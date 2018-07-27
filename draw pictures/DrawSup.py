@@ -3,6 +3,8 @@
 @date: Created on Fri Jul 27 11:16:59 2018
 
 @author: Zhen Chen
+
+@Python version: 3.6
  
 @descprition:
      
