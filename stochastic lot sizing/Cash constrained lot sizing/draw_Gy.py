@@ -6,7 +6,35 @@
 
 @Python version: 3.6
 
-@descprition: 
+@descprition: draw G(y) for the last period
     
 """
 
+import matplotlib.pyplot as plt
+import scipy.stats as sp
+
+
+meanDemand = 60;
+iniCash = 110;
+fixOrderCost = 100;
+variCost = 1;
+price = 8;
+holdCost = 1;
+
+Gy = []
+max_demand = sp.poisson.ppf(0.99, meanDemand)
+for y in range(100):
+    singleValue = 0
+    for d in range(max_demand):
+        revenue = price * min(y, d)
+        Iplus = max(y - d, 0)
+        ICost = holdCost * Iplus;
+        fixCost = fixOrderCost if y > 0 else 0 
+        orderCost = variCost * y
+        cashIncre = revenue - ICost - fixCost - orderCost
+        singleValue += sp.poisson.pmf(d, meanDemand) * cashIncre
+    
+    Gy.append(singleValue)
+
+
+ 

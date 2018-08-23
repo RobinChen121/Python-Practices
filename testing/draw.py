@@ -7,7 +7,7 @@ import numpy as np
 # plt.savefig('MyPicture')
 # plt.show()
 #
-# 
+#
 # N = 8
 # y = np.zeros(N)
 # x1 = np.linspace(0, 10, N, endpoint=True)
