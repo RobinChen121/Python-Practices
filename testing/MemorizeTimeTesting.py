@@ -1,16 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-@date: Created on Fri Jul 27 19:59:18 2018
-
-@author: Zhen Chen
-
-@Python version: 3.6
-
-@descprition: test computational time difference between
-whether adding a memorized class or not
-    
-"""
-
 import time
 import functools
 import collections

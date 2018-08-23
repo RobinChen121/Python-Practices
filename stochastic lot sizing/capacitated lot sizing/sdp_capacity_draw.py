@@ -1,0 +1,183 @@
+from typing import List
+import scipy.stats as sp
+import matplotlib.pyplot as plt
+import time
+import functools
+import collections
+
+
+# for memorizing in recursion, without computation repetition
+class memoized(object):
+   '''Decorator. Caches a function's return value each time it is called.
+   If called later with the same arguments, the cached value is returned
+   (not reevaluated).
+   '''
+   def __init__(self, func):
+      self.func = func
+      self.cache = {}
+   def __call__(self, *args):
+      if not isinstance(args, collections.Hashable):
+         # uncacheable. a list, for instance.
+         # better to not cache than blow up.
+         return self.func(*args)
+      if args in self.cache:
+         return self.cache[args]
+      else:
+         value = self.func(*args)
+         self.cache[args] = value
+         return value
+   def __repr__(self):
+      '''Return the function's docstring.'''
+      return self.func.__doc__
+   def __get__(self, obj, objtype):
+      '''Support instance methods.'''
+      return functools.partial(self.__call__, obj)
+
+
+class State:
+
+    def __init__(self, t: int, iniInventory: int):
+        self.t = t
+        self.iniInventory = iniInventory
+
+
+    def __str__(self):
+        return "t = " + str(self.t) + " " + "I = " + str(self.iniInventory)
+
+    def __hash__(self):
+        return hash(str(self.t) + str(self.iniInventory))
+
+    def __eq__(self, other):
+        return self.t == other.t and self.iniInventory == other.iniInventory
+
+
+class StochasticLotSizing:
+
+    def __init__(self, B: float, K: float, v: float, h: float, pai: float, d: List[float], tq: float, is_for_Gy:bool):
+        self.capacity = B
+        self.fixOrderCost = K
+        self.variOrderCost = v
+        self.holdCost = h
+        self.penaCost = pai
+        self.demands = d
+        self.truncationQ = tq
+        self.pmf = self.get_pmf()
+        self.max_inventory = 500
+        self.min_inventory = -300
+        self.cache_actions = {}
+        self.is_for_Gy = is_for_Gy
+
+    def __str__(self):
+        return 'B = %.2f\nK = %.2f\nv = %.2f\nh = %.2f\n pai = %.2f\n demands = %s' % \
+               (self.capacity, self.fixOrderCost, self.variOrderCost, self.holdCost, self.penaCost, self.demands)
+
+    def get_max_demands(self):
+         max_demands = [sp.poisson.ppf(self.truncationQ, d).astype(int) for d in self.demands]
+         return max_demands
+
+    def get_pmf(self):
+        max_demands = self.get_max_demands()
+        T = len(self.demands)
+        pmf = [[[k, sp.poisson.pmf(k,self.demands[t])/self.truncationQ] for k in range(max_demands[t])] for t in range(T)]
+        return pmf
+
+    def get_feasible_action(self, state:State):
+        return range(self.capacity)
+
+    def state_tran(self, state:State, action, demand, is_for_Gy:bool):
+        nextInventory = state.iniInventory-demand if is_for_Gy is True and state.t < 2 else state.iniInventory+action-demand
+        nextInventory = self.max_inventory if self.max_inventory < nextInventory else nextInventory
+        nextInventory = self.min_inventory if self.min_inventory > nextInventory else nextInventory
+        return State(state.t+1, nextInventory)
+
+    def imme_value(self, state: State, action, demand, is_for_Gy:bool):
+        if is_for_Gy is True and state.t < 2:
+            fixCost = 0
+            variCost = self.variOrderCost * state.iniInventory
+            nextInventory = state.iniInventory - demand
+        else:
+            fixCost = self.fixOrderCost if action > 0 else 0
+            variCost = self.variOrderCost * action
+            nextInventory = state.iniInventory + action - demand
+        nextInventory = self.max_inventory if nextInventory>self.max_inventory else nextInventory
+        nextInventory = self.min_inventory if nextInventory<self.min_inventory else nextInventory
+        holdingCost = self.holdCost*max(0, nextInventory)
+        penaltyCost = self.penaCost*max(0, -nextInventory)
+        return fixCost + variCost + holdingCost + penaltyCost
+
+    # recursion
+    @ memoized
+    def f(self, state:State) -> float:
+        bestQValue = 1000000
+        bestQ = 0
+        for action in self.get_feasible_action(state):
+            thisQValue = 0
+            for randDandP in self.pmf[state.t-1]:
+                thisQValue += randDandP[1] * self.imme_value(state, action, randDandP[0], self.is_for_Gy)
+                if state.t < len(self.demands):
+                    thisQValue += randDandP[1] * self.f(self.state_tran(state, action, randDandP[0], self.is_for_Gy))
+            if thisQValue < bestQValue:
+                bestQValue = thisQValue
+                bestQ = action
+
+        self.cache_actions[str(state)] = bestQ
+        return bestQValue
+
+    def draw_Ly(self, *domain):
+        self.is_for_Gy = True
+        L=[]
+        for I in range(*domain):
+            state = State(1, I)
+            thisQValue = 0
+            for randDandP in self.pmf[state.t - 1]:
+                thisQValue += randDandP[1] * self.imme_value(state, 0, randDandP[0], self.is_for_Gy)
+            L.append(thisQValue)
+        plt.plot(range(*domain),L)
+
+
+demands = [9, 23, 53, 29]
+capacity = 100
+fixOrderCost = 500
+variOderCost = 0
+holdCost = 2
+penaCost = 10
+truncationQ = 0.99
+domain_Gy =(-200,200)
+
+# start = time.clock()
+# lot_sizing = StochasticLotSizing(capacity, fixOrderCost, variOderCost, holdCost, penaCost, demands, truncationQ, False)
+# expect_total_cost = lot_sizing.f(State(1, 0))
+# print('final expected total cost is %.2f' % expect_total_cost)
+# optQ = lot_sizing.cache_actions[str(State(1, 0))]
+# print('optimal ordering quantity in the first period is %.2f' % optQ)
+# end = time.clock()
+# cpu_time = end-start
+# print('cpu time is %.3f s'% cpu_time)
+
+# draw Gy
+lot_sizing = StochasticLotSizing(capacity, fixOrderCost, variOderCost, holdCost, penaCost, demands, truncationQ, True)
+Gy = []
+for I in range(*domain_Gy):
+    Gy.append(lot_sizing.f(State(1, I)))
+plt.plot(range(*domain_Gy), Gy)
+plt.title('G(y) for different y')
+plt.xlabel('y')
+plt.ylabel('G(y)')
+
+
+# draw Ly
+lot_sizing.draw_Ly(*domain_Gy)
+
+# draw C_(n+1)y
+lot_sizing = StochasticLotSizing(capacity, fixOrderCost, variOderCost, holdCost, penaCost, demands, truncationQ, False)
+Cy = []
+for I in range(*domain_Gy):
+    Cy.append(lot_sizing.f(State(2, I)))
+plt.plot(range(*domain_Gy), Cy)
+plt.show()
+
+
+
+
+
+
