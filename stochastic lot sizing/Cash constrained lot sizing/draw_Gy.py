@@ -31,9 +31,9 @@ for y in range(100):
         ICost = holdCost * Iplus;
         orderCost = variCost * y
         cashIncre = revenue - ICost - orderCost
-        singleValue -= sp.poisson.pmf(d, meanDemand) * cashIncre
+        singleValue += sp.poisson.pmf(d, meanDemand) * cashIncre
 
     Gy.append(singleValue)
     
-plt.ylim(-500, 0)
+plt.ylim(0, 500)
 plt.plot(Gy)
