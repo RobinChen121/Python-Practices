@@ -135,46 +135,46 @@ class StochasticLotSizing:
         plt.plot(range(*domain),L)
 
 
-demands = [9, 23, 53, 29]
+demands = [9, 23, 53, 29, 9, 23, 53, 29]
 capacity = 100
 fixOrderCost = 500
 variOderCost = 0
 holdCost = 2
 penaCost = 10
 truncationQ = 0.99
-domain_Gy =(-200,200)
+#domain_Gy =(-200,200)
 
-# start = time.clock()
-# lot_sizing = StochasticLotSizing(capacity, fixOrderCost, variOderCost, holdCost, penaCost, demands, truncationQ, False)
-# expect_total_cost = lot_sizing.f(State(1, 0))
-# print('final expected total cost is %.2f' % expect_total_cost)
-# optQ = lot_sizing.cache_actions[str(State(1, 0))]
-# print('optimal ordering quantity in the first period is %.2f' % optQ)
-# end = time.clock()
-# cpu_time = end-start
-# print('cpu time is %.3f s'% cpu_time)
+start = time.clock()
+lot_sizing = StochasticLotSizing(capacity, fixOrderCost, variOderCost, holdCost, penaCost, demands, truncationQ, False)
+expect_total_cost = lot_sizing.f(State(1, 0))
+print('final expected total cost is %.2f' % expect_total_cost)
+optQ = lot_sizing.cache_actions[str(State(1, 0))]
+print('optimal ordering quantity in the first period is %.2f' % optQ)
+end = time.clock()
+cpu_time = end-start
+print('cpu time is %.3f s'% cpu_time)
 
 # draw Gy
-lot_sizing = StochasticLotSizing(capacity, fixOrderCost, variOderCost, holdCost, penaCost, demands, truncationQ, True)
-Gy = []
-for I in range(*domain_Gy):
-    Gy.append(lot_sizing.f(State(1, I)))
-plt.plot(range(*domain_Gy), Gy)
-plt.title('G(y) for different y')
-plt.xlabel('y')
-plt.ylabel('G(y)')
-
-
-# draw Ly
-lot_sizing.draw_Ly(*domain_Gy)
-
-# draw C_(n+1)y
-lot_sizing = StochasticLotSizing(capacity, fixOrderCost, variOderCost, holdCost, penaCost, demands, truncationQ, False)
-Cy = []
-for I in range(*domain_Gy):
-    Cy.append(lot_sizing.f(State(2, I)))
-plt.plot(range(*domain_Gy), Cy)
-plt.show()
+#lot_sizing = StochasticLotSizing(capacity, fixOrderCost, variOderCost, holdCost, penaCost, demands, truncationQ, True)
+#Gy = []
+#for I in range(*domain_Gy):
+#    Gy.append(lot_sizing.f(State(1, I)))
+#plt.plot(range(*domain_Gy), Gy)
+#plt.title('G(y) for different y')
+#plt.xlabel('y')
+#plt.ylabel('G(y)')
+#
+#
+## draw Ly
+#lot_sizing.draw_Ly(*domain_Gy)
+#
+## draw C_(n+1)y
+#lot_sizing = StochasticLotSizing(capacity, fixOrderCost, variOderCost, holdCost, penaCost, demands, truncationQ, False)
+#Cy = []
+#for I in range(*domain_Gy):
+#    Cy.append(lot_sizing.f(State(2, I)))
+#plt.plot(range(*domain_Gy), Cy)
+#plt.show()
 
 
 
