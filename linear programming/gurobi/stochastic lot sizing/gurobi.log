@@ -4937,3 +4937,34 @@ Solution count 10: 3003.08 3046.31 3046.33 ... 3608.63
 
 Optimal solution found (tolerance 1.00e-04)
 Best objective 3.003076691506e+03, best bound 3.003023951638e+03, gap 0.0018%
+Warning for adding constraints: zero or small (< 1e-13) coefficients, ignored
+Warning: variables 44 and 354 have the same name "H0110"
+Warning: to let Gurobi read it back, use rlp format
+Optimize a model with 50560 rows, 28800 columns and 142480 nonzeros
+Variable types: 27900 continuous, 900 integer (900 binary)
+Coefficient statistics:
+  Matrix range     [4e-02, 1e+04]
+  Objective range  [1e+00, 2e+04]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [1e+00, 1e+00]
+Found heuristic solution: objective 223226.16987
+Presolve removed 5666 rows and 22941 columns
+Presolve time: 0.45s
+Presolved: 44894 rows, 5859 columns, 135838 nonzeros
+Found heuristic solution: objective 20988.731684
+Variable types: 5394 continuous, 465 integer (465 binary)
+
+Root relaxation: objective 3.003077e+03, 12205 iterations, 2.63 seconds
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+*    0     0               0    3003.0766915 3003.07669  0.00%     -    3s
+
+Explored 0 nodes (12205 simplex iterations) in 3.24 seconds
+Thread count was 4 (of 4 available processors)
+
+Solution count 2: 3003.08 20988.7 
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective 3.003076691506e+03, best bound 3.003076691506e+03, gap 0.0000%

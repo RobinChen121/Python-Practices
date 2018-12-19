@@ -154,14 +154,6 @@ try:
     
     
     model.write('mip_RS_PM_Gurobi.lp')
-    x[0][1].lb = 1
-    x[0][1].ub = 1
-    x[2][3].lb = 1
-    x[2][3].ub = 1
-    x[4][5].lb = 1
-    x[4][5].ub = 1
-    q[0][1].lb = 116
-    q[0][1].ub = 116
     currTime = time.time()
     model.optimize()
     runTime = time.time() - currTime
