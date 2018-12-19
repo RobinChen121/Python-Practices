@@ -7,7 +7,8 @@ Created on Tue Dec  4 17:00:41 2018
 @Python version: 3.6
 
 @description: this is a gurobi in python to implement the piesewise method of 
-              Roberto Rossi et al. (2015)
+              Roberto Rossi et al. (2015).
+              30 periods 144838 nodes, running time 124s
     
 """
 
@@ -15,13 +16,14 @@ from gurobipy import *
 import numpy as np
 from enum import Enum
 import math
+import time
 
 
 BoundCriteria = Enum('BoundCriteria', ('lowBound', 'upBound'));
 
 
 
-meanDemand = np.array([20, 40, 60, 40])
+meanDemand = np.array([50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50, 50])
 sigma = meanDemand * 0.25
 iniInventory = 0;
 fixOrderCost = 100
@@ -157,7 +159,10 @@ try:
     
     
     m.write('mip_RS_Gurobi.mps')
+    currTime = time.time()
     m.optimize()
+    runTime = time.time() - currTime
+    print('running time is %.5f s' % runTime)
     print('Obj value is : %.2f' % m.objVal)
     if m.status == GRB.Status.OPTIMAL:
         print('x: ', end = '')
