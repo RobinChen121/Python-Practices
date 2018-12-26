@@ -187,3 +187,782 @@ Iteration    Objective       Primal Inf.    Dual Inf.      Time
 
 Solved in 0 iterations and 0.00 seconds
 Optimal objective  3.000000000e+00
+Changed value of parameter lazyConstraints to 1
+   Prev: 0  Min: 0  Max: 1  Default: 0
+Optimize a model with 50 rows, 1225 columns and 2450 nonzeros
+Variable types: 0 continuous, 1225 integer (1225 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 1e+00]
+  Objective range  [1e+00, 1e+02]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [2e+00, 2e+00]
+Found heuristic solution: objective 2775.3416544
+Presolve time: 0.03s
+Presolved: 50 rows, 1225 columns, 2450 nonzeros
+Variable types: 0 continuous, 1225 integer (1225 binary)
+
+Root relaxation: objective 5.981996e+02, 71 iterations, 0.00 seconds
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0  598.19961    0    6 2775.34165  598.19961  78.4%     -    0s
+H    0     0                     784.5828097  598.19961  23.8%     -    0s
+     0     0  626.69891    0    6  784.58281  626.69891  20.1%     -    0s
+     0     0  628.53542    0    6  784.58281  628.53542  19.9%     -    0s
+H    0     0                     680.9299140  628.53542  7.69%     -    0s
+     0     0  628.66176    0   15  680.92991  628.66176  7.68%     -    0s
+     0     0  628.66176    0    6  680.92991  628.66176  7.68%     -    0s
+H    0     0                     662.1920386  628.66176  5.06%     -    0s
+     0     0  628.66176    0    6  662.19204  628.66176  5.06%     -    0s
+     0     0  628.66176    0    6  662.19204  628.66176  5.06%     -    0s
+     0     0  629.19735    0   12  662.19204  629.19735  4.98%     -    0s
+H    0     0                     655.7181587  629.19735  4.04%     -    0s
+     0     0  631.46794    0   30  655.71816  631.46794  3.70%     -    0s
+     0     0  631.64115    0   28  655.71816  631.64115  3.67%     -    0s
+     0     0  631.64115    0    6  655.71816  631.64115  3.67%     -    0s
+     0     0  631.64115    0   28  655.71816  631.64115  3.67%     -    0s
+     0     0  632.33057    0   24  655.71816  632.33057  3.57%     -    0s
+     0     0  632.40257    0   30  655.71816  632.40257  3.56%     -    0s
+     0     0  632.40257    0   30  655.71816  632.40257  3.56%     -    0s
+     0     2  632.40257    0   30  655.71816  632.40257  3.56%     -    0s
+*   12    10               4     640.4797064  634.58336  0.92%   5.7    0s
+H   17     4                     635.5025788  634.83489  0.11%   4.5    0s
+
+Cutting planes:
+  Gomory: 3
+  MIR: 1
+  Zero half: 8
+  Lazy constraints: 8
+
+Explored 22 nodes (494 simplex iterations) in 0.45 seconds
+Thread count was 4 (of 4 available processors)
+
+Solution count 7: 635.503 640.48 655.718 ... 2775.34
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective 6.355025787588e+02, best bound 6.355025787588e+02, gap 0.0000%
+Changed value of parameter lazyConstraints to 1
+   Prev: 0  Min: 0  Max: 1  Default: 0
+Optimize a model with 50 rows, 1225 columns and 2450 nonzeros
+Variable types: 0 continuous, 1225 integer (1225 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 1e+00]
+  Objective range  [1e+00, 1e+02]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [2e+00, 2e+00]
+Found heuristic solution: objective 2775.3416544
+Presolve time: 0.00s
+Presolved: 50 rows, 1225 columns, 2450 nonzeros
+Variable types: 0 continuous, 1225 integer (1225 binary)
+
+Root relaxation: objective 5.981996e+02, 71 iterations, 0.00 seconds
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0  598.19961    0    6 2775.34165  598.19961  78.4%     -    0s
+H    0     0                     784.5828097  598.19961  23.8%     -    0s
+     0     0  626.69891    0    6  784.58281  626.69891  20.1%     -    0s
+     0     0  628.53542    0    6  784.58281  628.53542  19.9%     -    0s
+H    0     0                     680.9299140  628.53542  7.69%     -    0s
+     0     0  628.66176    0   15  680.92991  628.66176  7.68%     -    0s
+     0     0  628.66176    0    6  680.92991  628.66176  7.68%     -    0s
+H    0     0                     662.1920386  628.66176  5.06%     -    0s
+     0     0  628.66176    0    6  662.19204  628.66176  5.06%     -    0s
+     0     0  628.66176    0    6  662.19204  628.66176  5.06%     -    0s
+     0     0  629.19735    0   12  662.19204  629.19735  4.98%     -    0s
+H    0     0                     655.7181587  629.19735  4.04%     -    0s
+     0     0  631.46794    0   30  655.71816  631.46794  3.70%     -    0s
+     0     0  631.64115    0   28  655.71816  631.64115  3.67%     -    0s
+     0     0  631.64115    0    6  655.71816  631.64115  3.67%     -    0s
+     0     0  631.64115    0   28  655.71816  631.64115  3.67%     -    0s
+     0     0  632.33057    0   24  655.71816  632.33057  3.57%     -    0s
+     0     0  632.40257    0   30  655.71816  632.40257  3.56%     -    0s
+     0     0  632.40257    0   30  655.71816  632.40257  3.56%     -    0s
+     0     2  632.40257    0   30  655.71816  632.40257  3.56%     -    0s
+*   12    10               4     640.4797064  634.58336  0.92%   5.7    0s
+H   17     4                     635.5025788  634.83489  0.11%   4.5    0s
+
+Cutting planes:
+  Gomory: 3
+  MIR: 1
+  Zero half: 8
+  Lazy constraints: 8
+
+Explored 22 nodes (494 simplex iterations) in 0.38 seconds
+Thread count was 4 (of 4 available processors)
+
+Solution count 7: 635.503 640.48 655.718 ... 2775.34
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective 6.355025787588e+02, best bound 6.355025787588e+02, gap 0.0000%
+Changed value of parameter lazyConstraints to 1
+   Prev: 0  Min: 0  Max: 1  Default: 0
+Optimize a model with 75 rows, 2775 columns and 5550 nonzeros
+Variable types: 0 continuous, 2775 integer (2775 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 1e+00]
+  Objective range  [1e+00, 1e+02]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [2e+00, 2e+00]
+Presolve time: 0.01s
+Presolved: 75 rows, 2775 columns, 5550 nonzeros
+Variable types: 0 continuous, 2775 integer (2775 binary)
+
+Root relaxation: objective 7.185145e+02, 117 iterations, 0.00 seconds
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0  718.51455    0   18          -  718.51455      -     -    0s
+     0     0  726.65783    0    6          -  726.65783      -     -    0s
+     0     0  730.59315    0    6          -  730.59315      -     -    0s
+     0     0  731.60838    0   17          -  731.60838      -     -    0s
+     0     0  731.61337    0    8          -  731.61337      -     -    0s
+     0     0  731.61337    0    8          -  731.61337      -     -    0s
+     0     2  731.61337    0    8          -  731.61337      -     -    0s
+H  424   365                     937.8586989  739.82813  21.1%   4.9    0s
+H  501   165                     777.4496095  739.82813  4.84%   5.0    0s
+H  528    67                     761.4870345  741.29579  2.65%   5.0    0s
+H  550    73                     761.4870334  744.35554  2.25%   5.0    0s
+
+Cutting planes:
+  MIR: 2
+  Zero half: 5
+  Lazy constraints: 45
+
+Explored 672 nodes (4069 simplex iterations) in 0.60 seconds
+Thread count was 4 (of 4 available processors)
+
+Solution count 4: 761.487 761.487 777.45 937.859 
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective 7.614870333759e+02, best bound 7.614870333759e+02, gap 0.0000%
+Changed value of parameter lazyConstraints to 1
+   Prev: 0  Min: 0  Max: 1  Default: 0
+Optimize a model with 10 rows, 45 columns and 90 nonzeros
+Variable types: 0 continuous, 45 integer (45 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 1e+00]
+  Objective range  [1e+01, 1e+02]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [2e+00, 2e+00]
+Presolve time: 0.00s
+Presolved: 10 rows, 45 columns, 90 nonzeros
+Variable types: 0 continuous, 45 integer (45 binary)
+
+Root relaxation: objective 3.018755e+02, 15 iterations, 0.00 seconds
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0  301.87549    0    6          -  301.87549      -     -    0s
+H    0     0                     309.0937026  301.87549  2.34%     -    0s
+H    0     0                     302.7546404  301.87549  0.29%     -    0s
+     0     0 infeasible    0       302.75464  302.75464  0.00%     -    0s
+
+Cutting planes:
+  Lazy constraints: 3
+
+Explored 1 nodes (15 simplex iterations) in 0.03 seconds
+Thread count was 4 (of 4 available processors)
+
+Solution count 2: 302.755 309.094 
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective 3.027546403604e+02, best bound 3.027546403604e+02, gap 0.0000%
+Changed value of parameter lazyConstraints to 1
+   Prev: 0  Min: 0  Max: 1  Default: 0
+Optimize a model with 10 rows, 45 columns and 90 nonzeros
+Variable types: 0 continuous, 45 integer (45 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 1e+00]
+  Objective range  [1e+01, 1e+02]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [2e+00, 2e+00]
+Presolve time: 0.00s
+Presolved: 10 rows, 45 columns, 90 nonzeros
+Variable types: 0 continuous, 45 integer (45 binary)
+
+Root relaxation: objective 3.018755e+02, 15 iterations, 0.00 seconds
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0  301.87549    0    6          -  301.87549      -     -    0s
+H    0     0                     309.0937026  301.87549  2.34%     -    0s
+H    0     0                     302.7546404  301.87549  0.29%     -    0s
+     0     0 infeasible    0       302.75464  302.75464  0.00%     -    0s
+
+Cutting planes:
+  Lazy constraints: 3
+
+Explored 1 nodes (15 simplex iterations) in 0.02 seconds
+Thread count was 4 (of 4 available processors)
+
+Solution count 2: 302.755 309.094 
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective 3.027546403604e+02, best bound 3.027546403604e+02, gap 0.0000%
+Changed value of parameter lazyConstraints to 1
+   Prev: 0  Min: 0  Max: 1  Default: 0
+Optimize a model with 10 rows, 45 columns and 90 nonzeros
+Variable types: 0 continuous, 45 integer (45 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 1e+00]
+  Objective range  [1e+01, 1e+02]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [2e+00, 2e+00]
+Presolve time: 0.00s
+Presolved: 10 rows, 45 columns, 90 nonzeros
+Variable types: 0 continuous, 45 integer (45 binary)
+
+Root relaxation: objective 3.018755e+02, 15 iterations, 0.00 seconds
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0  301.87549    0    6          -  301.87549      -     -    0s
+H    0     0                     309.0937026  301.87549  2.34%     -    0s
+H    0     0                     302.7546404  301.87549  0.29%     -    0s
+     0     0 infeasible    0       302.75464  302.75464  0.00%     -    0s
+
+Cutting planes:
+  Lazy constraints: 3
+
+Explored 1 nodes (15 simplex iterations) in 0.03 seconds
+Thread count was 4 (of 4 available processors)
+
+Solution count 2: 302.755 309.094 
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective 3.027546403604e+02, best bound 3.027546403604e+02, gap 0.0000%
+Changed value of parameter lazyConstraints to 1
+   Prev: 0  Min: 0  Max: 1  Default: 0
+Warning: variables 0 and 45 have the same name "e[1,0]"
+Warning: to let Gurobi read it back, use rlp format
+Optimize a model with 10 rows, 90 columns and 90 nonzeros
+Variable types: 0 continuous, 90 integer (90 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 1e+00]
+  Objective range  [1e+01, 1e+02]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [2e+00, 2e+00]
+Presolve time: 0.00s
+Presolved: 10 rows, 90 columns, 90 nonzeros
+Variable types: 0 continuous, 90 integer (90 binary)
+
+Root relaxation: objective 3.018755e+02, 15 iterations, 0.00 seconds
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0  301.87549    0    6          -  301.87549      -     -    0s
+H    0     0                     309.0937026  301.87549  2.34%     -    0s
+H    0     0                     302.7546404  301.87549  0.29%     -    0s
+     0     0 infeasible    0       302.75464  302.75464  0.00%     -    0s
+
+Cutting planes:
+  Lazy constraints: 3
+
+Explored 1 nodes (15 simplex iterations) in 0.03 seconds
+Thread count was 4 (of 4 available processors)
+
+Solution count 2: 302.755 309.094 
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective 3.027546403604e+02, best bound 3.027546403604e+02, gap 0.0000%
+Changed value of parameter lazyConstraints to 1
+   Prev: 0  Min: 0  Max: 1  Default: 0
+Optimize a model with 10 rows, 45 columns and 45 nonzeros
+Variable types: 0 continuous, 45 integer (45 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 1e+00]
+  Objective range  [1e+01, 1e+02]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [2e+00, 2e+00]
+Presolve time: 0.00s
+
+Explored 0 nodes (0 simplex iterations) in 0.01 seconds
+Thread count was 1 (of 4 available processors)
+
+Solution count 0
+
+Model is infeasible
+Best objective -, best bound -, gap -
+Changed value of parameter lazyConstraints to 1
+   Prev: 0  Min: 0  Max: 1  Default: 0
+Optimize a model with 10 rows, 45 columns and 90 nonzeros
+Variable types: 0 continuous, 45 integer (45 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 1e+00]
+  Objective range  [1e+01, 1e+02]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [2e+00, 2e+00]
+Presolve time: 0.00s
+Presolved: 10 rows, 45 columns, 90 nonzeros
+Variable types: 0 continuous, 45 integer (45 binary)
+
+Root relaxation: objective 3.018755e+02, 15 iterations, 0.00 seconds
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0  301.87549    0    6          -  301.87549      -     -    0s
+H    0     0                     309.0937026  301.87549  2.34%     -    0s
+H    0     0                     302.7546404  301.87549  0.29%     -    0s
+     0     0 infeasible    0       302.75464  302.75464  0.00%     -    0s
+
+Cutting planes:
+  Lazy constraints: 3
+
+Explored 1 nodes (15 simplex iterations) in 0.03 seconds
+Thread count was 4 (of 4 available processors)
+
+Solution count 2: 302.755 309.094 
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective 3.027546403604e+02, best bound 3.027546403604e+02, gap 0.0000%
+Changed value of parameter lazyConstraints to 1
+   Prev: 0  Min: 0  Max: 1  Default: 0
+Optimize a model with 10 rows, 45 columns and 45 nonzeros
+Variable types: 0 continuous, 45 integer (45 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 1e+00]
+  Objective range  [1e+01, 1e+02]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [2e+00, 2e+00]
+Presolve time: 0.00s
+
+Explored 0 nodes (0 simplex iterations) in 0.01 seconds
+Thread count was 1 (of 4 available processors)
+
+Solution count 0
+
+Model is infeasible
+Best objective -, best bound -, gap -
+Changed value of parameter lazyConstraints to 1
+   Prev: 0  Min: 0  Max: 1  Default: 0
+Optimize a model with 10 rows, 45 columns and 45 nonzeros
+Variable types: 0 continuous, 45 integer (45 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 1e+00]
+  Objective range  [1e+01, 1e+02]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [2e+00, 2e+00]
+Presolve time: 0.00s
+
+Explored 0 nodes (0 simplex iterations) in 0.01 seconds
+Thread count was 1 (of 4 available processors)
+
+Solution count 0
+
+Model is infeasible
+Best objective -, best bound -, gap -
+Changed value of parameter lazyConstraints to 1
+   Prev: 0  Min: 0  Max: 1  Default: 0
+Optimize a model with 10 rows, 45 columns and 45 nonzeros
+Variable types: 0 continuous, 45 integer (45 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 1e+00]
+  Objective range  [1e+01, 1e+02]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [2e+00, 2e+00]
+Presolve time: 0.00s
+
+Explored 0 nodes (0 simplex iterations) in 0.01 seconds
+Thread count was 1 (of 4 available processors)
+
+Solution count 0
+
+Model is infeasible
+Best objective -, best bound -, gap -
+Changed value of parameter lazyConstraints to 1
+   Prev: 0  Min: 0  Max: 1  Default: 0
+Optimize a model with 10 rows, 45 columns and 90 nonzeros
+Variable types: 0 continuous, 45 integer (45 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 1e+00]
+  Objective range  [1e+01, 1e+02]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [2e+00, 2e+00]
+Presolve time: 0.00s
+Presolved: 10 rows, 45 columns, 90 nonzeros
+Variable types: 0 continuous, 45 integer (45 binary)
+
+Root relaxation: objective 3.018755e+02, 15 iterations, 0.00 seconds
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0  301.87549    0    6          -  301.87549      -     -    0s
+H    0     0                     309.0937026  301.87549  2.34%     -    0s
+H    0     0                     302.7546404  301.87549  0.29%     -    0s
+     0     0 infeasible    0       302.75464  302.75464  0.00%     -    0s
+
+Cutting planes:
+  Lazy constraints: 3
+
+Explored 1 nodes (15 simplex iterations) in 0.05 seconds
+Thread count was 4 (of 4 available processors)
+
+Solution count 2: 302.755 309.094 
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective 3.027546403604e+02, best bound 3.027546403604e+02, gap 0.0000%
+Changed value of parameter lazyConstraints to 1
+   Prev: 0  Min: 0  Max: 1  Default: 0
+Optimize a model with 10 rows, 45 columns and 90 nonzeros
+Variable types: 0 continuous, 45 integer (45 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 1e+00]
+  Objective range  [1e+01, 1e+02]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [2e+00, 2e+00]
+Presolve time: 0.00s
+Presolved: 10 rows, 45 columns, 90 nonzeros
+Variable types: 0 continuous, 45 integer (45 binary)
+
+Root relaxation: objective 3.018755e+02, 15 iterations, 0.00 seconds
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0  301.87549    0    6          -  301.87549      -     -    0s
+H    0     0                     309.0937026  301.87549  2.34%     -    0s
+H    0     0                     302.7546404  301.87549  0.29%     -    0s
+     0     0 infeasible    0       302.75464  302.75464  0.00%     -    0s
+
+Cutting planes:
+  Lazy constraints: 3
+
+Explored 1 nodes (15 simplex iterations) in 0.05 seconds
+Thread count was 4 (of 4 available processors)
+
+Solution count 2: 302.755 309.094 
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective 3.027546403604e+02, best bound 3.027546403604e+02, gap 0.0000%
+Changed value of parameter lazyConstraints to 1
+   Prev: 0  Min: 0  Max: 1  Default: 0
+Optimize a model with 10 rows, 45 columns and 90 nonzeros
+Variable types: 0 continuous, 45 integer (45 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 1e+00]
+  Objective range  [1e+01, 1e+02]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [2e+00, 2e+00]
+Presolve time: 0.00s
+Presolved: 10 rows, 45 columns, 90 nonzeros
+Variable types: 0 continuous, 45 integer (45 binary)
+
+Root relaxation: objective 3.018755e+02, 15 iterations, 0.00 seconds
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0  301.87549    0    6          -  301.87549      -     -    0s
+H    0     0                     309.0937026  301.87549  2.34%     -    0s
+H    0     0                     302.7546404  301.87549  0.29%     -    0s
+     0     0 infeasible    0       302.75464  302.75464  0.00%     -    0s
+
+Cutting planes:
+  Lazy constraints: 3
+
+Explored 1 nodes (15 simplex iterations) in 0.02 seconds
+Thread count was 4 (of 4 available processors)
+
+Solution count 2: 302.755 309.094 
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective 3.027546403604e+02, best bound 3.027546403604e+02, gap 0.0000%
+Changed value of parameter lazyConstraints to 1
+   Prev: 0  Min: 0  Max: 1  Default: 0
+Optimize a model with 10 rows, 45 columns and 90 nonzeros
+Variable types: 0 continuous, 45 integer (45 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 1e+00]
+  Objective range  [1e+01, 1e+02]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [2e+00, 2e+00]
+Presolve time: 0.00s
+Presolved: 10 rows, 45 columns, 90 nonzeros
+Variable types: 0 continuous, 45 integer (45 binary)
+
+Root relaxation: objective 3.018755e+02, 15 iterations, 0.00 seconds
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0  301.87549    0    6          -  301.87549      -     -    0s
+H    0     0                     309.0937026  301.87549  2.34%     -    0s
+H    0     0                     302.7546404  301.87549  0.29%     -    0s
+     0     0 infeasible    0       302.75464  302.75464  0.00%     -    0s
+
+Cutting planes:
+  Lazy constraints: 3
+
+Explored 1 nodes (15 simplex iterations) in 0.04 seconds
+Thread count was 4 (of 4 available processors)
+
+Solution count 2: 302.755 309.094 
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective 3.027546403604e+02, best bound 3.027546403604e+02, gap 0.0000%
+Changed value of parameter lazyConstraints to 1
+   Prev: 0  Min: 0  Max: 1  Default: 0
+Optimize a model with 10 rows, 45 columns and 90 nonzeros
+Variable types: 0 continuous, 45 integer (45 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 1e+00]
+  Objective range  [1e+01, 1e+02]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [2e+00, 2e+00]
+Presolve time: 0.00s
+Presolved: 10 rows, 45 columns, 90 nonzeros
+Variable types: 0 continuous, 45 integer (45 binary)
+
+Root relaxation: objective 3.018755e+02, 15 iterations, 0.00 seconds
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0  301.87549    0    6          -  301.87549      -     -    0s
+H    0     0                     309.0937026  301.87549  2.34%     -    0s
+H    0     0                     302.7546404  301.87549  0.29%     -    0s
+     0     0 infeasible    0       302.75464  302.75464  0.00%     -    0s
+
+Cutting planes:
+  Lazy constraints: 3
+
+Explored 1 nodes (15 simplex iterations) in 0.03 seconds
+Thread count was 4 (of 4 available processors)
+
+Solution count 2: 302.755 309.094 
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective 3.027546403604e+02, best bound 3.027546403604e+02, gap 0.0000%
+Changed value of parameter lazyConstraints to 1
+   Prev: 0  Min: 0  Max: 1  Default: 0
+Optimize a model with 10 rows, 45 columns and 90 nonzeros
+Variable types: 0 continuous, 45 integer (45 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 1e+00]
+  Objective range  [1e+01, 1e+02]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [2e+00, 2e+00]
+Presolve time: 0.00s
+Presolved: 10 rows, 45 columns, 90 nonzeros
+Variable types: 0 continuous, 45 integer (45 binary)
+
+Root relaxation: objective 3.018755e+02, 15 iterations, 0.00 seconds
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0  301.87549    0    6          -  301.87549      -     -    0s
+H    0     0                     309.0937026  301.87549  2.34%     -    0s
+H    0     0                     302.7546404  301.87549  0.29%     -    0s
+     0     0 infeasible    0       302.75464  302.75464  0.00%     -    0s
+
+Cutting planes:
+  Lazy constraints: 3
+
+Explored 1 nodes (15 simplex iterations) in 0.04 seconds
+Thread count was 4 (of 4 available processors)
+
+Solution count 2: 302.755 309.094 
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective 3.027546403604e+02, best bound 3.027546403604e+02, gap 0.0000%
+Changed value of parameter lazyConstraints to 1
+   Prev: 0  Min: 0  Max: 1  Default: 0
+Optimize a model with 10 rows, 45 columns and 90 nonzeros
+Variable types: 0 continuous, 45 integer (45 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 1e+00]
+  Objective range  [1e+01, 1e+02]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [2e+00, 2e+00]
+Presolve time: 0.00s
+Presolved: 10 rows, 45 columns, 90 nonzeros
+Variable types: 0 continuous, 45 integer (45 binary)
+
+Root relaxation: objective 3.018755e+02, 15 iterations, 0.00 seconds
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0  301.87549    0    6          -  301.87549      -     -    0s
+H    0     0                     309.0937026  301.87549  2.34%     -    0s
+H    0     0                     302.7546404  301.87549  0.29%     -    0s
+     0     0 infeasible    0       302.75464  302.75464  0.00%     -    0s
+
+Cutting planes:
+  Lazy constraints: 3
+
+Explored 1 nodes (15 simplex iterations) in 0.03 seconds
+Thread count was 4 (of 4 available processors)
+
+Solution count 2: 302.755 309.094 
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective 3.027546403604e+02, best bound 3.027546403604e+02, gap 0.0000%
+Changed value of parameter lazyConstraints to 1
+   Prev: 0  Min: 0  Max: 1  Default: 0
+Optimize a model with 10 rows, 45 columns and 90 nonzeros
+Variable types: 0 continuous, 45 integer (45 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 1e+00]
+  Objective range  [1e+01, 1e+02]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [2e+00, 2e+00]
+
+Gurobi 8.1.0 (win64, Python) logging started 12/26/18 11:28:11
+
+Changed value of parameter lazyConstraints to 1
+   Prev: 0  Min: 0  Max: 1  Default: 0
+Optimize a model with 10 rows, 45 columns and 90 nonzeros
+Variable types: 0 continuous, 45 integer (45 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 1e+00]
+  Objective range  [1e+01, 1e+02]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [2e+00, 2e+00]
+Found heuristic solution: objective 566.5292943
+Presolve time: 0.00s
+Presolved: 10 rows, 45 columns, 90 nonzeros
+Variable types: 0 continuous, 45 integer (45 binary)
+
+Root simplex log...
+
+Iteration    Objective       Primal Inf.    Dual Inf.      Time
+       0    0.0000000e+00   2.000000e+01   0.000000e+00   4107s
+      12    2.9519182e+02   0.000000e+00   0.000000e+00   4107s
+
+Root relaxation: objective 2.951918e+02, 12 iterations, 0.00 seconds
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0  301.87549    0    6  566.52929  301.87549  46.7%     - 4106s
+H    0     0                     344.0783012  301.87549  12.3%     - 4106s
+*    0     0               0     302.7546404  302.75464  0.00%     - 4106s
+
+Cutting planes:
+  Gomory: 1
+  Zero half: 2
+  Lazy constraints: 2
+
+Explored 1 nodes (17 simplex iterations) in 4106.82 seconds
+Thread count was 4 (of 4 available processors)
+
+Solution count 3: 302.755 344.078 566.529 
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective 3.027546403604e+02, best bound 3.027546403604e+02, gap 0.0000%
+Changed value of parameter lazyConstraints to 1
+   Prev: 0  Min: 0  Max: 1  Default: 0
+Optimize a model with 10 rows, 45 columns and 90 nonzeros
+Variable types: 0 continuous, 45 integer (45 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 1e+00]
+  Objective range  [1e+01, 1e+02]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [2e+00, 2e+00]
+Found heuristic solution: objective 566.5292943
+Presolve time: 0.00s
+Presolved: 10 rows, 45 columns, 90 nonzeros
+Variable types: 0 continuous, 45 integer (45 binary)
+
+Root simplex log...
+
+Iteration    Objective       Primal Inf.    Dual Inf.      Time
+       0    0.0000000e+00   2.000000e+01   0.000000e+00   2932s
+      12    2.9519182e+02   0.000000e+00   0.000000e+00   2932s
+
+Root relaxation: objective 2.951918e+02, 12 iterations, 0.00 seconds
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0  301.87549    0    6  566.52929  301.87549  46.7%     - 2932s
+H    0     0                     344.0783012  301.87549  12.3%     - 2932s
+*    0     0               0     302.7546404  302.75464  0.00%     - 2932s
+
+Cutting planes:
+  Gomory: 1
+  Zero half: 2
+  Lazy constraints: 2
+
+Explored 1 nodes (17 simplex iterations) in 2932.38 seconds
+Thread count was 4 (of 4 available processors)
+
+Solution count 3: 302.755 344.078 566.529 
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective 3.027546403604e+02, best bound 3.027546403604e+02, gap 0.0000%
+Changed value of parameter lazyConstraints to 1
+   Prev: 0  Min: 0  Max: 1  Default: 0
+Changed value of parameter lazyConstraints to 1
+   Prev: 0  Min: 0  Max: 1  Default: 0
+Optimize a model with 10 rows, 45 columns and 90 nonzeros
+Variable types: 0 continuous, 45 integer (45 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 1e+00]
+  Objective range  [1e+01, 1e+02]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [2e+00, 2e+00]
+Found heuristic solution: objective 566.5292943
+Presolve time: 0.00s
+Presolved: 10 rows, 45 columns, 90 nonzeros
+Variable types: 0 continuous, 45 integer (45 binary)
+
+Root relaxation: objective 2.951918e+02, 12 iterations, 0.00 seconds
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+*    0     0               0     295.1918192  295.19182  0.00%     -    0s
+
+Explored 0 nodes (12 simplex iterations) in 0.14 seconds
+Thread count was 4 (of 4 available processors)
+
+Solution count 2: 295.192 566.529 
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective 2.951918192103e+02, best bound 2.951918192103e+02, gap 0.0000%
+Changed value of parameter lazyConstraints to 1
+   Prev: 0  Min: 0  Max: 1  Default: 0
+Optimize a model with 10 rows, 45 columns and 90 nonzeros
+Variable types: 0 continuous, 45 integer (45 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 1e+00]
+  Objective range  [1e+01, 1e+02]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [2e+00, 2e+00]
+Presolve time: 0.00s
+Presolved: 10 rows, 45 columns, 90 nonzeros
+Variable types: 0 continuous, 45 integer (45 binary)
+
+Root relaxation: objective 3.018755e+02, 15 iterations, 0.00 seconds
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0  301.87549    0    6          -  301.87549      -     -    0s
+H    0     0                     309.0937026  301.87549  2.34%     -    0s
+H    0     0                     302.7546404  301.87549  0.29%     -    0s
+     0     0 infeasible    0       302.75464  302.75464  0.00%     -    0s
+
+Cutting planes:
+  Lazy constraints: 3
+
+Explored 1 nodes (15 simplex iterations) in 0.02 seconds
+Thread count was 4 (of 4 available processors)
+
+Solution count 2: 302.755 309.094 
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective 3.027546403604e+02, best bound 3.027546403604e+02, gap 0.0000%

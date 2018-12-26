@@ -22,6 +22,7 @@ import sys
 from gurobipy import *
 
 # Define my callback function
+# where is for monitoring the optimization process
 
 def mycallback(model, where):
     if where == GRB.Callback.POLLING:

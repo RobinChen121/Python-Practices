@@ -1,14 +1,13 @@
 # -*- coding: utf-8 -*-
 """
-Created on Tue Dec 18 10:42:38 2018
+Created on Tue Dec 25 10:53:07 2018
 
 @author: Zhen Chen
 
 @Python version: 3.6
 
-@description:  this is a class to implement the PM setting method of Tunc et al. (2018) to solve 
+@description:  this is a class to implement the dynamci cutting generation method of Tunc et al. (2018) to solve 
                 single-item stochastic lot sizing problem.
-                30 periods 0 nodes, running time 1.42s
     
 """
 
@@ -16,6 +15,8 @@ from gurobipy import *
 import math
 import numpy as np
 import time
+import scipy.integrate as integrate
+from scipy.stats import norm
 
 
 
@@ -55,6 +56,14 @@ h = {i: holdingCost for i in range(0, T)}
 v = {i: variCost for i in range(0, T)}
 pai = {i: penaltyCost for i in range(0, T)}
 I0 = iniInventory;
+
+def computeExpectIminus(S : float, start : int, end : int) :
+    sigma = conSigma[start][end]
+    mu = meanDemand[range(start, end + 1)].sum()
+    result = sigma * integrate.quad(lambda x : ((S - mu)/sigma - x) * norm.pdf(x), -50, (S - mu)/sigma)[0]
+    print(result)
+    return result
+    
 
 try:
     # creat a new model
@@ -150,11 +159,34 @@ try:
                 for k in range(partionNum) :
                     pik = prob[range(k + 1)].sum() # slope
                     pmean = prob[range(k + 1)].dot(means[range(k + 1)]) # intercept
-                    model.addConstr(H[i][j][t] + I >= pik * I - x[i][j] * pmean * conSigma[i][t])
+                    model.addConstr(H[i][j][t] + I >= 0)
     
-    # model.write('mip_RS_PM_Gurobi.lp')
+    # model.write('mip_RS_Callback_Gurobi.lp')
     currTime = time.time()
+    model.Params.method = 2
     model.optimize()
+    
+    eps = 0.01
+    addLine = True
+    varS = LinExpr()
+    while addLine :
+        for i in range(T) :
+            for j in range(i, T) :
+                for t in range(t, j + 1) :
+                    if x[i][j].X == 1 :
+                        orderUpLevel = q[i][j].X - cumDemand[i - 1] if i > 0 else q[i][j].X 
+                        Iminus = computeExpectIminus(orderUpLevel, i, j)
+                        addLine = False
+                        if Iminus - H[i][j][t].X > eps :
+                            thisMu = meanDemand[range(i, t + 1)].sum()
+                            thisSigma = conSigma[i][j]
+                            slope = norm.cdf(orderUpLevel, thisMu, thisSigma)
+                            intercept = Iminus - slope * orderUpLevel
+                            varS = q[i][j] if i == 0 else q[i][j] - x[i][j] * cumDemand[i - 1]
+                            model.addConstr(H[i][j][t] >= slope * varS + intercept)
+                            addLine = True
+        model.optimize()
+    
     runTime = time.time() - currTime
     print('running time is %.5f s' % runTime)
     
@@ -220,7 +252,3 @@ try:
     
 except GurobiError as e:
     print('Error code ' + str(e.errno) + ": " + str(e))
-
-
-
-

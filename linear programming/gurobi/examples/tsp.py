@@ -18,9 +18,9 @@ from gurobipy import *
 # Callback - use lazy constraints to eliminate sub-tours
 
 def subtourelim(model, where):
-    if where == GRB.Callback.MIPSOL:
+    if where == GRB.Callback.MIPSOL:  # MIP solution callback
         # make a list of edges selected in the solution
-        vals = model.cbGetSolution(model._vars)
+        vals = model.cbGetSolution(model._vars) #cbGetSolution only for MIPSOL or MULTIOBJ
         selected = tuplelist((i,j) for i,j in model._vars.keys() if vals[i,j] > 0.5)
         # find the shortest cycle in the selected edge list
         tour = subtour(selected)
@@ -51,14 +51,16 @@ def subtour(edges):
 
 # Parse argument
 
-if len(sys.argv) < 2:
-    print('Usage: tsp.py npoints')
-    exit(1)
-n = int(sys.argv[1])
+#if len(sys.argv) < 2:
+#    print('Usage: tsp.py npoints')
+#    exit(1)
+#n = int(sys.argv[1])
+    
+n = 10
 
 # Create n random points
 
-random.seed(1)
+random.seed(1) # can select a random seed number
 points = [(random.randint(0,100),random.randint(0,100)) for i in range(n)]
 
 # Dictionary of Euclidean distance between each pair of points
@@ -71,7 +73,7 @@ m = Model()
 
 # Create variables
 
-vars = m.addVars(dist.keys(), obj=dist, vtype=GRB.BINARY, name='e')
+vars = m.addVars(dist.keys(), obj=dist, vtype=GRB.BINARY, name='e') # use dict in addVars
 for i,j in vars.keys():
     vars[j,i] = vars[i,j] # edge in opposite direction
 
@@ -79,15 +81,16 @@ for i,j in vars.keys():
 # these decision variables instead.  The following would be equivalent
 # to the preceding m.addVars() call...
 #
-# vars = tupledict()
-# for i,j in dist.keys():
+#vars = tupledict()
+#for i,j in dist.keys():
 #   vars[i,j] = m.addVar(obj=dist[i,j], vtype=GRB.BINARY,
 #                        name='e[%d,%d]'%(i,j))
-
+#for i,j in vars.keys():
+#    vars[j,i] = vars[i,j] # edge in opposite direction
 
 # Add degree-2 constraint
 
-m.addConstrs(vars.sum(i,'*') == 2 for i in range(n))
+m.addConstrs(vars.sum(i,'*') == 2 for i in range(n)) # sum a column in a matrix
 
 # Using Python looping constructs, the preceding would be...
 #
@@ -98,13 +101,15 @@ m.addConstrs(vars.sum(i,'*') == 2 for i in range(n))
 # Optimize model
 
 m._vars = vars
-m.Params.lazyConstraints = 1
-m.optimize(subtourelim)
+m.Params.lazyConstraints = 1 # default value is 0, max value is 1
+m.write('tsp.lp')
+m.optimize(subtourelim) # must define a call back method first
 
-vals = m.getAttr('x', vars)
+vals = m.getAttr('X', vars)
 selected = tuplelist((i,j) for i,j in vals.keys() if vals[i,j] > 0.5)
 
-tour = subtour(selected)
+print(selected)
+tour = subtour(selected) # dynamic adding constraints
 assert len(tour) == n
 
 print('')
