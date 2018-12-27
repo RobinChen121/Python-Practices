@@ -23,7 +23,7 @@ BoundCriteria = Enum('BoundCriteria', ('lowBound', 'upBound'));
 
 
 
-meanDemand = np.array([20, 40, 60, 40])
+meanDemand = np.array([50,50,50,50,50,50,50,50,50,50])
 sigma = meanDemand * 0.25
 iniInventory = 0;
 fixOrderCost = 100

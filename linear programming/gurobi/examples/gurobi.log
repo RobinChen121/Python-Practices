@@ -966,3 +966,218 @@ Solution count 2: 302.755 309.094
 
 Optimal solution found (tolerance 1.00e-04)
 Best objective 3.027546403604e+02, best bound 3.027546403604e+02, gap 0.0000%
+Changed value of parameter lazyConstraints to 1
+   Prev: 0  Min: 0  Max: 1  Default: 0
+Optimize a model with 10 rows, 45 columns and 90 nonzeros
+Variable types: 0 continuous, 45 integer (45 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 1e+00]
+  Objective range  [1e+01, 1e+02]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [2e+00, 2e+00]
+Presolve time: 0.00s
+Presolved: 10 rows, 45 columns, 90 nonzeros
+Variable types: 0 continuous, 45 integer (45 binary)
+
+Root relaxation: objective 3.018755e+02, 15 iterations, 0.00 seconds
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0  301.87549    0    6          -  301.87549      -     -    0s
+H    0     0                     309.0937026  301.87549  2.34%     -    0s
+H    0     0                     302.7546404  301.87549  0.29%     -    0s
+     0     0 infeasible    0       302.75464  302.75464  0.00%     -    0s
+
+Cutting planes:
+  Lazy constraints: 3
+
+Explored 1 nodes (15 simplex iterations) in 0.02 seconds
+Thread count was 4 (of 4 available processors)
+
+Solution count 2: 302.755 309.094 
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective 3.027546403604e+02, best bound 3.027546403604e+02, gap 0.0000%
+Changed value of parameter lazyConstraints to 1
+   Prev: 0  Min: 0  Max: 1  Default: 0
+Optimize a model with 10 rows, 45 columns and 90 nonzeros
+Variable types: 0 continuous, 45 integer (45 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 1e+00]
+  Objective range  [1e+01, 1e+02]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [2e+00, 2e+00]
+Found heuristic solution: objective 566.5292943
+Presolve time: 0.00s
+Presolved: 10 rows, 45 columns, 90 nonzeros
+Variable types: 0 continuous, 45 integer (45 binary)
+
+Root simplex log...
+
+Iteration    Objective       Primal Inf.    Dual Inf.      Time
+       0    0.0000000e+00   2.000000e+01   0.000000e+00    830s
+      12    2.9519182e+02   0.000000e+00   0.000000e+00    830s
+
+Root relaxation: objective 2.951918e+02, 12 iterations, 0.00 seconds
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0  301.87549    0    6  566.52929  301.87549  46.7%     -  829s
+H    0     0                     344.0783012  301.87549  12.3%     -  829s
+*    0     0               0     302.7546404  302.75464  0.00%     -  829s
+
+Cutting planes:
+  Gomory: 1
+  Zero half: 2
+  Lazy constraints: 2
+
+Explored 1 nodes (17 simplex iterations) in 830.00 seconds
+Thread count was 4 (of 4 available processors)
+
+Solution count 3: 302.755 344.078 566.529 
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective 3.027546403604e+02, best bound 3.027546403604e+02, gap 0.0000%
+Changed value of parameter lazyConstraints to 1
+   Prev: 0  Min: 0  Max: 1  Default: 0
+Optimize a model with 5 rows, 10 columns and 20 nonzeros
+Variable types: 0 continuous, 10 integer (10 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 1e+00]
+  Objective range  [4e+01, 1e+02]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [2e+00, 2e+00]
+Presolve time: 0.00s
+Presolved: 5 rows, 10 columns, 20 nonzeros
+Variable types: 0 continuous, 10 integer (10 binary)
+Found heuristic solution: objective 279.7592526
+
+Root simplex log...
+
+Iteration    Objective       Primal Inf.    Dual Inf.      Time
+       0    0.0000000e+00   1.000000e+01   0.000000e+00   1643s
+
+Root relaxation: cutoff, 7 iterations, 0.00 seconds
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0     cutoff    0       279.75925  279.75925  0.00%     - 1642s
+
+Explored 0 nodes (7 simplex iterations) in 1642.63 seconds
+Thread count was 4 (of 4 available processors)
+
+Solution count 1: 279.759 
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective 2.797592525741e+02, best bound 2.797592525741e+02, gap 0.0000%
+Changed value of parameter lazyConstraints to 1
+   Prev: 0  Min: 0  Max: 1  Default: 0
+Optimize a model with 5 rows, 10 columns and 20 nonzeros
+Variable types: 0 continuous, 10 integer (10 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 1e+00]
+  Objective range  [4e+01, 1e+02]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [2e+00, 2e+00]
+Presolve time: 0.00s
+Presolved: 5 rows, 10 columns, 20 nonzeros
+Variable types: 0 continuous, 10 integer (10 binary)
+Found heuristic solution: objective 279.7592526
+
+Root simplex log...
+
+Iteration    Objective       Primal Inf.    Dual Inf.      Time
+       0    0.0000000e+00   1.000000e+01   0.000000e+00     48s
+
+Root relaxation: cutoff, 7 iterations, 0.01 seconds
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0     cutoff    0       279.75925  279.75925  0.00%     -   48s
+
+Explored 0 nodes (7 simplex iterations) in 48.04 seconds
+Thread count was 4 (of 4 available processors)
+
+Solution count 1: 279.759 
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective 2.797592525741e+02, best bound 2.797592525741e+02, gap 0.0000%
+Changed value of parameter lazyConstraints to 1
+   Prev: 0  Min: 0  Max: 1  Default: 0
+Optimize a model with 5 rows, 10 columns and 20 nonzeros
+Variable types: 0 continuous, 10 integer (10 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 1e+00]
+  Objective range  [4e+01, 1e+02]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [2e+00, 2e+00]
+Presolve time: 0.00s
+Presolved: 5 rows, 10 columns, 20 nonzeros
+Variable types: 0 continuous, 10 integer (10 binary)
+Found heuristic solution: objective 279.7592526
+
+Root relaxation: cutoff, 7 iterations, 0.00 seconds
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0     cutoff    0       279.75925  279.75925  0.00%     -    0s
+
+Explored 0 nodes (7 simplex iterations) in 0.02 seconds
+Thread count was 4 (of 4 available processors)
+
+Solution count 1: 279.759 
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective 2.797592525741e+02, best bound 2.797592525741e+02, gap 0.0000%
+Changed value of parameter lazyConstraints to 1
+   Prev: 0  Min: 0  Max: 1  Default: 0
+Optimize a model with 5 rows, 10 columns and 20 nonzeros
+Variable types: 0 continuous, 10 integer (10 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 1e+00]
+  Objective range  [4e+01, 1e+02]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [2e+00, 2e+00]
+Presolve time: 0.00s
+Presolved: 5 rows, 10 columns, 20 nonzeros
+Variable types: 0 continuous, 10 integer (10 binary)
+Found heuristic solution: objective 279.7592526
+
+Root relaxation: cutoff, 7 iterations, 0.00 seconds
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0     cutoff    0       279.75925  279.75925  0.00%     -    0s
+
+Explored 0 nodes (7 simplex iterations) in 0.02 seconds
+Thread count was 4 (of 4 available processors)
+
+Solution count 1: 279.759 
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective 2.797592525741e+02, best bound 2.797592525741e+02, gap 0.0000%
+Optimize a model with 2 rows, 3 columns and 5 nonzeros
+Variable types: 0 continuous, 3 integer (3 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 3e+00]
+  Objective range  [1e+00, 2e+00]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [1e+00, 4e+00]
+Found heuristic solution: objective 2.0000000
+Presolve removed 2 rows and 3 columns
+Presolve time: 0.00s
+Presolve: All rows and columns removed
+
+Explored 0 nodes (0 simplex iterations) in 0.01 seconds
+Thread count was 1 (of 4 available processors)
+
+Solution count 2: 3 2 
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective 3.000000000000e+00, best bound 3.000000000000e+00, gap 0.0000%

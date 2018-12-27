@@ -28,7 +28,7 @@ def subtourelim(model, where):
             # add subtour elimination constraint for every pair of cities in tour
             model.cbLazy(quicksum(model._vars[i,j]
                                   for i,j in itertools.combinations(tour, 2))
-                         <= len(tour)-1)
+                         <= len(tour)-1)  # quicksum only for gurobi
 
 
 # Given a tuplelist of edges, find the shortest subtour
@@ -56,7 +56,7 @@ def subtour(edges):
 #    exit(1)
 #n = int(sys.argv[1])
     
-n = 10
+n = 5
 
 # Create n random points
 
@@ -100,15 +100,15 @@ m.addConstrs(vars.sum(i,'*') == 2 for i in range(n)) # sum a column in a matrix
 
 # Optimize model
 
-m._vars = vars
+m._vars = vars # self define an attribute
 m.Params.lazyConstraints = 1 # default value is 0, max value is 1
-m.write('tsp.lp')
+#m.write('tsp.lp')
 m.optimize(subtourelim) # must define a call back method first
 
 vals = m.getAttr('X', vars)
 selected = tuplelist((i,j) for i,j in vals.keys() if vals[i,j] > 0.5)
 
-print(selected)
+#print(selected)
 tour = subtour(selected) # dynamic adding constraints
 assert len(tour) == n
 

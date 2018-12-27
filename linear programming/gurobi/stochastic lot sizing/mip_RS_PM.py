@@ -8,7 +8,7 @@ Created on Tue Dec 18 10:42:38 2018
 
 @description:  this is a class to implement the PM setting method of Tunc et al. (2018) to solve 
                 single-item stochastic lot sizing problem.
-                30 periods 0 nodes, running time 1.42s
+                30 periods 0 nodes, running time 1.42s, 50 periods 0 nodes, running time 65s
     
 """
 
@@ -19,7 +19,7 @@ import time
 
 
 
-meanDemand = np.array([20, 40, 60, 40])
+meanDemand = np.array([50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50,50])
 sigma = meanDemand * 0.25
 iniInventory = 0;
 fixOrderCost = 100
