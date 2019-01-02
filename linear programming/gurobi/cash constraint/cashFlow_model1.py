@@ -6,19 +6,21 @@ Created on Thu Dec 27 17:16:33 2018
 
 @Python version: 3.6
 
-@description: this is for testing a small numercial example by adopting Gurobi to solve
+@description: this is for testing a numercial example by adopting Gurobi to solve
               the linear model. 
-              The backgroud of this problem is about a small online retailer
+              The backgroud of this problem is about a small online retailer.
+              In the model1, there exits integer variables.
     
 """
 
 from gurobipy import *
 import numpy as np
+import time
 
 
 iniInventory = 0 # initial inventory
 iniCash = 200 # initial cash
-meanDemand = [20, 40] # mean demand in each week
+meanDemand = np.ones(150) * 30 # mean demand in each week
 T = len(meanDemand) # length of planning horizon
 M = 10000
 
@@ -30,7 +32,7 @@ alpha = 0 # revenue sharing rate
 
 try :
     # create a Gurobi model
-    m = Model("mip_cash_constraint_small")
+    m = Model("mip_cash_constraint_model1")
     
     
     # decision variables
@@ -81,8 +83,10 @@ try :
     
     
     # optimize
+    currTime = time.time()
     m.optimize()
-    
+    runTime = time.time() - currTime
+    print('running time is %.5f s' % runTime)
     
     # output results
     print('')  
