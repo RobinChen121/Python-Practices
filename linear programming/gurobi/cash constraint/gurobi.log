@@ -982,3 +982,417 @@ Iteration    Objective       Primal Inf.    Dual Inf.      Time
 
 Solved in 135 iterations and 0.02 seconds
 Optimal objective  1.193000000e+05
+
+Gurobi 8.1.0 (win64, Python) logging started 01/03/19 11:46:47
+
+Optimize a model with 301 rows, 450 columns and 600 nonzeros
+Model has 150 quadratic objective terms
+Model has 149 quadratic constraints
+Variable types: 300 continuous, 150 integer (150 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 2e+01]
+  QMatrix range    [1e+00, 1e+00]
+  QLMatrix range   [2e+01, 3e+01]
+  Objective range  [3e+01, 5e+01]
+  QObjective range [2e+00, 2e+00]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [3e+01, 2e+02]
+  QRHS range       [5e+01, 7e+03]
+Presolve removed 4 rows and 1 columns
+Presolve time: 0.03s
+
+Explored 0 nodes (0 simplex iterations) in 0.07 seconds
+Thread count was 1 (of 4 available processors)
+
+Solution count 0
+
+Best objective -, best bound -, gap -
+Optimize a model with 451 rows, 450 columns and 1049 nonzeros
+Model has 150 quadratic objective terms
+Model has 149 quadratic constraints
+Variable types: 300 continuous, 150 integer (150 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 1e+04]
+  QMatrix range    [1e+00, 1e+00]
+  QLMatrix range   [2e+01, 3e+01]
+  Objective range  [3e+01, 5e+01]
+  QObjective range [2e+00, 2e+00]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [3e+01, 2e+02]
+  QRHS range       [5e+01, 7e+03]
+Presolve removed 4 rows and 0 columns
+Presolve time: 0.01s
+
+Explored 0 nodes (0 simplex iterations) in 0.03 seconds
+Thread count was 1 (of 4 available processors)
+
+Solution count 0
+
+Best objective -, best bound -, gap -
+Optimize a model with 600 rows, 450 columns and 34723 nonzeros
+Variable types: 300 continuous, 150 integer (150 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 1e+04]
+  Objective range  [3e+01, 1e+02]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [3e+01, 7e+03]
+Presolve removed 10 rows and 6 columns
+Presolve time: 0.13s
+Presolved: 590 rows, 444 columns, 33815 nonzeros
+Variable types: 296 continuous, 148 integer (148 binary)
+
+Root relaxation: objective 1.263237e+05, 248 iterations, 0.02 seconds
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0 126323.720    0  147          - 126323.720      -     -    0s
+H    0     0                    111718.75000 126323.720  13.1%     -    0s
+H    0     0                    111725.00000 126323.720  13.1%     -    0s
+H    0     0                    111795.00000 126323.720  13.0%     -    0s
+H    0     0                    111810.00000 126323.720  13.0%     -    0s
+H    0     0                    111850.00000 126323.720  12.9%     -    0s
+H    0     0                    111860.00000 126323.720  12.9%     -    0s
+H    0     0                    111930.00000 126323.720  12.9%     -    0s
+H    0     0                    111970.00000 126323.720  12.8%     -    0s
+H    0     0                    111980.00000 126323.720  12.8%     -    0s
+H    0     0                    112050.00000 126173.153  12.6%     -    0s
+H    0     0                    112090.00000 126173.153  12.6%     -    0s
+H    0     0                    112100.00000 126173.153  12.6%     -    0s
+H    0     0                    112170.00000 126173.153  12.5%     -    0s
+H    0     0                    112210.00000 126173.153  12.4%     -    0s
+H    0     0                    112220.00000 126173.153  12.4%     -    0s
+H    0     0                    112290.00000 126173.153  12.4%     -    0s
+H    0     0                    112330.00000 126173.153  12.3%     -    0s
+H    0     0                    112340.00000 126173.153  12.3%     -    0s
+H    0     0                    112410.00000 126173.153  12.2%     -    0s
+H    0     0                    112450.00000 126173.153  12.2%     -    0s
+H    0     0                    112460.00000 126173.153  12.2%     -    0s
+H    0     0                    112530.00000 126173.153  12.1%     -    0s
+H    0     0                    112570.00000 126173.153  12.1%     -    0s
+H    0     0                    112580.00000 126173.153  12.1%     -    0s
+H    0     0                    112650.00000 126173.153  12.0%     -    0s
+H    0     0                    112690.00000 126173.153  12.0%     -    0s
+H    0     0                    112700.00000 126173.153  12.0%     -    0s
+H    0     0                    112770.00000 126173.153  11.9%     -    0s
+H    0     0                    112810.00000 126173.153  11.8%     -    0s
+H    0     0                    112820.00000 126173.153  11.8%     -    0s
+H    0     0                    112890.00000 126173.153  11.8%     -    0s
+H    0     0                    112930.00000 126173.153  11.7%     -    0s
+     0     0 121897.488    0  145 112930.000 121897.488  7.94%     -    0s
+H    0     0                    112940.00000 121897.488  7.93%     -    0s
+H    0     0                    113010.00000 121897.488  7.86%     -    0s
+H    0     0                    113050.00000 121897.488  7.83%     -    0s
+H    0     0                    113060.00000 121897.488  7.82%     -    0s
+H    0     0                    113130.00000 121897.488  7.75%     -    0s
+H    0     0                    113170.00000 121897.488  7.71%     -    0s
+H    0     0                    113180.00000 121897.488  7.70%     -    0s
+H    0     0                    113250.00000 121897.488  7.64%     -    0s
+H    0     0                    113290.00000 121897.488  7.60%     -    0s
+H    0     0                    113300.00000 121897.488  7.59%     -    0s
+H    0     0                    113370.00000 121897.488  7.52%     -    0s
+H    0     0                    113410.00000 121897.488  7.48%     -    0s
+H    0     0                    113420.00000 121897.488  7.47%     -    0s
+H    0     0                    113490.00000 121897.488  7.41%     -    0s
+H    0     0                    113530.00000 121897.488  7.37%     -    0s
+H    0     0                    113540.00000 121897.488  7.36%     -    0s
+H    0     0                    113610.00000 121897.488  7.29%     -    0s
+H    0     0                    113650.00000 121897.488  7.26%     -    0s
+H    0     0                    113660.00000 121897.488  7.25%     -    0s
+H    0     0                    113730.00000 121897.488  7.18%     -    0s
+H    0     0                    113770.00000 121897.488  7.14%     -    0s
+H    0     0                    113780.00000 121897.488  7.13%     -    0s
+H    0     0                    113850.00000 121897.488  7.07%     -    0s
+H    0     0                    113890.00000 121897.488  7.03%     -    0s
+H    0     0                    113900.00000 121897.488  7.02%     -    0s
+H    0     0                    113970.00000 121897.488  6.96%     -    0s
+H    0     0                    114010.00000 121897.488  6.92%     -    0s
+H    0     0                    114020.00000 121897.488  6.91%     -    0s
+H    0     0                    114090.00000 121897.488  6.84%     -    0s
+H    0     0                    114130.00000 121897.488  6.81%     -    0s
+H    0     0                    114140.00000 121897.488  6.80%     -    0s
+H    0     0                    114210.00000 121897.488  6.73%     -    0s
+H    0     0                    114250.00000 121897.488  6.69%     -    0s
+H    0     0                    114260.00000 121897.488  6.68%     -    0s
+     0     0 121886.043    0  145 114260.000 121886.043  6.67%     -    0s
+H    0     0                    114330.00000 121886.043  6.61%     -    0s
+H    0     0                    114370.00000 121886.043  6.57%     -    0s
+H    0     0                    114380.00000 121886.043  6.56%     -    0s
+H    0     0                    114450.00000 121886.043  6.50%     -    0s
+H    0     0                    114490.00000 121886.043  6.46%     -    0s
+H    0     0                    114500.00000 121886.043  6.45%     -    0s
+H    0     0                    114570.00000 121886.043  6.39%     -    0s
+H    0     0                    114610.00000 121886.043  6.35%     -    0s
+H    0     0                    114620.00000 121886.043  6.34%     -    0s
+H    0     0                    114690.00000 121886.043  6.27%     -    0s
+H    0     0                    114730.00000 121886.043  6.24%     -    0s
+H    0     0                    114740.00000 121886.043  6.23%     -    0s
+H    0     0                    114810.00000 121886.043  6.16%     -    0s
+H    0     0                    114850.00000 121886.043  6.13%     -    0s
+H    0     0                    114860.00000 121886.043  6.12%     -    0s
+H    0     0                    114930.00000 121886.043  6.05%     -    0s
+H    0     0                    114970.00000 121886.043  6.02%     -    0s
+H    0     0                    114980.00000 121886.043  6.01%     -    0s
+H    0     0                    115050.00000 121886.043  5.94%     -    0s
+H    0     0                    115090.00000 121886.043  5.90%     -    0s
+H    0     0                    115100.00000 121886.043  5.90%     -    0s
+H    0     0                    115170.00000 121886.043  5.83%     -    0s
+H    0     0                    115210.00000 121886.043  5.79%     -    0s
+H    0     0                    115220.00000 121886.043  5.79%     -    0s
+H    0     0                    115290.00000 121886.043  5.72%     -    0s
+H    0     0                    115330.00000 121886.043  5.68%     -    0s
+H    0     0                    115340.00000 121886.043  5.68%     -    0s
+H    0     0                    115410.00000 121886.043  5.61%     -    0s
+H    0     0                    115450.00000 121886.043  5.57%     -    0s
+H    0     0                    115460.00000 121886.043  5.57%     -    0s
+H    0     0                    115530.00000 121886.043  5.50%     -    0s
+H    0     0                    115570.00000 121886.043  5.47%     -    0s
+H    0     0                    115580.00000 121886.043  5.46%     -    0s
+H    0     0                    115650.00000 121886.043  5.39%     -    0s
+     0     0 121856.043    0  144 115650.000 121856.043  5.37%     -    0s
+     0     0 121855.872    0  144 115650.000 121855.872  5.37%     -    0s
+     0     0 121855.872    0  144 115650.000 121855.872  5.37%     -    0s
+     0     2 121855.872    0  144 115650.000 121855.872  5.37%     -    0s
+H  502   488                    115685.81027 121745.335  5.24%   1.2    0s
+H  503   488                    115725.81027 121745.335  5.20%   1.2    0s
+H  504   488                    115755.72027 121745.335  5.17%   1.2    0s
+H  505   488                    115855.45027 121745.335  5.08%   1.2    0s
+H  506   488                    115925.45027 121745.335  5.02%   1.2    0s
+H  507   488                    115965.45027 121745.335  4.98%   1.2    0s
+H  508   488                    115995.36027 121745.335  4.96%   1.2    0s
+H  509   485                    116095.09027 121745.335  4.87%   1.2    0s
+H  533   509                    116135.18054 121745.335  4.83%   1.2    0s
+*  564   562             109    116165.00000 121744.672  4.80%   1.2    0s
+*  574   562             109    116175.00000 121715.335  4.77%   1.2    0s
+*  576   560             109    116195.00000 121715.335  4.75%   1.2    0s
+H 1192  1166                    116236.08108 121676.019  4.68%   1.2    0s
+H 1193  1160                    116306.17189 121676.019  4.62%   1.2    0s
+H 1198  1154                    116365.81081 121676.019  4.56%   1.2    0s
+H 1200  1154                    116405.81135 121676.019  4.53%   1.2    0s
+H 1203  1152                    116425.63081 121676.019  4.51%   1.2    0s
+H 1204  1148                    116465.63135 121676.019  4.47%   1.2    0s
+H 1206  1144                    116485.45081 121676.019  4.46%   1.2    1s
+H 1210  1160                    116525.45135 121676.019  4.42%   1.2    1s
+H 1210  1146                    116755.00000 121676.019  4.21%   1.2    1s
+H 1296  1159                    116855.00000 117195.431  0.29%   1.2    1s
+H 1296  1101                    116945.00000 117195.431  0.21%   1.2    1s
+H 1296  1045                    117005.00000 117195.431  0.16%   1.2    1s
+H 1297   994                    117065.00000 117195.429  0.11%   1.2    1s
+H 1318   958                    117075.00000 117140.734  0.06%   1.6    2s
+* 1434   950              38    117095.00000 117130.500  0.03%   2.7    2s
+* 2004   796              34    117105.00000 117119.504  0.01%   2.9    2s
+
+Cutting planes:
+  Gomory: 28
+  MIR: 85
+  Flow cover: 178
+
+Explored 2304 nodes (7306 simplex iterations) in 2.84 seconds
+Thread count was 4 (of 4 available processors)
+
+Solution count 10: 117105 117095 117075 ... 116485
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective 1.171050000000e+05, best bound 1.171165702388e+05, gap 0.0099%
+Optimize a model with 20 rows, 15 columns and 68 nonzeros
+Variable types: 10 continuous, 5 integer (5 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 1e+04]
+  Objective range  [3e+01, 1e+02]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [3e+01, 2e+02]
+Found heuristic solution: objective -50.0000000
+Presolve removed 10 rows and 6 columns
+Presolve time: 0.00s
+Presolved: 10 rows, 9 columns, 30 nonzeros
+Found heuristic solution: objective 575.0000000
+Variable types: 6 continuous, 3 integer (3 binary)
+
+Root relaxation: objective 3.115625e+03, 2 iterations, 0.00 seconds
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0 3115.62476    0    2  575.00000 3115.62476   442%     -    0s
+H    0     0                    2968.7500000 3115.62476  4.95%     -    0s
+*    0     0               0    3045.0000000 3045.00000  0.00%     -    0s
+
+Cutting planes:
+  Gomory: 1
+
+Explored 1 nodes (4 simplex iterations) in 0.03 seconds
+Thread count was 4 (of 4 available processors)
+
+Solution count 3: 3045 2968.75 575 
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective 3.045000000000e+03, best bound 3.045000000000e+03, gap 0.0000%
+Optimize a model with 20 rows, 15 columns and 68 nonzeros
+Variable types: 10 continuous, 5 integer (5 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 1e+04]
+  Objective range  [3e+01, 1e+02]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [3e+01, 2e+02]
+Found heuristic solution: objective -50.0000000
+Presolve removed 10 rows and 6 columns
+Presolve time: 0.00s
+Presolved: 10 rows, 9 columns, 30 nonzeros
+Found heuristic solution: objective 575.0000000
+Variable types: 6 continuous, 3 integer (3 binary)
+
+Root relaxation: objective 3.115625e+03, 2 iterations, 0.00 seconds
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0 3115.62476    0    2  575.00000 3115.62476   442%     -    0s
+H    0     0                    2968.7500000 3115.62476  4.95%     -    0s
+*    0     0               0    3045.0000000 3045.00000  0.00%     -    0s
+
+Cutting planes:
+  Gomory: 1
+
+Explored 1 nodes (4 simplex iterations) in 0.03 seconds
+Thread count was 4 (of 4 available processors)
+
+Solution count 3: 3045 2968.75 575 
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective 3.045000000000e+03, best bound 3.045000000000e+03, gap 0.0000%
+Optimize a model with 15 rows, 15 columns and 54 nonzeros
+Variable types: 10 continuous, 5 integer (5 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 1e+02]
+  Objective range  [3e+01, 1e+02]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [3e+01, 2e+02]
+Found heuristic solution: objective 3625.0000000
+Presolve removed 15 rows and 15 columns
+Presolve time: 0.00s
+Presolve: All rows and columns removed
+
+Explored 0 nodes (0 simplex iterations) in 0.01 seconds
+Thread count was 1 (of 4 available processors)
+
+Solution count 1: 3625 
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective 3.625000000000e+03, best bound 3.625000000000e+03, gap 0.0000%
+Optimize a model with 8 rows, 6 columns and 17 nonzeros
+Variable types: 4 continuous, 2 integer (2 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 1e+04]
+  Objective range  [3e+01, 1e+02]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [2e+01, 2e+02]
+Found heuristic solution: objective 100.0000000
+Found heuristic solution: objective 725.0000000
+Presolve removed 8 rows and 6 columns
+Presolve time: 0.00s
+Presolve: All rows and columns removed
+
+Explored 0 nodes (0 simplex iterations) in 0.01 seconds
+Thread count was 1 (of 4 available processors)
+
+Solution count 2: 725 100 
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective 7.250000000000e+02, best bound 7.250000000000e+02, gap 0.0000%
+Optimize a model with 8 rows, 6 columns and 19 nonzeros
+Variable types: 4 continuous, 2 integer (2 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 1e+04]
+  Objective range  [3e+01, 1e+02]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [2e+01, 2e+02]
+Found heuristic solution: objective 100.0000000
+Presolve removed 8 rows and 6 columns
+Presolve time: 0.00s
+Presolve: All rows and columns removed
+
+Explored 0 nodes (0 simplex iterations) in 0.01 seconds
+Thread count was 1 (of 4 available processors)
+
+Solution count 2: 200 100 
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective 2.000000000000e+02, best bound 2.000000000000e+02, gap 0.0000%
+Optimize a model with 8 rows, 6 columns and 19 nonzeros
+Variable types: 4 continuous, 2 integer (2 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 1e+04]
+  Objective range  [3e+01, 1e+02]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [2e+01, 3e+02]
+Found heuristic solution: objective 200.0000000
+Found heuristic solution: objective 825.0000000
+Presolve removed 8 rows and 6 columns
+Presolve time: 0.00s
+Presolve: All rows and columns removed
+
+Explored 0 nodes (0 simplex iterations) in 0.01 seconds
+Thread count was 1 (of 4 available processors)
+
+Solution count 2: 825 200 
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective 8.250000000000e+02, best bound 8.250000000000e+02, gap 0.0000%
+Optimize a model with 6 rows, 6 columns and 14 nonzeros
+Variable types: 4 continuous, 2 integer (2 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 1e+02]
+  Objective range  [3e+01, 1e+02]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [2e+01, 3e+02]
+Found heuristic solution: objective 1700.0000000
+Presolve removed 6 rows and 6 columns
+Presolve time: 0.00s
+Presolve: All rows and columns removed
+
+Explored 0 nodes (0 simplex iterations) in 0.01 seconds
+Thread count was 1 (of 4 available processors)
+
+Solution count 1: 1700 
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective 1.700000000000e+03, best bound 1.700000000000e+03, gap 0.0000%
+Optimize a model with 8 rows, 6 columns and 19 nonzeros
+Variable types: 4 continuous, 2 integer (2 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 1e+04]
+  Objective range  [3e+01, 1e+02]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [2e+01, 3e+02]
+Found heuristic solution: objective 300.0000000
+Found heuristic solution: objective 1000.0000000
+Presolve removed 8 rows and 6 columns
+Presolve time: 0.00s
+Presolve: All rows and columns removed
+
+Explored 0 nodes (0 simplex iterations) in 0.01 seconds
+Thread count was 1 (of 4 available processors)
+
+Solution count 2: 1000 300 
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective 1.000000000000e+03, best bound 1.000000000000e+03, gap 0.0000%
+Optimize a model with 16 rows, 12 columns and 52 nonzeros
+Variable types: 8 continuous, 4 integer (4 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 1e+04]
+  Objective range  [3e+01, 1e+02]
+  Bounds range     [1e+00, 1e+00]
+  RHS range        [2e+01, 3e+02]
+Found heuristic solution: objective 300.0000000
+Presolve removed 16 rows and 12 columns
+Presolve time: 0.00s
+Presolve: All rows and columns removed
+
+Explored 0 nodes (0 simplex iterations) in 0.01 seconds
+Thread count was 1 (of 4 available processors)
+
+Solution count 2: 3350 300 
+
+Optimal solution found (tolerance 1.00e-04)
+Best objective 3.350000000000e+03, best bound 3.350000000000e+03, gap 0.0000%
