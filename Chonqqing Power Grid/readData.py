@@ -6,7 +6,7 @@ Created on Tue Apr 30 22:37:21 2019
 
 Python version: 3.7
 
-Description: read data from the csv files
+Description: read data from the excel files
 
 xlrd package read very slow for large xls files
 
