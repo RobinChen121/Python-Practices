@@ -12,6 +12,7 @@ Description: This a practice for crawler in the movie reviewing website Maoyan
 import requests  # a package for requesting from websites
 import xlwt  # a package for reading and writing in excel, not supporting xlsx writing
 from bs4 import BeautifulSoup # a package for webstie data analysis
+from collections import Counter # counter the num of each element in a list
 
 
 headers = {
@@ -82,8 +83,6 @@ for i in range(0, 10):
 #            director_list_english_name.append(director)
         
         # find the director name
-        if num == 46:
-            print(info)
         end = info.find('主')
         if end < 0:
             end = info.find('...')
@@ -155,5 +154,16 @@ for i in range(len(nation_list)):
     table.write(i + 1, 6, star_list[i])
     table.write(i + 1, 7, reviewNum_list[i])
     table.write(i + 1, 8, category_list[i])
-    
-file.save('豆瓣 top 250 电影爬虫抓取.xls')
+
+# save to xls file    
+#file.save('豆瓣 top 250 电影爬虫抓取.xls')
+
+# analysis nations
+locations = []
+for i in range(len(nation_list)):
+    nations = nation_list[i].split(' ') 
+    for j in range(len(nations)):
+        locations.append(nations[j])
+
+result = Counter(locations)
+print(locations)

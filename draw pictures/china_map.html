@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Awesome-pyecharts</title>
+            <script type="text/javascript" src="https://assets.pyecharts.org/assets/echarts.min.js"></script>
+        <script type="text/javascript" src="https://assets.pyecharts.org/assets/maps/china.js"></script>
+
+</head>
+<body>
+    <div id="8c5c824decd040ada6cc0471d1635e44" style="width:900px; height:500px;"></div>
+    <script>
+        var chart_8c5c824decd040ada6cc0471d1635e44 = echarts.init(
+            document.getElementById('8c5c824decd040ada6cc0471d1635e44'), 'white', {renderer: 'canvas'});
+        var option_8c5c824decd040ada6cc0471d1635e44 = {
+    "color": [
+        "#c23531",
+        "#2f4554",
+        "#61a0a8",
+        "#d48265",
+        "#749f83",
+        "#ca8622",
+        "#bda29a",
+        "#6e7074",
+        "#546570",
+        "#c4ccd3",
+        "#f05b72",
+        "#ef5b9c",
+        "#f47920",
+        "#905a3d",
+        "#fab27b",
+        "#2a5caa",
+        "#444693",
+        "#726930",
+        "#b2d235",
+        "#6d8346",
+        "#ac6767",
+        "#1d953f",
+        "#6950a1",
+        "#918597"
+    ],
+    "series": [
+        {
+            "type": "map",
+            "name": "\u4e2d\u56fd\u5730\u56fe",
+            "label": {
+                "show": true,
+                "position": "top",
+                "fontSize": 12
+            },
+            "mapType": "china",
+            "data": [
+                {
+                    "name": "\u91cd\u5e86",
+                    "value": 99
+                },
+                {
+                    "name": "\u5317\u4eac",
+                    "value": 91
+                },
+                {
+                    "name": "\u4e91\u5357",
+                    "value": 78
+                },
+                {
+                    "name": "\u6c5f\u897f",
+                    "value": 20
+                },
+                {
+                    "name": "\u6e56\u5357",
+                    "value": 60
+                },
+                {
+                    "name": "\u6d59\u6c5f",
+                    "value": 22
+                },
+                {
+                    "name": "\u6c5f\u82cf",
+                    "value": 56
+                }
+            ],
+            "roam": true,
+            "showLegendSymbol": true
+        }
+    ],
+    "legend": [
+        {
+            "data": [
+                "\u4e2d\u56fd\u5730\u56fe"
+            ],
+            "selected": {
+                "\u4e2d\u56fd\u5730\u56fe": true
+            }
+        }
+    ],
+    "tooltip": {
+        "show": true,
+        "trigger": "item",
+        "triggerOn": "mousemove|click",
+        "axisPointer": {
+            "type": "line"
+        },
+        "textStyle": {
+            "fontSize": 14
+        },
+        "borderWidth": 0
+    }
+};
+        chart_8c5c824decd040ada6cc0471d1635e44.setOption(option_8c5c824decd040ada6cc0471d1635e44);
+    </script>
+</body>
+</html>

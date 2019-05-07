@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Awesome-pyecharts</title>
+            <script type="text/javascript" src="https://assets.pyecharts.org/assets/echarts.min.js"></script>
+        <script type="text/javascript" src="https://assets.pyecharts.org/assets/maps/chongqing.js"></script>
+
+</head>
+<body>
+    <div id="7cfd5f6d349a48f992557713894720c7" style="width:900px; height:500px;"></div>
+    <script>
+        var chart_7cfd5f6d349a48f992557713894720c7 = echarts.init(
+            document.getElementById('7cfd5f6d349a48f992557713894720c7'), 'white', {renderer: 'canvas'});
+        var option_7cfd5f6d349a48f992557713894720c7 = {
+    "color": [
+        "#c23531",
+        "#2f4554",
+        "#61a0a8",
+        "#d48265",
+        "#749f83",
+        "#ca8622",
+        "#bda29a",
+        "#6e7074",
+        "#546570",
+        "#c4ccd3",
+        "#f05b72",
+        "#ef5b9c",
+        "#f47920",
+        "#905a3d",
+        "#fab27b",
+        "#2a5caa",
+        "#444693",
+        "#726930",
+        "#b2d235",
+        "#6d8346",
+        "#ac6767",
+        "#1d953f",
+        "#6950a1",
+        "#918597"
+    ],
+    "series": [
+        {
+            "type": "map",
+            "name": "\u5546\u5bb6A",
+            "label": {
+                "show": true,
+                "position": "top",
+                "fontSize": 12
+            },
+            "mapType": "\u91cd\u5e86",
+            "data": [
+                {
+                    "name": "\u5317\u789a\u533a",
+                    "value": 30
+                },
+                {
+                    "name": "\u6c5f\u5317\u533a",
+                    "value": 50
+                },
+                {
+                    "name": "\u6c99\u576a\u575d\u533a",
+                    "value": 40
+                }
+            ],
+            "roam": true,
+            "showLegendSymbol": true
+        }
+    ],
+    "legend": [
+        {
+            "data": [
+                "\u5546\u5bb6A"
+            ],
+            "selected": {
+                "\u5546\u5bb6A": true
+            },
+            "show": true
+        }
+    ],
+    "tooltip": {
+        "show": true,
+        "trigger": "item",
+        "triggerOn": "mousemove|click",
+        "axisPointer": {
+            "type": "line"
+        },
+        "textStyle": {
+            "fontSize": 14
+        },
+        "borderWidth": 0
+    },
+    "title": [
+        {
+            "text": "Map-\u91cd\u5e86\u5730\u56fe"
+        }
+    ],
+    "dataZoom": [
+        {
+            "show": true,
+            "type": "slider",
+            "realtime": true,
+            "start": 20,
+            "end": 80,
+            "orient": "horizontal",
+            "zoomLock": false
+        }
+    ]
+};
+        chart_7cfd5f6d349a48f992557713894720c7.setOption(option_7cfd5f6d349a48f992557713894720c7);
+    </script>
+</body>
+</html>
