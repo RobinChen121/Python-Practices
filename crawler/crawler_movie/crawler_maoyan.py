@@ -4,6 +4,8 @@ Created on Sun May  5 14:08:23 2019
 
 @author: zhen chen
 
+MIT Licence.
+
 Python version: 3.7
 
 Email: robinchen@swu.edu.cn
