@@ -73,3 +73,70 @@ df_merge_14to18 = pd.merge(df_merge_14to17, df2018, on = '物资品类', how = '
 df_merge_14to18 = df_merge_14to18.fillna(0) # replace nan with 0
 df_merge_14to18 = df_merge_14to18.sort_values(by = ['物资品类'])
 df_merge_14to18 = df_merge_14to18.reset_index(drop = True)  
+
+
+## to 2017
+filename = source + '初始数据14-17.xlsx'
+df_merge_14to17.to_excel(filename, encoding = 'gbk')
+
+# drop the all zero data
+columns = [source + '2014', source + '2015', source + '2016', source + '2017']
+data_matrix = df_merge_14to17[columns].values
+shape = data_matrix.shape
+row_num = shape[0]
+for i in range(row_num):
+    if sum(data_matrix[i, :]) < 10:
+        df_merge_14to17 = df_merge_14to17.drop([i], axis = 0)
+
+    
+# revise some data '普通', '优质'
+df_merge_14to17 = df_merge_14to17.reset_index(drop = True) # True if not adding a new index column
+row_num = df_merge_14to17.shape[0]
+for i in range(row_num):
+    df_merge_14to17['物资品类'][i] = df_merge_14to17['物资品类'][i].strip('-普通')
+    df_merge_14to17['物资品类'][i] = df_merge_14to17['物资品类'][i].strip('-优质')
+    if df_merge_14to17['物资品类'][i] == '删除':  # drop a row with category '删除'
+        df_merge_14to17 = df_merge_14to17.drop([i], axis = 0)
+    
+df_merge_14to17 = df_merge_14to17.reset_index(drop = True) # True if not adding a new index column
+row_num = df_merge_14to17.shape[0]
+for i in range(row_num):
+    df_merge_14to17['物资品类'][i] = df_merge_14to17['物资品类'][i].replace('kv', '千伏') 
+    df_merge_14to17['物资品类'][i] = df_merge_14to17['物资品类'][i].replace('KV', '千伏')  
+df_merge_14to17 = df_merge_14to17.groupby('物资品类').sum()
+df_merge_14to17 = df_merge_14to17.reset_index()
+filename = source + '去除优质普通合并数据14-17.xlsx'
+df_merge_14to17.to_excel(filename, encoding = 'gbk')
+
+
+# to 2018
+filename = source + '初始数据14-18.xlsx'
+df_merge_14to18.to_excel(filename, encoding = 'gbk')
+
+# drop the all zero data
+columns = [source + '2014', source + '2015', source + '2016', source + '2017', source + '2018']
+data_matrix = df_merge_14to18[columns].values
+shape = data_matrix.shape
+row_num = shape[0]
+for i in range(row_num):
+    if sum(data_matrix[i, :]) < 10:
+        df_merge_14to18 = df_merge_14to18.drop([i], axis = 0)
+
+# revise some data '普通', '优质'
+df_merge_14to18 = df_merge_14to18.reset_index(drop = True) # True if not adding a new index column
+row_num = df_merge_14to18.shape[0]
+for i in range(row_num):
+    df_merge_14to18['物资品类'][i] = df_merge_14to18['物资品类'][i].strip('-普通')
+    df_merge_14to18['物资品类'][i] = df_merge_14to18['物资品类'][i].strip('-优质')
+    if df_merge_14to18['物资品类'][i] == '删除':  # drop a row with category '删除'
+        df_merge_14to18 = df_merge_14to18.drop([i], axis = 0)
+    
+df_merge_14to18 = df_merge_14to18.reset_index(drop = True) # True if not adding a new index column
+row_num = df_merge_14to18.shape[0]
+for i in range(row_num):
+    df_merge_14to18['物资品类'][i] = df_merge_14to18['物资品类'][i].replace('kv', '千伏')
+    df_merge_14to18['物资品类'][i] = df_merge_14to18['物资品类'][i].replace('KV', '千伏')
+df_merge_14to18 = df_merge_14to18.groupby('物资品类').sum()
+df_merge_14to18 = df_merge_14to18.reset_index()
+filename = source + '去除优质普通合并数据14-18.xlsx'
+df_merge_14to18.to_excel(filename, encoding = 'gbk')
