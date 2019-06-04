@@ -8,11 +8,11 @@
 
 </head>
 <body>
-    <div id="7cfd5f6d349a48f992557713894720c7" style="width:900px; height:500px;"></div>
+    <div id="85a45696b95b4bd3a8bfd65a4cf22820" style="width:900px; height:500px;"></div>
     <script>
-        var chart_7cfd5f6d349a48f992557713894720c7 = echarts.init(
-            document.getElementById('7cfd5f6d349a48f992557713894720c7'), 'white', {renderer: 'canvas'});
-        var option_7cfd5f6d349a48f992557713894720c7 = {
+        var chart_85a45696b95b4bd3a8bfd65a4cf22820 = echarts.init(
+            document.getElementById('85a45696b95b4bd3a8bfd65a4cf22820'), 'white', {renderer: 'canvas'});
+        var option_85a45696b95b4bd3a8bfd65a4cf22820 = {
     "color": [
         "#c23531",
         "#2f4554",
@@ -95,19 +95,24 @@
             "text": "Map-\u91cd\u5e86\u5730\u56fe"
         }
     ],
-    "dataZoom": [
-        {
-            "show": true,
-            "type": "slider",
-            "realtime": true,
-            "start": 20,
-            "end": 80,
-            "orient": "horizontal",
-            "zoomLock": false
-        }
-    ]
+    "visualMap": {
+        "type": "piecewise",
+        "min": 0,
+        "max": 200,
+        "inRange": {
+            "color": [
+                "#50a3ba",
+                "#eac763",
+                "#d94e5d"
+            ]
+        },
+        "calculable": true,
+        "splitNumber": 5,
+        "orient": "vertical",
+        "showLabel": true
+    }
 };
-        chart_7cfd5f6d349a48f992557713894720c7.setOption(option_7cfd5f6d349a48f992557713894720c7);
+        chart_85a45696b95b4bd3a8bfd65a4cf22820.setOption(option_85a45696b95b4bd3a8bfd65a4cf22820);
     </script>
 </body>
 </html>
