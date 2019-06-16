@@ -19,8 +19,8 @@ import os
 
 
 
-source = '大修'
-source_budgets = [1500000000, 2887110000, 1743225000, 487350000, 950000000]
+source = '运维及成本'
+#source_budgets = [1500000000, 2887110000, 1743225000, 487350000, 950000000]
 direct = os.getcwd() # get the current directory
 file_direct = os.path.join(direct, 'data-output')
 file_name = source + '合并删除增加电商等14-18-金额.xlsx'
@@ -51,8 +51,8 @@ def rule3(i, arr):
     if data_matrix[i, - 1] < 50000:
         forcast_2018[i] = data_matrix[i, - 1] / 2
         return
-    if arr[column_num - 2] > 2.5 * arr[column_num - 1] and arr[column_num - 1] > 0.1:
-        forcast_2018[i] = arr[column_num - 1] / 1.5
+    if arr[column_num - 2] > 8 * arr[column_num - 1] and arr[column_num - 1] > 0.1:
+        forcast_2018[i] = arr[column_num - 1] / 5
         forcast_rule[i] = 8
         return
 #    if arr[column_num - 1] > 10 * arr[column_num - 2] and arr[column_num - 2] > 0.1:
@@ -61,11 +61,17 @@ def rule3(i, arr):
 #        return
      # 若上一年小于5万，则按上一年数据处理
 
-    if (max(arr) - min(arr))/ min(arr) > 3:
-        forcast_2018[i] = arr[column_num - 3 : column_num].mean() # 平均 2 年还是 3 年
+    if (max(arr) - min(arr))/ min(arr) > 3: # 剔除极端值
+        if (max(arr)) / sum(arr) > 0.5:
+            forcast_2018[i] = (sum(arr) - max(arr)) / (len(arr) - 1)
+        if (min(arr)) / sum(arr) < 0.1:
+            forcast_2018[i] = (sum(arr) - min(arr)) / (len(arr) - 1)
+        if (max(arr)) / sum(arr) > 0.5 and (min(arr)) / sum(arr) < 0.1:
+            forcast_2018[i] = (sum(arr) - min(arr) - max(arr)) / (len(arr) - 2)
+        forcast_rule[i] = 13
     else:
         forcast_2018[i] = arr.mean()
-    forcast_rule[i] = 3
+        forcast_rule[i] = 3
     return
 
 def rule4(i, arr):
@@ -148,7 +154,7 @@ for i in range(row_num):
         forcast_rule[i] = 11
 
 forcast_final = history_data       
-ratio = -0.4 * (source_budgets[-1] - source_budgets[-2]) / source_budgets[-2] # 居配取0.2，农网取0，配网取系数1, 运维乘以2，供电分离系数4 。大修取-0.4技改需要取负系数-0.8    
+ratio = 1.5  #* (source_budgets[-1] - source_budgets[-2]) / source_budgets[-2] # 应急1.4，居配取-0.7，零购0，信息0，农网取0，配网取系数0.9, 运维乘以1.5，供电分离系数4,大修取0，基建0.3,营销0.25，技改需要取负系数-0.3    
 forcast_2018 = np.asarray(forcast_2018) * (1 + ratio)     
      
 forcast_final['2018预测值'] = forcast_2018
@@ -156,6 +162,9 @@ forcast_final['预测偏差'] = forcast_2018 - history_data.iloc[:, column_num +
 gap_rate =  (forcast_2018 - history_data.iloc[:, column_num + 1].values)/history_data.iloc[:, column_num + 1].values
 forcast_final['预测规则'] = forcast_rule 
 forcast_final['偏差率'] = gap_rate
+forcast_final = forcast_final.fillna(0) # replace nan with 0 
+forcast_final = forcast_final.replace(np.inf, 1000000)
+forcast_final = forcast_final.sort_values(by = '偏差率', ascending = False)
 filename = source + '2018预测值对比-删除合并增加电商等-金额.xlsx'
 forcast_final.to_excel(filename, encoding = 'gbk')
 
