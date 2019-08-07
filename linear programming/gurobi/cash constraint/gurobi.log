@@ -1396,3 +1396,80 @@ Solution count 2: 3350 300
 
 Optimal solution found (tolerance 1.00e-04)
 Best objective 3.350000000000e+03, best bound 3.350000000000e+03, gap 0.0000%
+
+Gurobi 8.1.1 (win64, Python) logging started 07/20/19 20:16:54
+
+Optimize a model with 1 rows, 10 columns and 0 nonzeros
+Model has 1 quadratic objective term
+Coefficient statistics:
+  Matrix range     [0e+00, 0e+00]
+  Objective range  [0e+00, 0e+00]
+  QObjective range [2e+00, 2e+00]
+  Bounds range     [0e+00, 0e+00]
+  RHS range        [1e+00, 1e+00]
+Presolve time: 0.00s
+
+Barrier solved model in 0 iterations and 0.00 seconds
+Model is infeasible or unbounded
+Optimize a model with 1 rows, 10 columns and 0 nonzeros
+Model has 1 quadratic objective term
+Coefficient statistics:
+  Matrix range     [0e+00, 0e+00]
+  Objective range  [0e+00, 0e+00]
+  QObjective range [2e+00, 2e+00]
+  Bounds range     [0e+00, 0e+00]
+  RHS range        [1e+00, 1e+00]
+Presolve time: 0.00s
+
+Barrier solved model in 0 iterations and 0.00 seconds
+Model is infeasible or unbounded
+Optimize a model with 1 rows, 10 columns and 0 nonzeros
+Model has 1 quadratic objective term
+Coefficient statistics:
+  Matrix range     [0e+00, 0e+00]
+  Objective range  [0e+00, 0e+00]
+  QObjective range [2e+00, 2e+00]
+  Bounds range     [0e+00, 0e+00]
+  RHS range        [1e+00, 1e+00]
+Presolve time: 0.00s
+
+Barrier solved model in 0 iterations and 0.00 seconds
+Model is infeasible or unbounded
+Optimize a model with 1 rows, 10 columns and 0 nonzeros
+Model has 5 quadratic objective terms
+Coefficient statistics:
+  Matrix range     [0e+00, 0e+00]
+  Objective range  [0e+00, 0e+00]
+  QObjective range [2e+00, 2e+00]
+  Bounds range     [0e+00, 0e+00]
+  RHS range        [1e+00, 1e+00]
+Presolve time: 0.00s
+
+Barrier solved model in 0 iterations and 0.00 seconds
+Model is infeasible or unbounded
+Optimize a model with 1 rows, 10 columns and 0 nonzeros
+Model has 5 quadratic objective terms
+Coefficient statistics:
+  Matrix range     [0e+00, 0e+00]
+  Objective range  [0e+00, 0e+00]
+  QObjective range [2e+00, 2e+00]
+  Bounds range     [0e+00, 0e+00]
+  RHS range        [1e+00, 1e+00]
+Presolve time: 0.02s
+
+Barrier solved model in 0 iterations and 0.02 seconds
+Model is infeasible or unbounded
+Optimize a model with 0 rows, 10 columns and 0 nonzeros
+Model has 1 quadratic objective term
+Coefficient statistics:
+  Matrix range     [0e+00, 0e+00]
+  Objective range  [0e+00, 0e+00]
+  QObjective range [2e+00, 2e+00]
+  Bounds range     [0e+00, 0e+00]
+  RHS range        [0e+00, 0e+00]
+Presolve removed 0 rows and 10 columns
+Presolve time: 0.00s
+Presolve: All rows and columns removed
+
+Barrier solved model in 0 iterations and 0.00 seconds
+Optimal objective 0.00000000e+00
