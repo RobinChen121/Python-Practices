@@ -17,6 +17,12 @@ import numpy as np
 
 
 def subjective_probability(forecast_data, forecast_probability):
+    """
+
+    :param forecast_data: 预测的值
+    :param forecast_probability: 预测的值对应的概率
+    :return: 期望预测值
+    """
     forecast_num = np.dot(np.array(forecast_data), np.array(forecast_probability).T)
     return forecast_num
 

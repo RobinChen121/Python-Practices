@@ -17,6 +17,11 @@ import numpy as np
 
 
 def delphi(expert_data):
+    """
+
+    :param expert_data: 专家评分
+    :return: 专家评分的中位数以及上下四分位
+    """
     forecast_data = np.median(expert_data)
     upper_q = np.quantile(expert_data, 0.75)
     lower_q = np.quantile(expert_data, 0.25)
