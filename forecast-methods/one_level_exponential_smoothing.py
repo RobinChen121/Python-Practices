@@ -8,7 +8,8 @@ Python version: 3.7
 
 Email: 15011074486@163.com
 
-Description: python codes for one-level exponential smoothing forecasting method, 一次指数平滑的 python 代码
+Description: python codes for one-level exponential smoothing forecasting method, 一次指数平滑的 python 代码，
+             本方法的初始预测值取第一个历史数据
     
 """
 
