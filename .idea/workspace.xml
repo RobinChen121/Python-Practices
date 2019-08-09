@@ -57,7 +57,49 @@
       </list>
     </option>
   </component>
-  <component name="RunManager">
+  <component name="RunManager" selected="Python.grey_model">
+    <configuration name="grey_model" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <module name="Python-Practices" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/forecast-methods" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/forecast-methods/grey_model.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="multi_variable_linear_regression" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <module name="Python-Practices" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/forecast-methods" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/forecast-methods/multi_variable_linear_regression.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
     <configuration name="one_variable_linear_regression" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="Python-Practices" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -81,6 +123,8 @@
     </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.grey_model" />
+        <item itemvalue="Python.multi_variable_linear_regression" />
         <item itemvalue="Python.one_variable_linear_regression" />
       </list>
     </recent_temporary>
@@ -116,8 +160,13 @@
       <breakpoints>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/forecast-methods/one_variable_linear_regression.py</url>
-          <line>65</line>
+          <line>72</line>
           <option name="timeStamp" value="24" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/forecast-methods/multi_variable_linear_regression.py</url>
+          <line>60</line>
+          <option name="timeStamp" value="30" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

@@ -17,6 +17,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import statsmodels.api as sm
 
+plt.interactive(True)  # 防止调试不能出现交互式界面
 
 def linear_regression_by_formula(history_data):
     """
@@ -49,6 +50,12 @@ def linear_regression_by_formula(history_data):
 
 
 def linear_regression_by_package(history_data):
+    """
+    通过调用 statesmodels 包进行回归分析
+
+    :param history_data: 历史数据
+    :return: 回归包生成的各种结果
+    """
     T = len(history_data)
     x = np.arange(1, T + 1)
     y = history_data
@@ -92,6 +99,6 @@ forecast_value, error, a, b, summary, forecast_values = linear_regression_by_pac
 print('通过统计包的预测值为： %.2f' % forecast_value)
 print('通过统计包的预测方程为： y = %.2fx + %.2f' % (a, b))
 print('通过统计包的预测平均绝对差百分比为： %.2f%%' % (error * 100))
-print('预测报的回归结果：')
+print('预测包的回归结果：')
 print(summary)
 draw_picture(history_value, forecast_values)
