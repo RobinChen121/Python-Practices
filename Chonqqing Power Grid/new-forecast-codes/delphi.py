@@ -25,9 +25,9 @@ def delphi(expert_data):
     forecast_data = np.median(expert_data)
     upper_q = np.quantile(expert_data, 0.75)
     lower_q = np.quantile(expert_data, 0.25)
-    return forecast_data, lower_q, upper_q
+    # return forecast_data, lower_q, upper_q
+    return forecast_data
 
-
-expert_values = [28, 29, 24, 25, 27]
-forecast_value, __, __ = delphi(expert_values)
-print('德尔菲法的预测值为： %.2f' % forecast_value)
+# expert_values = [28, 29, 24, 25, 27]
+# forecast_value = delphi(expert_values)
+# print('德尔菲法的预测值为： %.2f' % forecast_value)

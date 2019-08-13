@@ -1,19 +1,17 @@
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
+
 """
-Created on Sun May 19 12:04:09 2019
 
-@author: zhen chen
+# @Time    : 2019/8/11 16:30
+# @Author  : Zhen Chen
+# @Email   : 15011074486@163.com
 
-MIT Licence.
+# Python version: 3.7
+# Description: 从 data-files 里面读取数据，整理合并数据，并生成到新的 excel 表格里面
 
-Python version: 3.7
-
-Email: robinchen@swu.edu.cn
-
-Description:  read the value data from several excels(new files)
-              从新数据文件中读取每一类项目中各采购品的数据，并输出到excel表里面去
-    
 """
+
 
 import pandas as pd
 import numpy as np
@@ -62,11 +60,11 @@ for source in sources:
     df_merge_14to18 = pd.merge(df_merge_14to17, df2018, on='物资品类', how='outer')
     df_merge_14to18 = df_merge_14to18.fillna(0)  # replace nan with 0
 
-    ### to 2017
+    # to 2017
     # filename = source + '初始数据14-17.xlsx'
     # df_merge_14to17.to_excel(filename, encoding = 'gbk')
 
-    ## add other data
+    # add other data
     direct = os.getcwd()  # get the current directory
     file_direct = os.path.join(direct, 'data-files')
     file_path_xls = os.path.join(file_direct, "14-18年电商数据（金额、数量）.xlsx")

@@ -11,6 +11,7 @@ Python version: 3.7
 Email: robinchen@swu.edu.cn
 
 Description:  read the quantity data from several excels(new files)
+              从新数据文件中读取每一年的销售量
     
 """
 
