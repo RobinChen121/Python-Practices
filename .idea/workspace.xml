@@ -41,14 +41,15 @@
     </option>
   </component>
   <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="D:\Users\chen_\git\Python-Practices\Chonqqing Power Grid" />
+    </key>
     <key name="MoveFile.RECENT_KEYS">
       <recent name="D:\Users\chen_\git\Python-Practices\Chonqqing Power Grid\new-forecast-codes" />
+      <recent name="D:\Users\chen_\git\Python-Practices\forecast-methods" />
       <recent name="D:\Users\chen_\git\Python-Practices\Chonqqing Power Grid\" />
       <recent name="D:\Users\chen_\git\Python-Practices\Chonqqing Power Grid" />
       <recent name="D:\Users\chen_\git\Python-Practices" />
-    </key>
-    <key name="CopyFile.RECENT_KEYS">
-      <recent name="D:\Users\chen_\git\Python-Practices\Chonqqing Power Grid" />
     </key>
   </component>
   <component name="RunDashboard">
@@ -63,7 +64,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Python.bp_network">
+  <component name="RunManager" selected="Python.holt_exponential_smoothing (1)">
     <configuration name="bp_network" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="Python-Practices" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -76,7 +77,7 @@
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/Chonqqing Power Grid/new-forecast-codes/bp_network.py" />
+      <option name="SCRIPT_NAME" value="D:\Users\chen_\git\Python-Practices\forecast-methods\bp_network.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -85,7 +86,7 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="grey_model (1)" type="PythonConfigurationType" factoryName="Python" temporary="true">
+    <configuration name="grey_model" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="Python-Practices" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -93,11 +94,32 @@
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/Chonqqing Power Grid/new-forecast-codes" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/forecast-methods" />
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/Chonqqing Power Grid/new-forecast-codes/grey_model.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/forecast-methods/grey_model.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="holt_exponential_smoothing (1)" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <module name="Python-Practices" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/forecast-methods" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/forecast-methods/holt_exponential_smoothing.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -118,7 +140,7 @@
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/Chonqqing Power Grid/new-forecast-codes/holt_exponential_smoothing.py" />
+      <option name="SCRIPT_NAME" value="D:\Users\chen_\git\Python-Practices\forecast-methods\holt_exponential_smoothing.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -127,7 +149,7 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="multi_variable_linear_regression" type="PythonConfigurationType" factoryName="Python" temporary="true">
+    <configuration name="one_variable_linear_regression" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="Python-Practices" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -135,32 +157,11 @@
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/Chonqqing Power Grid/new-forecast-codes" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/forecast-methods" />
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/Chonqqing Power Grid/new-forecast-codes/multi_variable_linear_regression.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
-    <configuration name="test" type="PythonConfigurationType" factoryName="Python" temporary="true">
-      <module name="Python-Practices" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/practises" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/practises/test.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/forecast-methods/one_variable_linear_regression.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -171,11 +172,11 @@
     </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.holt_exponential_smoothing (1)" />
+        <item itemvalue="Python.grey_model" />
+        <item itemvalue="Python.one_variable_linear_regression" />
         <item itemvalue="Python.bp_network" />
         <item itemvalue="Python.holt_exponential_smoothing" />
-        <item itemvalue="Python.multi_variable_linear_regression" />
-        <item itemvalue="Python.grey_model (1)" />
-        <item itemvalue="Python.test" />
       </list>
     </recent_temporary>
   </component>
@@ -209,7 +210,7 @@
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/Chonqqing Power Grid/new-forecast-codes/bp_network.py</url>
+          <url>file://$PROJECT_DIR$/forecast-methods/bp_network.py</url>
           <line>136</line>
           <option name="timeStamp" value="25" />
         </line-breakpoint>
