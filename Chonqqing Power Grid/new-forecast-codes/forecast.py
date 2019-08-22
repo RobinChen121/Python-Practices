@@ -17,8 +17,7 @@ import pandas as pd
 import numpy as np
 # import xlrd
 import os
-import delphi
-import hybrid_method
+import grey_model
 
 
 source = '运维及成本'  # 可以改成其他类别的名字
@@ -38,7 +37,7 @@ forecast_2018 = [0 for i in range(row_num)]   # an empty matrix of given size，
 # forcast_rule = ['' for i in range(row_num)]  # 记录预测方法
 
 for i in range(row_num):
-    forecast_2018[i] = delphi.delphi(history_data[i, :])
+    forecast_2018[i] = grey_model.gm(history_data[i, :]) # 选取预测方法
 
 
 # 应急 1.4，居配取 -0.7，零购 0，信息 0，农网取 0，配网取系数 0.9, 运维乘以 1.5，供电分离系数 4, 大修取 0，基建 0.3,营销 0.25，技改需要取负系数 -0.3
