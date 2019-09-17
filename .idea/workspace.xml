@@ -1,7 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="f99bd7d8-beb4-47cd-bc85-89bae93f688b" name="Default Changelist" comment="" />
+    <list default="true" id="f99bd7d8-beb4-47cd-bc85-89bae93f688b" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/scenario programming/scenario_reduction.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/Python-Practices.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/Python-Practices.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/inspectionProfiles/profiles_settings.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/profiles_settings.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Chonqqing Power Grid/.spyproject/workspace.ini" beforeDir="false" afterPath="$PROJECT_DIR$/Chonqqing Power Grid/.spyproject/workspace.ini" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Tinker Gui/.spyproject/codestyle.ini" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Tinker Gui/.spyproject/encoding.ini" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Tinker Gui/.spyproject/vcs.ini" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Tinker Gui/.spyproject/workspace.ini" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Tinker Gui/test_tkinter.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/statistics book/draw_bar.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/statistics book/draw_box.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/statistics book/draw_gdp.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/statistics book/draw_hist.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/statistics book/draw_pie.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/statistics book/draw_scatter. py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/statistics book/draw_sin.py" beforeDir="false" />
+    </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -26,9 +44,12 @@
     <option name="WARN_ABOUT_DETACHED_HEAD" value="false" />
   </component>
   <component name="ProjectId" id="1P5kK5cJsObC7srziGRXBj3LkGx" />
+  <component name="ProjectLevelVcsManager">
+    <ConfirmationsSetting value="2" id="Add" />
+  </component>
   <component name="PropertiesComponent">
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/Chonqqing Power Grid" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="restartRequiresConfirmation" value="false" />
     <property name="settings.editor.selected.configurable" value="fileTemplates" />
   </component>
@@ -42,11 +63,11 @@
   </component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="D:\Users\chen_\git\Python-Practices\statistics book" />
+      <recent name="D:\Users\chen_\git\Python-Practices\statistics book\draw_pics" />
+      <recent name="D:\Users\chen_\git\Python-Practices" />
       <recent name="D:\Users\chen_\git\Python-Practices\Chonqqing Power Grid\new-forecast-codes" />
       <recent name="D:\Users\chen_\git\Python-Practices\forecast-methods" />
-      <recent name="D:\Users\chen_\git\Python-Practices\Chonqqing Power Grid\" />
-      <recent name="D:\Users\chen_\git\Python-Practices\Chonqqing Power Grid" />
-      <recent name="D:\Users\chen_\git\Python-Practices" />
     </key>
     <key name="CopyFile.RECENT_KEYS">
       <recent name="D:\Users\chen_\git\Python-Practices\Chonqqing Power Grid" />
@@ -64,28 +85,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Python.draw_box">
-    <configuration name="draw_bar" type="PythonConfigurationType" factoryName="Python" temporary="true">
-      <module name="Python-Practices" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/statistics book" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/statistics book/draw_bar.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
+  <component name="RunManager" selected="Python.generate_DataFrame">
     <configuration name="draw_box" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="Python-Practices" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -98,7 +98,7 @@
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/statistics book/draw_box.py" />
+      <option name="SCRIPT_NAME" value="D:\Users\chen_\git\Python-Practices\statistics book\draw_pics\draw_box.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -119,7 +119,7 @@
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/statistics book/draw_hist.py" />
+      <option name="SCRIPT_NAME" value="D:\Users\chen_\git\Python-Practices\statistics book\draw_pics\draw_hist.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -128,7 +128,7 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="draw_pie" type="PythonConfigurationType" factoryName="Python" temporary="true">
+    <configuration name="draw_weibull" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="Python-Practices" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -136,11 +136,11 @@
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/statistics book" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/scenario programming" />
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/statistics book/draw_pie.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/scenario programming/draw_weibull.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -149,7 +149,7 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="scatter_diagram" type="PythonConfigurationType" factoryName="Python" temporary="true">
+    <configuration name="gamma_scenario" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="Python-Practices" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -157,11 +157,32 @@
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/statistics book" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/scenario programming" />
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="D:\Users\chen_\git\Python-Practices\statistics book\draw_scatter. py" />
+      <option name="SCRIPT_NAME" value="D:\Users\chen_\git\Python-Practices\scenario programming\gamma_fitter.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="generate_DataFrame" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <module name="Python-Practices" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/statistics book/numpy&amp;pandas_use" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/statistics book/numpy&amp;pandas_use/generate_DataFrame.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -172,11 +193,11 @@
     </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.generate_DataFrame" />
         <item itemvalue="Python.draw_box" />
-        <item itemvalue="Python.draw_pie" />
-        <item itemvalue="Python.draw_bar" />
+        <item itemvalue="Python.draw_weibull" />
+        <item itemvalue="Python.gamma_scenario" />
         <item itemvalue="Python.draw_hist" />
-        <item itemvalue="Python.scatter_diagram" />
       </list>
     </recent_temporary>
   </component>
@@ -220,34 +241,29 @@
           <option name="timeStamp" value="26" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/statistics book/draw_bar.py</url>
+          <url>file://$PROJECT_DIR$/statistics book/draw_pics/draw_bar.py</url>
           <line>20</line>
           <option name="timeStamp" value="27" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/statistics book/draw_hist.py</url>
+          <url>file://$PROJECT_DIR$/statistics book/draw_pics/draw_hist.py</url>
           <line>32</line>
           <option name="timeStamp" value="31" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/statistics book/draw_bar.py</url>
-          <line>65</line>
-          <option name="timeStamp" value="32" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/statistics book/draw_pie.py</url>
+          <url>file://$PROJECT_DIR$/statistics book/draw_pics/draw_pie.py</url>
           <line>44</line>
           <option name="timeStamp" value="33" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/statistics book/draw_pie.py</url>
+          <url>file://$PROJECT_DIR$/statistics book/draw_pics/draw_pie.py</url>
           <line>25</line>
           <option name="timeStamp" value="39" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/statistics book/draw_box.py</url>
-          <line>23</line>
-          <option name="timeStamp" value="41" />
+          <url>file://$PROJECT_DIR$/scenario programming/scenario_generation.py</url>
+          <line>30</line>
+          <option name="timeStamp" value="42" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
