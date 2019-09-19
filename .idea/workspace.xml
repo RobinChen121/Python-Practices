@@ -2,23 +2,10 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="f99bd7d8-beb4-47cd-bc85-89bae93f688b" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/scenario programming/scenario_reduction.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/Python-Practices.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/Python-Practices.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/inspectionProfiles/profiles_settings.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/profiles_settings.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/statistics book/numpy&amp;pandas_use/read_csv_url.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/dictionaries/chen_.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dictionaries/chen_.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Chonqqing Power Grid/.spyproject/workspace.ini" beforeDir="false" afterPath="$PROJECT_DIR$/Chonqqing Power Grid/.spyproject/workspace.ini" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Tinker Gui/.spyproject/codestyle.ini" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Tinker Gui/.spyproject/encoding.ini" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Tinker Gui/.spyproject/vcs.ini" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Tinker Gui/.spyproject/workspace.ini" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Tinker Gui/test_tkinter.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/statistics book/draw_bar.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/statistics book/draw_box.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/statistics book/draw_gdp.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/statistics book/draw_hist.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/statistics book/draw_pie.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/statistics book/draw_scatter. py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/statistics book/draw_sin.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/scenario programming/scenario_reduction.py" beforeDir="false" afterPath="$PROJECT_DIR$/scenario programming/scenario_reduction.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -107,27 +94,6 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="draw_hist" type="PythonConfigurationType" factoryName="Python" temporary="true">
-      <module name="Python-Practices" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/statistics book" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="D:\Users\chen_\git\Python-Practices\statistics book\draw_pics\draw_hist.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
     <configuration name="draw_weibull" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="Python-Practices" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -191,13 +157,34 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
+    <configuration name="read_csv_url" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <module name="Python-Practices" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/statistics book/numpy&amp;pandas_use" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/statistics book/numpy&amp;pandas_use/read_csv_url.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
     <recent_temporary>
       <list>
         <item itemvalue="Python.generate_DataFrame" />
+        <item itemvalue="Python.read_csv_url" />
         <item itemvalue="Python.draw_box" />
         <item itemvalue="Python.draw_weibull" />
         <item itemvalue="Python.gamma_scenario" />
-        <item itemvalue="Python.draw_hist" />
       </list>
     </recent_temporary>
   </component>
