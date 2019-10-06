@@ -2,10 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="f99bd7d8-beb4-47cd-bc85-89bae93f688b" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/statistics book/numpy&amp;pandas_use/read_csv_url.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/dictionaries/chen_.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dictionaries/chen_.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scenario programming/scenario_reduction.py" beforeDir="false" afterPath="$PROJECT_DIR$/scenario programming/scenario_reduction.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/statistics book/numpy&amp;pandas_use/generate_DataFrame.py" beforeDir="false" afterPath="$PROJECT_DIR$/statistics book/numpy&amp;pandas_use/generate_DataFrame.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -38,7 +36,7 @@
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="restartRequiresConfirmation" value="false" />
-    <property name="settings.editor.selected.configurable" value="fileTemplates" />
+    <property name="settings.editor.selected.configurable" value="preferences.keymap" />
   </component>
   <component name="PyConsoleOptionsProvider">
     <option name="myPythonConsoleState">

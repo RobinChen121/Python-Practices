@@ -16,4 +16,4 @@ import numpy as np
 
 df = pd.DataFrame(np.array([[85, 68, 90], [82, 63, 88], [84, 90, 78]]), columns=['统计学', '高数', '英语'], index=['张三', '李四', '王五'])
 print(df)
-print(df.sample(2))
+print(df['英语'])
