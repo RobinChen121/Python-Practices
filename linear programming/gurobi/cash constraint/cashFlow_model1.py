@@ -30,7 +30,7 @@ holdCost = 1
 K = np.ones(T) * 100 # overhead costs for each period
 alpha = 0 # revenue sharing rate
 
-try :
+try:
     # create a Gurobi model
     m = Model("mip_cash_constraint_model1")
     

@@ -1,9 +1,36 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+  <component name="AnalysisUIOptions">
+    <option name="SCOPE_TYPE" value="3" />
+  </component>
   <component name="ChangeListManager">
     <list default="true" id="f99bd7d8-beb4-47cd-bc85-89bae93f688b" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/crawler/crawler_ecommerce/online_saling.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/gurobi.log" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/scenario programming in SCF/mip_deterministic_noFinance.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/statistics book/test.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/test.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/Python-Practices.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/Python-Practices.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/statistics book/numpy&amp;pandas_use/generate_DataFrame.py" beforeDir="false" afterPath="$PROJECT_DIR$/statistics book/numpy&amp;pandas_use/generate_DataFrame.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Chonqqing Power Grid/.spyproject/workspace.ini" beforeDir="false" afterPath="$PROJECT_DIR$/Chonqqing Power Grid/.spyproject/workspace.ini" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/gurobi examples/gurobi.log" beforeDir="false" afterPath="$PROJECT_DIR$/gurobi examples/gurobi.log" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/linear programming/gurobi/cash constraint/cashFlow_model1.py" beforeDir="false" afterPath="$PROJECT_DIR$/linear programming/gurobi/cash constraint/cashFlow_model1.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/linear programming/gurobi/cash constraint/gurobi.log" beforeDir="false" afterPath="$PROJECT_DIR$/linear programming/gurobi/cash constraint/gurobi.log" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scenario programming/demand_fit.py" beforeDir="false" afterPath="$PROJECT_DIR$/scenario programming in SCF/demand_fit.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scenario programming/draw_weibull.py" beforeDir="false" afterPath="$PROJECT_DIR$/scenario programming in SCF/draw_weibull.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scenario programming/gamma_fitter.py" beforeDir="false" afterPath="$PROJECT_DIR$/scenario programming in SCF/gamma_fitter.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scenario programming/scenario_generation.py" beforeDir="false" afterPath="$PROJECT_DIR$/scenario programming in SCF/scenario_generation.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scenario programming/scenario_reduction.py" beforeDir="false" afterPath="$PROJECT_DIR$/scenario programming in SCF/scenario_reduction.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/statistics book/draw_pics/draw_bar.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/statistics book/draw_pics/draw_box.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/statistics book/draw_pics/draw_gdp.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/statistics book/draw_pics/draw_hist.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/statistics book/draw_pics/draw_pie.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/statistics book/draw_pics/draw_scatter. py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/statistics book/draw_pics/draw_sin.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/statistics book/numpy&amp;pandas_use/generate_DataFrame.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/statistics book/numpy&amp;pandas_use/marks.xlsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/statistics book/numpy&amp;pandas_use/read_csv_url.py" beforeDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -33,14 +60,17 @@
     <ConfirmationsSetting value="2" id="Add" />
   </component>
   <component name="PropertiesComponent">
+    <property name="ASKED_ADD_EXTERNAL_FILES" value="true" />
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="restartRequiresConfirmation" value="false" />
-    <property name="settings.editor.selected.configurable" value="preferences.keymap" />
+    <property name="run.code.analysis.last.selected.profile" value="aDefault" />
+    <property name="settings.editor.selected.configurable" value="preferences.editor" />
   </component>
   <component name="PyConsoleOptionsProvider">
     <option name="myPythonConsoleState">
       <console-settings module-name="Python-Practices" is-module-sdk="true">
+        <option name="useSoftWraps" value="true" />
         <option name="myUseModuleSdk" value="true" />
         <option name="myModuleName" value="Python-Practices" />
       </console-settings>
@@ -70,8 +100,92 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Python.generate_DataFrame">
-    <configuration name="draw_box" type="PythonConfigurationType" factoryName="Python" temporary="true">
+  <component name="RunManager" selected="Python.online_saling">
+    <configuration name="cashFlow_model1" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <module name="Python-Practices" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/linear programming/gurobi/cash constraint" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/linear programming/gurobi/cash constraint/cashFlow_model1.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="crawler_maoyan" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <module name="Python-Practices" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/crawler/crawler_movie" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/crawler/crawler_movie/crawler_maoyan.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="mip1" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <module name="Python-Practices" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/gurobi examples" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/gurobi examples/mip1.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="online_saling" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <module name="Python-Practices" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/crawler/crawler_ecommerce" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/crawler/crawler_ecommerce/online_saling.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="test" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="Python-Practices" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -83,91 +197,7 @@
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="D:\Users\chen_\git\Python-Practices\statistics book\draw_pics\draw_box.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
-    <configuration name="draw_weibull" type="PythonConfigurationType" factoryName="Python" temporary="true">
-      <module name="Python-Practices" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/scenario programming" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/scenario programming/draw_weibull.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
-    <configuration name="gamma_scenario" type="PythonConfigurationType" factoryName="Python" temporary="true">
-      <module name="Python-Practices" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/scenario programming" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="D:\Users\chen_\git\Python-Practices\scenario programming\gamma_fitter.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
-    <configuration name="generate_DataFrame" type="PythonConfigurationType" factoryName="Python" temporary="true">
-      <module name="Python-Practices" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/statistics book/numpy&amp;pandas_use" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/statistics book/numpy&amp;pandas_use/generate_DataFrame.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
-    <configuration name="read_csv_url" type="PythonConfigurationType" factoryName="Python" temporary="true">
-      <module name="Python-Practices" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/statistics book/numpy&amp;pandas_use" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/statistics book/numpy&amp;pandas_use/read_csv_url.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/statistics book/test.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -178,11 +208,11 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Python.generate_DataFrame" />
-        <item itemvalue="Python.read_csv_url" />
-        <item itemvalue="Python.draw_box" />
-        <item itemvalue="Python.draw_weibull" />
-        <item itemvalue="Python.gamma_scenario" />
+        <item itemvalue="Python.online_saling" />
+        <item itemvalue="Python.crawler_maoyan" />
+        <item itemvalue="Python.test" />
+        <item itemvalue="Python.cashFlow_model1" />
+        <item itemvalue="Python.mip1" />
       </list>
     </recent_temporary>
   </component>
@@ -211,6 +241,9 @@
         </entry>
       </map>
     </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -246,9 +279,24 @@
           <option name="timeStamp" value="39" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/scenario programming/scenario_generation.py</url>
+          <url>file://$PROJECT_DIR$/scenario programming in SCF/scenario_generation.py</url>
           <line>30</line>
           <option name="timeStamp" value="42" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/statistics book/test.py</url>
+          <line>18</line>
+          <option name="timeStamp" value="43" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/crawler/crawler_movie/crawler_maoyan.py</url>
+          <line>58</line>
+          <option name="timeStamp" value="53" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/crawler/crawler_ecommerce/online_saling.py</url>
+          <line>37</line>
+          <option name="timeStamp" value="55" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
