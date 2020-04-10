@@ -7,7 +7,8 @@
 # @Author  : Zhen Chen
 
 # Python version: 3.7
-# Description:  fit the best distribution given a list of history data
+# Description:  fit the best distribution given a list of history data, 
+it seems gamma distribution is appropriate for one tmall sales data
 
 """
 
@@ -29,10 +30,13 @@ history_data = [141, 159, 166, 172, 177, 182, 188, 196, 203, 214,
                 156, 165, 172, 176, 181, 188, 195, 201, 211, 234,
                 158, 165, 172, 176, 182, 188, 195, 202, 213, 237]
 
+histroy_data = [90, 150, 610, 240, 310, 170,  40, 110,  60,  50,  80, 270]
+
 print(len(history_data))
 
-f = Fitter(history_data, distributions=['lognorm', 'johnsonsu', 'genlogistic', 'gamma', 'weibull'])
+f = Fitter(history_data, distributions=['lognorm', 'norm', 'beta', 'gamma', 'weibull_min'])
 f.fit()
+print(f.fitted_param)
 
 # may take some time since by default, all distributions are tried
 # but you call manually provide a smaller set of distributions
