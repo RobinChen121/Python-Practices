@@ -56,7 +56,7 @@ def GetInfo(num):
         }
         #解析JS文件内容，用了正则表达式
         content = requests.get(COMMENT_PAGE_URL[i],headers=headers).text
-        nk = re.findall('"displayUserNick":"(.*?)"', content)
+        nk = re.findall('"nickname":"(.*?)"', content) # 评论者账号
         # 如果网页为空，表示评论数没那么多，则跳过循环
         if len(nk) == 0:
             break
@@ -64,9 +64,9 @@ def GetInfo(num):
             time.sleep(random.random())  # 每抓一个网页休息0-1秒，防止被反爬措施封锁 IP
         nickname.extend(nk) # extend 添加一串数
         #print(nk)
-        auctionSku.extend(re.findall('"auctionSku":"(.*?)"', content))
-        ratecontent.extend(re.findall('"rateContent":"(.*?)"', content))
-        ratedate.extend(re.findall('"rateDate":"(.*?)"', content))
+        auctionSku.extend(re.findall('"productColor:":"(.*?)"', content)) # 产品型号
+        ratecontent.extend(re.findall('"content":"(.*?)"', content))
+        ratedate.extend(re.findall('"creationTime":"(.*?)"', content))
     #将数据写入csv文件中
     address = 'E:\爬虫练习\天猫评论\商品' + str(ITEM_ID) + '.csv'
     f = open(address, 'a+', encoding='utf-8-sig')
@@ -80,6 +80,6 @@ def GetInfo(num):
 
 #主函数
 if __name__ == "__main__":
-    Page_Num = 30  # 最大支持 30*20 个评论
+    Page_Num = 30  # 最大支持 Page_Num*20 个评论
     Get_Url(Page_Num)
     GetInfo(Page_Num)
