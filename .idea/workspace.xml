@@ -5,10 +5,19 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="f99bd7d8-beb4-47cd-bc85-89bae93f688b" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/crawler/crawler_ecommerce/jd.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/draw-pictures/world_map.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/Python-Practices.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/Python-Practices.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Chonqqing Power Grid/.spyproject/workspace.ini" beforeDir="false" afterPath="$PROJECT_DIR$/Chonqqing Power Grid/.spyproject/workspace.ini" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/crawler/crawler_ecommerce/jd.py" beforeDir="false" afterPath="$PROJECT_DIR$/crawler/crawler_ecommerce/jd.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/crawler/crawler_ecommerce/tmall.py" beforeDir="false" afterPath="$PROJECT_DIR$/crawler/crawler_ecommerce/tmall.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/draw-pictures/china_map.html" beforeDir="false" afterPath="$PROJECT_DIR$/draw-pictures/china_map.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/draw-pictures/chongqing.html" beforeDir="false" afterPath="$PROJECT_DIR$/draw-pictures/chongqing.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/draw-pictures/example.html" beforeDir="false" afterPath="$PROJECT_DIR$/draw-pictures/example.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/draw-pictures/render.html" beforeDir="false" afterPath="$PROJECT_DIR$/draw-pictures/render.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scenario programming in SCF/craw_demand.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/scenario programming in SCF/demand_fit.py" beforeDir="false" afterPath="$PROJECT_DIR$/scenario programming in SCF/demand_fit.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -70,7 +79,91 @@
       <recent name="D:\Users\chen_\git\Python-Practices\Chonqqing Power Grid\new-forecast-codes" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.jd">
+  <component name="RunManager" selected="Python.daw_pyechartsMap2">
+    <configuration name="craw_demand_clean" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="Python-Practices" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/scenario programming in SCF" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/scenario programming in SCF/craw_demand_clean.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="daw_pyechartsMap2" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="Python-Practices" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/draw-pictures" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/draw-pictures/daw_pyechartsMap2.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="draw_normal" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="Python-Practices" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/draw-pictures" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/draw-pictures/draw_normal.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="draw_pyecharts_useage" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="Python-Practices" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/draw-pictures" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/draw-pictures/draw_pyecharts_useage.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
     <configuration name="jd" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="Python-Practices" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -92,97 +185,13 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="macro_eco_data" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
-      <module name="Python-Practices" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/crawler/tushare" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/crawler/tushare/macro_eco_data.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
-    <configuration name="main" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
-      <module name="Python-Practices" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/crawler/stockholm-master/stockholm" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/crawler/stockholm-master/stockholm/main.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
-    <configuration name="onlin_guwen" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
-      <module name="Python-Practices" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/crawler/crawler_ecommerce" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/crawler/crawler_ecommerce/onlin_guwen.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
-    <configuration name="test" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
-      <module name="Python-Practices" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/crawler/yfinance" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/crawler/yfinance/test.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.daw_pyechartsMap2" />
+        <item itemvalue="Python.draw_pyecharts_useage" />
+        <item itemvalue="Python.draw_normal" />
+        <item itemvalue="Python.craw_demand_clean" />
         <item itemvalue="Python.jd" />
-        <item itemvalue="Python.macro_eco_data" />
-        <item itemvalue="Python.test" />
-        <item itemvalue="Python.main" />
-        <item itemvalue="Python.onlin_guwen" />
       </list>
     </recent_temporary>
   </component>
@@ -220,10 +229,10 @@
       <screen x="0" y="0" width="1536" height="824" />
     </state>
     <state x="-286" y="330" key="#xdebugger.XInspectDialog/0.0.1536.824@0.0.1536.824" timestamp="1586524994932" />
-    <state x="532" y="203" key="#xdebugger.evaluate" timestamp="1586579058730">
+    <state x="532" y="203" key="#xdebugger.evaluate" timestamp="1586679894504">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
-    <state x="532" y="203" key="#xdebugger.evaluate/0.0.1536.824@0.0.1536.824" timestamp="1586579058730" />
+    <state x="532" y="203" key="#xdebugger.evaluate/0.0.1536.824@0.0.1536.824" timestamp="1586679894504" />
     <state width="466" height="466" key="DebuggerActiveHint" timestamp="1586527664018">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
@@ -232,42 +241,42 @@
       <screen x="0" y="0" width="1536" height="824" />
     </state>
     <state x="671" y="340" key="FileChooserDialogImpl/0.0.1536.824@0.0.1536.824" timestamp="1585920212663" />
-    <state width="1515" height="257" key="GridCell.Tab.0.bottom" timestamp="1586583275817">
+    <state width="1515" height="206" key="GridCell.Tab.0.bottom" timestamp="1586852497837">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
-    <state width="1515" height="257" key="GridCell.Tab.0.bottom/0.0.1536.824@0.0.1536.824" timestamp="1586583275817" />
-    <state width="1515" height="257" key="GridCell.Tab.0.center" timestamp="1586583275816">
+    <state width="1515" height="206" key="GridCell.Tab.0.bottom/0.0.1536.824@0.0.1536.824" timestamp="1586852497837" />
+    <state width="1515" height="206" key="GridCell.Tab.0.center" timestamp="1586852497837">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
-    <state width="1515" height="257" key="GridCell.Tab.0.center/0.0.1536.824@0.0.1536.824" timestamp="1586583275816" />
-    <state width="1515" height="257" key="GridCell.Tab.0.left" timestamp="1586583275816">
+    <state width="1515" height="206" key="GridCell.Tab.0.center/0.0.1536.824@0.0.1536.824" timestamp="1586852497837" />
+    <state width="1515" height="206" key="GridCell.Tab.0.left" timestamp="1586852497837">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
-    <state width="1515" height="257" key="GridCell.Tab.0.left/0.0.1536.824@0.0.1536.824" timestamp="1586583275816" />
-    <state width="1515" height="257" key="GridCell.Tab.0.right" timestamp="1586583275816">
+    <state width="1515" height="206" key="GridCell.Tab.0.left/0.0.1536.824@0.0.1536.824" timestamp="1586852497837" />
+    <state width="1515" height="206" key="GridCell.Tab.0.right" timestamp="1586852497837">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
-    <state width="1515" height="257" key="GridCell.Tab.0.right/0.0.1536.824@0.0.1536.824" timestamp="1586583275816" />
-    <state width="1515" height="200" key="GridCell.Tab.1.bottom" timestamp="1586583275798">
+    <state width="1515" height="206" key="GridCell.Tab.0.right/0.0.1536.824@0.0.1536.824" timestamp="1586852497837" />
+    <state width="1515" height="253" key="GridCell.Tab.1.bottom" timestamp="1586700915481">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
-    <state width="1515" height="200" key="GridCell.Tab.1.bottom/0.0.1536.824@0.0.1536.824" timestamp="1586583275798" />
-    <state width="1515" height="200" key="GridCell.Tab.1.center" timestamp="1586583275798">
+    <state width="1515" height="253" key="GridCell.Tab.1.bottom/0.0.1536.824@0.0.1536.824" timestamp="1586700915481" />
+    <state width="1515" height="253" key="GridCell.Tab.1.center" timestamp="1586700915481">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
-    <state width="1515" height="200" key="GridCell.Tab.1.center/0.0.1536.824@0.0.1536.824" timestamp="1586583275798" />
-    <state width="1515" height="200" key="GridCell.Tab.1.left" timestamp="1586583275798">
+    <state width="1515" height="253" key="GridCell.Tab.1.center/0.0.1536.824@0.0.1536.824" timestamp="1586700915481" />
+    <state width="1515" height="253" key="GridCell.Tab.1.left" timestamp="1586700915481">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
-    <state width="1515" height="200" key="GridCell.Tab.1.left/0.0.1536.824@0.0.1536.824" timestamp="1586583275798" />
-    <state width="1515" height="200" key="GridCell.Tab.1.right" timestamp="1586583275798">
+    <state width="1515" height="253" key="GridCell.Tab.1.left/0.0.1536.824@0.0.1536.824" timestamp="1586700915481" />
+    <state width="1515" height="253" key="GridCell.Tab.1.right" timestamp="1586700915481">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
-    <state width="1515" height="200" key="GridCell.Tab.1.right/0.0.1536.824@0.0.1536.824" timestamp="1586583275798" />
-    <state x="272" y="57" key="SettingsEditor" timestamp="1585400856453">
+    <state width="1515" height="253" key="GridCell.Tab.1.right/0.0.1536.824@0.0.1536.824" timestamp="1586700915481" />
+    <state x="272" y="57" key="SettingsEditor" timestamp="1586851559556">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
-    <state x="272" y="57" key="SettingsEditor/0.0.1536.824@0.0.1536.824" timestamp="1585400856453" />
+    <state x="272" y="57" key="SettingsEditor/0.0.1536.824@0.0.1536.824" timestamp="1586851559556" />
     <state width="634" height="602" key="XDebugger.FullValuePopup" timestamp="1586582693280">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
@@ -276,14 +285,14 @@
       <screen x="0" y="0" width="1536" height="824" />
     </state>
     <state x="246" y="120" key="com.intellij.execution.console.ConsoleHistoryController$MyBrowseAction$1/0.0.1536.824@0.0.1536.824" timestamp="1586580522879" />
-    <state x="461" y="239" key="com.intellij.ide.util.TipDialog" timestamp="1586573616773">
+    <state x="461" y="239" key="com.intellij.ide.util.TipDialog" timestamp="1586851299075">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
-    <state x="461" y="239" key="com.intellij.ide.util.TipDialog/0.0.1536.824@0.0.1536.824" timestamp="1586573616773" />
-    <state x="332" y="151" key="com.intellij.xdebugger.impl.breakpoints.ui.BreakpointsDialogFactory$2" timestamp="1585394633953">
+    <state x="461" y="239" key="com.intellij.ide.util.TipDialog/0.0.1536.824@0.0.1536.824" timestamp="1586851299075" />
+    <state x="332" y="151" key="com.intellij.xdebugger.impl.breakpoints.ui.BreakpointsDialogFactory$2" timestamp="1586679831665">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
-    <state x="332" y="151" key="com.intellij.xdebugger.impl.breakpoints.ui.BreakpointsDialogFactory$2/0.0.1536.824@0.0.1536.824" timestamp="1585394633953" />
+    <state x="332" y="151" key="com.intellij.xdebugger.impl.breakpoints.ui.BreakpointsDialogFactory$2/0.0.1536.824@0.0.1536.824" timestamp="1586679831665" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -380,8 +389,13 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/crawler/crawler_ecommerce/jd.py</url>
-          <line>37</line>
+          <line>38</line>
           <option name="timeStamp" value="101" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/scenario programming in SCF/craw_demand_clean.py</url>
+          <line>36</line>
+          <option name="timeStamp" value="110" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

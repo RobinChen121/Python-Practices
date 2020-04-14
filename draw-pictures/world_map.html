@@ -4,15 +4,15 @@
     <meta charset="UTF-8">
     <title>Awesome-pyecharts</title>
             <script type="text/javascript" src="https://assets.pyecharts.org/assets/echarts.min.js"></script>
-        <script type="text/javascript" src="https://assets.pyecharts.org/assets/maps/china.js"></script>
+        <script type="text/javascript" src="https://assets.pyecharts.org/assets/maps/world.js"></script>
 
 </head>
 <body>
-    <div id="ec5ebfedfbee424bb5466e3e13ed392c" style="width:900px; height:500px;"></div>
+    <div id="b5c8b36302604ace93308a2aafea307a" style="width:900px; height:500px;"></div>
     <script>
-        var chart_ec5ebfedfbee424bb5466e3e13ed392c = echarts.init(
-            document.getElementById('ec5ebfedfbee424bb5466e3e13ed392c'), 'white', {renderer: 'canvas'});
-        var option_ec5ebfedfbee424bb5466e3e13ed392c = {
+        var chart_b5c8b36302604ace93308a2aafea307a = echarts.init(
+            document.getElementById('b5c8b36302604ace93308a2aafea307a'), 'white', {renderer: 'canvas'});
+        var option_b5c8b36302604ace93308a2aafea307a = {
     "color": [
         "#c23531",
         "#2f4554",
@@ -42,54 +42,60 @@
     "series": [
         {
             "type": "map",
-            "name": "\u5546\u5bb6A",
+            "name": "\u4e2d\u56fd\u5730\u56fe",
             "label": {
-                "show": true,
+                "show": false,
                 "position": "top",
                 "fontSize": 12
             },
-            "mapType": "china",
+            "mapType": "world",
             "data": [
                 {
-                    "name": "\u5e7f\u4e1c",
-                    "value": 98
+                    "name": "China",
+                    "value": 31
                 },
                 {
-                    "name": "\u5317\u4eac",
-                    "value": 29
+                    "name": "Canada",
+                    "value": 108
                 },
                 {
-                    "name": "\u4e0a\u6d77",
-                    "value": 139
+                    "name": "Brazil",
+                    "value": 97
                 },
                 {
-                    "name": "\u6c5f\u897f",
+                    "name": "Russia",
+                    "value": 20
+                },
+                {
+                    "name": "United States",
+                    "value": 26
+                },
+                {
+                    "name": "Africa",
                     "value": 45
                 },
                 {
-                    "name": "\u6e56\u5357",
-                    "value": 68
-                },
-                {
-                    "name": "\u6d59\u6c5f",
-                    "value": 83
-                },
-                {
-                    "name": "\u6c5f\u82cf",
-                    "value": 138
+                    "name": "Germany",
+                    "value": 91
                 }
             ],
             "roam": true,
-            "showLegendSymbol": true
+            "showLegendSymbol": true,
+            "rippleEffect": {
+                "show": true,
+                "brushType": "stroke",
+                "scale": 2.5,
+                "period": 4
+            }
         }
     ],
     "legend": [
         {
             "data": [
-                "\u5546\u5bb6A"
+                "\u4e2d\u56fd\u5730\u56fe"
             ],
             "selected": {
-                "\u5546\u5bb6A": true
+                "\u4e2d\u56fd\u5730\u56fe": true
             },
             "show": true
         }
@@ -108,11 +114,11 @@
     },
     "title": [
         {
-            "text": "Map-\u57fa\u672c\u793a\u4f8b"
+            "text": "Map-\u4e16\u754c\u5730\u56fe"
         }
     ],
     "visualMap": {
-        "type": "piecewise",
+        "type": "continuous",
         "min": 0,
         "max": 200,
         "inRange": {
@@ -128,7 +134,7 @@
         "showLabel": true
     }
 };
-        chart_ec5ebfedfbee424bb5466e3e13ed392c.setOption(option_ec5ebfedfbee424bb5466e3e13ed392c);
+        chart_b5c8b36302604ace93308a2aafea307a.setOption(option_b5c8b36302604ace93308a2aafea307a);
     </script>
 </body>
 </html>

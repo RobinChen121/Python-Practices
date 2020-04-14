@@ -22,12 +22,13 @@ from bs4 import BeautifulSoup
 
 # 宏变量存储目标js的URL列表，全局变量
 COMMENT_PAGE_URL = []
-ITEM_ID = 4571299  # 商品代码
+ITEM_ID = 4571301  # 商品代码 4676059 为钛度毁灭者RGB鼠标， 4571301 为黑色磨砂鼠标
 
 
 # 生成链接列表
 def get_Url(num):
-    urlFront = 'https://club.jd.com/comment/productPageComments.action?callback=fetchJSON_comment98&productId='
+    #productPageComments
+    urlFront = 'https://club.jd.com/comment/skuProductPageComments.action?callback=fetchJSON_comment98&productId='
     urlMid = '&score=0&sortType=6&page='
     urlRear = '&pageSize=10&isShadowSku=0&rid=0&fold=1'
     for i in range(0, num):
@@ -72,7 +73,7 @@ def getInfo(num):
         else:
             time.sleep(random.random())  # 每抓一个网页休息0-1秒，防止被反爬措施封锁 IP
             if i % 10 == 0:
-                time.sleep(2)  # 每抓 10页休息两秒
+                time.sleep(1)  # 每抓 10页休息两秒
         for result in results:
             rateContent.append(result[0])
             rateDate.append(result[1])
@@ -87,7 +88,7 @@ def getInfo(num):
     for i in list(range(len(score))):
         text = ','.join((score[i], rateDate[i], auctionSku[i], rateContent[i])) + '\n'
         f.write(text + ' ')
-        print(i + 1, ":写入成功")
+        #print(i + 1, ":写入成功")
     f.close()
 
 
