@@ -7,13 +7,10 @@
 
 """
 
-wage = int(input("请输入你的月薪: "))
-print("")
-if wage <= 3000:
-    print("贫困户")
-    if 2000 <= wage < 3000:
-        print("贫困户中的一般贫")
-    if wage <= 1000:
-        print("贫困户中的特贫")
-else:
-    print("不是贫困户")
+def changeSet(mySet):
+    mySet.update([1, 2, 3])
+    return mySet
+
+setTry = {10, 20, 30}
+changeSet(setTry)
+print(setTry)  # 结果是 [10, 20, 30, 1, 2, 3]

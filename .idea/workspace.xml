@@ -5,10 +5,15 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="f99bd7d8-beb4-47cd-bc85-89bae93f688b" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/scenario programming in SCF/gamma_para.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/draw-pictures/chongqing.html" beforeDir="false" afterPath="$PROJECT_DIR$/draw-pictures/chongqing.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/draw-pictures/example.html" beforeDir="false" afterPath="$PROJECT_DIR$/draw-pictures/example.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scenario programming in SCF/demand_fit.py" beforeDir="false" afterPath="$PROJECT_DIR$/scenario programming in SCF/demand_fit.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Chonqqing Power Grid/.spyproject/workspace.ini" beforeDir="false" afterPath="$PROJECT_DIR$/Chonqqing Power Grid/.spyproject/workspace.ini" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/crawler/crawler_ecommerce/jd.py" beforeDir="false" afterPath="$PROJECT_DIR$/crawler/crawler_ecommerce/jd.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/crawler/crawler_ecommerce/tmall.py" beforeDir="false" afterPath="$PROJECT_DIR$/crawler/crawler_ecommerce/tmall.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scenario programming in SCF/craw_demand_clean.py" beforeDir="false" afterPath="$PROJECT_DIR$/scenario programming in SCF/craw_demand_clean.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scenario programming in SCF/gamma_fitter.py" beforeDir="false" afterPath="$PROJECT_DIR$/scenario programming in SCF/gamma_fitter.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/scenario programming in SCF/scenario_generation.py" beforeDir="false" afterPath="$PROJECT_DIR$/scenario programming in SCF/scenario_generation.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/statistics book/test.py" beforeDir="false" afterPath="$PROJECT_DIR$/statistics book/test.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -276,10 +281,10 @@
       <screen x="0" y="0" width="1536" height="824" />
     </state>
     <state x="246" y="120" key="com.intellij.execution.console.ConsoleHistoryController$MyBrowseAction$1/0.0.1536.824@0.0.1536.824" timestamp="1586580522879" />
-    <state x="461" y="239" key="com.intellij.ide.util.TipDialog" timestamp="1586940862239">
+    <state x="461" y="239" key="com.intellij.ide.util.TipDialog" timestamp="1589029195242">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
-    <state x="461" y="239" key="com.intellij.ide.util.TipDialog/0.0.1536.824@0.0.1536.824" timestamp="1586940862239" />
+    <state x="461" y="239" key="com.intellij.ide.util.TipDialog/0.0.1536.824@0.0.1536.824" timestamp="1589029195242" />
     <state x="332" y="151" key="com.intellij.xdebugger.impl.breakpoints.ui.BreakpointsDialogFactory$2" timestamp="1586679831665">
       <screen x="0" y="0" width="1536" height="824" />
     </state>
@@ -320,13 +325,8 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/scenario programming in SCF/scenario_generation.py</url>
-          <line>30</line>
+          <line>40</line>
           <option name="timeStamp" value="42" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/statistics book/test.py</url>
-          <line>18</line>
-          <option name="timeStamp" value="43" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/crawler/crawler_movie/crawler_maoyan.py</url>
@@ -380,7 +380,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/crawler/crawler_ecommerce/jd.py</url>
-          <line>38</line>
+          <line>40</line>
           <option name="timeStamp" value="101" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">

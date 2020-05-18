@@ -22,10 +22,13 @@ import csv
 import re
 import time
 import random
+import datetime
 
 #宏变量存储目标js的URL列表，全局变量
 COMMENT_PAGE_URL = []
-ITEM_ID = 591120591607 # 商品代码
+ITEM_ID = 591120591607 # 商品代码， 鼠标
+#ITEM_ID = 588953969527 # 商品为暗鸦之眼pro 二合一 耳机
+ITEM_ID = 587914055973 # 防水键盘104
 
 #生成链接列表
 def Get_Url(num):
@@ -69,7 +72,7 @@ def GetInfo(num):
         ratecontent.extend(re.findall('"rateContent":"(.*?)"', content))
         rateDate.extend(re.findall('"rateDate":"(.*?)"', content))
     #将数据写入csv文件中
-    address = 'E:\爬虫练习\天猫评论\商品' + str(ITEM_ID) + '.csv'
+    address = 'E:\爬虫练习\天猫评论\商品' + str(ITEM_ID) + '-' + str(datetime.date.today()) + '.csv'
     f = open(address, 'a+', encoding='utf-8-sig')
     # 首先读取列标题
     f.write(','.join(('nickname', 'rateDate', 'auctionSku', 'ratecontent')) +'\n') # 用逗号分隔，csv读取时视作不同的单元格

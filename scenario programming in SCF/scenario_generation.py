@@ -10,12 +10,15 @@
 # Description: general scenarios for a given demand distribution based on the
                methods proposed by Heitsch & Romisch in "Scenario reduction algorithms in stochastic
                programming" (2013) of Computational Optimization and Application
+               
+               results not good by scipy, may not be feasible
 
 """
 
 from scipy.optimize import minimize
 from scipy.optimize import Bounds
 import numpy as np
+from scipy.optimize import LinearConstraint
 
 
 def objective(x):
@@ -26,19 +29,30 @@ def objective(x):
     sample_variance = 0
     for i in range(T):
         sample_variance += x[T + i]*(x[i] - sample_mean)**2
+    sample_skew = 0;
+    for i in range(T):
+        sample_skew += x[T + i]*(x[i] - sample_mean)**3 / sample_variance **1.5
+    sample_kurt = 0
+    for i in range(T):
+        sample_kurt += x[T + i]*(x[i] - sample_mean)**4 / sample_variance **2
 
-    obj = 0.5 * (sample_mean - mean[0])**2 + 0.5 * (sample_variance - variance[0])**2
+    obj = 0.25 * (sample_mean - mean)**2 + 0.25 * (sample_variance - variance)**2 + \
+             0.25 * (sample_skew - skew)**2 + 0.25 * (sample_kurt - kurt)**2
     return obj
 
 
 # three demands, all follow Weibull distibution
-global mean
-mean = [467.25, 33.82, 149.7]
+global mean 
 global variance
-variance = [99.422, 175.4231, 4877.8]
-skew = [1.06, 0.25, 0.47]
-kurt = [4.35, 2.78, 2.98]
+global skew
+global kurt
+mean = 82.14
+variance = 5173.98
+skew = 2.06
+kurt = 4.39
 
-x0 = [3, 6, 9, 0.3, 0.3, 0.6]
-res = minimize(objective, x0, method='nelder-mead', options={'xtol': 1e-8, 'disp': True})
+x0 = [mean/5, mean/5, mean/5, mean/5, mean/5, 0.2, 0.2, 0.2, 0.2, 0.2]
+linear_constraint = LinearConstraint([0, 0, 0, 0, 0, 1, 1, 1, 1, 1], 1, 1)
+bounds = [(1, 10000), (1, 10000), (1, 10000), (1, 10000), (1, 10000), (0.1, 0.35), (0.1, 0.35), (0.1, 0.35), (0.1, 0.35), (0.1, 0.35)]
+res = minimize(objective, x0, method='nelder-mead', constraints = linear_constraint, bounds = bounds, options={'xtol': 1e-8, 'disp': True})
 print(res.x)

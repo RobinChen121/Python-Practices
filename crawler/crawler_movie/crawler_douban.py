@@ -151,7 +151,7 @@ for i in range(0, 10):
     if len(quote_list) == 249: # 第250部电影没有代表性评论，单独处理。the 250th movie has no quote, so add a blank one
         quote_list.append(' ') 
     
-file = xlwt.Workbook()
+file = xlwt.Workbook()  # 写在 excel 里面可能有问题，估计 xlwt 包的原因，用 pandas 估计会好些
 
 table = file.add_sheet('sheet1', cell_overwrite_ok = True)
 
@@ -176,10 +176,11 @@ for i in range(len(nation_list)):
     table.write(i + 1, 6, star_list[i])
     table.write(i + 1, 7, reviewNum_list[i])
     table.write(i + 1, 8, category_list[i])
-    table.write(i + 1, 9, quote_list[i])
+    if i < len(quote_list): # 防止空值
+        table.write(i + 1, 9, quote_list[i])
 
  # 导出到 xls 文件里，save to xls file    
-file.save('豆瓣 top 250 电影爬虫抓取.xls')
+file.save('豆瓣 top 250 电影爬虫抓取.csv')
 
 # 分析电影来源地，analysis nations
 locations = []
@@ -253,7 +254,7 @@ plt.show()
 jieba.add_word('久石让')
 jieba.add_word('谢耳朵')
 # 一些语气词和没有意义的词
-del_words = ['的', ' ', '人', '就是', '一个', '被', 
+del_words = ['的', ' ', '人', '就是', '一个', '被', '电影', '我们',
              '不是', '也', '最', '了', '才', '给', '要', 
              '就', '让', '在', '都', '是', '与', '和', 
              '不', '有', '我', '你', '能', '每个',  '不会', '中', '没有',

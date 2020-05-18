@@ -19,10 +19,12 @@ import time
 import random
 import math
 from bs4 import BeautifulSoup
+import datetime
 
 # 宏变量存储目标js的URL列表，全局变量
 COMMENT_PAGE_URL = []
 ITEM_ID = 4571301  # 商品代码 4676059 为钛度毁灭者RGB鼠标， 4571301 为黑色磨砂鼠标
+ITEM_ID = 100003986945 # 商品代码 100003986945 为暗鸦之眼3.5usb 耳机
 
 
 # 生成链接列表
@@ -81,10 +83,10 @@ def getInfo(num):
             auctionSku.append(result[3])
 
     # 将数据写入csv文件中
-    address = 'E:\爬虫练习\京东评论\商品' + str(ITEM_ID) + '.csv'
+    address = 'E:\爬虫练习\京东评论\商品' + str(ITEM_ID) + '-' + str(datetime.date.today()) + '.csv'
     f = open(address, 'a+', encoding='utf-8-sig')
     # 首先读取列标题
-    f.write(','.join(('score', 'rateDate', 'auctionSku', 'rateContent')) + '\n')  # 用逗号分隔，csv读取时视作不同的单元格
+    f.write(','.join(['score', 'rateDate', 'auctionSku', 'rateContent']) + '\n')  # 用逗号分隔，csv读取时视作不同的单元格
     for i in list(range(len(score))):
         text = ','.join((score[i], rateDate[i], auctionSku[i], rateContent[i])) + '\n'
         f.write(text + ' ')

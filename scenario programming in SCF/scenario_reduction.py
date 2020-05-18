@@ -5,27 +5,53 @@
 6  # @Desc  :  reduce the number of scenarios based on the paper: A two stage stochastic programming model for 
                lot-sizing and scheduling under uncertainty (2016) in CIE.
                
-               demand follow non-stationary Weibull distribution.
-               single-item, three periods:
-               mean = [467, 34, 150]
-               variance = [99422, 175, 4878]
-               skew = [1.06, 0.25, 0.47]
-               kurt = [4.35 2.78 2.98]
+               demand follow non-stationary gamma distribution.
+               3-item, 6 periods:
+                Distribution   & Gamma & Gamma & Gamma  \\
+                Scale   & 62.99 & 199.34&124.05\\
+                Shape &1.30 & 1.99 &1.46 \\
+                Mean &82.14 & 397.33 &181.54 \\
+                Variance &5173.98 &79206.22 &22520.71 \\
+                Skewness &2.06 &0.41 &1.67 \\
+                Kurtosis &7.39 & 1.78 &5.37\\
                
+        scenario tree 1: possibility and demand realizations
+                    0.105  & 25  & 290  & 109  \\ 
+                    0.341  & 58  & 365  & 90  \\ 
+                    0.330  & 62  & 134  & 132  \\ 
+                    0.106  & 289  & 789  & 273  \\ 
+                    0.119  & 74  & 965  & 564  \\ 
+                    
+           in each period there are five scenarios obtained by matlab
+           
+           matrix size is too large, not suitable to compute in python
              
 """
 
-# in each period there are five scenarios obtained by Lingo
 
-demand1_scenarios = [469.0991593, 509.3416195, 78.44273046, 1248.680927, 521.1852173]
-demand1_probs = [0.259515204, 0.291146581, 0.2483824, 0.1, 0.100955815]
 
-demand2_scenarios = [34.12093184, 40.90651414, 40.80139453, 61.31685471, 15.8583253]
-demand2_probs = [0.35, 0.145936376, 0.140957808, 0.100715976, 0.26238984]
+import numpy as np
+import math
 
-demand3_scenarios = [116.5985386, 190.6280441, 31.61344284, 103.5003829, 298.9006897]
-demand3_probs = [0.278719043, 0.35, 0.1, 0.171266148, 0.100014808]
+demand_scenarios = [[25, 290, 109], [58, 365, 90], [62, 134, 132], [289, 789, 273], [74, 965, 564]]
+demand_probs = [0.105, 0.341, 0.33, 0.106, 0.119]
 
 scenario_num_need = 10  # scenario number after reducing
 
 
+item_num = 3
+horizon_length = 6
+demand_relization_num = len(demand_scenarios)
+scenario_num = demand_relization_num ** horizon_length
+scenario_index = np.zeros((scenario_num, demand_relization_num))
+index = 0
+for i1 in range(horizon_length):
+    for i2 in range(horizon_length):
+        for i3 in range(horizon_length):
+            for i4 in range(horizon_length):
+                for i5 in range(horizon_length):
+                    for i6 in range(horizon_length):
+                        scenario_index[index, :] = [i1, i2, i3, i4, i5, i6]
+                        index = index + 1
+        
+        
