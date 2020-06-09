@@ -23,5 +23,8 @@ ax = sns.heatmap(df, cmap='GnBu', annot=True)
 ax.set_xlabel('R', fontsize=15, labelpad = 15)
 ax.set_ylabel('x', fontsize=15, labelpad = 15)
 
+df2 = pd.read_excel(r'D:\Users\chen_\git\Statistics-book\datas\data-scatter.xlsx')
+df3 = df2.pivot(index = '产量', columns = '温度', values = '降雨量')
+
 
 

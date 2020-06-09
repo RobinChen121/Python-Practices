@@ -5,30 +5,31 @@
 # @Date  : 2019/11/6
 # @Desc  : the mip model for no finance situation when demand are deterministic
 
+price: mouse 89, headset 159, keyboard 239.
+mean demand: 181.54, 397.33, 82.14
+vari cost: 70, 130, 200
+overhead cost: 20,000
+
 """
 
 import numpy as np
 from gurobipy import *
-#from gurobipy import Model
-#from gurobipy import GurobiError
+from gurobipy import Model
+from gurobipy import GurobiError
 
 # parameter values
-ini_cash = 10000
-ini_I1 = 0
-ini_I2 = 0
+ini_cash = 100000
+ini_I = [0] #[0, 0, 0]
+prices = [89] #[89, 159, 239]
+vari_costs = [70] #[70, 130, 200]
+overhead_cost = 20000
 
-price1 = 50
-price2 = 20
-vari_cost1 = 25
-vari_cost2 = 10
-overhead_cost = 500
-
-T = 24
-delay_length = 2
+T = 1
+N = len(ini_I)
+delay_length = 0
 discount_rate = 0.01
 
-demand1 = 30 * np.ones((1, T))
-demand2 = 50 * np.ones((1, T))
+mean_demands = [181.54]  # [181.54, 397.33, 82.14]
 
 
 try:
@@ -36,23 +37,67 @@ try:
     m = Model("self-cash-mip")
 
     # Create variables
-    Q1 = {} # ordering quantity in each period for product 1
-    Q2 = {} # ordering quantity in each period for product 2
-    I1 = {} # end-of-period inventory in each period for product 1
-    I2 = {} # end-of-period inventory in each period for product 2
-    C = {} # end-of-period cash in each period
-    for i in range(T):
-        Q1[i] = m.addVar(vtype=GRB.CONTINUOUS)
-        Q2[i] = m.addVar(vtype=GRB.CONTINUOUS)
-        I1[i] = m.addVar(vtype=GRB.CONTINUOUS)
-        I2[i] = m.addVar(vtype=GRB.CONTINUOUS)
-        C[i] = m.addVar(vtype=GRB.CONTINUOUS)
-
+    Q = [[m.addVar(vtype = GRB.CONTINUOUS) for t in range(T)] for n in range(N)] # ordering quantity in each period for each product
+    I = [[m.addVar(vtype = GRB.CONTINUOUS) for t in range(T)] for n in range(N)] # end-of-period inventory in each period for each product
+    C = [m.addVar(vtype = GRB.CONTINUOUS) for t in range(T)] # end-of-period cash in each period
+    w = [[m.addVar(vtype = GRB.CONTINUOUS) for t in range(T)] for n in range(N)] # lost-sale quantity
+    R = [[m.addVar(vtype = GRB.CONTINUOUS) for t in range(T)] for n in range(N)] # revenue for each product in each period
+    
     # objective function
-
-
-
-
+    
+    # inventory flow
+    for n in range(N):
+        for t in range(T):
+            if t == 0:
+                I[n][t] == ini_I[n] + Q[n][t] + w[n][t] - mean_demands[n]
+            else:
+                I[n][t] == I[n][t - 1] + Q[n][t] + w[n][t] - mean_demands[n]
+                
+    # revenue
+    for n in range(N):
+        for t in range(T):
+            if t <= delay_length:
+                R[n][t] = 0
+            else:
+                R[n][t] = prices[n] * (mean_demands[n] - w[n][t - delay_length])
+        
+    # cash flow
+    for t in range(T):
+        if t == 0:
+            C[t] = ini_cash + sum([R[n][t] for n in range(N)]) - sum([vari_costs[n] * Q[n][t] for n in range(N)]) - overhead_cost
+        else:
+            C[t] = C[t - 1] + sum([R[n][t] for n in range(N)]) - sum([vari_costs[n] * Q[n][t] for n in range(N)]) - overhead_cost
+            
+    discounted_cash = 0
+    for n in range(N):
+        for k in range(delay_length):
+            discounted_cash += R[n][T-1-k] / (1 + discount_rate)**(delay_length - k)    
+    final_cash = C[T - 1] + discounted_cash
+     
+    # Set objective
+    m.setObjective(final_cash, GRB.MAXIMIZE)
+    
+    # Add constraints
+    # cash constraint
+    for t in range(T):
+        m.addConstr(C[t] >= 0) # cash constaints
+       
+    # lost sale constraint
+    for n in range(N):
+        for t in range(T):
+            m.addConstr(w[n][t] <= mean_demands[n])
+      
+    
+    # solve
+    m.optimize()
+    
+    # output
+#    for v in m.getVars():
+#        print('%s %g' % (v.varName, v.x))
+    
+    print('Obj: %g' % m.objVal)
+    
+    
 except GurobiError as e:
     print('Error code ' + str(e.errno) + ": " + str(e))
     

@@ -18,7 +18,7 @@ try:
     m = Model("mip1")
 
     # Create variables
-    x = m.addVar(vtype=GRB.BINARY, name="x")
+    x = m.addVar(vtype=GRB.BINARY, name="x") # default bounds for continuous type is [0, infinite]
     y = m.addVar(vtype=GRB.BINARY, name="y")
     z = m.addVar(vtype=GRB.BINARY, name="z")
 
