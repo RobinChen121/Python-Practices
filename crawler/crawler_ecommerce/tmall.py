@@ -27,8 +27,10 @@ import datetime
 #宏变量存储目标js的URL列表，全局变量
 COMMENT_PAGE_URL = []
 ITEM_ID = 591120591607 # 商品代码， 鼠标
-#ITEM_ID = 588953969527 # 商品为暗鸦之眼pro 二合一 耳机
-ITEM_ID = 587914055973 # 防水键盘104
+ITEM_ID = 588953969527 # 商品为暗鸦之眼pro 二合一 耳机
+#ITEM_ID = 587914055973 # 防水键盘104
+#ITEM_ID = 588788936455 # 黑色标准版鼠标
+
 
 #生成链接列表
 def Get_Url(num):
