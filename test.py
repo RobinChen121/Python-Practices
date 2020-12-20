@@ -1,34 +1,26 @@
-import numpy as np
 import matplotlib.pyplot as plt
-plt.rcParams['font.sans-serif'] = 'SimHei' ## 设置中文显示
+import numpy as np
+
+# 这两行代码解决 plt 中文显示的问题
+plt.rcParams['font.sans-serif'] = ['SimHei']
 plt.rcParams['axes.unicode_minus'] = False
-data = np.load(\
-               'E:\讲课\Python数据分析\《Python数据分析与应用》源数据和代码\Python数据分析与应用\第3章\任务程序\data\国民经济核算季度数据.npz',\
-               allow_pickle=True)
-name = data['columns']## 提取其中的columns数组，视为数据的标签
-values = data['values']## 提取其中的values数组，数据的存在位置
-temp = values.tolist
-p = plt.figure(figsize=(12,12)) ##设置画布
 
-import pandas as pd
-df= pd.DataFrame.from_dict({item: data[item] for item in data.files}, orient='index')
+# 输入统计数据
+waters = ('碳酸饮料', '绿茶', '矿泉水', '果汁', '其他')
+buy_number_male = [6, 7, 6, 1, 2]
+buy_number_female = [9, 4, 4, 5, 6]
 
-## 子图2
-ax2 = p.add_subplot(2,1,2)
-plt.scatter(values[:,0],values[:,6], marker='o',c='r')## 绘制散点
-plt.scatter(values[:,0],values[:,7], marker='D',c='b')## 绘制散点
-plt.scatter(values[:,0],values[:,8], marker='v',c='y')## 绘制散点
-plt.scatter(values[:,0],values[:,9], marker='8',c='g')## 绘制散点
-plt.scatter(values[:,0],values[:,10], marker='p',c='c')## 绘制散点
-plt.scatter(values[:,0],values[:,11], marker='+',c='m')## 绘制散点
-plt.scatter(values[:,0],values[:,12], marker='s',c='k')## 绘制散点
-## 绘制散点
-plt.scatter(values[:,0],values[:,13], marker='*',c='purple')
-## 绘制散点
-plt.scatter(values[:,0],values[:,14], marker='d',c='brown')
-plt.legend(['农业','工业','建筑','批发','交通',
-        '餐饮','金融','房地产','其他']) 
-plt.xlabel('年份')## 添加横轴标签
-plt.ylabel('生产总值（亿元）')## 添加纵轴标签
-plt.xticks(range(0,70,4),values[range(0,70,4),1],rotation=45)
+bar_width = 0.3  # 条形宽度
+index_male = np.arange(len(waters))  # 男生条形图的横坐标
+index_female = index_male + bar_width  # 女生条形图的横坐标
+
+# 使用两次 bar 函数画出两组条形图
+plt.bar(index_male, height=buy_number_male, width=bar_width, color='b', label='男性')
+plt.bar(index_female, height=buy_number_female, width=bar_width, color='g', label='女性')
+
+plt.legend()  # 显示图例
+plt.xticks(index_male + bar_width/2, waters)  # 让横坐标轴刻度显示 waters 里的饮用水， index_male + bar_width/2 为横坐标轴刻度的位置
+plt.ylabel('购买量')  # 纵坐标轴标题
+plt.title('购买饮用水情况的调查结果')  # 图形标题
+
 plt.show()

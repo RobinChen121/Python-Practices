@@ -20,79 +20,7 @@ from gurobipy import GRB
 from gurobipy import Model
 import time
 import product
-
-
-# check values for another scenario tree
-def check_value(Q, I, delta, g):
-    global ini_I
-    global prices
-    global vari_costs
-    global overhead_cost, scenarioLink, scenario_permulations
-    global ini_cash, K, S, N
-    global T, booming_demand, delay_length, discount_rate, r0, M
-
-    # 不同情境树中，用不到具体的需求数值了，只用到了情境概率
-
-    # tree 1
-    demand_scenarios = [[[134, 17, 40], [246, 62, 57], [84, 58, 28]],
-                        [[345, 269, 481], [341, 302, 611], [156, 123, 184]]]
-    demand_possibility = [[0.103, 0.383, 0.514], [0.185, 0.556, 0.259]]
-
-    # tree 2
-    #    demand_scenarios = [[[133,30,49], [246,58,57], [87, 39, 20]], [[291,468,268], [597,322,293], [123, 124,177]]]
-    #    demand_possibility = [[0.102, 0.598, 0.3], [0.286, 0.318, 0.396]]
-
-    C = [[0 for s in range(S)] for t in range(T)]  # LinExpr, end-of-period cash in each period
-    R = [[[0 for s in range(S)] for n in range(N)] for t in
-         range(T + delay_length)]  # LinExpr, revenue for each product in each period
-
-    for s in range(S):
-        index = scenario_permulations[s][0]
-        scenario_probs[s] = demand_possibility[booming_demand[0]][index]
-        for i in range(1, len(scenario_permulations[s])):
-            index = scenario_permulations[s][i]
-            index2 = booming_demand[i]
-            scenario_probs[s] = scenario_probs[s] * demand_possibility[index2][index]
-
-    for s in range(S):
-        for n in range(N):
-            for t in range(T + delay_length):
-                if t < delay_length:
-                    R[t][n][s] = prices[n] * g[t][n][s]
-                else:
-                    if t == delay_length:
-                        R[t][n][s] = prices[n] * (ini_I[n] + Q[t - delay_length][n][s] - I[t - delay_length][n][s] -
-                                                  g[t - delay_length][n][s] - g[t - delay_length][n][s] * (
-                                                              1 + ro) ** delay_length)
-                    elif t < T:
-                        R[t][n][s] = prices[n] * (
-                                    g[t][n][s] + I[t - delay_length - 1][n][s] + Q[t - delay_length][n][s] -
-                                    I[t - delay_length][n][s] - g[t - delay_length][n][s] - g[t - delay_length][n][
-                                        s] * (1 + ro) ** delay_length)
-                    else:
-                        R[t][n][s] = prices[n] * (
-                                    I[t - delay_length - 1][n][s] + Q[t - delay_length][n][s] - I[t - delay_length][n][
-                                s] - g[t - delay_length][n][s] - g[t - delay_length][n][s] * (1 + ro) ** delay_length)
-
-    revenue_total = [[0 for t in range(T)] for s in range(S)]
-    vari_costs_total = [[0 for t in range(T)] for s in range(S)]
-    for s in range(S):
-        for t in range(T):
-            revenue_total[s][t] = sum([R[t][n][s] for n in range(N)])
-            vari_costs_total[s][t] = sum([vari_costs[n] * Q[t][n][s] for n in range(N)])
-            if t == 0:
-                C[t][s] = ini_cash + revenue_total[s][t] - vari_costs_total[s][t] - overhead_cost[t]
-            else:
-                C[t][s] = C[t - 1][s] + revenue_total[s][t] - vari_costs_total[s][t] - overhead_cost[t]
-
-    discounted_cash = [0 for s in range(S)]
-    for s in range(S):
-        for n in range(N):
-            for k in range(delay_length):
-                discounted_cash[s] = discounted_cash[s] + R[T + k][n][s] / (1 + discount_rate) ** (k + 1)
-    final_cash = sum([scenario_probs[s] * (C[T - 1][s] + discounted_cash[s]) for s in range(S)])
-    return final_cash
-
+import check_outsample
 
 
 # parameter values
@@ -101,27 +29,28 @@ ini_I = [0, 0, 0]
 # vari_costs = [70, 60, 60]
 prices = [189, 144, 239]
 vari_costs = [140, 70, 150]
-ini_cash = 20000
+ini_cash = 15000
 
-T = 2
-overhead_cost = [2000, 2000, 2000, 2000, 2000, 2000]
+T = 6
+overhead_cost = [2000 for t in range(T)]
 booming_demand = [0, 0, 0, 0, 1, 1]
 N = len(ini_I)
-delay_length = 1
+delay_length = 2
 discount_rate = 0.01
 B = 10000  # total quantity of order loan
-ro = 0.015  # loan rate
+r0 = 0.015  # loan rate
 M = 10000
 
 # # tree 3
-demand_scenarios = [[[47, 58, 133], [57, 58, 246], [44, 25, 86]], [[249, 314, 472], [316, 296, 596], [125, 178, 123]]]
-demand_possibility = [[0.38, 0.517, 0.103], [0.327, 0.385, 0.289]]
-# tree 2
-# demand_scenarios = [[[133,30,49], [246,58,57], [87, 39, 20]], [[291,468,268], [597,322,293], [123, 124,177]]]
-# demand_possibility = [[0.102, 0.598, 0.3], [0.286, 0.318, 0.396]]
-# tree 1
-demand_scenarios = [[[134, 17, 40], [246, 62, 57], [84, 58, 28]], [[345, 269, 481], [341, 302, 611], [156, 123, 184]]]
-demand_possibility = [[0.103, 0.383, 0.514], [0.185, 0.556, 0.259]]
+demand_scenarios = [[[134, 28, 46], [246, 58, 58], [87, 24, 43]],
+                    [[481, 317, 259], [608, 311, 309], [134, 181, 121]]]
+demand_possibility = [[0.103, 0.476, 0.421], [0.266, 0.34, 0.394]]
+# # #tree 2
+# demand_scenarios = [[[134, 32, 54], [246, 59, 56], [88, 37, 17]], [[345, 269, 481], [341, 302, 611], [156, 123, 184]]]
+# demand_possibility = [[0.102, 0.694, 0.204], [0.185, 0.556, 0.259]]
+# # # # tree 1
+demand_scenarios = [[[133, 30, 49], [246, 58, 57], [87, 39, 20]], [[291, 468, 268], [597, 322, 293], [123, 124, 177]]]
+demand_possibility = [[0.1, 0.598, 0.302], [0.286, 0.318, 0.396]]
 
 K = len(demand_possibility[0])  # scenario number in a period
 S = K ** T  # total scenario number
@@ -130,7 +59,7 @@ S = K ** T  # total scenario number
 scenarioLink = [[[0 for s in range(S)] for s in range(S)] for t in range(T)]
 for t in range(T):
     slices = round(S * (1 / K) ** (t + 1))  # number of scenario in a slice
-    slice_num = round(K ** (t + 1))  # totoal number of slices
+    slice_num = round(K ** (t + 1))  # total number of slices
     for i in range(slice_num):
         for j in range(slices * i, slices * (i + 1)):
             for k in range(slices * i, slices * (i + 1)):
@@ -176,16 +105,15 @@ try:
                     if t == delay_length:
                         R[t][n][s] = prices[n] * (ini_I[n] + Q[t - delay_length][n][s] - I[t - delay_length][n][s] -
                                                   g[t - delay_length][n][s] - g[t - delay_length][n][s] * (
-                                                              1 + ro) ** delay_length)
+                                                          1 + r0) ** delay_length)
                     elif t < T:
                         R[t][n][s] = prices[n] * (
-                                    g[t][n][s] + I[t - delay_length - 1][n][s] + Q[t - delay_length][n][s] -
-                                    I[t - delay_length][n][s] - g[t - delay_length][n][s] - g[t - delay_length][n][
-                                        s] * (1 + ro) ** delay_length)
+                                g[t][n][s] + I[t - delay_length - 1][n][s] + Q[t - delay_length][n][s] -
+                                I[t - delay_length][n][s] - g[t - delay_length][n][s] - g[t - delay_length][n][s] * (1 + r0) ** delay_length)
                     else:
                         R[t][n][s] = prices[n] * (
-                                    I[t - delay_length - 1][n][s] + Q[t - delay_length][n][s] - I[t - delay_length][n][
-                                s] - g[t - delay_length][n][s] - g[t - delay_length][n][s] * (1 + ro) ** delay_length)
+                                I[t - delay_length - 1][n][s] + Q[t - delay_length][n][s] - I[t - delay_length][n][
+                            s] - g[t - delay_length][n][s] - g[t - delay_length][n][s] * (1 + r0) ** delay_length)
 
     m.update()
     # cash flow   
@@ -232,22 +160,22 @@ try:
                 index = scenario_permulations[s][t]
                 index2 = booming_demand[t]
                 if t == 0:
-                    m.addConstr(I[t][n][s] <= ini_I[n] + Q[t][n][s] - demand_scenarios[index2][index][n] + (
-                                1 - delta[t][n][s]) * M)
-                    m.addConstr(I[t][n][s] >= ini_I[n] + Q[t][n][s] - demand_scenarios[index2][index][n] - (
-                                1 - delta[t][n][s]) * M)
-                    m.addConstr(ini_I[n] + Q[t][n][s] - demand_scenarios[index2][index][n] <= delta[t][n][s] * M - 0.1)
-                    m.addConstr(ini_I[n] + Q[t][n][s] >= demand_scenarios[index2][index][n] - (1 - delta[t][n][s]) * M)
+                    m.addConstr(I[t][n][s] <= ini_I[n] + Q[t][n][s] - demand_scenarios[index2][n][index] + (
+                            1 - delta[t][n][s]) * M)
+                    m.addConstr(I[t][n][s] >= ini_I[n] + Q[t][n][s] - demand_scenarios[index2][n][index] - (
+                            1 - delta[t][n][s]) * M)
+                    m.addConstr(ini_I[n] + Q[t][n][s] - demand_scenarios[index2][n][index] <= delta[t][n][s] * M - 0.1)
+                    m.addConstr(ini_I[n] + Q[t][n][s] >= demand_scenarios[index2][n][index] - (1 - delta[t][n][s]) * M)
                 else:
                     try:
-                        m.addConstr(I[t][n][s] <= I[t - 1][n][s] + Q[t][n][s] - demand_scenarios[index2][index][n] + (
-                                    1 - delta[t][n][s]) * M)
-                        m.addConstr(I[t][n][s] >= I[t - 1][n][s] + Q[t][n][s] - demand_scenarios[index2][index][n] - (
-                                    1 - delta[t][n][s]) * M)
-                        m.addConstr(I[t - 1][n][s] + Q[t][n][s] - demand_scenarios[index2][index][n] <= delta[t][n][
+                        m.addConstr(I[t][n][s] <= I[t - 1][n][s] + Q[t][n][s] - demand_scenarios[index2][n][index] + (
+                                1 - delta[t][n][s]) * M)
+                        m.addConstr(I[t][n][s] >= I[t - 1][n][s] + Q[t][n][s] - demand_scenarios[index2][n][index] - (
+                                1 - delta[t][n][s]) * M)
+                        m.addConstr(I[t - 1][n][s] + Q[t][n][s] - demand_scenarios[index2][n][index] <= delta[t][n][
                             s] * M - 0.1)
-                        m.addConstr(I[t - 1][n][s] + Q[t][n][s] >= demand_scenarios[index2][index][n] - (
-                                    1 - delta[t][n][s]) * M)
+                        m.addConstr(I[t - 1][n][s] + Q[t][n][s] - demand_scenarios[index2][n][index] >= -(1 -delta[t][n][
+                            s]) * M + 0.1)
                     except:
                         print(n)
                 m.addConstr(I[t][n][s] <= delta[t][n][s] * M)
@@ -259,11 +187,9 @@ try:
     for s in range(S):
         for t in range(T):
             if t == 0:
-                m.addConstr(ini_cash >= sum([vari_costs[n] * Q[t][n][s] for n in range(N)]) + overhead_cost[
-                    t])  # cash constaints
+                m.addConstr(ini_cash >= sum([vari_costs[n] * Q[t][n][s] for n in range(N)]) + overhead_cost[t])  # cash constaints
             else:
-                m.addConstr(C[t - 1][s] >= sum([vari_costs[n] * Q[t][n][s] for n in range(N)]) + overhead_cost[
-                    t])  # cash constaints
+                m.addConstr(C[t - 1][s] >= sum([vari_costs[n] * Q[t][n][s] for n in range(N)]) + overhead_cost[t])  # cash constaints
 
     # non-negavtivety of I_t
     for s in range(S):
@@ -289,7 +215,7 @@ try:
 
     # non-anticipativity 
     # s1 与 s 的顺序没啥影响       
-    # no need for I, R, C      
+    # no need for R, C
     for t in range(T):
         for n in range(N):
             for s in range(S):
@@ -299,6 +225,8 @@ try:
                             I[t][n][s] * sum([scenarioLink[t][s1][s] * scenario_probs[s1] for s1 in range(S)]))
                 m.addConstr(sum([scenarioLink[t][s1][s] * scenario_probs[s1] * delta[t][n][s1] for s1 in range(S)]) == \
                             delta[t][n][s] * sum([scenarioLink[t][s1][s] * scenario_probs[s1] for s1 in range(S)]))
+                m.addConstr(sum([scenarioLink[t][s1][s] * scenario_probs[s1] * g[t][n][s1] for s1 in range(S)]) == \
+                            g[t][n][s] * sum([scenarioLink[t][s1][s] * scenario_probs[s1] for s1 in range(S)]))
 
     # solve
     m.update()
@@ -430,5 +358,8 @@ toc = time.time()
 time_pass = toc - tic
 print('running time is %.2f' % time_pass)
 
-#    out_sample_value = check_value(Qv, Iv, deltav, gv)
-#    print('out of sample value is %.2f' % out_sample_value)
+out_sample_value = check_outsample.check_value(Qv, Iv, deltav, gv, ini_I, prices, vari_costs, overhead_cost, scenarioLink, scenario_permulations,\
+                ini_cash, K, S, N, T, booming_demand, delay_length, discount_rate, r0, M, scenario_probs)
+print('out of sample value is %.2f' % out_sample_value)
+
+

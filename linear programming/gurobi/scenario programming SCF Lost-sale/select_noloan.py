@@ -1,17 +1,12 @@
-# -*- coding: utf-8 -*-
+""" 
+# @File  : select-noloan.py
+# @Author: Chen Zhen
+# python version: 3.7
+# @Date  : 2020/11/19
+# @Desc  : 
+
 """
-Created on Sun Oct 11 16:51:58 2020
 
-@author: zhen chen
-
-MIT Licence.
-
-Python version: 3.7
-
-
-Description: solve scenario-oderLoan problem for selected scenarios
-    
-"""
 
 import product
 import math
@@ -103,9 +98,6 @@ def select_mip(scenario_selected, demand_scenarios, demand_possibility, booming_
              range(T)]  # end-of-period inventory in each period for each product
         delta = [[[m.addVar(vtype=GRB.BINARY) for s in range(M)] for n in range(N)] for t in
                  range(T)]  # whether lost-sale not occurs
-        g = [[[m.addVar(vtype=GRB.CONTINUOUS) for s in range(M)] for n in range(N)] for t in
-              range(T)]  # order-loan quantity in each period for each product
-
 
         C = [[LinExpr() for s in range(M)] for t in range(T)]  # LinExpr, end-of-period cash in each period
         R = [[[LinExpr() for s in range(M)] for n in range(N)] for t in
@@ -116,24 +108,16 @@ def select_mip(scenario_selected, demand_scenarios, demand_possibility, booming_
             for n in range(N):
                 for t in range(T + delay_length):
                     if t < delay_length:
-                        R[t][n][s] = prices[n] * g[t][n][s]
+                        R[t][n][s] = LinExpr(0)
                     else:
                         if t == delay_length:
-                            R[t][n][s] = prices[n] * (ini_I[n] + Q[t - delay_length][n][s] - I[t - delay_length][n][s] -
-                                                      g[t - delay_length][n][s] - g[t - delay_length][n][s] * (
-                                                              1 + ro) ** delay_length)
-                        elif t < T:
-                            R[t][n][s] = prices[n] * (
-                                    g[t][n][s] + I[t - delay_length - 1][n][s] + Q[t - delay_length][n][s] -
-                                    I[t - delay_length][n][s] - g[t - delay_length][n][s] - g[t - delay_length][n][
-                                        s] * (1 + ro) ** delay_length)
+                            R[t][n][s] = prices[n] * (ini_I[n] + Q[t - delay_length][n][s] - I[t - delay_length][n][s])
                         else:
-                            R[t][n][s] = prices[n] * (I[t - delay_length - 1][n][s] + Q[t - delay_length][n][s] -
-                                                      I[t - delay_length][n][s] - g[t - delay_length][n][s] -
-                                                      g[t - delay_length][n][s] * (1 + ro) ** delay_length)
+                            R[t][n][s] = prices[n] * (
+                                    I[t - delay_length - 1][n][s] + Q[t - delay_length][n][s] - I[t - delay_length][n][s])
 
         m.update()
-        # cash flow   
+        # cash flow
         revenue_total = [[LinExpr() for t in range(T)] for s in range(M)]
         vari_costs_total = [[LinExpr() for t in range(T)] for s in range(M)]
         expect_revenue_total = [LinExpr() for t in range(T)]
@@ -153,7 +137,7 @@ def select_mip(scenario_selected, demand_scenarios, demand_possibility, booming_
 
         m.update()
 
-        # objective function          
+        # objective function
         discounted_cash = [LinExpr() for s in range(M)]
         for s in range(M):
             for n in range(N):
@@ -167,7 +151,7 @@ def select_mip(scenario_selected, demand_scenarios, demand_possibility, booming_
         m.setObjective(final_cash, GRB.MAXIMIZE)
 
         # Add constraints
-        # inventory flow    
+        # inventory flow
         for s in range(M):
             for n in range(N):
                 for t in range(T):
@@ -202,9 +186,11 @@ def select_mip(scenario_selected, demand_scenarios, demand_possibility, booming_
         for s in range(M):
             for t in range(T):
                 if t == 0:
-                    m.addConstr(ini_cash >= sum([vari_costs[n] * Q[t][n][s] for n in range(N)]) + overhead_cost[t])  # cash constaints
+                    m.addConstr(ini_cash >= sum([vari_costs[n] * Q[t][n][s] for n in range(N)]) + overhead_cost[
+                        t])  # cash constaints
                 else:
-                    m.addConstr(C[t - 1][s] >= sum([vari_costs[n] * Q[t][n][s] for n in range(N)]) + overhead_cost[t])  # cash constaints
+                    m.addConstr(C[t - 1][s] >= sum([vari_costs[n] * Q[t][n][s] for n in range(N)]) + overhead_cost[
+                        t])  # cash constaints
 
         # non-negativity of I_t
         for s in range(M):
@@ -212,25 +198,10 @@ def select_mip(scenario_selected, demand_scenarios, demand_possibility, booming_
                 for t in range(T):
                     m.addConstr(I[t][n][s] >= 0)
 
-        # order loan quantity less than realized demand
-        for s in range(M):
-            for n in range(N):
-                for t in range(T):
-                    m.addConstr(g[t][n][s] <= I[t - delay_length - 1][n][s] + Q[t - delay_length][n][s] -
-                                I[t - delay_length][n][s])
 
-        # total order loan limit
-        total_loan = [LinExpr() for s in range(M)]
-        for s in range(M):
-            for n in range(N):
-                for t in range(T):
-                    total_loan[s] += prices[n] * g[t][n][s]
-        for s in range(M):
-            m.addConstr(total_loan[s] <= B)
-
-        # non-anticipativity 
-        # s1 与 s 的顺序没啥影响       
-        # no need for I, R, C      
+        # non-anticipativity
+        # s1 与 s 的顺序没啥影响
+        # no need for I, R, C
         for t in range(T):
             for n in range(N):
                 for s in range(M):
@@ -241,9 +212,6 @@ def select_mip(scenario_selected, demand_scenarios, demand_possibility, booming_
                     m.addConstr(
                         sum([scenarioLink[t][s1][s] * scenario_probs[s1] * delta[t][n][s1] for s1 in range(M)]) == \
                         delta[t][n][s] * sum([scenarioLink[t][s1][s] * scenario_probs[s1] for s1 in range(M)]))
-                    m.addConstr(
-                        sum([scenarioLink[t][s1][s] * scenario_probs[s1] * g[t][n][s1] for s1 in range(M)]) == \
-                        g[t][n][s] * sum([scenarioLink[t][s1][s] * scenario_probs[s1] for s1 in range(M)]))
         # solve
         m.update()
         m.optimize()
@@ -269,30 +237,8 @@ def select_mip(scenario_selected, demand_scenarios, demand_possibility, booming_
                         Qv[t][n][s] = Q[t][n][s].X
                     f.write('\n')
                 f.write('\n')
-            f.write('***************************************************************************************************************\n')
-            f.write('************************************************************\n')
-            f.write('************************************************************\n')
-            f.write('order loan g used in each scenario:\n')
-            count = 0
-            for s in range(M):
-                count_flag = 0
-                f.write('S%d:\n' % s)
-                for n in range(N):
-                    f.write('item %d: ' % n)
-                    for t in range(T):
-                        f.write('%.1f ' % g[t][n][s].X)
-                        if g[t][n][s].X > 0.5:
-                            count_flag = 1
-                        gv[t][n][s] = g[t][n][s].X
-                    f.write('\n')
-                if count_flag == 1:
-                    count = count + 1
-                f.write('\n')
-            f.write('order loan used in total %d ' % count)
-                        # print('order loan used in total %d ' % count)
-                        # percent = count / M
-                        # print('order loan used percent %.4f ' % percent)
-                        # f.write('************************\n')
+            f.write(
+                '***************************************************************************************************************\n')
 
             f.write('end-of-period inventory I in each scenario:\n')
             for s in range(M):

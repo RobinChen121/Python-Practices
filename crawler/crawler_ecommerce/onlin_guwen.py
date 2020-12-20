@@ -24,7 +24,7 @@ def get_url_content(url):
     headers = {
         'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.108 Safari/537.36'
     }  # 主要是模拟浏览器登录，防止反爬
-    r = requests.post(url, headers=headers, timeout=30)  # 获取网页的内容，并返回给r变量，timeout 为超时时间
+    r = requests.get(url, headers=headers, timeout=30)  # 获取网页的内容，并返回给r变量，timeout 为超时时间
     r.raise_for_status()  # 检查返回网页的内容的状态码，200表示成功
     r.encoding = r.apparent_encoding  # 统一编码方式
     return r.text  # 返回网页中的文本内容，数据内容为 r.content
@@ -49,7 +49,7 @@ def filter_info(chapter_num, url_text):
     chapter_title = contents.find('p').get_text()  # 第一句话是本回的标题
     chapter_titel = '第' + str(chapter_num) + '回 ' + chapter_title.lstrip()
     chapter_content = contents.get_text(separator="\n")  # find 返回的不是列表，不用跟 [0]
-    chapter_content = chapter_content.lstrip()
+    chapter_content = chapter_content.lstrip() # 结掉字符串左边的空字符
     this_chapter = [chapter_titel, chapter_content]
     return this_chapter
 
@@ -58,9 +58,8 @@ def filter_info(chapter_num, url_text):
 def write_txt(string_array):
     file_address = 'E:/爬虫练习/三国演义/'  # txt 存放地址
     file_name = string_array[0]
-    f = open(file_address + file_name + '.txt', 'w', encoding='utf-8')  # 必须跟解码形式，不然有的网页中文内容写不到txt里
-    f.write(string_array[1])
-    f.close()
+    with open(file_address + file_name + '.txt', 'w', encoding='utf-8') as f: # 必须跟解码形式，不然有的网页中文内容写不到txt里
+        f.write(string_array[1])
 
 
 # 主函数
