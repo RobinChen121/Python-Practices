@@ -22,4 +22,6 @@ def product(args, repeat):
     for pool in pools:
         result = [x+[y] for x in result for y in pool]
     return result
+
+product(range(3), 4) 
            

@@ -224,5 +224,5 @@ def mip(mean_demands, T, booming_demand, ini_cash, overhead_cost, delay_length):
         print('Encountered an attribute error')
 
 
-T = 3
+T = 6
 mip(mean_demands12, T, booming_demand, ini_cash, overhead_cost, delay_length)

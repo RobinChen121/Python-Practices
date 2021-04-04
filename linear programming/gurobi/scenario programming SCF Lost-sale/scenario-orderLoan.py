@@ -10,7 +10,8 @@ Python version: 3.7
 
 
 Description: 
-     scenario programming version for order-loan situation
+     scenario programming version for order-loan situation,
+     4 periods, 5 scenarios in the each period, running time is 50.15s, value is 33999;
     
 """
 
@@ -29,9 +30,9 @@ ini_I = [0, 0, 0]
 # vari_costs = [70, 60, 60]
 prices = [189, 144, 239]
 vari_costs = [140, 70, 150]
-ini_cash = 15000
+ini_cash = 22000
 
-T = 6
+T = 4
 overhead_cost = [2000 for t in range(T)]
 booming_demand = [0, 0, 0, 0, 1, 1]
 N = len(ini_I)
@@ -45,12 +46,17 @@ M = 10000
 demand_scenarios = [[[134, 28, 46], [246, 58, 58], [87, 24, 43]],
                     [[481, 317, 259], [608, 311, 309], [134, 181, 121]]]
 demand_possibility = [[0.103, 0.476, 0.421], [0.266, 0.34, 0.394]]
-# # #tree 2
-# demand_scenarios = [[[134, 32, 54], [246, 59, 56], [88, 37, 17]], [[345, 269, 481], [341, 302, 611], [156, 123, 184]]]
-# demand_possibility = [[0.102, 0.694, 0.204], [0.185, 0.556, 0.259]]
+ # #tree 2
+demand_scenarios = [[[134, 32, 54], [246, 59, 56], [88, 37, 17]], [[345, 269, 481], [341, 302, 611], [156, 123, 184]]]
+demand_possibility = [[0.102, 0.694, 0.204], [0.185, 0.556, 0.259]]
 # # # # tree 1
-demand_scenarios = [[[133, 30, 49], [246, 58, 57], [87, 39, 20]], [[291, 468, 268], [597, 322, 293], [123, 124, 177]]]
-demand_possibility = [[0.1, 0.598, 0.302], [0.286, 0.318, 0.396]]
+#demand_scenarios = [[[133, 30, 49], [246, 58, 57], [87, 39, 20]], [[291, 468, 268], [597, 322, 293], [123, 124, 177]]]
+#demand_possibility = [[0.1, 0.598, 0.302], [0.286, 0.318, 0.396]]
+
+#demand_scenarios = [[[133.6453,29.4853,40.3997,58.0380,32.7425], [246.6858,56.1574,57.1013,63.2265,58.2849], [30.5152,35.5840,16.1261,83.1273,35.6119]], \
+#                    [[548.5844,294.1882,336.2068,183.5184,352.6249], [702.1755,206.3259,378.2353,276.9209,467.1965], [145.1143, 202.3169, 138.8466, 95.8576, 155.0488]]]
+#demand_possibility = [[0.1022, 0.2323, 0.1419, 0.1295, 0.3941], [ 0.1098,0.1309,0.5212,0.1199, 0.1181]]
+
 
 K = len(demand_possibility[0])  # scenario number in a period
 S = K ** T  # total scenario number

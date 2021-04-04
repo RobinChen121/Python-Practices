@@ -19,7 +19,7 @@ vari_costs = [140, 70, 150]
 ini_cash = 20000
 
 T = 6
-overhead_cost = [4000 for t in range(T)]
+overhead_cost = [2000 for t in range(T)]
 booming_demand = [0, 0, 0, 0, 1, 1]
 N = len(ini_I)
 delay_length = 2

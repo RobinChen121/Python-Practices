@@ -211,6 +211,10 @@ def select_mip(scenario_selected, demand_scenarios, demand_possibility, booming_
             for n in range(N):
                 for t in range(T):
                     m.addConstr(I[t][n][s] >= 0)
+                    
+        for s in range(M-1):
+            for n in range(N):
+                m.addConstr(Q[0][n][s] == Q[0][n][s+1])
 
         # order loan quantity less than realized demand
         for s in range(M):

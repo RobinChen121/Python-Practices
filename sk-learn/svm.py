@@ -18,6 +18,7 @@ from sklearn import datasets
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from sklearn.svm import SVC
+from sklearn.metrics import classification_report
 
 cancer = datasets.load_breast_cancer()
 cancer_data =  cancer['data']
@@ -41,3 +42,4 @@ print('预测前20个结果为：\n', cancer_target_pred[:20])
 
 # 预测和真实一样的数目
 print('预测对的结果数目为：' , np.sum(cancer_target_pred == cancer_target_test))
+print('神经网络预测结果评价报告：\n', classification_report(cancer_target_test,cancer_target_pred))

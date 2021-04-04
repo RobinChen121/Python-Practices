@@ -11,9 +11,6 @@ Python version: 3.7
 
 Description: 
     
-    scenario progamming version of the mip model for no finance situation when demand are deterministic
-    
-    lost sales quantity is not a decision variable
     
     for 6 periods, 3 scenario branches, running time is 80s
     for 7 periods, 3 scenario branches, running time is 1652.42s
@@ -113,9 +110,9 @@ def mip(booming_demand):
     
     T = 6
     overhead_cost = [2000, 2000, 2000, 2000, 2000, 2000]
-    #booming_demand = [0, 0, 0, 0, 1, 1]
+    booming_demand = [0, 0, 0, 0, 1, 1]
     N = len(ini_I)
-    delay_length = 0
+    delay_length = 2
     discount_rate = 0.01
     B = 10000 # total quantity of order loan
     ro = 0.015 # loan rate
@@ -124,7 +121,8 @@ def mip(booming_demand):
     # tree 3
     demand_scenarios = [[[47, 58, 133], [57, 58, 246], [44, 25, 86]], [[249, 314, 472], [316, 296, 596], [125, 178, 123]]]
     demand_possibility = [[0.38, 0.517, 0.103], [0.327, 0.385, 0.289]]
-        
+    
+
     
     K = len(demand_possibility[0]) # scenario number in a period
     S =  K ** T # total scenario number
@@ -144,7 +142,7 @@ def mip(booming_demand):
     scenario_probs = [0 for s in range(S)]
     for s in range(S):
         index = scenario_permulations[s][0]
-        scenario_probs[s] = demand_possibility[0][index]
+        scenario_probs[s] = demand_possibility[booming_demand[0]][index]
         for i in range(1, len(scenario_permulations[s])):
             index = scenario_permulations[s][i]
             index2 = booming_demand[i]
@@ -156,10 +154,9 @@ def mip(booming_demand):
         m = Model("self-cash-mip")
     
         # Create variables
-        Q = [[[m.addVar(vtype = GRB.CONTINUOUS) for s in range(S)] for n in range(N)] for t in range(T)] # ordering quantity in each period for each product
-        I = [[[m.addVar(vtype = GRB.CONTINUOUS) for s in range(S)] for n in range(N)] for t in range(T)] # end-of-period inventory in each period for each product
-        delta = [[[m.addVar(vtype = GRB.BINARY) for s in range(S)] for n in range(N)] for t in range(T)] # whether lost-sale not occurs
-        g = [[[m.addVar(vtype = GRB.CONTINUOUS) for s in range(S)] for n in range(N)] for t in range(T)] # order-loan quantity in each period for each product
+        Q = [[[m.addVar(vtype = GRB.CONTINUOUS) for s in range(S)] for t in range(N)] for n in range(T)] # ordering quantity in each period for each product
+        I = [[[m.addVar(vtype = GRB.CONTINUOUS) for s in range(S)] for t in range(N)] for n in range(T)] # end-of-period inventory in each period for each product
+        delta = [[[m.addVar(vtype = GRB.BINARY) for s in range(S)] for t in range(N)] for n in range(T)] # whether lost-sale not occurs
         
         C = [[LinExpr()  for s in range(S)] for t in range(T)] # LinExpr, end-of-period cash in each period
         R = [[[LinExpr()  for s in range(S)] for n in range(N)] for t in range(T + delay_length)]  # LinExpr, revenue for each product in each period
@@ -170,14 +167,12 @@ def mip(booming_demand):
             for n in range(N):
                 for t in range(T + delay_length):
                     if t < delay_length:
-                        R[t][n][s] = prices[n] * g[t][n][s]
+                        R[t][n][s] = LinExpr(0)
                     else:
                         if t == delay_length:
-                            R[t][n][s] = prices[n]*(ini_I[n]+Q[t-delay_length][n][s]-I[t-delay_length][n][s]-g[t-delay_length][n][s]-g[t-delay_length][n][s]*(1+ro)**delay_length)
-                        elif t < T:
-                            R[t][n][s] = prices[n]*(g[t][n][s]+I[t-delay_length-1][n][s]+Q[t-delay_length][n][s]-I[t-delay_length][n][s]-g[t-delay_length][n][s]-g[t-delay_length][n][s]*(1+ro)**delay_length)
+                            R[t][n][s] = prices[n] * (ini_I[n] + Q[t-delay_length][n][s] - I[t-delay_length][n][s])
                         else:        
-                            R[t][n][s] = prices[n]*(I[t-delay_length-1][n][s]+Q[t-delay_length][n][s]-I[t-delay_length][n][s]-g[t-delay_length][n][s]-g[t-delay_length][n][s]*(1+ro)**delay_length)
+                            R[t][n][s] = prices[n] * (I[t-delay_length-1][n][s] + Q[t-delay_length][n][s] - I[t-delay_length][n][s])
                                 
         m.update()
         # cash flow   
@@ -256,22 +251,6 @@ def mip(booming_demand):
             for n in range(N):
                 for t in range(T):
                     m.addConstr(I[t][n][s] >= 0)
-        
-         # order loan quantity less than realized demand
-        for s in range(S):
-            for n in range(N):
-                for t in range(T):
-                    m.addConstr(g[t][n][s] <= I[t-delay_length-1][n][s]+Q[t-delay_length][n][s]-I[t-delay_length][n][s])
-                
-        # total order loan limit
-        total_loan = [LinExpr() for s in range(S)]
-        for s in range(S):
-            for n in range(N):
-                for t in range(T):
-                    total_loan[s] += prices[n] * g[t][n][s]
-        for s in range(S):
-            m.addConstr(total_loan[s] <= B)
-        
              
         # non-anticipativity 
         # s1 与 s 的顺序没啥影响       
@@ -295,7 +274,7 @@ def mip(booming_demand):
         Qv = [[[0 for s in range(S)] for n in range(N)] for t in range(T)] # ordering quantity in each period for each product
         Iv = [[[0 for s in range(S)] for n in range(N)] for t in range(T)] # end-of-period inventory in each period for each product
         deltav = [[[0 for s in range(S)] for n in range(N)] for t in range(T)] # whether lost-sale not occurs
-        gv = [[[0 for s in range(S)] for n in range(N)] for t in range(T)] # order-loan quantity in each period for each product
+      
         with open('results.txt', 'w') as f:
             f.write('*********************************\n')
             f.write('ordering quantity Q in each scenario:\n')
@@ -304,34 +283,11 @@ def mip(booming_demand):
                 for n in range(N):
                     f.write('item %d: ' % n)
                     for t in range(T):
-                        f.write('%.1f ' % Q[t][n][s].X)    
+                        f.write('%.1f ' % Q[t][n][s].X)   
                         Qv[t][n][s] = Q[t][n][s].X
                     f.write('\n')
                 f.write('\n')
-            f.write('***************************************************************************************************************\n')
-            f.write('************************************************************\n')
-            f.write('************************************************************\n')
-            f.write('order loan g used in each scenario:\n')
-            count = 0
-            for s in range(S):
-                count_flag = 0
-                f.write('S%d:\n' % s)
-                for n in range(N):
-                    f.write('item %d: ' % n)
-                    for t in range(T):
-                        f.write('%.1f ' % g[t][n][s].X)    
-                        if g[t][n][s].X > 0.5:
-                            count_flag = 1
-                        gv[t][n][s] = g[t][n][s].X
-                    f.write('\n')
-                if count_flag == 1:
-                    count = count + 1
-                f.write('\n')
-            f.write('order loan used in total %d ' % count)
-            print('order loan used in total %d ' % count)
-            percent = count / (3**T)
-            print('order loan used percent %.4f ' % percent)
-            f.write('************************\n')
+            f.write('*********************************\n')
             
             f.write('end-of-period inventory I in each scenario:\n')
             for s in range(S):
@@ -351,7 +307,7 @@ def mip(booming_demand):
                 for n in range(N):
                     f.write('item %d: ' % n)
                     for t in range(T):
-                        f.write('%.1f ' % delta[t][n][s].X)  
+                        f.write('%.1f ' % delta[t][n][s].X)    
                         deltav[t][n][s] = delta[t][n][s].X
                     f.write('\n')
                 f.write('\n')
@@ -412,8 +368,8 @@ def mip(booming_demand):
     toc = time.time()
     time_pass = toc - tic
     print('running time is %.2f' % time_pass)
-    #    out_sample_value = check_value(Qv, Iv, deltav)
-    #    print('out of sample value is %.2f' % out_sample_value)
+#    out_sample_value = check_value(Qv, Iv, deltav)
+#    print('out of sample value is %.2f' % out_sample_value)
     return m.objVal
 
 args = [[0, 0, 0, 0, 0, 0], [0, 0, 0, 1, 0, 1], [0, 0, 0, 0, 1, 1], [0, 1, 0, 1, 0, 1], [0, 0, 0, 1, 1, 1], [1, 1, 1, 1, 1, 1]]

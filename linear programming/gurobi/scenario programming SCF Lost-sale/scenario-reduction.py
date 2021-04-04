@@ -26,7 +26,7 @@ def distance(index1, index2, boomingIndex):
         set2[i] = demand_scenarios[k][i][index2]
 
 inSample_values = []
-for nn in range(20, 310, 20):  # scenario number after reducing
+for nn in range(50, 60, 20):  # scenario number after reducing
 
 
     # tree 2
@@ -39,10 +39,10 @@ for nn in range(20, 310, 20):  # scenario number after reducing
                         [[291, 468, 268], [597, 322, 293], [123, 124, 177]]]
     demand_possibility = [[0.1, 0.598, 0.302], [0.286, 0.318, 0.396]]
 
-    # tree 3
-    demand_scenarios = [[[134, 28, 46], [246, 58, 58], [87, 24, 43]],
-                        [[481, 317, 259], [608, 311, 309], [134, 181, 121]]]
-    demand_possibility = [[0.103, 0.476, 0.421], [0.266, 0.34, 0.394]]
+#    # tree 3
+#    demand_scenarios = [[[134, 28, 46], [246, 58, 58], [87, 24, 43]],
+#                        [[481, 317, 259], [608, 311, 309], [134, 181, 121]]]
+#    demand_possibility = [[0.103, 0.476, 0.421], [0.266, 0.34, 0.394]]
 
     booming_demand = [0, 0, 0, 0, 1, 1]
     scenario_selected = []  # index of selected scenario
@@ -142,7 +142,8 @@ for nn in range(20, 310, 20):  # scenario number after reducing
     #         scenario.append(demand_scenarios[booming_demand[j]][2][j])
     #     print(scenario)
     scenario_selected.sort()
-    value = select_noloan.select_mip(scenario_selected, demand_scenarios, demand_possibility, booming_demand, T,
+    # or select_noloan
+    value = select_orderloan.select_mip(scenario_selected, demand_scenarios, demand_possibility, booming_demand, T,
                                         delay_length)
     inSample_values.append(value)
 
