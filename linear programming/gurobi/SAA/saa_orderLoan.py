@@ -16,6 +16,7 @@ Description:  saa modeling for the no financing siutation；
 6 periods, 5 samples in the first 5 periods and 3 samples in the final:
      843766 rows, 562518 columns, 3724009 nonzeros, runnding time is 1862.54s; value = 45348;
      scenario tree value is 45188 for 3 scenarios in each period;
+     [5,5,5,3,3,3] value is , running time is ;
 4 periods, 5 samples in each period, running time is 25s, value = 33417;
     scenario tree value is 33999 for 5 scenarios in each period, running time 49s;
     scenario tree value is 33775 for 3 scenarios in each period, running time 1s;
@@ -34,6 +35,8 @@ import numpy as np
 import scipy.stats as st
 from math import exp
 import itertools
+from saa_mip_scenarios import mip_fixQ0
+import _pickle as cPickle # save python list to files
 
 
 def lognorm_ppf(x, mu, sigma):
@@ -63,10 +66,10 @@ prices = [189, 144, 239]
 vari_costs = [140, 70, 150]
 ini_cash = 20000
 
-T = 2
+T = 6
 overhead_cost = [2000 for t in range(T)]
 booming_demand = [0, 0, 0, 0, 1, 1]
-delay_length = 0
+delay_length = 2
 discount_rate = 0.01
 B = 10000  # total quantity of order loan
 ro = 0.015  # loan rate
@@ -77,10 +80,12 @@ sigmas = [[0.6, 0.26], [0.66, 0.33], [0.46, 0.18]]
 #mus = [[3.66, 5.79], [4.13, 5.91]]
 #sigmas = [[0.6, 0.26], [0.66, 0.33]]
 N = len(mus)
-sample_nums = [5, 5, 5, 5, 3, 3]
-trunQuantile = 0.999
+sample_nums = [5, 5, 5, 3, 3, 3]
+trunQuantile = 0.9999
 
-samples = generate_sample(sample_nums, trunQuantile, mus, sigmas, booming_demand[0:T])
+#samples = generate_sample(sample_nums, trunQuantile, mus, sigmas, booming_demand[0:T])
+samples = cPickle.load(open("data1.pkl", "rb"))
+
 S = np.prod(sample_nums[0:T])
 arr = []
 for t in range(T):
@@ -190,10 +195,14 @@ try:
                 m.addConstr(I[t][n][s] >= 0)
     
      # order loan quantity less than realized demand
+     # careful, there is no delay_length in this constraint
     for s in range(S):
         for n in range(N):
             for t in range(T):
-                m.addConstr(g[t][n][s] <= I[t-delay_length-1][n][s]+Q[t-delay_length][n][s]-I[t-delay_length][n][s])
+                if t == 0:
+                    m.addConstr(g[t][n][s] <= ini_I[n] + Q[t][n][s]-I[t][n][s])
+                else:
+                    m.addConstr(g[t][n][s] <= I[t-1][n][s]+Q[t][n][s]-I[t][n][s])
             
     # total order loan limit
     total_loan = [LinExpr() for s in range(S)]
@@ -336,7 +345,10 @@ try:
         f.write('\n')
         f.write('final expected discounted cash is: %g\n' % expect_discounted_cash.getValue())
         f.write('final expected cash is: %g' % final_cash.getValue())
-    print('final expected value is: %g' % m.objVal)
+    print('final expected value is: %g\n' % m.objVal)
+    Q0 = [Q[0][0][0].X, Q[0][1][0].X, Q[0][2][0].X]
+    print('first stage solution: \n')
+    print(Q0)
     
 except GurobiError as e:
     print('Error code ' + str(e.errno) + ": " + str(e))    
@@ -347,6 +359,10 @@ except AttributeError:
 toc = time.time()
 time_pass = toc - tic
 print('running time is %.2f' % time_pass)
+
+#Q_range = [0, 171, 0]
+#this_value = mip_fixQ0(Q_range, samples, scenario_permulations, B, delay_length, prices, vari_costs, overhead_cost, ini_cash, ini_I, discount_rate, ro)
+#print(this_value)    
 
 
 

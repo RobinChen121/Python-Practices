@@ -23,6 +23,7 @@ import scipy.stats as st
 from math import exp
 import itertools
 import csv
+import _pickle as cPickle # save python list to files
 
 
 def lognorm_ppf(x, mu, sigma):
@@ -55,7 +56,7 @@ ini_cash = 20000
 T = 6
 overhead_cost = [2000 for t in range(T)]
 booming_demand = [0, 0, 0, 0, 1, 1]
-delay_length = 0
+delay_length = 2
 discount_rate = 0.01
 B = 10000  # total quantity of order loan
 ro = 0.015  # loan rate
@@ -66,15 +67,17 @@ sigmas = [[0.6, 0.26], [0.66, 0.33], [0.46, 0.18]]
 #mus = [[3.66, 5.79], [4.13, 5.91]]
 #sigmas = [[0.6, 0.26], [0.66, 0.33]]
 N = len(mus)
-sample_nums = [3, 3, 3, 3, 3, 3]
-trunQuantile = 0.999
+sample_nums = [5, 5, 5, 3, 3, 3]
+trunQuantile = 0.9999
 
-KK = 20 # running times
+KK = 10 # running times
 
 headers = ['run','Final Value','Q1_0', 'Q2_0', 'Q3_0', 'Time','loan-used percent']
 rows = [[0 for i in range(7)] for j in range(KK)]
 for iK in range(KK):
     samples = generate_sample(sample_nums, trunQuantile, mus, sigmas, booming_demand[0:T])
+    file_name = 'data' + str(iK+11) + '.pkl'
+    cPickle.dump(samples, open(file_name, "wb"))
     S = np.prod(sample_nums[0:T])
     arr = []
     for t in range(T):
@@ -183,12 +186,15 @@ for iK in range(KK):
                 for t in range(T):
                     m.addConstr(I[t][n][s] >= 0)
         
-         # order loan quantity less than realized demand
+        # order loan quantity less than realized demand
+        # careful, there is no delay_length in this constraint
         for s in range(S):
             for n in range(N):
                 for t in range(T):
-                    m.addConstr(g[t][n][s] <= I[t-delay_length-1][n][s]+Q[t-delay_length][n][s]-I[t-delay_length][n][s])
-                
+                    if t == 0:
+                        m.addConstr(g[t][n][s] <= ini_I[n] + Q[t][n][s]-I[t][n][s])
+                    else:
+                        m.addConstr(g[t][n][s] <= I[t-1][n][s]+Q[t][n][s]-I[t][n][s])   
         # total order loan limit
         total_loan = [LinExpr() for s in range(S)]
         for s in range(S):
@@ -213,123 +219,7 @@ for iK in range(KK):
         m.update()
         m.optimize()
         print('') 
-        
-        # output in txt files
-        Qv = [[[0 for s in range(S)] for n in range(N)] for t in range(T)] # ordering quantity in each period for each product
-        Iv = [[[0 for s in range(S)] for n in range(N)] for t in range(T)] # end-of-period inventory in each period for each product
-        deltav = [[[0 for s in range(S)] for n in range(N)] for t in range(T)] # whether lost-sale not occurs, 0 means occur
-        gv = [[[0 for s in range(S)] for n in range(N)] for t in range(T)] # order-loan quantity in each period for each product
-        with open('results.txt', 'w') as f:
-            f.write('*********************************\n')
-            f.write('ordering quantity Q in the first period:\n')
-            for n in range(N):
-                f.write('item %d: ' % n)
-                f.write('%.1f ' % Q[0][n][0].X)  
-            print('ordering quantity Q in the first period:\n')
-            for n in range(N):
-                print('item %d: ' % n)
-                print('%.1f ' % Q[0][n][0].X) 
-            f.write('\n*********************************\n')
-            f.write('ordering quantity Q in each scenario:\n')
-            for s in range(S):
-                f.write('S%d:\n' % s)
-                for n in range(N):
-                    f.write('item %d: ' % n)
-                    for t in range(T):
-                        f.write('%.1f ' % Q[t][n][s].X)    
-                        Qv[t][n][s] = Q[t][n][s].X
-                    f.write('\n')
-                f.write('\n')
-            f.write('***************************************************************************************************************\n')           
-            f.write('order loan g used in each scenario:\n')
-            count = 0
-            for s in range(S):
-                count_flag = 0
-                f.write('S%d:\n' % s)
-                for n in range(N):
-                    f.write('item %d: ' % n)
-                    for t in range(T):
-                        f.write('%.1f ' % g[t][n][s].X)    
-                        if g[t][n][s].X > 0.5:
-                            count_flag = 1
-                        gv[t][n][s] = g[t][n][s].X
-                    f.write('\n')
-                if count_flag == 1:
-                    count = count + 1
-                f.write('\n')
-            f.write('times of order loan used in total %d ' % count)
-            print('times of order loan used in total %d ' % count)
-            percent = count / S
-            print('order loan used percent %.4f%% ' % percent)
-            f.write('\n************************\n')
-            f.write('end-of-period inventory I in each scenario:\n')
-            for s in range(S):
-                f.write('S%d:\n' % s)
-                for n in range(N):
-                    f.write('item %d: ' % n)
-                    for t in range(T):
-                        f.write('%.1f ' % I[t][n][s].X)    
-                        Iv[t][n][s] = I[t][n][s].X
-                    f.write('\n')
-                f.write('\n')
-            f.write('***************************************************************\n')
-            
-            f.write('not lost-sale delta in each scenario:\n')
-            for s in range(S):
-                f.write('S%d:\n' % s)
-                for n in range(N):
-                    f.write('item %d: ' % n)
-                    for t in range(T):
-                        f.write('%.1f ' % delta[t][n][s].X)  
-                        deltav[t][n][s] = delta[t][n][s].X
-                    f.write('\n')
-                f.write('\n')
-            f.write('*********************************\n')
-            
-            
-            f.write('revenue R in each scenario:\n')
-            for s in range(S):
-                f.write('S%d:\n' % s)
-                for n in range(N):
-                    f.write('item %d: ' % n)
-                    for t in range(T):
-                        f.write('%.1f ' % R[t][n][s].getValue())    
-                    f.write('\n')
-                f.write('\n')
-            f.write('*********************************\n')
-            
-            f.write('end-of-period cash C in each scenario:\n')
-            for s in range(S):
-                f.write('S%d:\n' % s)
-                for t in range(T):
-                    f.write('%.1f ' % C[t][s].getValue()) 
-                f.write('\n')
-            f.write('*********************************\n')
-            
-            f.write('discounted cash in each scenario:\n')
-            for s in range(S):
-                f.write('S%d: ' % s)
-                f.write('%.1f ' % discounted_cash[s].getValue())    
-                f.write('\n')
-            f.write('\n*********************************\n')
-                
-            f.write('expectd Revenue in each period:\n')
-            for t in range(T):
-                f.write('%.1f ' % expect_revenue_total[t].getValue()) 
-            f.write('\n')
-            f.write('varicosts in each period:\n')
-            for t in range(T):
-                f.write('%.1f ' % expect_vari_costs_total[t].getValue()) 
-            f.write('\n')
-            f.write('expected end-of-period cash in each period:\n')
-            f.write('%.1f ' % ini_cash) 
-            expect_cash = [LinExpr() for t in range(T)]
-            for t in range(T):
-                expect_cash[t] = sum([C[t][s] / S for s in range(S)])
-                f.write('%.1f ' % expect_cash[t].getValue())           
-            f.write('\n')
-            f.write('final expected discounted cash is: %g\n' % expect_discounted_cash.getValue())
-            f.write('final expected cash is: %g' % final_cash.getValue())
+
         print('final expected value is: %g' % m.objVal)
         
     except GurobiError as e:
@@ -343,7 +233,7 @@ for iK in range(KK):
     print('running time is %.2f' % time_pass)
     rows[iK] = [iK+1, m.objVal, Q[0][0][0].X, Q[0][1][0].X, Q[0][2][0].X, time_pass, percent]
 
-with open('results-upperBound.csv','w', newline='') as f: # newline = '' is to remove the blank line
+with open('results-upperBound.csv','a', newline='') as f: # newline = '' is to remove the blank line
     f_csv = csv.writer(f)
-    f_csv.writerow(headers)
+#    f_csv.writerow(headers)
     f_csv.writerows(rows)

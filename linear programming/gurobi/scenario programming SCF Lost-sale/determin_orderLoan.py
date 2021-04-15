@@ -126,8 +126,12 @@ def mip(mean_demands, T, booming_demand, ini_cash, overhead_cost, delay_length):
         # order loan quantity less than realized demand
         for n in range(N):
             for t in range(T):
-                m.addConstr(g[t][n] <= I[t - delay_length - 1][n] + Q[t - delay_length][n] - I[t - delay_length][n])
+                if t == 0:
+                    m.addConstr(g[t][n] <= ini_I[n] + Q[t][n] - I[t][n])
+                else:
+                    m.addConstr(g[t][n] <= I[t - 1][n] + Q[t][n] - I[t][n])
 
+                    
         # total order loan limit
         total_loan = LinExpr()
         for n in range(N):

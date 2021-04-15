@@ -254,12 +254,16 @@ def mip(booming_demand):
                 for t in range(T):
                     m.addConstr(I[t][n][s] >= 0)
         
-         # order loan quantity less than realized demand
+        # order loan quantity less than realized demand
+        # careful, there is no delay_length in this constraint
         for s in range(S):
             for n in range(N):
                 for t in range(T):
-                    m.addConstr(g[t][n][s] <= I[t-delay_length-1][n][s]+Q[t-delay_length][n][s]-I[t-delay_length][n][s])
-                
+                    if t == 0:
+                        m.addConstr(g[t][n][s] <= ini_I[n] + Q[t][n][s]-I[t][n][s])
+                    else:
+                        m.addConstr(g[t][n][s] <= I[t-1][n][s]+Q[t][n][s]-I[t][n][s]) 
+                        
         # total order loan limit
         total_loan = [LinExpr() for s in range(S)]
         for s in range(S):

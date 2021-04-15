@@ -81,60 +81,68 @@ sigmas = [[0.6, 0.26], [0.66, 0.33], [0.46, 0.18]]
 #mus = [[3.66, 5.79], [4.13, 5.91]]
 #sigmas = [[0.6, 0.26], [0.66, 0.33]]
 N = len(mus)
-sample_nums = [5, 5, 5, 5, 3, 3]
+sample_nums = [5, 5, 5, 3, 3, 3]
 trunQuantile = 1
 
 #samples = generate_sample(sample_nums, trunQuantile, mus, sigmas, booming_demand[0:T])
 #cPickle.dump(samples, open("data.pkl", "wb"))
-samples = cPickle.load(open("data.pkl", "rb"))
-SS = np.prod(sample_nums[0:T]) # number of samples
-arr = []
-for t in range(T):
-    arr.append(range(sample_nums[t]))
-scenario_permulations = list(itertools.product(*arr))
 
-# samples2 = get_sample2(samples, scenario_permulations)
-
-#headers = ['run','Final Value','Q1_0', 'Q2_0', 'Q3_0']
-#values = [[0 for i in range(5)] for s in range(SS)]
-#for sk in range(SS):   
-#    result =  mip(samples2[sk], B, delay_length, prices, vari_costs, overhead_cost, ini_cash, ini_I, discount_rate, ro)
-#    values[sk] = [sk, result[0], result[1], result[2], result[3]]    
-#values.sort(key = lambda x: x[1])  
-#
-#with open('results-allScenarios.csv','w', newline='') as f: # newline = '' is to remove the blank line
-#    f_csv = csv.writer(f)
-#    f_csv.writerow(headers)
-#    f_csv.writerows(values)
-        
-## choosing the reference scenario:the one with lowest value        
-     
-ref_index = 5624 # index of each period for the reference scenario
-
-# choose another scenario and solve the pair scenario model:
-pair_values = [[0 for i in range(3)] for s in range(SS-1)]
-index = 0
-for sk in range(5620, 5621):
-    if abs(sk - ref_index) < 0.5:
-        continue
-    ref_range = [ref_index, sk]
+for kk in range(1):
+    file_name = 'data' + str(kk+1) + '.pkl'
+    samples = cPickle.load(open(file_name, "rb"))
+    SS = np.prod(sample_nums[0:T]) # number of samples
+    arr = []
+    for t in range(T):
+        arr.append(range(sample_nums[t]))
+    scenario_permulations = list(itertools.product(*arr))
     
-
-    value, Q1, Q2, Q3 = mip_pairS(ref_range, samples, scenario_permulations, B, delay_length, prices, vari_costs, overhead_cost, ini_cash, ini_I, discount_rate, ro)
-    Q_range = [Q1, Q2, Q3]
-    Q_range = [0, 245, 0]
-    tic = time.time()
-    this_value = mip_fixQ0(Q_range, samples, scenario_permulations, B, delay_length, prices, vari_costs, overhead_cost, ini_cash, ini_I, discount_rate, ro)
-    toc = time.time()
-    time_pass = toc - tic
-    print('running time is %.2f' % time_pass)
-    pair_values[index] = [this_value, sk, ref_index, time_pass]
-    with open('results-pairValues.csv','a', newline='') as f: # newline = '' is to remove the blank line
-        f_csv = csv.writer(f)
-        #f_csv.writerow(headers2)
-        temp = pair_values[index]
-        f_csv.writerow(temp)
-    index = index + 1
+    # samples2 = get_sample2(samples, scenario_permulations)
+    
+    #headers = ['run','Final Value','Q1_0', 'Q2_0', 'Q3_0']
+    #values = [[0 for i in range(5)] for s in range(SS)]
+    #for sk in range(SS):   
+    #    result =  mip(samples2[sk], B, delay_length, prices, vari_costs, overhead_cost, ini_cash, ini_I, discount_rate, ro)
+    #    values[sk] = [sk, result[0], result[1], result[2], result[3]]    
+    #values.sort(key = lambda x: x[1])  
+    #
+    #with open('results-allScenarios.csv','w', newline='') as f: # newline = '' is to remove the blank line
+    #    f_csv = csv.writer(f)
+    #    f_csv.writerow(headers)
+    #    f_csv.writerows(values)
+            
+    ## choosing the reference scenario:the one with lowest value        
+         
+    ref_index = 3374 # index of each period for the reference scenario
+    
+    # choose another scenario and solve the pair scenario model:
+    pair_values = [[0 for i in range(3)] for s in range(SS-1)]
+    last_Q_range = [0, 0, 0]
+    this_value = 0
+    time_pass = 0
+    index = 0
+    for sk in range(SS):
+        if abs(sk - ref_index) < 0.5:
+            continue
+        ref_range = [ref_index, sk]
+        value, Q1, Q2, Q3 = mip_pairS(ref_range, samples, scenario_permulations, B, delay_length, prices, vari_costs, overhead_cost, ini_cash, ini_I, discount_rate, ro)
+        Q_range = [Q1, Q2, Q3]
+        if index > 0 and abs(Q_range[0] - last_Q_range[0]) < 3 \
+                    and abs(Q_range[1] - last_Q_range[1]) < 3 and abs(Q_range[2] - last_Q_range[2]) < 3:
+            pair_values[index] = [value, this_value, sk, ref_index, time_pass]
+        else:       
+            tic = time.time()
+            this_value = mip_fixQ0(Q_range, samples, scenario_permulations, B, delay_length, prices, vari_costs, overhead_cost, ini_cash, ini_I, discount_rate, ro)
+            toc = time.time()
+            time_pass = toc - tic
+            print('running time is %.2f' % time_pass)
+            pair_values[index] = [value, this_value, sk, ref_index, time_pass]
+        with open('results-pairValues.csv','a', newline='') as f: # newline = '' is to remove the blank line
+            f_csv = csv.writer(f)
+            #f_csv.writerow(headers2)
+            temp = pair_values[index]
+            f_csv.writerow(temp)
+        last_Q_range = Q_range
+        index = index + 1
 
 
 #headers2 =  ['value','S1', 'S2']

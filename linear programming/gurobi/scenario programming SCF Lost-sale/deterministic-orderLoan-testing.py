@@ -131,7 +131,10 @@ try:
     # order loan quantity less than realized demand
     for n in range(N):
         for t in range(T):
-            m.addConstr(g[n][t] <= I[n][t-delay_length-1]+Q[n][t-delay_length]-I[n][t-delay_length])
+            if t == 0:
+                m.addConstr(g[t][n] <= ini_I[n] + Q[t][n] - I[t][n])
+            else:
+                m.addConstr(g[t][n] <= I[t - 1][n] + Q[t][n] - I[t][n])
             
     # total order loan limit
     total_loan = LinExpr()
