@@ -51,10 +51,10 @@ ini_cash = 20000
 T = 6
 overhead_cost = [2000 for t in range(T)]
 booming_demand = [0, 0, 0, 0, 1, 1]
-delay_length = 0
+delay_length = 2
 discount_rate = 0.01
 B = 10000  # total quantity of order loan
-r0 = 0.015  # loan rate
+r0 = 0.1  # loan rate
 M = 10000
 
 mus = [[3.66, 5.79], [4.13, 5.91], [3.54, 4.96]]

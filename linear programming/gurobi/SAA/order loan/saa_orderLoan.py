@@ -72,7 +72,7 @@ booming_demand = [0, 0, 0, 0, 1, 1]
 delay_length = 2
 discount_rate = 0.01
 B = 10000  # total quantity of order loan
-ro = 0.015  # loan rate
+ro = 0.0  # loan rate
 M = 10000
 
 mus = [[3.66, 5.79], [4.13, 5.91], [3.54, 4.96]]
@@ -212,7 +212,13 @@ try:
                 total_loan[s] += prices[n] * g[t][n][s]
     for s in range(S):
         m.addConstr(total_loan[s] <= B)
-        
+    
+    # whether using loan or not
+    for s in range(S):
+        for n in range(N):
+            for t in range(T):
+                m.addConstr(g[t][n][s] == 0)
+                
     # first-stage decision
     for s in range(S-1):
         for n in range(N):
