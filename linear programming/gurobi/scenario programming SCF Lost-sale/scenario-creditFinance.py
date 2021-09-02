@@ -11,7 +11,7 @@ Python version: 3.7
 
 Description: 
     
-    scenario progamming version of the mip model for no finance situation when demand are deterministic
+    scenario progamming version of the mip model for credit-based loan situation when demand are deterministic
     
     lost sales quantity is not a decision variable
     
@@ -38,7 +38,7 @@ ini_I = [0, 0, 0]
 # vari_costs = [70, 60, 60]
 prices = [189, 144, 239]
 vari_costs = [140, 70, 150]
-ini_cash = 20000
+ini_cash = 30000
 
 T = 6
 overhead_cost = [2000 for t in range(T)]
@@ -46,9 +46,11 @@ booming_demand = [0, 0, 0, 0, 1, 1]
 N = len(ini_I)
 delay_length = 2
 discount_rate = 0.003
-B = 10000  # total quantity of order loan
+B = 10000  # total quantity of credit loan
 ro = 0.015  # loan rate
 M = 10000
+
+finalValue = 0
 
 # tree 3
 demand_scenarios = [[[134, 28, 46], [246, 58, 58], [87, 24, 43]],
@@ -58,16 +60,17 @@ demand_possibility = [[0.103, 0.476, 0.421], [0.266, 0.34, 0.394]]
 # tree 2
 # demand_scenarios = [[[134, 32, 54], [246, 59, 56], [88, 37, 17]], [[345, 269, 481], [341, 302, 611], [156, 123, 184]]]
 # demand_possibility = [[0.102, 0.694, 0.204], [0.185, 0.556, 0.259]]
-# ## tree 1
-demand_scenarios = [[[133, 30, 49], [246, 58, 57], [87, 39, 20]], [[291, 468, 268], [597, 322, 293], [123, 124, 177]]]
-demand_possibility = [[0.1, 0.598, 0.302], [0.286, 0.318, 0.396]]
+
+# tree 1
+# demand_scenarios = [[[133, 30, 49], [246, 58, 57], [87, 39, 20]], [[291, 468, 268], [597, 322, 293], [123, 124, 177]]]
+# demand_possibility = [[0.1, 0.598, 0.302], [0.286, 0.318, 0.396]]
 
 
 for i in range(2):
         for j in range(3):
             for k in range(3):
                 demand_scenarios[i][j][k] = 2 * demand_scenarios[i][j][k]
-# overhead_cost = [2 * i for i in overhead_cost]  
+#overhead_cost = [2 * i for i in overhead_cost]  
 
 K = len(demand_possibility[0])  # scenario number in a period
 S = K ** T  # total scenario number
@@ -135,7 +138,7 @@ try:
             vari_costs_total[s][t] = sum([vari_costs[n] * Q[t][n][s] for n in range(N)])
             try:
                 if t == 0:
-                    C[t][s] = ini_cash + revenue_total[s][t] - vari_costs_total[s][t] - overhead_cost[t]
+                    C[t][s] = ini_cash + revenue_total[s][t] - vari_costs_total[s][t] - overhead_cost[t] + B
                 else:
                     C[t][s] = C[t - 1][s] + revenue_total[s][t] - vari_costs_total[s][t] - overhead_cost[t]
             except:
@@ -153,7 +156,7 @@ try:
         for n in range(N):
             for k in range(delay_length):
                 discounted_cash[s] = discounted_cash[s] + R[T + k][n][s] / (1 + discount_rate) ** (k + 1)
-    final_cash = sum([scenario_probs[s] * (C[T - 1][s] + discounted_cash[s]) for s in range(S)])
+    final_cash = sum([scenario_probs[s] * (C[T - 1][s] + discounted_cash[s]) for s in range(S)]) - B * (1+ro)**T
     expect_discounted_cash = sum([scenario_probs[s] * (discounted_cash[s]) for s in range(S)])
 
     # Set objective
@@ -214,8 +217,9 @@ try:
     for t in range(T):
         for n in range(N):
             for s in range(S):
-                m.addConstr(sum([scenarioLink[t][s1][s] * scenario_probs[s1] * Q[t][n][s1] for s1 in range(S)]) == \
-                            Q[t][n][s] * sum([scenarioLink[t][s1][s] * scenario_probs[s1] for s1 in range(S)]))
+                if t > 0 and t < T - 1:
+                    m.addConstr(sum([scenarioLink[t][s1][s] * scenario_probs[s1] * Q[t+1][n][s1] for s1 in range(S)]) == \
+                            Q[t+1][n][s] * sum([scenarioLink[t][s1][s] * scenario_probs[s1] for s1 in range(S)]))
                 m.addConstr(sum([scenarioLink[t][s1][s] * scenario_probs[s1] * I[t][n][s1] for s1 in range(S)]) == \
                             I[t][n][s] * sum([scenarioLink[t][s1][s] * scenario_probs[s1] for s1 in range(S)]))
                 m.addConstr(sum([scenarioLink[t][s1][s] * scenario_probs[s1] * delta[t][n][s1] for s1 in range(S)]) == \
@@ -322,6 +326,7 @@ try:
         f.write('final expected discounted cash is: %g\n' % expect_discounted_cash.getValue())
         f.write('final expected cash is: %g' % final_cash.getValue())
     print('final expected value is: %g' % m.objVal)
+    finalValue = m.objVal
 except GurobiError as e:
     print('Error code ' + str(e.errno) + ": " + str(e))
 
@@ -331,9 +336,10 @@ except AttributeError:
 toc = time.time()
 time_pass = toc - tic
 print('running time is %.2f' % time_pass)
+Q0 = [Qv[0][0][0], Qv[0][1][0], Qv[0][2][0]]
+print(Q0)
 
-# gv = [[[0 for s in range(S)] for n in range(N)] for t in range(T)]
-# r0 = 0
-# out_sample_value = check_outsample.check_value(Qv, Iv, deltav, gv, ini_I, prices, vari_costs, overhead_cost, scenarioLink, scenario_permulations,\
-#                 ini_cash, K, S, N, T, booming_demand, delay_length, discount_rate, r0, M, scenario_probs)
-# print('out of sample value is %.2f' % out_sample_value)
+out_sample_value = check_outsample.check_valueCredit(Q0, B, ini_I, prices, vari_costs, overhead_cost, scenarioLink, scenario_permulations,\
+                ini_cash, K, S, N, T, booming_demand, delay_length, discount_rate, ro, M, scenario_probs)
+print('final value is %.2f' % finalValue)
+print('out of sample value is %.2f' % out_sample_value)

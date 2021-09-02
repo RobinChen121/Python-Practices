@@ -30,13 +30,12 @@ T = 6
 delay_length = 2
 
 
-def mip(mean_demands, T, booming_demand, ini_cash, overhead_cost, delay_length):
+def mip(mean_demands, T, booming_demand, ini_cash, overhead_cost, delay_length, B, r0, discount_rate):
     ini_I = [0, 0, 0]
     prices = [189, 144, 239]
     vari_costs = [140, 70, 150]
 
     N = len(ini_I)
-    discount_rate = 0.01
     M = 10000
 
     try:
@@ -70,7 +69,7 @@ def mip(mean_demands, T, booming_demand, ini_cash, overhead_cost, delay_length):
             revenue_total[t] = sum([R[t][n]for n in range(N)])
             vari_costs_total[t] = sum([vari_costs[n] * Q[t][n]for n in range(N)])
             if t == 0:
-                C[t] = ini_cash + revenue_total[t] - vari_costs_total[t] - overhead_cost[t]
+                C[t] = ini_cash + revenue_total[t] - vari_costs_total[t] - overhead_cost[t] + B
             else:
                 C[t] = C[t - 1] + revenue_total[t] - vari_costs_total[t]- overhead_cost[t]
 
@@ -79,7 +78,7 @@ def mip(mean_demands, T, booming_demand, ini_cash, overhead_cost, delay_length):
         for n in range(N):
             for k in range(delay_length):
                 discounted_cash = LinExpr(discounted_cash + R[T+k][n] / (1 + discount_rate)**(k+1))
-        final_cash = LinExpr(C[T - 1] + discounted_cash)
+        final_cash = LinExpr(C[T - 1] + discounted_cash) - B * (1+r0)**T
 
         # Set objective
         m.update()
@@ -177,7 +176,8 @@ def mip(mean_demands, T, booming_demand, ini_cash, overhead_cost, delay_length):
         print('\n')
 
         print('Obj: %g' % m.objVal)
-        return Qv, m.objVal
+        Q0 = [Qv[0][0], Qv[0][1], Qv[0][2]]
+        return Q0, m.objVal
 
     except GurobiError as e:
         print('Error code ' + str(e.errno) + ": " + str(e))
@@ -185,7 +185,9 @@ def mip(mean_demands, T, booming_demand, ini_cash, overhead_cost, delay_length):
     except AttributeError:
         print('Encountered an attribute error')
 
-
-mip(mean_demands12, T, booming_demand, ini_cash, overhead_cost, delay_length)
+B = 10000
+r0 = 0.015
+discount_rate = 0.003
+mip(mean_demands12, T, booming_demand, ini_cash, overhead_cost, delay_length, B, r0, discount_rate)
 
 

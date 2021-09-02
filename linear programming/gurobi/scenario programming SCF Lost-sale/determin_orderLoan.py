@@ -17,22 +17,20 @@ Description:
 from gurobipy import *
 
 mean_demands12 = [[[46.5, 77, 38], [338, 389, 144]] for i in range(6)]
+for t in range(6):
+    for i in range(2):
+        for j in range(3):
+            mean_demands12[t][i][j] = 2 * mean_demands12[t][i][j]
 booming_demand = [0, 0, 0, 0, 1, 1]
-ini_cash = 20000
-overhead_cost = [4000 for t in range(6)]
-delay_length = 2
+overhead_cost = [2000 for t in range(6)]
 
-def mip(mean_demands, T, booming_demand, ini_cash, overhead_cost, delay_length):
+def mip(mean_demands12, T, booming_demand, ini_cash, overhead_cost, delay_length, B, r0, discount_rate):
     # parameter values
     ini_I = [0, 0, 0]
     prices = [189, 144, 239]
     vari_costs = [140, 70, 150]
-    B = 10000  # total quantity of order loan
-    r0 = 0.015  # loan rate
-
     N = len(ini_I)
 
-    discount_rate = 0.01
     M = 1000000
 
     try:
@@ -97,16 +95,17 @@ def mip(mean_demands, T, booming_demand, ini_cash, overhead_cost, delay_length):
         for n in range(N):
             for t in range(T):
                 index2 = booming_demand[t]
+                demand = mean_demands12[t][index2][n]
                 if t == 0:
-                    m.addConstr(I[t][n] <= ini_I[n] + Q[t][n] - mean_demands[t][index2][n] + (1 - delta[t][n]) * M)
-                    m.addConstr(I[t][n] >= ini_I[n] + Q[t][n] - mean_demands[t][index2][n] - (1 - delta[t][n]) * M)
-                    m.addConstr(ini_I[n] + Q[t][n] - mean_demands[t][index2][n] <= delta[t][n] * M - 0.1)
-                    m.addConstr(ini_I[n] + Q[t][n] >= mean_demands[t][index2][n] - (1 - delta[t][n]) * M)
+                    m.addConstr(I[t][n] <= ini_I[n] + Q[t][n] - demand + (1 - delta[t][n]) * M)
+                    m.addConstr(I[t][n] >= ini_I[n] + Q[t][n] - demand - (1 - delta[t][n]) * M)
+                    m.addConstr(ini_I[n] + Q[t][n] - demand <= delta[t][n] * M - 0.1)
+                    m.addConstr(ini_I[n] + Q[t][n] >= demand - (1 - delta[t][n]) * M)
                 else:
-                    m.addConstr(I[t][n] <= I[t - 1][n] + Q[t][n] - mean_demands[t][index2][n] + (1 - delta[t][n]) * M)
-                    m.addConstr(I[t][n] >= I[t - 1][n] + Q[t][n] - mean_demands[t][index2][n] - (1 - delta[t][n]) * M)
-                    m.addConstr(I[t - 1][n] + Q[t][n] - mean_demands[t][index2][n] <= delta[t][n] * M - 0.1)
-                    m.addConstr(I[t - 1][n] + Q[t][n] >= mean_demands[t][index2][n] - (1 - delta[t][n]) * M)
+                    m.addConstr(I[t][n] <= I[t - 1][n] + Q[t][n] - demand + (1 - delta[t][n]) * M)
+                    m.addConstr(I[t][n] >= I[t - 1][n] + Q[t][n] - demand - (1 - delta[t][n]) * M)
+                    m.addConstr(I[t - 1][n] + Q[t][n] - demand <= delta[t][n] * M - 0.1)
+                    m.addConstr(I[t - 1][n] + Q[t][n] >= demand - (1 - delta[t][n]) * M)
                 m.addConstr(I[t][n] <= delta[t][n] * M)
 
         # cash constraint
@@ -138,7 +137,11 @@ def mip(mean_demands, T, booming_demand, ini_cash, overhead_cost, delay_length):
             for t in range(T):
                 total_loan += prices[n] * g[t][n]
         m.addConstr(total_loan <= B)
-
+        
+        Q0 = [0, 154, 9.8]
+        for n in range(N):
+            m.addConstr(Q[0][n] <= Q0[n])
+            
         # solve
         m.optimize()
         print('')
@@ -154,73 +157,75 @@ def mip(mean_demands, T, booming_demand, ini_cash, overhead_cost, delay_length):
             for t in range(T):
                 gv[t][n] = g[t][n].X
 
-        # print('*********************************')
-        # print('ordering quantity Q:')
-        # for n in range(N):
-        #     print('item %d:' % n)
-        #     for t in range(T):
-        #         print('%.1f' % Q[t][n].X, end=' ')
-        #         Qv[t][n] = Q[t][n].X
-        #     print('')
-        # print('*********************************')
-        #
-        # gv = [[0 for n in range(N)] for t in
-        #       range(T)]
-        # print('order loan quantity g:')
-        # for n in range(N):
-        #     print('item %d:' % n)
-        #     for t in range(T):
-        #         print('%.1f' % g[t][n].X, end=' ')
-        #         gv[t][n] = g[t][n].X
-        #     print('')
-        # print('*********************************')
-        #
-        # print('end-of-period inventory I:')
-        # for n in range(N):
-        #     print('item %d:' % n)
-        #     for t in range(T):
-        #         print('%.1f' % I[t][n].X, end=' ')
-        #     print('')
-        # print('*********************************')
-        #
-        # print('values of delta:')
-        # for n in range(N):
-        #     print('item %d:' % n)
-        #     for t in range(T):
-        #         print('%.1f' % delta[t][n].X, end=' ')
-        #     print('')
-        # print('*********************************')
-        #
-        # print('revenue R:')
-        # for n in range(N):
-        #     print('item %d:' % n)
-        #     for t in range(T):
-        #         print('%.1f' % R[t][n].getValue(), end=' ')
-        #     print('')
-        # print('*********************************')
-        #
-        # print('total revenue in each period:')
-        # for t in range(T):
-        #     print('%.1f' % revenue_total[t].getValue(), end=' ')
-        # print('\n')
-        #
-        # print('total vari costs in each period:')
-        # for t in range(T):
-        #     print('%.1f' % vari_costs_total[t].getValue(), end=' ')
-        # print('\n')
-        #
-        # if not isinstance(discounted_cash, int):
-        #     print('totoal discounted cash: ')
-        #     print('%.1f\n' % discounted_cash.getValue())
-        #
-        # print('end-of-period cash C:')
-        # for t in range(T):
-        #     print('%.1f' % C[t].getValue(), end=' ')
-        # print('\n')
-        #
+        print('*********************************')
+        print('ordering quantity Q:')
+        for n in range(N):
+            print('item %d:' % n)
+            for t in range(T):
+                print('%.1f' % Q[t][n].X, end=' ')
+                Qv[t][n] = Q[t][n].X
+            print('')
+        print('*********************************')
+        
+        gv = [[0 for n in range(N)] for t in
+              range(T)]
+        print('order loan quantity g:')
+        for n in range(N):
+            print('item %d:' % n)
+            for t in range(T):
+                print('%.1f' % g[t][n].X, end=' ')
+                gv[t][n] = g[t][n].X
+            print('')
+        print('*********************************')
+        
+        print('end-of-period inventory I:')
+        for n in range(N):
+            print('item %d:' % n)
+            for t in range(T):
+                print('%.1f' % I[t][n].X, end=' ')
+            print('')
+        print('*********************************')
+        
+        print('values of delta:')
+        for n in range(N):
+            print('item %d:' % n)
+            for t in range(T):
+                print('%.1f' % delta[t][n].X, end=' ')
+            print('')
+        print('*********************************')
+        
+        print('revenue R:')
+        for n in range(N):
+            print('item %d:' % n)
+            for t in range(T):
+                print('%.1f' % R[t][n].getValue(), end=' ')
+            print('')
+        print('*********************************')
+        
+        print('total revenue in each period:')
+        for t in range(T):
+            print('%.1f' % revenue_total[t].getValue(), end=' ')
+        print('\n')
+        
+        print('total vari costs in each period:')
+        for t in range(T):
+            print('%.1f' % vari_costs_total[t].getValue(), end=' ')
+        print('\n')
+        
+        if not isinstance(discounted_cash, int):
+            print('totoal discounted cash: ')
+            print('%.1f\n' % discounted_cash.getValue())
+        
+        print('end-of-period cash C:')
+        for t in range(T):
+            print('%.1f' % C[t].getValue(), end=' ')
+        print('\n')
+        
         print('Obj: %g' % m.objVal)
-
-        return Qv, gv, m.objVal
+        Q0 = [Qv[0][0], Qv[0][1], Qv[0][2]]
+        print(Q0)
+        return Q0, gv, m.objVal
+        
     except GurobiError as e:
         print('Error code ' + str(e.errno) + ": " + str(e))
 
@@ -229,4 +234,9 @@ def mip(mean_demands, T, booming_demand, ini_cash, overhead_cost, delay_length):
 
 
 T = 6
-mip(mean_demands12, T, booming_demand, ini_cash, overhead_cost, delay_length)
+B = 10000
+r0 = 0.015
+discount_rate = 0.003
+ini_cash = 30000
+delay_length = 3
+mip(mean_demands12, T, booming_demand, ini_cash, overhead_cost, delay_length, B, r0, discount_rate)

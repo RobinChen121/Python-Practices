@@ -26,23 +26,26 @@ def distance(index1, index2, boomingIndex):
         set2[i] = demand_scenarios[k][i][index2]
 
 inSample_values = []
-for nn in range(50, 60, 20):  # scenario number after reducing
-
-
+for nn in range(20, 220, 20):  # scenario number after reducing
     # tree 2
     demand_scenarios = [[[134, 32, 54], [246, 59, 56], [88, 37, 17]],
                         [[345, 269, 481], [341, 302, 611], [156, 123, 184]]]
     demand_possibility = [[0.102, 0.694, 0.204], [0.185, 0.556, 0.259]]
 
-    # tree 1
-    demand_scenarios = [[[133, 30, 49], [246, 58, 57], [87, 39, 20]],
-                        [[291, 468, 268], [597, 322, 293], [123, 124, 177]]]
-    demand_possibility = [[0.1, 0.598, 0.302], [0.286, 0.318, 0.396]]
+    #tree 1
+    # demand_scenarios = [[[133, 30, 49], [246, 58, 57], [87, 39, 20]],
+    #                     [[291, 468, 268], [597, 322, 293], [123, 124, 177]]]
+    # demand_possibility = [[0.1, 0.598, 0.302], [0.286, 0.318, 0.396]]
 
-#    # tree 3
-#    demand_scenarios = [[[134, 28, 46], [246, 58, 58], [87, 24, 43]],
-#                        [[481, 317, 259], [608, 311, 309], [134, 181, 121]]]
-#    demand_possibility = [[0.103, 0.476, 0.421], [0.266, 0.34, 0.394]]
+    # #tree 3
+    # demand_scenarios = [[[134, 28, 46], [246, 58, 58], [87, 24, 43]],
+    #                     [[481, 317, 259], [608, 311, 309], [134, 181, 121]]]
+    # demand_possibility = [[0.103, 0.476, 0.421], [0.266, 0.34, 0.394]]
+
+    for i in range(2):
+        for j in range(3):
+            for k in range(3):
+                demand_scenarios[i][j][k] = 2 * demand_scenarios[i][j][k]
 
     booming_demand = [0, 0, 0, 0, 1, 1]
     scenario_selected = []  # index of selected scenario
@@ -83,8 +86,7 @@ for nn in range(50, 60, 20):  # scenario number after reducing
                 index1 = scenario_permutations[i][k]
                 index2 = scenario_permutations[j][k]
                 boomingIndex = booming_demand[k]
-                d[i][j] += (scenario_permutations[i][k] - scenario_permutations[j][
-                    k]) ** 2  # distance(index1, index2, boomingIndex)
+                d[i][j] += (scenario_permutations[i][k] - scenario_permutations[j][k]) ** 2  # distance(index1, index2, boomingIndex)
             d[i][j] = math.sqrt(d[i][j])
             d[j][i] = d[i][j]
     while K <= scenario_num_need:
@@ -143,7 +145,9 @@ for nn in range(50, 60, 20):  # scenario number after reducing
     #     print(scenario)
     scenario_selected.sort()
     # or select_noloan
-    value = select_orderloan.select_mip(scenario_selected, demand_scenarios, demand_possibility, booming_demand, T,
+    #value = select_orderloan.select_mip(scenario_selected, demand_scenarios, demand_possibility, booming_demand, T,
+#
+    value = select_orderloan.select_mip_creditLoan(scenario_selected, demand_scenarios, demand_possibility, booming_demand, T,
                                         delay_length)
     inSample_values.append(value)
 

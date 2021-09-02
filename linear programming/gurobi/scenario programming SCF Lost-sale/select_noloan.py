@@ -24,8 +24,8 @@ def select_mip(scenario_selected, demand_scenarios, demand_possibility, booming_
     prices = [189, 144, 239]
     vari_costs = [140, 70, 150]
     ini_cash = 20000
-    overhead_cost = [2000, 2000, 2000, 2000, 2000, 2000]
-    discount_rate = 0.01
+    overhead_cost = [2 * i for i in overhead_cost]
+    discount_rate = 0.003
     B = 10000  # total quantity of order loan
     ro = 0.015  # loan rate
     MM = 10000
@@ -212,6 +212,12 @@ def select_mip(scenario_selected, demand_scenarios, demand_possibility, booming_
                     m.addConstr(
                         sum([scenarioLink[t][s1][s] * scenario_probs[s1] * delta[t][n][s1] for s1 in range(M)]) == \
                         delta[t][n][s] * sum([scenarioLink[t][s1][s] * scenario_probs[s1] for s1 in range(M)]))
+        
+        # first-stage decision
+        for s in range(M-1):
+            for n in range(N):
+                m.addConstr(Q[0][n][s] == Q[0][n][s+1])
+        
         # solve
         m.update()
         m.optimize()

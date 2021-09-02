@@ -80,11 +80,11 @@ sigmas = [[0.6, 0.26], [0.66, 0.33], [0.46, 0.18]]
 #mus = [[3.66, 5.79], [4.13, 5.91]]
 #sigmas = [[0.6, 0.26], [0.66, 0.33]]
 N = len(mus)
-sample_nums = [5, 5, 5, 3, 3, 3]
+sample_nums = [3, 3, 3, 3, 3, 3]
 trunQuantile = 0.9999
 
-#samples = generate_sample(sample_nums, trunQuantile, mus, sigmas, booming_demand[0:T])
-samples = cPickle.load(open("data1.pkl", "rb"))
+samples = generate_sample(sample_nums, trunQuantile, mus, sigmas, booming_demand[0:T])
+# samples = cPickle.load(open("datas/data1.pkl", "rb"))
 
 S = np.prod(sample_nums[0:T])
 arr = []
@@ -92,6 +92,17 @@ for t in range(T):
     arr.append(range(sample_nums[t]))
 scenario_permulations = list(itertools.product(*arr))
 
+
+# set values for scenario links: whether scenario i links with scenario j in period t
+scenarioLink = [[[0 for s in range(S)] for s in range(S)] for t in range(T)]
+for t in range(T):
+    node_scenario_num = round(np.prod(sample_nums[t+1:T]))  # number of scenarios in a node in a period
+    node_num = np.prod(sample_nums[0:t+1])  # total number of slices
+    for i in range(node_num):
+        for j in range(node_scenario_num * i, node_scenario_num * (i + 1)):
+            for k in range(node_scenario_num * i, node_scenario_num * (i + 1)):
+                scenarioLink[t][j][k] = 1
+                
 tic = time.time()
 try:
     # Create a new model
@@ -188,11 +199,11 @@ try:
             else:       
                 m.addConstr(C[t - 1][s]  >= sum([vari_costs[n] * Q[t][n][s] for n in range(N)]) + overhead_cost[t]) # cash constaints  
     
-    # non-negavtivety of I_t
-    for s in range(S):
-        for n in range(N):
-            for t in range(T):
-                m.addConstr(I[t][n][s] >= 0)
+    # non-negavtivety of I_t, not necessary
+#    for s in range(S):
+#        for n in range(N):
+#            for t in range(T):
+#                m.addConstr(I[t][n][s] >= 0)
     
      # order loan quantity less than realized demand
      # careful, there is no delay_length in this constraint
@@ -218,6 +229,22 @@ try:
         for n in range(N):
             for t in range(T):
                 m.addConstr(g[t][n][s] == 0)
+                
+    # non-anticipativity 
+    # there should not be non-antivity constraints in SAA, otherwise SAA is not worthy computing
+    # s1 与 s 的顺序没啥影响       
+    # no need for R, C
+    # for t in range(T):
+    #     for n in range(N):
+    #         for s in range(S):
+    #             m.addConstr(sum([scenarioLink[t][s1][s] * (1/S)* Q[t][n][s1] for s1 in range(S)]) == \
+    #                         Q[t][n][s] * sum([scenarioLink[t][s1][s] * (1 / S) for s1 in range(S)]))
+    #             m.addConstr(sum([scenarioLink[t][s1][s] * (1/S) * I[t][n][s1] for s1 in range(S)]) == \
+    #                         I[t][n][s] * sum([scenarioLink[t][s1][s] * (1 / S) for s1 in range(S)]))
+    #             m.addConstr(sum([scenarioLink[t][s1][s] * (1/S) * delta[t][n][s1] for s1 in range(S)]) == \
+    #                         delta[t][n][s] * sum([scenarioLink[t][s1][s] * (1 / S) for s1 in range(S)]))
+    #             m.addConstr(sum([scenarioLink[t][s1][s] * (1/S) * g[t][n][s1] for s1 in range(S)]) == \
+    #                         g[t][n][s] * sum([scenarioLink[t][s1][s] * (1 / S) for s1 in range(S)]))
                 
     # first-stage decision
     for s in range(S-1):
@@ -246,10 +273,6 @@ try:
         for n in range(N):
             f.write('item %d: ' % n)
             f.write('%.1f ' % Q[0][n][0].X)  
-        print('ordering quantity Q in the first period:\n')
-        for n in range(N):
-            print('item %d: ' % n)
-            print('%.1f ' % Q[0][n][0].X) 
         f.write('\n*********************************\n')
         f.write('ordering quantity Q in each scenario:\n')
         for s in range(S):
