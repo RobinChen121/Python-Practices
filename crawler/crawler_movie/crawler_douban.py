@@ -21,6 +21,9 @@ from collections import Counter # 计算列表中元素的包，counter the num 
 import collections
 import matplotlib.pyplot as plt # 画图的包
 from pylab import mpl  # 设置图形中字体样式与大小的包
+import numpy as np
+
+
 mpl.rcParams['font.sans-serif'] = ['SimHei'] 
 mpl.rcParams['font.size'] = 6.0
 
@@ -213,6 +216,8 @@ for i in range(10):
     labels.append(list(result_sort.keys())[i])
 values.append(othervalue)
 labels.append('其他地区')
+
+plt.figure(1)
 plt.rcParams['savefig.dpi'] = 200 # 定义图形清晰度，set dpi for figure, affect the figure's size
 plt.rcParams['figure.dpi'] = 200 #set dpi for figure
 w, l, p  = plt.pie(values, explode = [0.02 for i in range(11)], labels = labels, pctdistance = 0.8, 
@@ -222,6 +227,7 @@ plt.title('豆瓣 TOP250 电影来源地', y = -0.1)
 plt.show()
 
 # 分析电影类型，analysis categories
+plt.figure(2)
 categories = []
 for i in range(len(category_list)):
     category = category_list[i].split(' ') 
@@ -281,7 +287,7 @@ cloud = WordCloud(
 #wc = cloud.generate(words) # 这种方法对中文支持不太好，this mehtod is better for only english string
 wc = cloud.generate_from_frequencies(text_result)
 wc.to_file("豆瓣 TOP 250 词云.jpg") 
-plt.figure()
+plt.figure(3)
 plt.imshow(wc)
 plt.axis('off')
 plt.title('豆瓣 TOP 250 电影代表性评论的词云分析')
@@ -296,7 +302,13 @@ labels=[]
 for i in range(10):
     labels.append(list(star_sort.keys())[i])
     values.append(list(star_sort.values())[i])
-bar = plt.barh(range(10), width = values, tick_label = labels, color = 'rgbycmrgby')
+
+number = 10
+cmap = plt.get_cmap('gnuplot')
+colors = [cmap(i) for i in np.linspace(0, 1, number)]
+
+plt.figure(4)
+bar = plt.barh(range(10), width = values, tick_label = labels, color = colors)
 for i, v in enumerate(values): # 柱状图添加数字
     plt.text(v + 0.05, i - 0.1, str(v), color = 'blue', fontweight = 'bold')
 plt.xlim(xmax = 10, xmin = 8)
@@ -312,9 +324,11 @@ labels=[]
 for i in range(10):
     labels.append(list(review_sort.keys())[i])
     values.append(list(review_sort.values())[i])
-bar = plt.barh(range(10), width = values, tick_label = labels, color = 'rgbycmrgby')
+
+plt.figure(5)
+bar = plt.barh(range(10), width = values, tick_label = labels, color = colors) # , color = 'rgbycmrgby'
 for i, v in enumerate(values): # 柱状图添加数字
     plt.text(v + 10000, i - 0.1, str(v), color = 'blue', fontweight = 'bold')
-plt.xlim(xmax = 1450000, xmin = 400000)
+plt.xlim(xmax = 2550000, xmin = 1400000)
 plt.title('评分人数最多的十部电影')
 plt.show()
