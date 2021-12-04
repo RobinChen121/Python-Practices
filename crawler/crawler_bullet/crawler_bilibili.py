@@ -21,7 +21,7 @@ from pprint import pprint
 
 
 # 若直接找到了 cid， 这个也可以不用
-# 1.根据bvid请求得到cid
+# 1.根据bvid请求得到cid，每个b站视频网址都有一个bvid
 def get_cid():
     url = 'https://api.bilibili.com/x/player/pagelist?bvid=BV1PK4y1b7dt&jsonp=jsonp'
     res = requests.get(url).text

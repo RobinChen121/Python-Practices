@@ -16,6 +16,7 @@ import requests  # 联系网络的包，a package for requesting from websites
 from bs4 import BeautifulSoup  # 分析网页数据的包，a package for webstie data analysis
 import time
 import random
+import os
 
 
 # 获取单个网页信息
@@ -53,7 +54,9 @@ def get_url_links(url_head_content):
 
 # 将每章内容输出到 txt 文档里
 def write_txt(string_array):
-    file_address = 'E:/爬虫练习/三国演义/'  # txt 存放地址
+    file_address = 'E:/三国演义/'  # txt 存放地址
+    if not os.path.exists(file_address):       #用os库判断对应文件夹是否存在
+        os.makedirs(file_address)              #如果没有对应文件夹则自动生成 
     file_name = string_array[0]
     with open(file_address + file_name + '.txt', 'w', encoding='utf-8') as f: # 必须跟解码形式，不然有的网页中文内容写不到txt里
         f.write(string_array[1])
@@ -72,4 +75,6 @@ def main():
 # 运行函数
 main()
 
+
+    
 

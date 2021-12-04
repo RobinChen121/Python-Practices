@@ -29,7 +29,7 @@ def getKeywordResult(keyword):
 def parserLinks(html):
     soup = BeautifulSoup(html, "html.parser")
     links = []
-    for div in soup.find_all('div', {'data-tools': re.compile('title')}):
+    for div in soup.find_all('div', {'data-tools': re.compile('title')}): # 字典类型定义特殊的标签
         data = div.attrs['data-tools']  #获得属性值
         d = json.loads(data)        #将属性值转换成字典
         links.append(d['title'])    #将返回链接的题目返回
