@@ -134,7 +134,7 @@ try:
             period  = t + 1
             f.write('period %d: ' % period)
             for s in range(scenario_num):
-                f.write('%.2f ' % Iplus[t][s].X)
+                f.write('%.2f ' % Iplus[t][s].x)
             f.write('\n')
         f.write('\n')
         f.write('end-of-period cash in each period---------\n')

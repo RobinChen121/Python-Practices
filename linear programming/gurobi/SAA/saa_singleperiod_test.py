@@ -31,7 +31,7 @@ price  =  6
 vari_cost = 2
 sal_value = 1
 mean_demands = 5
-sample_num = 10
+sample_num = 100
 trunQuantile = 0.999
 
 samples = generate_sample(sample_num, trunQuantile, mean_demands)
