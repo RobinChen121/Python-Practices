@@ -10,7 +10,8 @@ MIT Licence.
 Python version: 3.8
 
 
-Description: test sddp in multi period newsvendor problems
+Description: test sddp in multi period newsvendor problems,
+the state variables are also decision variables in the linear programming models.
     
 """
 

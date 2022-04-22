@@ -123,7 +123,7 @@ try:
                         m1.addConstr(x[i] <= math.floor(x_value[i]))
                         break
                 if sum(all_integer) == n:
-                    z_ub = m1.objVal
+                    z_ub = c @ x_value + nita_value
                     if abs(z_ub - z_lb) < 1e-6:
                         print('Obj: %g' % m1.objVal)
                         print('x = ')

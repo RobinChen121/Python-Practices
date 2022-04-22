@@ -37,19 +37,20 @@ def generate_sample(sample_num, trunQuantile, mus):
     return samples
         
   
-iniCash = 200
+iniCash = 150
 iniI = 0
-price  =  [22, 22, 22]
+price  =  [22, 22, 22, 22]
 variCostUnit = 10
-sal_value = 0.5
-mean_demands = [10, 10, 10]
-sample_nums = [10, 10, 10]
-service_rate = 0.8
+sal_value = 5
+mean_demands = [10, 5, 10, 5]
+sample_nums = [5, 5, 5, 5]
+service_rate = 0.6
+unit_hold = 1
 
 T = len(mean_demands)
-overheadCost = [150 for t in range(T)]
+overheadCost = [100 for t in range(T)]
 
-trunQuantile = 0.9999
+trunQuantile = 0.999
 S = reduce(lambda x, y: x * y, sample_nums[0:T], 1) # total scenario number
 
 samples = generate_sample(sample_nums, trunQuantile, mean_demands)
@@ -87,7 +88,7 @@ try:
             M1 = sCumDemand
     
     M2 = iniCash + price[0] * M1;
-    M3 = variCostUnit * M1 + sum(overheadCost) - iniCash
+    M3 = unit_hold*T*iniI + variCostUnit * M1 + sum(overheadCost) - iniCash
     
     
     # Set objective
@@ -121,13 +122,13 @@ try:
     for t in range(T):
         for s in range(S):
             if t == 0 and T > 1: # end-of-period cash balance in the first period
-                cash[t][s] = iniCash + price[t] * (iniI + Q[t][s] - I[t][s]) - variCostUnit * Q[t][s] - overheadCost[t]
+                cash[t][s] = iniCash + price[t] * (iniI + Q[t][s] - I[t][s]) - unit_hold * I[t][s] - variCostUnit * Q[t][s] - overheadCost[t]
             elif t == 0 and T <= 1:
-                cash[t][s] = iniCash + price[t] * (iniI + Q[t][s] - I[t][s]) - variCostUnit * Q[t][s] - overheadCost[t] + sal_value * I[t][s]
+                cash[t][s] = iniCash + price[t] * (iniI + Q[t][s] - I[t][s]) - unit_hold * I[t][s] - variCostUnit * Q[t][s] - overheadCost[t] + sal_value * I[t][s]
             elif t == T - 1 and T > 1:
-                cash[t][s] = cash[t-1][s] + price[t] * (I[t-1][s] + Q[t][s] - I[t][s]) - variCostUnit * Q[t][s] - overheadCost[t] + sal_value * I[t][s]
+                cash[t][s] = cash[t-1][s] + price[t] * (I[t-1][s] + Q[t][s] - I[t][s]) - unit_hold * I[t][s] - variCostUnit * Q[t][s] - overheadCost[t] + sal_value * I[t][s]
             else:
-                cash[t][s] = cash[t-1][s] + price[t] * (I[t-1][s] + Q[t][s] - I[t][s]) - variCostUnit * Q[t][s] - overheadCost[t]
+                cash[t][s] = cash[t-1][s] + price[t] * (I[t-1][s] + Q[t][s] - I[t][s]) - unit_hold * I[t][s] - variCostUnit * Q[t][s] - overheadCost[t]
 
     m.update()    
     

@@ -18,6 +18,8 @@ Description: test sddp in a single period news vender problem
 import numpy as np
 import scipy.stats as st
 from gurobipy import *
+import math
+import random
 
 
 # generate latin hypercube samples 
@@ -32,13 +34,13 @@ def generate_sample(sample_num, trunQuantile, mu):
 price  =  6
 vari_cost = 2
 sal_value = 1
-mean_demands = 5
-sample_num = 10
+mean_demands = 10
+sample_num = 100
 trunQuantile = 0.9999 # affective to the final ordering quantity
 
 samples = generate_sample(sample_num, trunQuantile, mean_demands)
    
-ini_Q = 5
+ini_Q = 6
 ini_Obj = float("inf") # largest float number
 
 ## compute seconde stage objective in each scenario
@@ -82,7 +84,12 @@ while True:
         Dpi2[i] = -pi[1] * samples[i]
         print()    
    
-    avg_obj = sum(obj)/N
+    avg_obj = sum(obj)/N    
+    M = round(0.5*N)
+    obj2 = random.choices(obj, k=M)
+    avg_obj2 = sum(obj2)/N 
+    var_obj2 = sum([(obj2[i] - avg_obj2)**2 for i in range(M)]) / (M-1)
+    std_obj2 = math.sqrt(var_obj2)
     avg_g = sum(g)/N
     avg_pi1 = sum(pi1)/N
     avg_Dpi2 = sum(Dpi2)/N
@@ -97,9 +104,22 @@ while True:
     print()
     
     k = k + 1
-    # if abs(nita_value - last_nita) < 1e-3 and k > 4:
-    if abs(master_obj - last_master_obj) < 1e-1 and k > 4: # same effect with the above line
+    # if abs(nita_value - avg_obj) < 1e-2 and k > 4: 
+    #     break
+
+    lb = avg_obj2 - 1.96*std_obj2/math.sqrt(M)
+    ub = avg_obj2 + 1.96*std_obj2/math.sqrt(M)    
+    # print(nita_value)
+    # print(lb)
+    # print(ub)  
+    # print(Q)
+    # if nita_value >= lb and nita_value <= ub:
+    #     break
+    # if abs(ub-lb) < 0.8:
+    #     break
+    if abs(last_master_obj - master_obj) < 1e-2 and k > 4:  # 这个终止条件最好
         break
+
 
 print('iteration steps are %d' % k)    
 print('ordering quantity is %.2f' % Q)

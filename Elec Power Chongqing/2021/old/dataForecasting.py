@@ -84,6 +84,7 @@ plt.plot(range(366), group_data['sum'], 'm', label = '原始数据')
 plt.plot(range(380), predict, 'r:', label = '预测数据')
 plt.legend()
 plt.show()
+plt.savefig('forecast.png', dpi=1000)
 
 
 # df1 = ini_data[ini_data.户号对应 == 1]
