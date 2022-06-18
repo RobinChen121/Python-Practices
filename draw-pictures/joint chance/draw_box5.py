@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Created on Thu May  5 14:05:23 2022
+Created on Wed May 11 16:07:24 2022
 
 @author: zhen chen
 @Email: chen.zhen5526@gmail.com
@@ -10,7 +10,7 @@ MIT Licence.
 Python version: 3.8
 
 
-Description: about the impact of different holding cost
+Description: 
     
 """
 import matplotlib.pyplot as plt
@@ -22,7 +22,7 @@ pd.options.mode.chained_assignment = None  # default='warn'
 
 
 datas = pd.read_excel(r'D:\Users\chen_\git\Numerical-tests\joint chance datas\JointChanceSAA5Periods-normalDist.xls')
-df = datas[['demand mode', 'serviceRate', 'scenario number', 'iniCash', 'sigmaCoe', 'sim SAA obj', 'sim SAA service rate', 'sim extend SAA obj', 'sim extend SAA service', 'holdCost']]
+df = datas[['demand mode', 'serviceRate', 'scenario number', 'price', 'iniCash', 'sigmaCoe', 'sim SAA obj', 'sim SAA service rate', 'sim extend SAA obj', 'sim extend SAA service', 'holdCost']]
 demandPatterns = ['STA', 'LC1', 'LC2', 'SIN1', 'SIN2', 'RAND', 'EMP1', 'EMP2', 'EMP3', 'EMP4']
 
 df['sim extend SAA service'] = df['sim extend SAA service'] *100
@@ -30,10 +30,10 @@ df['sim SAA service rate'] = df['sim SAA service rate'] *100
 df['sim extend SAA obj'] = df['sim extend SAA obj'] *100
 df['sim SAA obj'] = df['sim SAA obj'] *100
 
-df1 = df[(df.serviceRate == 0.6) & (df.sigmaCoe == 0.25) & (df.iniCash == 40) & (df['scenario number']==3125)]
+df1 = df[(df.serviceRate == 0.6) & (df.holdCost == 0) & (df.sigmaCoe == 0.25) & (df['scenario number']==3125)]
 plt.close('all')
 plt.figure()
-fig1 = sns.boxplot(x="demand mode", y="sim extend SAA service", hue="holdCost",
+fig1 = sns.boxplot(x="demand mode", y="sim extend SAA service", hue="price",
                  data=df1, palette="Set3")
 plt.xticks(np.arange(0, 10), demandPatterns)
 plt.xlabel('demand patterns')
@@ -43,7 +43,7 @@ plt.axhline(y=60, xmin=0.01, xmax=0.99, ls='--', label = 'required service rate'
 plt.legend()
 
 plt.figure()
-fig2 = sns.boxplot(x="demand mode", y="sim SAA service rate", hue="holdCost",
+fig2 = sns.boxplot(x="demand mode", y="sim SAA service rate", hue="price",
                  data=df1, palette="Set3")
 plt.axhline(y=60, xmin=0.01, xmax=0.99, ls='--', label = 'required service rate')
 plt.xticks(np.arange(0, 10), demandPatterns)
@@ -53,7 +53,7 @@ plt.ylim([0, 100])
 fig2.legend()
 
 plt.figure()
-fig3 = sns.boxplot(x="demand mode", y="sim extend SAA obj", hue="holdCost", data=df1, palette="Set3")
+fig3 = sns.boxplot(x="demand mode", y="sim extend SAA obj", hue="price", data=df1, palette="Set3")
 plt.xticks(np.arange(0, 10), demandPatterns)
 plt.xlabel('demand patterns')
 plt.ylabel('survival probability')
@@ -64,7 +64,7 @@ plt.legend()
 
 
 plt.figure()
-fig4 = sns.boxplot(x="demand mode", y="sim SAA obj", hue="holdCost",
+fig4 = sns.boxplot(x="demand mode", y="sim SAA obj", hue="price",
                  data=df1, palette="Set3")
 plt.xticks(np.arange(0, 10), demandPatterns)
 plt.xlabel('demand patterns')
@@ -74,14 +74,14 @@ plt.legend()
 # figure = fig4.get_figure() 
 # figure.savefig(r'D:\Users\chen_\git\Numerical-tests\joint chance datas\scenarioNum_SAAObj.eps', dpi=3000)
 
-df2 = df1[['demand mode', 'holdCost', 'sim extend SAA service', "sim SAA service rate", "sim extend SAA obj", "sim SAA obj"]].round(1)
-service_values1 = df2.groupby(['demand mode', 'holdCost'])["sim extend SAA service"].apply(lambda df1: df1.reset_index(drop=True)).unstack()
-service_values2 = df2.groupby(['demand mode', 'holdCost'])["sim SAA service rate"].apply(lambda df1: df1.reset_index(drop=True)).unstack()
-service_values3 = df2.groupby(['demand mode', 'holdCost'])["sim extend SAA obj"].apply(lambda df1: df1.reset_index(drop=True)).unstack()
-service_values4 = df2.groupby(['demand mode', 'holdCost'])["sim SAA obj"].apply(lambda df1: df1.reset_index(drop=True)).unstack()
+df2 = df1[['demand mode', 'price', 'sim extend SAA service', "sim SAA service rate", "sim extend SAA obj", "sim SAA obj"]].round(2)
+service_values1 = df2.groupby(['demand mode', 'price'])["sim extend SAA service"].apply(lambda df1: df1.reset_index(drop=True)).unstack()
+service_values2 = df2.groupby(['demand mode', 'price'])["sim SAA service rate"].apply(lambda df1: df1.reset_index(drop=True)).unstack()
+service_values3 = df2.groupby(['demand mode', 'price'])["sim extend SAA obj"].apply(lambda df1: df1.reset_index(drop=True)).unstack()
+service_values4 = df2.groupby(['demand mode', 'price'])["sim SAA obj"].apply(lambda df1: df1.reset_index(drop=True)).unstack()
 
 
-names = ['hold_extendService','hold_SAAService', 'hold_extendObj', 'hold_SAAObj']
+names = ['price_extendService','price_SAAService', 'price_extendObj', 'price_SAAObj']
 row_num = service_values1.shape[0]
 col_num = service_values1.shape[1]
 for k in range(1, 5):
