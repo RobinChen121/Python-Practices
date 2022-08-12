@@ -54,9 +54,9 @@ S = K ** T  # total scenario number
 # set values for scenario links: whether scenario i links with scenario j in period t
 scenarioLink = [[[0 for s in range(S)] for s in range(S)] for t in range(T)]
 for t in range(T):
-    slices = round(S * (1 / K) ** (t + 1))  # number of scenario in a slice
-    slice_num = round(K ** (t + 1))  # totoal number of slices
-    for i in range(slice_num):
+    slices = round(S * (1 / K) ** (t + 1))  # number of slices in a node
+    node_num = round(K ** (t + 1))  # totoal number of nodes in period t
+    for i in range(node_num):
         for j in range(slices * i, slices * (i + 1)):
             for k in range(slices * i, slices * (i + 1)):
                 scenarioLink[t][j][k] = 1
