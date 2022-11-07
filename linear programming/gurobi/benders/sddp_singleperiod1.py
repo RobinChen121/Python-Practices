@@ -10,8 +10,8 @@ MIT Licence.
 Python version: 3.8
 
 
-Description: test sddp in a single period news vender problem:
-second stage decision variable is selling quantity y
+Description: test sddp in a single period news vender problem,
+secondd stage decision variable is end-of-period inventory I.
     
 """
 
@@ -41,7 +41,7 @@ trunQuantile = 0.9999 # affective to the final ordering quantity
 
 samples = generate_sample(sample_num, trunQuantile, mean_demands)
    
-ini_Q = 10
+ini_Q = 0
 ini_Obj = float("inf") # largest float number
 
 ## compute seconde stage objective in each scenario
@@ -69,25 +69,21 @@ while True:
     last_master_obj = nita_value + vari_cost*Q
     for i in range(N):
         m1 = Model()    
-        y = m1.addVar( vtype = GRB.CONTINUOUS)
-        this_s_obj = -price*y - sal_value*(Q - y) # 
-#        this_s_obj = -price*(Q-y) - sal_value*y # y is inventory
+        I = m1.addVar(vtype = GRB.CONTINUOUS)
+        this_s_obj = -price*(Q-I) - sal_value*I # y is inventory
         m1.setObjective(this_s_obj, GRB.MINIMIZE)
         
-        m1.addConstr(y <= Q) # should be standard model, or else the dual variable will be the opposite number
-        m1.addConstr(y <= samples[i])
-#        m1.addConstr(y >= Q - samples[i]) # can be wrong using min or max directly
-#        m1.addConstr(y >= 0)
-        # m1.addConstr(y == max(0, Q-samples[i])) # do not output the right resuls
+        m1.addConstr(I >= Q-samples[i]) # can be wrong using min or max directly
+        m1.addConstr(-I >= -Q) # should not be omitted
         m1.write('test.lp')
         m1.optimize()       
-        y_value = y.x
+        I_value = I.x
         
         obj[i] = m1.objVal
         pi = m1.getAttr(GRB.Attr.Pi) # important
         g[i] = sum([a*b for a,b in zip(pi, T)])
-        pi1[i] = pi[0] # must be the dual variable of this constraint
-        Dpi2[i] = pi[1] * samples[i]
+        pi1[i] = pi[0] - pi[1] # must be the dual variable of this constraint
+        Dpi2[i] = pi[0] * samples[i]
         print()    
    
     avg_obj = sum(obj)/N    
@@ -99,10 +95,8 @@ while True:
     avg_g = sum(g)/N
     avg_pi1 = sum(pi1)/N
     avg_Dpi2 = sum(Dpi2)/N
-#    m.addConstr(nita >= avg_obj - avg_pi1*(x-Q))
-    #m.addConstr(nita >= avg_obj + avg_pi1*(x-Q)) # add cut
     avg_d = sum(samples)/N
-    m.addConstr(nita >= avg_pi1*x+avg_Dpi2) # just the benders optimality cut, same as the above constraint
+    m.addConstr(nita >= avg_pi1*x-price*x-avg_Dpi2) # just the benders optimality cut, same as the above constraint
     m.update()
     m.write('test.lp')  
     m.optimize()
