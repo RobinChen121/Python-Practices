@@ -74,8 +74,8 @@ while True:
 #        this_s_obj = -price*(Q-y) - sal_value*y # y is inventory
         m1.setObjective(this_s_obj, GRB.MINIMIZE)
         
-        m1.addConstr(y <= Q) # should be standard model, or else the dual variable will be the opposite number
-        m1.addConstr(y <= samples[i])
+        m1.addConstr(-y >= -Q) # should be standard model, or else the dual variable will be the opposite number
+        m1.addConstr(-y >= -samples[i])
 #        m1.addConstr(y >= Q - samples[i]) # can be wrong using min or max directly
 #        m1.addConstr(y >= 0)
         # m1.addConstr(y == max(0, Q-samples[i])) # do not output the right resuls
@@ -100,9 +100,10 @@ while True:
     avg_pi1 = sum(pi1)/N
     avg_Dpi2 = sum(Dpi2)/N
 #    m.addConstr(nita >= avg_obj - avg_pi1*(x-Q))
-    #m.addConstr(nita >= avg_obj + avg_pi1*(x-Q)) # add cut
     avg_d = sum(samples)/N
-    m.addConstr(nita >= avg_pi1*x+avg_Dpi2) # just the benders optimality cut, same as the above constraint
+    # 下面的这个约束条件相当于大于等于子问题对偶的目标函数值的期望，子问题中 x 是已知的，
+    # 添加到这个约束条件中是未知的决策变量
+    m.addConstr(nita >= -avg_pi1*x - avg_Dpi2 - sal_value*x) # just the benders optimality cut, same as the above constraint
     m.update()
     m.write('test.lp')  
     m.optimize()

@@ -4,7 +4,7 @@ Created on Mon Sep  5 21:10:47 2022
 
 @author: chen
 
-traditional newsvendor problems in which there are no prices.
+traditional multi period problems in which there are no prices.
 
 """
 
@@ -81,7 +81,6 @@ def get_tree_strcture(samples):
 
 
 ini_I = 0
-ini_cash = 0
 vari_cost = 1
 h = 1 # unit holding cost
 pi = 2  # unit penalty cost
@@ -183,6 +182,7 @@ while iter < iter_num:
             # optimize
             m_sub[t][j].optimize()
             obj[j] = m_sub[t][j].objVal
+            # 约束条件更新了，模型中原来的需要删除
             m_sub[t][j].remove(m_sub[t][j].getConstrs()[-1])
             if t < T - 1:
                 index = node_index[t][j][0]

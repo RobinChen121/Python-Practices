@@ -21,30 +21,48 @@ import seaborn as sns
 pd.options.mode.chained_assignment = None  # default='warn'
 
 
-datas = pd.read_excel(r'/Users/chen/Documents/gitOld/Numerical-tests/joint chance datas/2022-08-03/eta_N.xls')
+datas = pd.read_excel('nita_N.xls')
 df = datas[['sampleNumSim', 'eta', 'SAAObj', 'scenarioObj', 'simSAAObj', 'simSAAService', 'simScenarioObj', 'simScenarioService']]
-demandPatterns = ['size1', 'size2', 'size3', 'size4', 'size5']
+demandPatterns = ['size2', 'size3', 'size4', 'size5']
+for k in range(2, 8):
+    df.iloc[:, k] = df.iloc[:, k] * 100
 
-# df1 = df[(df.eta==0.05) & (df.sampleNumSim==27)]
 
-# row_num = df1.shape[0]
-# for k in range(row_num):
-#     print('%.2f\\\\ ' % df1.iloc[k, 3], end='') # saa
-# print('\n')
-# for k in range(row_num):
-#     print('%.2f\\\\ ' % df1.iloc[k, 2], end='') # scenario
 
-arr = []
+eta = 0.3 # variable value
 for k in range(5):
-    sample_size = (k*2+3) ** 3
-    means = df[(df.eta==0.05) & (df.sampleNumSim==sample_size)].mean()
-    arr.append([means[6], means[4], means[7], means[5]])
+    print('\\addplot+[draw=black!50,boxplot={draw position=')
+    position = 0.8 + k
 
-for k in range(len(arr[0])):
-    print('\\addplot coordinates {', end='')
-    for i in range(len(arr)):
-        print('(%d, %.2f) ' % (i+1, arr[i][k]), end='')
+    position_str = str(position)
+    print(position_str + ',box extend=0.35}] table[row sep=\\\\,y index=0] {')
+    sample_size = (k*2+3) ** 3
+    df1 = df[(df.eta==eta) & (df.sampleNumSim == sample_size)]
+    row_num = df1.shape[0]
+    for k in range(row_num):
+        print('%.2f\\\\ ' % df1.iloc[k, 3], end='') # scenario
     print('};')
+    position2 = position + 0.4
+    position_str = str(position2)
+    print('\\addplot+[draw=black!50,boxplot={draw position=')
+    print(position_str + ',box extend=0.35}] table[row sep=\\\\,y index=0] {')
+    for k in range(row_num):
+        print('%.2f\\\\ ' % df1.iloc[k, 2], end='') # saa
+    print('};')
+    print()
+
+
+# arr = []
+# for k in range(5):
+#     sample_size = (k*2+3) ** 3
+#     means = df[(df.eta==eta) & (df.sampleNumSim==sample_size)].mean() # revise eta here
+#     arr.append([means[6], means[4], means[7], means[5]])
+
+# for k in range(len(arr[0])):
+#     print('\\addplot coordinates {', end='')
+#     for i in range(len(arr)):
+#         print('(%d, %.2f) ' % (i+1, arr[i][k]), end='')
+#     print('};')
 
 
         

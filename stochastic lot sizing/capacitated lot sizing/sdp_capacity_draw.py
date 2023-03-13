@@ -40,7 +40,6 @@ class State:
         self.t = t
         self.iniInventory = iniInventory
 
-
     def __str__(self):
         return "t = " + str(self.t) + " " + "I = " + str(self.iniInventory)
 
@@ -108,11 +107,11 @@ class StochasticLotSizing:
     # recursion
     @ memoized
     def f(self, state:State) -> float:
-        bestQValue = 1000000
+        bestQValue = float('inf')
         bestQ = 0
         for action in self.get_feasible_action(state):
             thisQValue = 0
-            for randDandP in self.pmf[state.t-1]:
+            for randDandP in self.pmf[state.t - 1]:
                 thisQValue += randDandP[1] * self.imme_value(state, action, randDandP[0], self.is_for_Gy)
                 if state.t < len(self.demands):
                     thisQValue += randDandP[1] * self.f(self.state_tran(state, action, randDandP[0], self.is_for_Gy))
@@ -135,9 +134,9 @@ class StochasticLotSizing:
         plt.plot(range(*domain),L)
 
 
-demands = [9, 23, 53, 29]
+demands = [10]
 capacity = 100
-fixOrderCost = 500
+fixOrderCost = 0
 variOderCost = 0
 holdCost = 2
 penaCost = 10

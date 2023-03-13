@@ -96,6 +96,8 @@ while True:
     avg_pi1 = sum(pi1)/N
     avg_Dpi2 = sum(Dpi2)/N
     avg_d = sum(samples)/N
+    # 下面的这个约束条件相当于大于等于子问题对偶的目标函数值的期望，子问题中 x 是已知的，
+    # 添加到这个约束条件中是未知的决策变量
     m.addConstr(nita >= avg_pi1*x-price*x-avg_Dpi2) # just the benders optimality cut, same as the above constraint
     m.update()
     m.write('test.lp')  
