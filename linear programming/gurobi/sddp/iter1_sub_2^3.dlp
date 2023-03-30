@@ -1,0 +1,10 @@
+\ LP format - for model browsing. Use MPS format to capture full model detail.
+Maximize
+  20 C0(2) - 75 Constant
+Subject To
+ c0: - C0(2) <= 2
+ c1: C0(2) <= 15
+Bounds
+ C0(2) free
+ Constant = 1
+End
