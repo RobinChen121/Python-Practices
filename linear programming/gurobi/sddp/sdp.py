@@ -4,7 +4,7 @@
 Created on Tue Mar  7 15:32:46 2023
 
 @author: chen
-@desp: stochastic dynamic programming code
+@desp: stochastic dynamic programming code for multi period newsvendor problem without price
 """
 
 import scipy.stats as sp

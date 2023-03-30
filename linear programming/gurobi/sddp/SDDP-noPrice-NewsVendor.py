@@ -4,7 +4,7 @@
 Created on Wed Mar  8 14:14:38 2023
 
 @author: chen
-@desp: use sddp to solve a 2 period newsvendor problem
+@desp: use sddp to solve traditional newsvendor problem without price
 
 when samples are [[5, 15], [5, 15]], q = 10 in period 1, 
 and q = [10, 20] in period 2. pi = [0, 0] in period 1 
