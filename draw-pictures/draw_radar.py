@@ -16,8 +16,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib
 
-matplotlib.rcParams['font.family']='SimHei'
-matplotlib.rcParams['font.sans-serif'] = ['SimHei']
+# matplotlib.rcParams['font.family']='SimHei'
+matplotlib.rcParams['font.sans-serif'] = ['Arial Unicode MS']
 labels = np.array(['综合', 'KDA', '发育', '推进', '生存','输出'])
 nAttr = 6
 data = np.array([7, 5, 6, 9, 8, 7]) #数据值

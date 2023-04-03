@@ -19,7 +19,7 @@ plt.legend()
 
 y1 = [st.norm.pdf(i, n*p, np.sqrt(n*p*(1-p))) for i in x]
 plt.plot(x, y1, 'b', label='norm, mu=np, sigma^2=np(1-p)')
-plt.legend(fontsize=20)
+plt.legend(fontsize=5)
 
 
 plt.figure()
@@ -33,4 +33,4 @@ plt.legend()
 
 y1 = [st.norm.pdf(i, n*p, np.sqrt(n*p*(1-p))) for i in x]
 plt.plot(x, y1, 'b', label='norm, mu=np, sigma^2=np(1-p)')
-plt.legend(fontsize=20)
+plt.legend(fontsize=5)

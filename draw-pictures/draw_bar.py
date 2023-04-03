@@ -16,8 +16,8 @@ Description:
 import matplotlib.pyplot as plt
 
  # 这两行代码解决 plt 中文显示的问题
-plt.rcParams['font.sans-serif'] = ['SimHei']
-plt.rcParams['axes.unicode_minus'] = False
+plt.rcParams['font.sans-serif'] = ['Arial Unicode MS'] # ['SimHei'] for windows
+# plt.rcParams['axes.unicode_minus'] = False
 
 waters = ['碳酸饮料', '绿茶', '矿泉水', '果汁','其他']
 buy_number = [6, 7, 6, 1, 2]
