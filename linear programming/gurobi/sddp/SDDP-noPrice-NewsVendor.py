@@ -89,8 +89,8 @@ ini_I = 0
 vari_cost = 1
 unit_back_cost = 10
 unit_hold_cost = 2
-mean_demands = [10, 10, 15]
-sample_nums = [10, 10, 10]
+mean_demands = [10, 10]
+sample_nums = [10, 10]
 T = len(mean_demands)
 trunQuantile = 0.9999 # affective to the final ordering quantity
 scenario_numTotal = reduce(lambda x, y: x * y, sample_nums, 1)
@@ -102,7 +102,7 @@ for t in range(T):
 
 #samples_detail = [[5, 15], [5, 15]]
 scenarios = list(itertools.product(*samples_detail)) 
-sample_num = 100
+sample_num = 20
 samples= random.sample(scenarios, sample_num) # sampling without replacement
 samples.sort() # sort to make same numbers together
 node_values, node_index = get_tree_strcture(samples)
@@ -125,7 +125,7 @@ B_sub = [[m_sub[t][j].addVar(vtype = GRB.CONTINUOUS, name = 'B_' + str(t+1) + '^
 theta_sub = [[m_sub[t][j].addVar(lb = theta_iniValue*(T-1-t), vtype = GRB.CONTINUOUS, name = 'theta_' + str(t+3) + '^' + str(j+1)) for j in range(t_nodeNum[t])] for t in range(T-1)]
 
 iter = 1
-iter_num = 8
+iter_num = 4
 pi_sub_detail_values = [[[[] for s in range(t_nodeNum[t])] for t in range(T)] for iter in range(iter_num)] 
 q_detail_values = [[[] for t in range(T)] for iter in range(iter_num)] 
 for i in range(iter_num):
@@ -195,7 +195,7 @@ while iter <= iter_num:
             rhs = m_sub[t][j].getAttr(GRB.Attr.RHS)
             if t < T - 1:
                 num_con = len(pi)
-                for k in range(num_con - 1):
+                for k in range(num_con-1):
                     pi_rhs_values[t][j] += pi[k]*rhs[k]
                 pi_rhs_values[t][j] += -pi[-1]*demand 
             else:

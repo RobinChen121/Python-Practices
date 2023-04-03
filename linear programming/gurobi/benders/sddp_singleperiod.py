@@ -32,9 +32,9 @@ def generate_sample(sample_num, trunQuantile, mu):
     return samples
 
 
-price  =  6
-vari_cost = 2
-sal_value = 1
+price  =  10
+vari_cost = 1
+sal_value = 0
 mean_demands = 10
 sample_num = 100
 trunQuantile = 0.9999 # affective to the final ordering quantity
@@ -64,7 +64,9 @@ x = m.addVar(vtype = GRB.CONTINUOUS)
 this_obj = vari_cost*x + nita
 m.setObjective(this_obj, GRB.MINIMIZE)
 
-while True:
+iter_num = 3
+iter = 0
+while iter  < 3:
     last_nita = nita_value
     last_master_obj = nita_value + vari_cost*Q
     for i in range(N):
@@ -113,7 +115,7 @@ while True:
     master_obj = m.objVal
     print()
     
-    k = k + 1
+    iter = iter + 1
     # if abs(nita_value - avg_obj) < 1e-2 and k > 4: 
     #     break
 
@@ -131,7 +133,7 @@ while True:
         break
 
 
-print('iteration steps are %d' % k)    
+print('iteration steps are %d' % iter)    
 print('ordering quantity is %.2f' % Q)
 print('expected profit is %.2f' % master_obj)
 
