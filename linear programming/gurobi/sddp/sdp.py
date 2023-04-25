@@ -83,7 +83,10 @@ class StochasticInventory:
             thisQValue = 0
             for randDandP in self.pmf[state.t - 1]:
                 thisQValue += randDandP[1] * self.imme_value(state, action, randDandP[0])
+                demand = randDandP[0]
                 if state.t < len(self.demands):
+                    if action > 0 and demand > 1:
+                        pass
                     thisQValue += randDandP[1] * self.f(self.state_tran(state, action, randDandP[0]))
             if thisQValue < bestQValue:
                 bestQValue = thisQValue
@@ -94,7 +97,7 @@ class StochasticInventory:
 
 
 demands = [10, 15]
-capacity = 100
+capacity = 5
 fixOrderCost = 0
 variOderCost = 1
 holdCost = 2

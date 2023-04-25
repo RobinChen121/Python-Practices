@@ -28,8 +28,8 @@ class State:
     def __hash__(self):
         return hash(str(self.t) + str(self.iniInventory))
 
-    def __eq__(self, other):
-        return self.t == other.t and self.iniInventory == other.iniInventory
+    def __eq__(self, other): # can affect state transition, do not omit cash
+        return self.t == other.t and self.iniInventory == other.iniInventory and self.iniCash == other.iniCash
 
     
 class StochasticInventory:
@@ -62,13 +62,16 @@ class StochasticInventory:
         return pmf
 
     def get_feasible_action(self, state:State):
-        return range(self.capacity)
+        Q_bound = min(self.capacity, state.iniCash / variOderCost)
+        return range(int(Q_bound) + 1)
 
     def state_tran(self, state:State, action, demand):
         nextInventory = max(state.iniInventory + action - demand, 0)
         nextInventory = self.max_inventory if self.max_inventory < nextInventory else nextInventory
         nextInventory = self.min_inventory if self.min_inventory > nextInventory else nextInventory
         cashIncrement = self.imme_value(state, action, demand)
+        if action > 4 and demand == 10:
+            pass
         return State(state.t + 1, nextInventory, state.iniCash + cashIncrement)
 
     def imme_value(self, state:State, action, demand):
@@ -90,9 +93,15 @@ class StochasticInventory:
         for action in self.get_feasible_action(state):
             thisQValue = 0
             for randDandP in self.pmf[state.t - 1]:
-                thisQValue += randDandP[1] * self.imme_value(state, action, randDandP[0])
+                demand = randDandP[0]
+                thisQValue += randDandP[1] * self.imme_value(state, action, demand)
                 if state.t < len(self.demands):
-                    thisQValue += randDandP[1] * self.f(self.state_tran(state, action, randDandP[0]))
+                    new_state = self.state_tran(state, action, demand)
+                    new_cash = new_state.iniCash
+                    new_inventory = new_state.iniInventory
+                    if action > 0 and demand > 1:
+                        pass
+                    thisQValue += randDandP[1] * self.f(new_state)
             if thisQValue > bestQValue:
                 bestQValue = thisQValue
                 bestQ = action
@@ -101,14 +110,14 @@ class StochasticInventory:
         return bestQValue
 
 
-demands = [10, 10]
+demands = [10, 20]
 capacity = 100
 fixOrderCost = 0
 variOderCost = 1
 price = 10
 iniI = 0
-iniCash = 0
-holdCost = 2
+iniCash = 5
+holdCost = 0
 penaCost = 0
 truncationQ = 0.9999
 
