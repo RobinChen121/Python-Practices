@@ -1,10 +1,13 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Tue Mar  7 15:32:46 2023
+Created on Fri May 12 09:59:16 2023
 
-@author: chen
-@desp: stochastic dynamic programming code for multi period newsvendor problem without price
+@author: zhenchen
+
+@disp:  for single product overdraft
+    
+    
 """
 
 import scipy.stats as sp
@@ -13,9 +16,10 @@ import time
 
 
 class State:
-    def __init__(self, t: int, iniInventory: float):
+    def __init__(self, t: int, iniInventory: float, iniCash: float,):
         self.t = t
         self.iniInventory = iniInventory
+        self.iniCash = iniCash
 
     def __str__(self):
         return "t = " + str(self.t) + " " + "，I = " + str(self.iniInventory)
@@ -23,16 +27,17 @@ class State:
     def __hash__(self):
         return hash(str(self.t) + str(self.iniInventory))
 
-    def __eq__(self, other):
-        return self.t == other.t and self.iniInventory == other.iniInventory
+    def __eq__(self, other): # can affect state transition, do not omit cash
+        return self.t == other.t and self.iniInventory == other.iniInventory and self.iniCash == other.iniCash
 
     
 class StochasticInventory:
-    def __init__(self, B: float, K: float, v: float, h: float, pai: float, meanD: list[float], tq: float):
+    def __init__(self, B: float, price: float, K: float,  v: float, h: float, pai: float, meanD: list[float], tq: float):
         self.capacity = B
         self.fixOrderCost = K
         self.variOrderCost = v
         self.holdCost = h
+        self.price = price
         self.penaCost = pai
         self.demands = meanD
         self.truncationQ = tq
@@ -42,8 +47,8 @@ class StochasticInventory:
         self.cache_actions = {}
 
     def __str__(self):
-        return 'B = %.2f\nK = %.2f\nv = %.2f\nh = %.2f\n pai = %.2f\n demands = %s' % \
-               (self.capacity, self.fixOrderCost, self.variOrderCost, self.holdCost, self.penaCost, self.demands)
+        return 'B = %.2f\nK = %.2f\nprice = %.2f\nv = %.2f\nh = %.2f\n pai = %.2f\n demands = %s' % \
+               (self.capacity, self.price, self.fixOrderCost, self.variOrderCost, self.holdCost, self.penaCost, self.demands)
 
     def get_max_demands(self):
          max_demands = [sp.poisson.ppf(self.truncationQ, d).astype(int) for d in self.demands]
@@ -56,13 +61,17 @@ class StochasticInventory:
         return pmf
 
     def get_feasible_action(self, state:State):
-        return range(self.capacity + 1)
+        Q_bound = min(self.capacity, state.iniCash / variOderCost)
+        return range(int(Q_bound) + 1)
 
     def state_tran(self, state:State, action, demand):
-        nextInventory = state.iniInventory + action - demand
+        nextInventory = max(state.iniInventory + action - demand, 0)
         nextInventory = self.max_inventory if self.max_inventory < nextInventory else nextInventory
         nextInventory = self.min_inventory if self.min_inventory > nextInventory else nextInventory
-        return State(state.t + 1, nextInventory)
+        cashIncrement = self.imme_value(state, action, demand)
+        if action > 4 and demand == 10:
+            pass
+        return State(state.t + 1, nextInventory, state.iniCash + cashIncrement)
 
     def imme_value(self, state:State, action, demand):
         fixCost = self.fixOrderCost if action > 0 else 0
@@ -72,23 +81,27 @@ class StochasticInventory:
         nextInventory = self.min_inventory if nextInventory < self.min_inventory else nextInventory
         holdingCost = self.holdCost * max(0, nextInventory)
         penaltyCost = self.penaCost * max(0, -nextInventory)
-        return fixCost + variCost + holdingCost + penaltyCost
+        revenue = self.price * min(demand, state.iniInventory + action)
+        return revenue - fixCost - variCost - holdingCost - penaltyCost
     
     # recursion
     @ lru_cache(maxsize = None)
     def f(self, state:State) -> float:
-        bestQValue = float('inf')
+        bestQValue = -float('inf')
         bestQ = 0
         for action in self.get_feasible_action(state):
             thisQValue = 0
             for randDandP in self.pmf[state.t - 1]:
-                thisQValue += randDandP[1] * self.imme_value(state, action, randDandP[0])
                 demand = randDandP[0]
+                thisQValue += randDandP[1] * self.imme_value(state, action, demand)
                 if state.t < len(self.demands):
+                    new_state = self.state_tran(state, action, demand)
+                    new_cash = new_state.iniCash
+                    new_inventory = new_state.iniInventory
                     if action > 0 and demand > 1:
                         pass
-                    thisQValue += randDandP[1] * self.f(self.state_tran(state, action, randDandP[0]))
-            if thisQValue < bestQValue:
+                    thisQValue += randDandP[1] * self.f(new_state)
+            if thisQValue > bestQValue:
                 bestQValue = thisQValue
                 bestQ = action
 
@@ -96,21 +109,25 @@ class StochasticInventory:
         return bestQValue
 
 
-demands = [10, 20, 10]
-capacity = 5
+demands = [10, 20]
+holdingCost = [30, 60]
+capacity = 100
 fixOrderCost = 0
 variOderCost = 1
-holdCost = 2
-penaCost = 10
+price = 10
+iniI = 0
+iniCash = 0
+holdCost = 0
+penaCost = 0
 truncationQ = 0.9999
 
 start = time.process_time()
-lot_sizing = StochasticInventory(capacity, fixOrderCost, variOderCost, holdCost, penaCost, demands, truncationQ)
-ini_state = State(1, 0)
+lot_sizing = StochasticInventory(capacity, price, fixOrderCost, variOderCost, holdCost, penaCost, demands, truncationQ)
+ini_state = State(1, iniI, iniCash)
 expect_total_cost = lot_sizing.f(ini_state)
 print('****************************************')
-print('final expected total cost is %.2f' % expect_total_cost)
-optQ = lot_sizing.cache_actions[str(State(1, 0))]
+print('final expected total cash increment is %.2f' % expect_total_cost)
+optQ = lot_sizing.cache_actions[str(ini_state)]
 print('optimal Q_1 is %.2f' % optQ)
 end = time.process_time()
 cpu_time = end - start

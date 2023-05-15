@@ -5,7 +5,7 @@ Created on Thu Mar 30 17:36:22 2023
 
 @author: zhenchen
 
-@disp:  ftochastic dynamic programming code for multi period newsvendor problem with price
+@disp:  stochastic dynamic programming code for multi period newsvendor problem with price
     
     
 """
@@ -62,7 +62,8 @@ class StochasticInventory:
         return pmf
 
     def get_feasible_action(self, state:State):
-        Q_bound = min(self.capacity, state.iniCash / variOderCost)
+        Q_bound = state.iniCash / variOderCost
+        Q_bound = capacity
         return range(int(Q_bound) + 1)
 
     def state_tran(self, state:State, action, demand):
@@ -116,7 +117,7 @@ fixOrderCost = 0
 variOderCost = 1
 price = 10
 iniI = 0
-iniCash = 5
+iniCash = 10
 holdCost = 0
 penaCost = 0
 truncationQ = 0.9999
@@ -124,7 +125,7 @@ truncationQ = 0.9999
 start = time.process_time()
 lot_sizing = StochasticInventory(capacity, price, fixOrderCost, variOderCost, holdCost, penaCost, demands, truncationQ)
 ini_state = State(1, iniI, iniCash)
-expect_total_cost = lot_sizing.f(ini_state)
+expect_total_cost = lot_sizing.f(ini_state) 
 print('****************************************')
 print('final expected total cash increment is %.2f' % expect_total_cost)
 optQ = lot_sizing.cache_actions[str(ini_state)]

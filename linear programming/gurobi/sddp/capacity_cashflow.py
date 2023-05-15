@@ -21,12 +21,12 @@ import time
 
 start = time.process_time()
 ini_I = 0
-ini_cash = 5
+ini_cash = 10
 vari_cost = 1
 price = 10
 unit_back_cost = 0
 mean_demands = [10, 20]
-sample_nums = [10, 10]
+sample_nums = [10, 10, 10]
 T = len(mean_demands)
 trunQuantile = 0.9999 # affective to the final ordering quantity
 scenario_numTotal = reduce(lambda x, y: x * y, sample_nums, 1)
@@ -36,14 +36,16 @@ samples_detail = [[0 for i in range(sample_nums[t])] for t in range(T)]
 for t in range(T):
     samples_detail[t] = generate_sample(sample_nums[t], trunQuantile, mean_demands[t])
 
-samples_detail = [[5, 15], [15, 20]]
+# samples_detail = [[5, 15], [15, 20]]
 scenarios = list(itertools.product(*samples_detail)) 
-sample_num = 4
+sample_num = 50
+
+# sampling can't be in the while looping
 samples= random.sample(scenarios, sample_num) # sampling without replacement
 samples.sort() # sort to make same numbers together
 node_values, node_index = get_tree_strcture(samples)
 
-theta_iniValue = -300 # initial theta values in each period, do not be too small
+theta_iniValue = -400 # initial theta values in each period, seems affecting the final result
 m = Model() # linear model in the first stage
 # decision variable in the first stage model
 q = m.addVar(vtype = GRB.CONTINUOUS, name = 'q_1')
@@ -62,7 +64,7 @@ C_sub = [[m_sub[t][j].addVar(vtype = GRB.CONTINUOUS, name = 'C_' + str(t+1) + '^
 theta_sub = [[m_sub[t][j].addVar(lb = -GRB.INFINITY, vtype = GRB.CONTINUOUS, name = 'theta_' + str(t+3) + '^' + str(j+1)) for j in range(t_nodeNum[t])] for t in range(T-1)]
 
 iter = 1
-iter_num = 4
+iter_num = 5
 pi_sub_detail_values = [[[[] for s in range(t_nodeNum[t])] for t in range(T)] for iter in range(iter_num)] 
 rhs_sub_detail_values = [[[[] for s in range(t_nodeNum[t])] for t in range(T)] for iter in range(iter_num)] 
 q_detail_values = [[[] for t in range(T)] for iter in range(iter_num)] 
@@ -81,8 +83,8 @@ while iter <= iter_num:
     m.addConstr(theta >= theta_iniValue*(T))
     m.addConstr(vari_cost*q <= ini_cash)
     m.optimize()
-    m.write('iter' + str(iter) + '_main.lp')
-    m.write('iter' + str(iter) + '_main.sol')
+    # m.write('iter' + str(iter) + '_main.lp')
+    # m.write('iter' + str(iter) + '_main.sol')
     
     print(end = '')
     q_value = q.x
@@ -136,9 +138,9 @@ while iter <= iter_num:
             m_sub[t][j].optimize()
             if t < T - 1 and theta_sub[t][j].x != theta_iniValue*(T-1-t):
                 print()
-            m_sub[t][j].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(j+1) + '.lp')
-            m_sub[t][j].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(j+1) + '.dlp')
-            m_sub[t][j].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(j+1) + '.sol')
+            # m_sub[t][j].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(j+1) + '.lp')
+            # m_sub[t][j].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(j+1) + '.dlp')
+            # m_sub[t][j].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(j+1) + '.sol')
 
             if t < T - 1:              
                 q_detail_values[iter - 1][t+1][j] = q_sub[t][j].x

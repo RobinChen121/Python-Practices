@@ -25,8 +25,8 @@ vari_cost = 1
 price = 10
 unit_back_cost = 0
 unit_hold_cost = 0
-mean_demands = [10, 15]
-sample_nums = [10, 10]
+mean_demands = [10, 20, 10]
+sample_nums = [10, 10, 10]
 T = len(mean_demands)
 trunQuantile = 0.9999 # affective to the final ordering quantity
 scenario_numTotal = reduce(lambda x, y: x * y, sample_nums, 1)
@@ -36,14 +36,14 @@ samples_detail = [[0 for i in range(sample_nums[t])] for t in range(T)]
 for t in range(T):
     samples_detail[t] = generate_sample(sample_nums[t], trunQuantile, mean_demands[t])
 
-# samples_detail = [[5, 15], [5, 15]]
+# samples_detail = [[5, 15], [5, 15], [5, 15]]
 scenarios = list(itertools.product(*samples_detail)) 
 sample_num = 30
 samples= random.sample(scenarios, sample_num) # sampling without replacement
 samples.sort() # sort to make same numbers together
 node_values, node_index = get_tree_strcture(samples)
 
-theta_iniValue = -250 # initial theta values in each period
+theta_iniValue = -300 # initial theta values in each period
 m = Model() # linear model in the first stage
 # decision variable in the first stage model
 q = m.addVar(vtype = GRB.CONTINUOUS, name = 'q_1')
