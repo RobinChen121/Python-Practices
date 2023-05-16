@@ -5,7 +5,9 @@ Created on Thu Mar 30 23:31:56 2023
 
 @author: zhenchen
 
-@disp:  sddp for multi period newsvendor, lost sale variable B in the objective function
+@disp:  sddp for multi period newsvendor, lost sale variable B in the objective function;
+ 
+more length of the planning horizon, more iterations to converge;
     
     
 """
@@ -25,8 +27,8 @@ vari_cost = 1
 price = 10
 unit_back_cost = 0
 unit_hold_cost = 0
-mean_demands = [10, 20, 10]
-sample_nums = [10, 10, 10]
+mean_demands = [10, 20, 10, 10]
+sample_nums = [10, 10, 10, 10]
 T = len(mean_demands)
 trunQuantile = 0.9999 # affective to the final ordering quantity
 scenario_numTotal = reduce(lambda x, y: x * y, sample_nums, 1)
@@ -61,7 +63,7 @@ B_sub = [[m_sub[t][j].addVar(vtype = GRB.CONTINUOUS, name = 'B_' + str(t+1) + '^
 theta_sub = [[m_sub[t][j].addVar(lb = -GRB.INFINITY, vtype = GRB.CONTINUOUS, name = 'theta_' + str(t+3) + '^' + str(j+1)) for j in range(t_nodeNum[t])] for t in range(T-1)]
 
 iter = 1
-iter_num = 6
+iter_num = 15
 pi_sub_detail_values = [[[[] for s in range(t_nodeNum[t])] for t in range(T)] for iter in range(iter_num)] 
 rhs_sub_detail_values = [[[[] for s in range(t_nodeNum[t])] for t in range(T)] for iter in range(iter_num)] 
 q_detail_values = [[[] for t in range(T)] for iter in range(iter_num)] 
@@ -79,8 +81,8 @@ while iter <= iter_num:
     m.setObjective(vari_cost*q + theta, GRB.MINIMIZE)
     m.update()
     m.optimize()
-    # m.write('iter' + str(iter) + '_main.lp')
-    # m.write('iter' + str(iter) + '_main.sol')
+    m.write('iter' + str(iter) + '_main.lp')
+    m.write('iter' + str(iter) + '_main.sol')
     
     print(end = '')
     q_value = q.x
@@ -112,7 +114,7 @@ while iter <= iter_num:
                 if t == T - 1:                   
                     m_sub[t][j].setObjective(unit_hold_cost*I_sub[t][j] - price*(demand - B_sub[t][j]), GRB.MINIMIZE)
                 else:
-                    m_sub[t][j].setObjective(vari_cost*q_sub[t][j] + unit_hold_cost*I_sub[t][j] + price*(demand - B_sub[t][j]) +theta_sub[t][j], GRB.MINIMIZE)
+                    m_sub[t][j].setObjective(vari_cost*q_sub[t][j] + unit_hold_cost*I_sub[t][j] - price*(demand - B_sub[t][j]) +theta_sub[t][j], GRB.MINIMIZE)
                     m_sub[t][j].addConstr(theta_sub[t][j] >= theta_iniValue*(T-1-t))
                 last_index = 0
                 for k in node_index[t - 1]:
@@ -123,11 +125,9 @@ while iter <= iter_num:
                     
             # optimize
             m_sub[t][j].optimize()
-            if t < T - 1 and theta_sub[t][j].x != theta_iniValue*(T-1-t):
-                print()
-            # m_sub[t][j].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(j+1) + '.lp')
-            # m_sub[t][j].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(j+1) + '.dlp')
-            # m_sub[t][j].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(j+1) + '.sol')
+            m_sub[t][j].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(j+1) + '.lp')
+            m_sub[t][j].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(j+1) + '.dlp')
+            m_sub[t][j].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(j+1) + '.sol')
             obj[j] = m_sub[t][j].objVal
             if t < T - 1:              
                 q_detail_values[iter - 1][t+1][j] = q_sub[t][j].x
@@ -150,11 +150,13 @@ while iter <= iter_num:
             #     pi_rhs_values[t][j] = -pi[-1] * demand - price*demand
             pi_sub_values[t][j] = pi[-1]
             d_sub_values[t][j] = demand
-            m_sub[t][j].remove(m_sub[t][j].getConstrs()[-1])
+            # so hyperplane cuts are always in the front
+            m_sub[t][j].remove(m_sub[t][j].getConstrs()[-1]) # inventory flow
             if t < T - 1:
-                m_sub[t][j].remove(m_sub[t][j].getConstrs()[-2])
+                m_sub[t][j].remove(m_sub[t][j].getConstrs()[-2]) # theta bound constraint
             
         # get and add the cut      
+        # very important
         if iter == 2:
             pass
         avg_pi = sum(pi_sub_values[t]) / t_nodeNum[t]
