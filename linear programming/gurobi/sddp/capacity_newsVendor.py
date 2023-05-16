@@ -5,7 +5,8 @@ Created on Sun Apr  2 15:54:49 2023
 
 @author: zhenchen
 
-@disp:  for capacitated multi period newsvendor
+@disp:  for capacitated multi period newsvendor (no price);
+more iterations to converge for longer planning horizon length: 10 iteration for T =3;
     
     
 """
@@ -25,7 +26,7 @@ ini_I = 0
 vari_cost = 1
 unit_back_cost = 10
 unit_hold_cost = 2
-mean_demands = [10, 20, 10]
+mean_demands = [10, 10, 10]
 sample_nums = [10, 10, 10]
 capacity = 5
 T = len(mean_demands)
@@ -62,7 +63,7 @@ B_sub = [[m_sub[t][j].addVar(vtype = GRB.CONTINUOUS, name = 'B_' + str(t+1) + '^
 theta_sub = [[m_sub[t][j].addVar(lb = theta_iniValue*(T-1-t), vtype = GRB.CONTINUOUS, name = 'theta_' + str(t+3) + '^' + str(j+1)) for j in range(t_nodeNum[t])] for t in range(T-1)]
 
 iter = 1
-iter_num = 5
+iter_num = 10
 pi_sub_detail_values = [[[[] for s in range(t_nodeNum[t])] for t in range(T)] for iter in range(iter_num)] 
 q_detail_values = [[[] for t in range(T)] for iter in range(iter_num)] 
 for i in range(iter_num):
@@ -79,8 +80,8 @@ while iter <= iter_num:
     m.setObjective(vari_cost*q + theta, GRB.MINIMIZE)
     m.addConstr(q <= capacity)
     m.update()
-#    m.write('iter' + str(iter) + '_main.lp')
     m.optimize()
+#    m.write('iter' + str(iter) + '_main.lp')
 #    m.write('iter' + str(iter) + '_main.sol')
     
     print(end = '')
@@ -120,10 +121,10 @@ while iter <= iter_num:
                 print(end = '')
                     
             # optimize
-#            m_sub[t][j].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(j+1) + '.lp')
-#            m_sub[t][j].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(j+1) + '.dlp')
             m_sub[t][j].optimize()
-#            m_sub[t][j].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(j+1) + '.sol')
+#           m_sub[t][j].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(j+1) + '.lp')
+#           m_sub[t][j].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(j+1) + '.dlp')
+#           m_sub[t][j].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(j+1) + '.sol')
             obj[j] = m_sub[t][j].objVal
             if t < T - 1:              
                 q_detail_values[iter - 1][t+1][j] = q_sub[t][j].x

@@ -25,7 +25,7 @@ ini_cash = 10
 vari_cost = 1
 price = 10
 unit_back_cost = 0
-mean_demands = [10, 20]
+mean_demands = [10, 20, 10]
 sample_nums = [10, 10, 10]
 T = len(mean_demands)
 trunQuantile = 0.9999 # affective to the final ordering quantity
@@ -38,7 +38,7 @@ for t in range(T):
 
 # samples_detail = [[5, 15], [15, 20]]
 scenarios = list(itertools.product(*samples_detail)) 
-sample_num = 50
+sample_num = 30
 
 # sampling can't be in the while looping
 samples= random.sample(scenarios, sample_num) # sampling without replacement
@@ -64,7 +64,7 @@ C_sub = [[m_sub[t][j].addVar(vtype = GRB.CONTINUOUS, name = 'C_' + str(t+1) + '^
 theta_sub = [[m_sub[t][j].addVar(lb = -GRB.INFINITY, vtype = GRB.CONTINUOUS, name = 'theta_' + str(t+3) + '^' + str(j+1)) for j in range(t_nodeNum[t])] for t in range(T-1)]
 
 iter = 1
-iter_num = 5
+iter_num = 10
 pi_sub_detail_values = [[[[] for s in range(t_nodeNum[t])] for t in range(T)] for iter in range(iter_num)] 
 rhs_sub_detail_values = [[[[] for s in range(t_nodeNum[t])] for t in range(T)] for iter in range(iter_num)] 
 q_detail_values = [[[] for t in range(T)] for iter in range(iter_num)] 
@@ -121,7 +121,7 @@ while iter <= iter_num:
                 if t == T - 1:                   
                     m_sub[t][j].setObjective(- price*(demand - B_sub[t][j]), GRB.MINIMIZE)
                 else:
-                    m_sub[t][j].setObjective(vari_cost*q_sub[t][j] + price*(demand - B_sub[t][j]) + theta_sub[t][j], GRB.MINIMIZE)
+                    m_sub[t][j].setObjective(vari_cost*q_sub[t][j] - price*(demand - B_sub[t][j]) + theta_sub[t][j], GRB.MINIMIZE)
                     m_sub[t][j].addConstr(theta_sub[t][j] >= theta_iniValue*(T-1-t))
                 last_index = 0
                 for k in node_index[t - 1]:

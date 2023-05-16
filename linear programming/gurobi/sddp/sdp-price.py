@@ -62,8 +62,7 @@ class StochasticInventory:
         return pmf
 
     def get_feasible_action(self, state:State):
-        Q_bound = state.iniCash / variOderCost
-        Q_bound = capacity
+        Q_bound = min(capacity, state.iniCash / variOderCost)
         return range(int(Q_bound) + 1)
 
     def state_tran(self, state:State, action, demand):
@@ -111,7 +110,7 @@ class StochasticInventory:
         return bestQValue
 
 
-demands = [10, 10, 10]
+demands = [10, 20, 10]
 capacity = 100
 fixOrderCost = 0
 variOderCost = 1
