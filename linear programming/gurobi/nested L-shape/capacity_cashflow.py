@@ -25,8 +25,8 @@ ini_cash = 10
 vari_cost = 1
 price = 10
 unit_back_cost = 0
-mean_demands = [10, 20, 10]
-sample_nums = [10, 10, 10]
+mean_demands = [10, 20, 10, 5]
+sample_nums = [10, 10, 10, 10]
 T = len(mean_demands)
 trunQuantile = 0.9999 # affective to the final ordering quantity
 scenario_numTotal = reduce(lambda x, y: x * y, sample_nums, 1)
@@ -38,14 +38,14 @@ for t in range(T):
 
 # samples_detail = [[5, 15], [15, 20]]
 scenarios = list(itertools.product(*samples_detail)) 
-sample_num = 30
+sample_num = 50
 
 # sampling can't be in the while looping
 samples= random.sample(scenarios, sample_num) # sampling without replacement
 samples.sort() # sort to make same numbers together
 node_values, node_index = get_tree_strcture(samples)
 
-theta_iniValue = -400 # initial theta values in each period, seems affecting the final result
+theta_iniValue = -400 # initial theta values in each period
 m = Model() # linear model in the first stage
 # decision variable in the first stage model
 q = m.addVar(vtype = GRB.CONTINUOUS, name = 'q_1')
@@ -64,7 +64,7 @@ C_sub = [[m_sub[t][j].addVar(vtype = GRB.CONTINUOUS, name = 'C_' + str(t+1) + '^
 theta_sub = [[m_sub[t][j].addVar(lb = -GRB.INFINITY, vtype = GRB.CONTINUOUS, name = 'theta_' + str(t+3) + '^' + str(j+1)) for j in range(t_nodeNum[t])] for t in range(T-1)]
 
 iter = 1
-iter_num = 10
+iter_num = 14
 pi_sub_detail_values = [[[[] for s in range(t_nodeNum[t])] for t in range(T)] for iter in range(iter_num)] 
 rhs_sub_detail_values = [[[[] for s in range(t_nodeNum[t])] for t in range(T)] for iter in range(iter_num)] 
 q_detail_values = [[[] for t in range(T)] for iter in range(iter_num)] 
@@ -75,6 +75,7 @@ for i in range(iter_num):
         else:
             q_detail_values[i][t] = [0 for s in range(t_nodeNum[t-1])]
 
+result_iter = []
 while iter <= iter_num:       
     
     # forward computation    
@@ -187,7 +188,8 @@ while iter <= iter_num:
 
     m.remove(m.getConstrs()[-2])  
     m.remove(m.getConstrs()[-1])  
-    m.update()     
+    m.update()  
+    result_iter.append(-z)
     iter += 1
 
 end = time.process_time()

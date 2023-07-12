@@ -29,40 +29,42 @@ for k in range(2, 8):
 
 
 
-eta = 0.3 # variable value
-for k in range(5):
-    print('\\addplot+[draw=black!50,boxplot={draw position=')
-    position = 0.8 + k
+eta = 0.05 # variable value
+print()
 
-    position_str = str(position)
-    print(position_str + ',box extend=0.35}] table[row sep=\\\\,y index=0] {')
-    sample_size = (k*2+3) ** 3
-    df1 = df[(df.eta==eta) & (df.sampleNumSim == sample_size)]
-    row_num = df1.shape[0]
-    for k in range(row_num):
-        print('%.2f\\\\ ' % df1.iloc[k, 3], end='') # scenario
-    print('};')
-    position2 = position + 0.4
-    position_str = str(position2)
-    print('\\addplot+[draw=black!50,boxplot={draw position=')
-    print(position_str + ',box extend=0.35}] table[row sep=\\\\,y index=0] {')
-    for k in range(row_num):
-        print('%.2f\\\\ ' % df1.iloc[k, 2], end='') # saa
-    print('};')
-    print()
-
-
-# arr = []
 # for k in range(5):
-#     sample_size = (k*2+3) ** 3
-#     means = df[(df.eta==eta) & (df.sampleNumSim==sample_size)].mean() # revise eta here
-#     arr.append([means[6], means[4], means[7], means[5]])
+#     print('\\addplot+[draw=black!50,boxplot={draw position=')
+#     position = 0.8 + k
 
-# for k in range(len(arr[0])):
-#     print('\\addplot coordinates {', end='')
-#     for i in range(len(arr)):
-#         print('(%d, %.2f) ' % (i+1, arr[i][k]), end='')
+#     position_str = str(position)
+#     print(position_str + ',box extend=0.35}] table[row sep=\\\\,y index=0] {')
+#     sample_size = (k*2+3) ** 3
+#     df1 = df[(df.eta==eta) & (df.sampleNumSim == sample_size)]
+#     row_num = df1.shape[0]
+#     for k in range(row_num):
+#         print('%.2f\\\\ ' % df1.iloc[k, 3], end='') # scenario
 #     print('};')
+#     position2 = position + 0.4
+#     position_str = str(position2)
+#     print('\\addplot+[draw=black!50,boxplot={draw position=')
+#     print(position_str + ',box extend=0.35}] table[row sep=\\\\,y index=0] {')
+#     for k in range(row_num):
+#         print('%.2f\\\\ ' % df1.iloc[k, 2], end='') # saa
+#     print('};')
+#     print()
+
+
+arr = []
+for k in range(5):
+    sample_size = (k*2+3) ** 3
+    means = df[(df.eta==eta) & (df.sampleNumSim==sample_size)].mean() # revise eta here
+    arr.append([means[6], means[4], means[7], means[5]])
+
+for k in range(len(arr[0])):
+    print('\\addplot coordinates {', end='')
+    for i in range(len(arr)):
+        print('(%d, %.2f) ' % (i+1, arr[i][k]), end='')
+    print('};')
 
 
         

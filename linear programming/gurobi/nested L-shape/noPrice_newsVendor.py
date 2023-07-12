@@ -87,8 +87,8 @@ ini_I = 0
 vari_cost = 1
 unit_back_cost = 10
 unit_hold_cost = 2
-mean_demands = [10, 10, 10]
-sample_nums = [10, 10, 10]
+mean_demands = [10, 10]
+sample_nums = [10, 10]
 T = len(mean_demands)
 trunQuantile = 0.9999 # affective to the final ordering quantity
 scenario_numTotal = reduce(lambda x, y: x * y, sample_nums, 1)
@@ -98,9 +98,9 @@ samples_detail = [[0 for i in range(sample_nums[t])] for t in range(T)]
 for t in range(T):
     samples_detail[t] = generate_sample(sample_nums[t], trunQuantile, mean_demands[t])
 
-#samples_detail = [[5, 15], [5, 15]]
+samples_detail = [[5, 15], [5, 15]]
 scenarios = list(itertools.product(*samples_detail)) 
-sample_num = 20
+sample_num = 4
 samples= random.sample(scenarios, sample_num) # sampling without replacement
 samples.sort() # sort to make same numbers together
 node_values, node_index = get_tree_strcture(samples)
@@ -139,9 +139,9 @@ while iter <= iter_num:
     # solve the first stage model    
     m.setObjective(vari_cost*q + theta, GRB.MINIMIZE)
     m.update()
-#    m.write('iter' + str(iter) + '_main.lp')
     m.optimize()
-#    m.write('iter' + str(iter) + '_main.sol')
+    m.write('2iter' + str(iter) + '_main.lp')    
+    m.write('2iter' + str(iter) + '_main.sol')
     
     print(end = '')
     q_value = q.x
@@ -178,10 +178,10 @@ while iter <= iter_num:
                 print(end = '')
                     
             # optimize
-#            m_sub[t][j].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(j+1) + '.lp')
-#            m_sub[t][j].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(j+1) + '.dlp')
             m_sub[t][j].optimize()
-#            m_sub[t][j].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(j+1) + '.sol')
+#           m_sub[t][j].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(j+1) + '.lp')
+#           m_sub[t][j].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(j+1) + '.dlp')          
+#           m_sub[t][j].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(j+1) + '.sol')
             obj[j] = m_sub[t][j].objVal
             if t < T - 1:              
                 q_detail_values[iter - 1][t+1][j] = q_sub[t][j].x

@@ -96,8 +96,8 @@ class StochasticInventory:
         return bestQValue
 
 
-demands = [10, 20, 10]
-capacity = 5
+demands = [10, 10]
+capacity = 100
 fixOrderCost = 0
 variOderCost = 1
 holdCost = 2
