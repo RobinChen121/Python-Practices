@@ -107,6 +107,9 @@ while iter <= iter_num:
                 theta_forward_values[n][t] = theta_forward[n][t].x
     
     # backward
+    for n in range(N):
+        for t in range(T-2, 0, -1):
+            print()
 
 
 
