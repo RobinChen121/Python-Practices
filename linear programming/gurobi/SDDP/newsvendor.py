@@ -41,7 +41,7 @@ scenarios_full = list(itertools.product(*samples_detail))
 
 iter = 1
 iter_num = 15
-sample_num = 20
+N = 20 # sampled number of scenarios for forward computing
 
 theta_iniValue = -300 # initial theta values (profit) in each period
 m = Model() # linear model in the first stage
@@ -56,7 +56,7 @@ theta_value = 0
 while iter <= iter_num:  
     
     # sample a numer of scenarios from the full scenario tree
-    sample_scenarios= random.sample(scenarios_full, sample_num) # sampling without replacement
+    sample_scenarios= random.sample(scenarios_full, N) # sampling without replacement
     sample_scenarios.sort() # sort to make same numbers together
     node_values, node_index = get_tree_strcture(sample_scenarios)
     
@@ -67,11 +67,44 @@ while iter <= iter_num:
     theta_value = theta.x
     z = m.objVal
     
-    forward_m = [[Model() for t in range(T)] for n in range(sample_num)] 
+    m_forward = [[Model() for t in range(T)] for n in range(N)] 
+    q_forward = [[m_forward[n][t].addVar(vtype = GRB.CONTINUOUS, name = 'q_' + str(t+2) + '^' + str(n+1)) for t in range(T - 1)] for n in range(N)]
+    I_forward = [[m_forward[n][t].addVar(vtype = GRB.CONTINUOUS, name = 'I_' + str(t+1) + '^' + str(n+1)) for t in range(T)] for n in range(N)]
+    # B is the quantity of lost sale
+    B_forward = [[m_forward[n][t].addVar(vtype = GRB.CONTINUOUS, name = 'B_' + str(t+1) + '^' + str(n+1)) for t in range(T)] for n in range(N)]
+    theta_forward = [[m_forward[n][t].addVar(lb = -GRB.INFINITY, vtype = GRB.CONTINUOUS, name = 'theta_' + str(t+3) + '^' + str(n+1)) for t in range(T - 1)] for n in range(N)]
+
+    q_forward_values = [[0 for t in range(T)] for n in range(N)]  
+    I_forward_values = [[0 for t in range(T)] for n in range(N)]
+    B_forward_values = [[0 for t in range(T)] for n in range(N)]
+    theta_forward_values = [[0 for t in range(T)] for n in range(N)]
     
-    for n in range(sample_num):
-        
-        print(n)
+    for n in range(N):
+        for t in range(T):
+            demand = sample_scenarios[n][t]
+            if t == 0:   
+                if T > 1:
+                    m_forward[n][t].setObjective(vari_cost*q_forward[n][t] - price*(demand - B_forward[n][t]) + theta_forward[n][t], GRB.MINIMIZE)
+                    m_forward[n][t].addConstr(theta_forward[n][t] >= theta_iniValue*(T-1-t))
+                else:
+                    m_forward[n][t].setObjective(-price*(demand - B_forward[n][t]), GRB.MINIMIZE)
+                m_forward[n][t].addConstr(I_forward[n][t] - B_forward[n][t] == ini_I + q_value - demand)
+                print('')               
+            else:
+                if t == T - 1:                   
+                    m_forward[n][t].setObjective(-price*(demand - B_forward[n][t]), GRB.MINIMIZE)
+                else:
+                    m_forward[n][t].setObjective(vari_cost*q_forward[n][t] - price*(demand - B_forward[n][t]) + theta_forward[n][t], GRB.MINIMIZE)
+                    m_forward[n][t].addConstr(theta_forward[n][t] >= theta_iniValue*(T-1-t))
+                    m_forward[n][t].addConstr(I_forward[n][t] - B_forward[n][t] == I_forward_values[n][t-1] - B_forward_values[n][t-1] + q_forward_values[n][t] - demand)
+                    print(end = '')
+            # optimize
+            m_forward[n][t].optimize()
+            I_forward_values[n][t] = I_forward[n][t].x 
+            B_forward_values[n][t] = B_forward[n][t].x      
+            if t < T - 1:
+                q_forward_values[n][t] = q_forward[n][t].x
+                theta_forward_values[n][t] = theta_forward[n][t].x
     
     # backward
 
