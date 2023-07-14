@@ -101,8 +101,8 @@ samples_detail = [[0 for i in range(sample_nums[t])] for t in range(T)]
 for t in range(T):
     samples_detail[t] = generate_sample(sample_nums[t], trunQuantile, mean_demands[t])
 
-samples_detail = [[5, 15], [5, 15]]
-sample_nums = [2, 2]
+# samples_detail = [[5, 15], [5, 15]]
+# sample_nums = [2, 2]
 scenarios = list(itertools.product(*samples_detail)) 
 # sampling in the loop
 
@@ -129,9 +129,9 @@ intercept = [[ 0 for t in range(T)] for i in range(iter_num)]
 while iter <= iter_num:   
     
     # sampling
-    sample_num = 4
-    samples = [(5, 5), (5, 15), (15, 5), (15, 15)]
-    # samples= random.sample(scenarios, sample_num) # sampling without replacement
+    sample_num = 30
+    # samples = [(5, 5), (5, 15), (15, 5), (15, 15)]
+    samples= random.sample(scenarios, sample_num) # sampling without replacement
     samples.sort() # sort to make same numbers together
     node_values, node_index = get_tree_strcture(samples)
     

@@ -24,11 +24,11 @@ import time
 start = time.process_time()
 ini_I = 0
 vari_cost = 1
-unit_back_cost = 0
-unit_hold_cost = 0
-mean_demands = [10, 10, 10]
-sample_nums = [10, 10, 10]
-capacity = 5
+unit_back_cost = 10
+unit_hold_cost = 2
+mean_demands = [10, 20]
+sample_nums = [10, 10]
+capacity = 200
 T = len(mean_demands)
 trunQuantile = 0.9999 # affective to the final ordering quantity
 scenario_numTotal = reduce(lambda x, y: x * y, sample_nums, 1)

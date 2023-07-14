@@ -122,9 +122,6 @@ I_sub = [[m_sub[t][j].addVar(vtype = GRB.CONTINUOUS, name = 'I_' + str(t+1) + '^
 B_sub = [[m_sub[t][j].addVar(vtype = GRB.CONTINUOUS, name = 'B_' + str(t+1) + '^' + str(j+1)) for j in range(t_nodeNum[t])] for t in range(T)]
 theta_sub = [[m_sub[t][j].addVar(lb = theta_iniValue*(T-1-t), vtype = GRB.CONTINUOUS, name = 'theta_' + str(t+3) + '^' + str(j+1)) for j in range(t_nodeNum[t])] for t in range(T-1)]
 
-var_num = [4 for t in range(T)] # decision variable number in the first T stage models
-var_num[0] -= 2
-
 
 iter = 1
 iter_num = 10
@@ -144,8 +141,8 @@ while iter <= iter_num:
     m.setObjective(vari_cost*q + theta, GRB.MINIMIZE)
     m.update()
     m.optimize()
-    m.write('2iter' + str(iter) + '_main.lp')    
-    m.write('2iter' + str(iter) + '_main.sol')
+    # m.write('iter' + str(iter) + '_main.lp')    
+    # m.write('iter' + str(iter) + '_main.sol')
     
     print(end = '')
     q_value = q.x
@@ -159,6 +156,7 @@ while iter <= iter_num:
     pi_rhs_values = [[0 for s in range(t_nodeNum[t])] for t in range(T)] 
     d_sub_values = [[0 for s in range(t_nodeNum[t])] for t in range(T)]
     pi_rhs_values = [[0 for s in range(t_nodeNum[t])] for t in range(T)] 
+    
     # forward and backward  
     for t in range(T):     
         slope = [0 for j in range(t_nodeNum[t])]
@@ -218,6 +216,9 @@ while iter <= iter_num:
             
         # get and add the cut  
         # cut method 1     
+        # actually every node in stage t share the same cut
+        # this is not the formal handling of NLDS, nor the formal handling of SDDP
+        # but the result seems close to optimal       
         avg_pi = sum(pi_sub_values[t]) / t_nodeNum[t]
         sum_pi_rhs = 0
         for j in range(t_nodeNum[t]): 
@@ -225,22 +226,49 @@ while iter <= iter_num:
         avg_pi_rhs = sum_pi_rhs / t_nodeNum[t]
         if t == 0:
             m.addConstr(theta >= avg_pi*q + avg_pi_rhs) # just the benders optimality cut, same as the below constraint
-            # m.write('test.lp')
-            print(end='')
+            m.write('test.lp')
+           
         else:
-            for j in range(t_nodeNum[t-1]):             
+            for j in range(t_nodeNum[t-1]):                  
                 m_sub[t-1][j].addConstr(theta_sub[t-1][j] >= avg_pi*(I_sub[t-1][j] - B_sub[t-1][j] + q_sub[t-1][j]) + avg_pi_rhs)
                 m_sub[t-1][j].update()
+                # m_sub[t][j].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(j+1) + '.lp')
                 print(end='')
         
         # cut method 2
-        # avg_slope = slope / t_nodeNum[t]
-        # avg_intercept = intercept / t_nodeNum[t]
+        # formal handling of NLDS
+        if t == 0:
+            avg_pi = sum(pi_sub_values[t]) / t_nodeNum[t]
+            sum_pi_rhs = 0
+            for j in range(t_nodeNum[t]): 
+                sum_pi_rhs += pi_rhs_values[t][j]
+            avg_pi_rhs = sum_pi_rhs / t_nodeNum[t]
+            m.addConstr(theta >= avg_pi*q + avg_pi_rhs) # just the benders optimality cut, same as the below constraint
+            m.write('test.lp')
+        else:
+            for j in range(t_nodeNum[t-1]):  
+                sum_pi = 0
+                for k in node_index[t-1][j]:
+                    sum_pi += pi_sub_values[t]
+                avg_pi = sum(pi_sub_values[t]) / t_nodeNum[t]
+                sum_pi_rhs = 0
+                for j in range(t_nodeNum[t]): 
+                    sum_pi_rhs += pi_rhs_values[t][j]
+                avg_pi_rhs = sum_pi_rhs / t_nodeNum[t]
+                    
+        
+        # cut method 3
+        # avg_slope = sum(slope) / t_nodeNum[t]
+        # avg_intercept = sum(intercept) / t_nodeNum[t]
         # if t == 0:
         #     m.addConstr(theta >= avg_slope * q + avg_intercept)
+        #     m.write('test2.lp')
         # else:
-        #     m_sub[t-1][j].addConstr(theta >= avg_slope * (I_sub[t-1][j] - B_sub[t-1][j] + q_sub[t-1][j]) + avg_intercept)
-    
+        #     for j in range(t_nodeNum[t-1]): 
+        #         m_sub[t-1][j].addConstr(theta_sub[t-1][j] >= avg_slope * (I_sub[t-1][j] - B_sub[t-1][j] + q_sub[t-1][j]) + avg_intercept)
+        #         m_sub[t-1][j].update()
+        #         # m_sub[t][j].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(j+1) + '.lp')
+        # print(end='')
     iter += 1
 
 end = time.process_time()

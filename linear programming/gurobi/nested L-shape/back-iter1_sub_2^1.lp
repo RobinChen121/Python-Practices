@@ -1,8 +1,7 @@
 \ LP format - for model browsing. Use MPS format to capture full model detail.
 Minimize
-  q_1 + theta_2
+  2 I_2^1 + 10 B_2^1
 Subject To
- R0: 10 q_1 + theta_2 >= -300
+ R0: I_2^1 - B_2^1 = -11
 Bounds
- theta_2 >= -600
 End

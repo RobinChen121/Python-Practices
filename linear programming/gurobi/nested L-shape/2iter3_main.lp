@@ -1,8 +1,0 @@
-\ LP format - for model browsing. Use MPS format to capture full model detail.
-Minimize
-  q_1 + theta_2
-Subject To
- R0: 10 q_1 + theta_2 >= 101.1111111111111
- R1: 4.333333333333333 q_1 + theta_2 >= 77.10317460317461
-Bounds
-End

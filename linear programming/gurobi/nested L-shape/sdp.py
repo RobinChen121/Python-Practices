@@ -29,7 +29,7 @@ class State:
 
     
 class StochasticInventory:
-    def __init__(self, B: float, K: float, v: float, h: float, pai: float, meanD: list[float], tq: float):
+    def __init__(self, B: float, K: float, v: float, h: float, pai: float, meanD: list, tq: float):
         self.capacity = B
         self.fixOrderCost = K
         self.variOrderCost = v
