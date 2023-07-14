@@ -8,6 +8,7 @@ Created on Thu Mar 30 23:31:56 2023
 @disp:  sddp for multi period newsvendor, lost sale variable B in the objective function;
  
 more length of the planning horizon, more iterations to converge;
+have backorder;
     
     
 """
@@ -25,10 +26,10 @@ start = time.process_time()
 ini_I = 0
 vari_cost = 1
 price = 10
-unit_back_cost = 0
-unit_hold_cost = 0
-mean_demands = [10, 20, 10, 10]
-sample_nums = [10, 10, 10, 10]
+unit_back_cost = 10
+unit_hold_cost = 2
+mean_demands = [10, 20]
+sample_nums = [10, 10]
 T = len(mean_demands)
 trunQuantile = 0.9999 # affective to the final ordering quantity
 scenario_numTotal = reduce(lambda x, y: x * y, sample_nums, 1)

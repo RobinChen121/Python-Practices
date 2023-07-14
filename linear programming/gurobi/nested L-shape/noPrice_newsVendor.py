@@ -87,7 +87,7 @@ ini_I = 0
 vari_cost = 1
 unit_back_cost = 10
 unit_hold_cost = 2
-mean_demands = [10, 10]
+mean_demands = [10, 20]
 sample_nums = [10, 10]
 T = len(mean_demands)
 trunQuantile = 0.9999 # affective to the final ordering quantity
@@ -98,9 +98,9 @@ samples_detail = [[0 for i in range(sample_nums[t])] for t in range(T)]
 for t in range(T):
     samples_detail[t] = generate_sample(sample_nums[t], trunQuantile, mean_demands[t])
 
-samples_detail = [[5, 15], [5, 15]]
+# samples_detail = [[5, 15], [5, 15]]
 scenarios = list(itertools.product(*samples_detail)) 
-sample_num = 4
+sample_num = 30
 samples= random.sample(scenarios, sample_num) # sampling without replacement
 samples.sort() # sort to make same numbers together
 node_values, node_index = get_tree_strcture(samples)
@@ -121,6 +121,10 @@ q_sub = [[m_sub[t][j].addVar(vtype = GRB.CONTINUOUS, name = 'q_' + str(t+2) + '^
 I_sub = [[m_sub[t][j].addVar(vtype = GRB.CONTINUOUS, name = 'I_' + str(t+1) + '^' + str(j+1)) for j in range(t_nodeNum[t])] for t in range(T)]
 B_sub = [[m_sub[t][j].addVar(vtype = GRB.CONTINUOUS, name = 'B_' + str(t+1) + '^' + str(j+1)) for j in range(t_nodeNum[t])] for t in range(T)]
 theta_sub = [[m_sub[t][j].addVar(lb = theta_iniValue*(T-1-t), vtype = GRB.CONTINUOUS, name = 'theta_' + str(t+3) + '^' + str(j+1)) for j in range(t_nodeNum[t])] for t in range(T-1)]
+
+var_num = [4 for t in range(T)] # decision variable number in the first T stage models
+var_num[0] -= 2
+
 
 iter = 1
 iter_num = 10
@@ -156,7 +160,9 @@ while iter <= iter_num:
     d_sub_values = [[0 for s in range(t_nodeNum[t])] for t in range(T)]
     pi_rhs_values = [[0 for s in range(t_nodeNum[t])] for t in range(T)] 
     # forward and backward  
-    for t in range(T):       
+    for t in range(T):     
+        slope = [0 for j in range(t_nodeNum[t])]
+        intercept = [0 for j in range(t_nodeNum[t])]
         for j in range(t_nodeNum[t]): 
             obj = [0.0 for i in range(t_nodeNum[t])] 
             index = node_index[t][j][0]
@@ -202,15 +208,23 @@ while iter <= iter_num:
             d_sub_values[t][j] = demand
             m_sub[t][j].remove(m_sub[t][j].getConstrs()[-1])
             
-        # get and add the cut            
+            # get slope and intercept
+            slope[j] = pi[0]
+            if t == 0:
+                intercept[j] = obj[j] - pi[0] * q_value
+            else:
+                intercept[j] = obj[j] - pi[0] * (I_sub_values[t-1][last_index]- B_sub_values[t-1][last_index] + q_detail_values[iter-1][t][last_index])
+            
+            
+        # get and add the cut  
+        # cut method 1     
         avg_pi = sum(pi_sub_values[t]) / t_nodeNum[t]
         sum_pi_rhs = 0
         for j in range(t_nodeNum[t]): 
             sum_pi_rhs += pi_rhs_values[t][j]
         avg_pi_rhs = sum_pi_rhs / t_nodeNum[t]
         if t == 0:
-            # should have more
-            m.addConstr(theta >= avg_pi*q + avg_pi_rhs) # just the benders optimality cut, same as the above constraint
+            m.addConstr(theta >= avg_pi*q + avg_pi_rhs) # just the benders optimality cut, same as the below constraint
             # m.write('test.lp')
             print(end='')
         else:
@@ -218,6 +232,14 @@ while iter <= iter_num:
                 m_sub[t-1][j].addConstr(theta_sub[t-1][j] >= avg_pi*(I_sub[t-1][j] - B_sub[t-1][j] + q_sub[t-1][j]) + avg_pi_rhs)
                 m_sub[t-1][j].update()
                 print(end='')
+        
+        # cut method 2
+        # avg_slope = slope / t_nodeNum[t]
+        # avg_intercept = intercept / t_nodeNum[t]
+        # if t == 0:
+        #     m.addConstr(theta >= avg_slope * q + avg_intercept)
+        # else:
+        #     m_sub[t-1][j].addConstr(theta >= avg_slope * (I_sub[t-1][j] - B_sub[t-1][j] + q_sub[t-1][j]) + avg_intercept)
     
     iter += 1
 

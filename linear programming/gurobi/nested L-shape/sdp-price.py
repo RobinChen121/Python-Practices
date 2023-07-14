@@ -5,7 +5,8 @@ Created on Thu Mar 30 17:36:22 2023
 
 @author: zhenchen
 
-@disp:  stochastic dynamic programming code for multi period newsvendor problem with price
+@disp:  stochastic dynamic programming code for multi period newsvendor problem with price;
+lost sale, no backorder; 
     
     
 """
@@ -66,7 +67,7 @@ class StochasticInventory:
         return range(int(Q_bound) + 1)
 
     def state_tran(self, state:State, action, demand):
-        nextInventory = max(state.iniInventory + action - demand, 0)
+        nextInventory = max(state.iniInventory + action - demand, 0) # whether lost sale
         nextInventory = self.max_inventory if self.max_inventory < nextInventory else nextInventory
         nextInventory = self.min_inventory if self.min_inventory > nextInventory else nextInventory
         cashIncrement = self.imme_value(state, action, demand)
@@ -110,13 +111,13 @@ class StochasticInventory:
         return bestQValue
 
 
-demands = [10, 20, 10]
-capacity = 100
+demands = [10, 10, 10]
+capacity = 5
 fixOrderCost = 0
 variOderCost = 1
 price = 10
 iniI = 0
-iniCash = 10
+iniCash = 0
 holdCost = 0
 penaCost = 0
 truncationQ = 0.9999

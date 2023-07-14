@@ -24,8 +24,8 @@ import time
 start = time.process_time()
 ini_I = 0
 vari_cost = 1
-unit_back_cost = 10
-unit_hold_cost = 2
+unit_back_cost = 0
+unit_hold_cost = 0
 mean_demands = [10, 10, 10]
 sample_nums = [10, 10, 10]
 capacity = 5

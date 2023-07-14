@@ -5,7 +5,8 @@ Created on Sat Apr  1 11:03:26 2023
 
 @author: zhenchen
 
-@disp:  sddp for multi period newsvendor, inventoryl level I in the objective function
+@disp:  sddp for multi period newsvendor, inventoryl level I in the objective function,
+have backorder;
     
     
 """

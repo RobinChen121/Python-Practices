@@ -4,7 +4,8 @@
 Created on Tue Mar  7 15:32:46 2023
 
 @author: chen
-@desp: stochastic dynamic programming code for multi period newsvendor problem without price
+@desp: stochastic dynamic programming code for multi period newsvendor problem without price, 
+have backorder;
 """
 
 import scipy.stats as sp
@@ -96,8 +97,8 @@ class StochasticInventory:
         return bestQValue
 
 
-demands = [10, 10]
-capacity = 100
+demands = [10, 20]
+capacity = 200
 fixOrderCost = 0
 variOderCost = 1
 holdCost = 2
