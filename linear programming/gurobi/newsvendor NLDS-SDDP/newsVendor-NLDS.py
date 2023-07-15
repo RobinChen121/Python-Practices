@@ -106,7 +106,7 @@ while iter <= iter_num:
         for j in range(t_nodeNum[t]): 
             obj = [0.0 for i in range(t_nodeNum[t])] 
             index = node_index[t][j][0]
-            demand = samples[index][t]
+            demand = sample_scenarios[index][t]
             if t == 0:   
                 m_sub[t][j].setObjective(vari_cost*q_sub[t][j] + unit_hold_cost*I_sub[t][j] + unit_back_cost*B_sub[t][j] +theta_sub[t][j], GRB.MINIMIZE)
                 m_sub[t][j].addConstr(I_sub[t][j] - B_sub[t][j] == ini_I + q_value - demand)
@@ -120,6 +120,7 @@ while iter <= iter_num:
                 for k in node_index[t - 1]:
                     if node_index[t][j][0] in k:
                         last_index = node_index[t - 1].index(k)
+                        break;
                 m_sub[t][j].addConstr(I_sub[t][j] - B_sub[t][j] == I_sub_values[t-1][last_index] - B_sub_values[t-1][last_index] + q_detail_values[iter-1][t][last_index] - demand)
                 print(end = '')
                     
@@ -168,8 +169,7 @@ while iter <= iter_num:
         avg_pi_rhs = sum_pi_rhs / t_nodeNum[t]
         if t == 0:
             m.addConstr(theta >= avg_pi*q + avg_pi_rhs) # just the benders optimality cut, same as the below constraint
-            m.write('test.lp')
-           
+            # m.write('test.lp')     
         else:
             for j in range(t_nodeNum[t-1]):                  
                 m_sub[t-1][j].addConstr(theta_sub[t-1][j] >= avg_pi*(I_sub[t-1][j] - B_sub[t-1][j] + q_sub[t-1][j]) + avg_pi_rhs)
@@ -179,24 +179,24 @@ while iter <= iter_num:
         
         # cut method 2
         # formal handling of NLDS
-        if t == 0:
-            avg_pi = sum(pi_sub_values[t]) / t_nodeNum[t]
-            sum_pi_rhs = 0
-            for j in range(t_nodeNum[t]): 
-                sum_pi_rhs += pi_rhs_values[t][j]
-            avg_pi_rhs = sum_pi_rhs / t_nodeNum[t]
-            m.addConstr(theta >= avg_pi*q + avg_pi_rhs) # just the benders optimality cut, same as the below constraint
-            m.write('test.lp')
-        else:
-            for j in range(t_nodeNum[t-1]):  
-                sum_pi = 0
-                for k in node_index[t-1][j]:
-                    sum_pi += pi_sub_values[t]
-                avg_pi = sum(pi_sub_values[t]) / t_nodeNum[t]
-                sum_pi_rhs = 0
-                for j in range(t_nodeNum[t]): 
-                    sum_pi_rhs += pi_rhs_values[t][j]
-                avg_pi_rhs = sum_pi_rhs / t_nodeNum[t]
+        # if t == 0:
+        #     avg_pi = sum(pi_sub_values[t]) / t_nodeNum[t]
+        #     sum_pi_rhs = 0
+        #     for j in range(t_nodeNum[t]): 
+        #         sum_pi_rhs += pi_rhs_values[t][j]
+        #     avg_pi_rhs = sum_pi_rhs / t_nodeNum[t]
+        #     m.addConstr(theta >= avg_pi*q + avg_pi_rhs) # just the benders optimality cut, same as the below constraint
+        #     m.write('test.lp')
+        # else:
+        #     for j in range(t_nodeNum[t-1]):  
+        #         sum_pi = 0
+        #         for k in node_index[t-1][j]:
+        #             sum_pi += pi_sub_values[t]
+        #         avg_pi = sum(pi_sub_values[t]) / t_nodeNum[t]
+        #         sum_pi_rhs = 0
+        #         for j in range(t_nodeNum[t]): 
+        #             sum_pi_rhs += pi_rhs_values[t][j]
+        #         avg_pi_rhs = sum_pi_rhs / t_nodeNum[t]
                     
         
         # cut method 3
