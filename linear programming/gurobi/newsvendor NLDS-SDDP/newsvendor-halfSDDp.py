@@ -1,14 +1,15 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Wed Mar  8 14:14:38 2023
+Created on Mon Jul 17 08:26:58 2023
 
-@author: chen
-@desp: use formal NLDS to solve traditional newsvendor problem without price.
+@author: zhenchen
 
-doe snot perform well for small number of scenarios
-
+@disp:  
+    
+    
 """
+
 
 import numpy as np
 import scipy.stats as st
@@ -22,7 +23,6 @@ sys.path.append("..")
 from tree import generate_sample, get_tree_strcture
 
 
- 
 
 ini_I = 0
 vari_cost = 1
@@ -41,7 +41,7 @@ for t in range(T):
 
 # samples_detail = [[5, 15], [5, 15]]
 scenarios = list(itertools.product(*samples_detail)) 
-N = 30
+N = 200
 sample_num = N
 # random.seed(10000)
 sample_scenarios= random.sample(scenarios, sample_num) # sampling without replacement
@@ -67,7 +67,7 @@ theta_sub = [[m_sub[t][j].addVar(lb = theta_iniValue*(T-1-t), vtype = GRB.CONTIN
 
 
 iter = 1
-iter_num = 10
+iter_num = 15
 pi_sub_detail_values = [[[[] for s in range(t_nodeNum[t])] for t in range(T)] for iter in range(iter_num)] 
 q_detail_values = [[[] for t in range(T)] for iter in range(iter_num)] 
 for i in range(iter_num):
@@ -158,29 +158,40 @@ while iter <= iter_num:
             else:
                 intercept[j] = obj[j] - pi[0] * (I_sub_values[t-1][last_index]- B_sub_values[t-1][last_index] + q_detail_values[iter-1][t][last_index])
             
+            
+        # get and add the cut  
+        # cut method 1     
+        # actually every node in stage t share the same cut
+        # this is not the formal handling of NLDS, nor the formal handling of SDDP
+        # but the result seems close to optimal       
         
-        # cut method 2
-        # formal handling of NLDS      
+        avg_pi = sum(pi_sub_values[t]) / t_nodeNum[t]
+        sum_pi_rhs = 0
+        for j in range(t_nodeNum[t]): 
+            sum_pi_rhs += pi_rhs_values[t][j]
+        avg_pi_rhs = sum_pi_rhs / t_nodeNum[t]
         if t == 0:
-            avg_pi = sum(pi_sub_values[t]) / t_nodeNum[t]
-            sum_pi_rhs = 0
-            for j in range(t_nodeNum[t]): 
-                sum_pi_rhs += pi_rhs_values[t][j]
-            avg_pi_rhs = sum_pi_rhs / t_nodeNum[t]
             m.addConstr(theta >= avg_pi*q + avg_pi_rhs) 
         else:
-            for j in range(t_nodeNum[t-1]):  
-                sum_pi = []
-                sum_pi_rhs = []
-                for kk, vv in enumerate(node_index[t]):
-                    if set(vv) <= set(node_index[t-1][j]):
-                        sum_pi.append(pi_sub_values[t][kk])
-                        sum_pi_rhs.append(pi_rhs_values[t][kk])
-                        
-                avg_pi = sum(sum_pi) / len(sum_pi)
-                avg_pi_rhs = sum(sum_pi_rhs) / len(sum_pi_rhs)
+            for j in range(t_nodeNum[t-1]):                  
                 m_sub[t-1][j].addConstr(theta_sub[t-1][j] >= avg_pi*(I_sub[t-1][j] - B_sub[t-1][j] + q_sub[t-1][j]) + avg_pi_rhs)
                 m_sub[t-1][j].update()
+                # m_sub[t][j].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(j+1) + '.lp')
+                print(end='')       
+                    
+        
+        # cut method 3
+        # avg_slope = sum(slope) / t_nodeNum[t]
+        # avg_intercept = sum(intercept) / t_nodeNum[t]
+        # if t == 0:
+        #     m.addConstr(theta >= avg_slope * q + avg_intercept)
+        #     m.write('test2.lp')
+        # else:
+        #     for j in range(t_nodeNum[t-1]): 
+        #         m_sub[t-1][j].addConstr(theta_sub[t-1][j] >= avg_slope * (I_sub[t-1][j] - B_sub[t-1][j] + q_sub[t-1][j]) + avg_intercept)
+        #         m_sub[t-1][j].update()
+        #         # m_sub[t][j].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(j+1) + '.lp')
+        # print(end='')
     iter += 1
 
 end = time.process_time()
