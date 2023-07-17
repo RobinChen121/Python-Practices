@@ -123,7 +123,7 @@ while iter <= iter_num:
                     if node_index[t][j][0] in k:
                         last_index = node_index[t - 1].index(k)
                         break;
-                m_sub[t][j].addConstr(I_sub[t][j] - B_sub[t][j] == I_sub_values[t-1][last_index] - B_sub_values[t-1][last_index] + q_detail_values[iter-1][t][last_index] - demand)
+                m_sub[t][j].addConstr(I_sub[t][j] - B_sub[t][j] == I_sub_values[t-1][last_index] - B_sub_values[t-1][last_index] + q_detail_values[iter-1][t-1][last_index] - demand)
                 print(end = '')
                     
             # optimize
