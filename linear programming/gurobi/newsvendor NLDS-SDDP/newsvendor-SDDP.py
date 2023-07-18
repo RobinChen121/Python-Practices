@@ -55,8 +55,8 @@ scenarios_full = list(itertools.product(*sample_detail))
 
 
 iter = 0
-iter_num = 4
-N = 4 # sampled number of scenarios for forward computing
+iter_num = 8
+N = 30 # sampled number of scenarios for forward computing
 
 theta_iniValue = 0 # initial theta values (profit) in each period
 m = Model() # linear model in the first stage
@@ -73,6 +73,7 @@ intercept1_stage = []
 slopes = [[ [] for n in range(N)] for t in range(T-1)]
 intercepts = [[ [] for n in range(N)] for t in range(T-1)]
 q_values = [0 for iter in range(iter_num)]
+q_sub_values = [[[0 for n in range(N)] for t in range(T-1)] for iter in range(iter_num)]
 start = time.process_time()
 while iter < iter_num:  
     
@@ -87,7 +88,7 @@ while iter < iter_num:
     m.update()
     m.optimize()
     m.write('iter' + str(iter) + '_main2.lp')    
-    # m.write('iter' + str(iter) + '_main2.sol')
+    m.write('iter' + str(iter) + '_main2.sol')
     
     q_values[iter] = q.x
     theta_value = theta.x
@@ -126,12 +127,13 @@ while iter < iter_num:
             
             # optimize
             m_forward[t][n].optimize()
-            m_forward[t][n].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(n+1) + '-2.lp')
+            # m_forward[t][n].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(n+1) + '-2.lp')
             
             I_forward_values[t][n] = I_forward[t][n].x 
             B_forward_values[t][n] = B_forward[t][n].x      
             if t < T - 1:
                 q_forward_values[t][n] = q_forward[t][n].x
+                q_sub_values[iter][t][n] = q_forward[t][n].x
                 theta_forward_values[t][n] = theta_forward[t][n].x
     
     # backward
@@ -165,16 +167,18 @@ while iter < iter_num:
                 if t == T - 1:                   
                     m_backward[t][n][k].setObjective(unit_hold_cost*I_backward[t][n][k] + unit_back_cost*B_backward[t][n][k], GRB.MINIMIZE)
                 else:
-                    m_backward[t][n][k].setObjective(unit_hold_cost*I_backward[t][n][k] + unit_back_cost*B_backward[t][n][k] + theta_backward[t][n][k], GRB.MINIMIZE)
+                    m_backward[t][n][k].setObjective(vari_cost*q_backward[t][n][k] + unit_hold_cost*I_backward[t][n][k] + unit_back_cost*B_backward[t][n][k] + theta_backward[t][n][k], GRB.MINIMIZE)
                 if t == 0:   
                     m_backward[t][n][k].addConstr(I_backward[t][n][k] - B_backward[t][n][k] == ini_I + q_values[iter] - demand)
                 else:
-                    m_backward[t][n][k].addConstr(I_backward[t][n][k] - B_backward[t][n][k] == I_backward_values[t-1][n][k] - B_backward_values[t-1][n][k] + q_backward_values[t][n][k] - demand)
+                    m_backward[t][n][k].addConstr(I_backward[t][n][k] - B_backward[t][n][k] == I_forward_values[t-1][n] - B_forward_values[t-1][n] + q_forward_values[t-1][n] - demand)
                     
                 # optimize
                 m_backward[t][n][k].optimize()
-                if t == 0 and n == 0 and iter > 0:
-                    m_backward[t][n][k].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(n+1) + '_' + str(k+1) +'-2back.lp')
+                # if t == 0 and n == 0 and iter > 0:
+                #     m_backward[t][n][k].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(n+1) + '_' + str(k+1) +'-2back.lp')
+                # if t > 0:
+                #     m_backward[t][n][k].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(n+1) + '_' + str(k+1) +'-2back.lp')
                 
                 pi = m_backward[t][n][k].getAttr(GRB.Attr.Pi)
                 rhs = m_backward[t][n][k].getAttr(GRB.Attr.RHS)
@@ -187,7 +191,7 @@ while iter < iter_num:
                     pi_rhs_values[t][n][k] = -pi[-1] * demand
                 pi_values[t][n][k] = pi[-1]
             
-            if iter > 0 and t == 0:
+            if iter > 0 and t == 1:
                 print()
             avg_pi = sum(pi_values[t][n]) / K
             avg_pi_rhs = sum(pi_rhs_values[t][n]) / K
@@ -206,7 +210,7 @@ while iter < iter_num:
 end = time.process_time()
 print('********************************************')
 print('final expected total costs is %.2f' % z)
-print('ordering Q in the first peiod is %.2f' % q_value)
+print('ordering Q in the first peiod is %.2f' % q_values[iter-1])
 cpu_time = end - start
 print('cpu time is %.3f s' % cpu_time)
 

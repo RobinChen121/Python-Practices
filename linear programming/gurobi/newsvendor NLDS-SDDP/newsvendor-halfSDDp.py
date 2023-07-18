@@ -129,8 +129,8 @@ while iter < iter_num:
             # optimize
             m_sub[t][j].optimize()
             m_sub[t][j].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(j+1) + '.lp')
-#           m_sub[t][j].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(j+1) + '.dlp')          
-#           m_sub[t][j].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(j+1) + '.sol')
+            m_sub[t][j].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(j+1) + '.dlp')          
+            m_sub[t][j].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(j+1) + '.sol')
             obj[j] = m_sub[t][j].objVal
             if t < T - 1:              
                 q_detail_values[iter - 1][t+1][j] = q_sub[t][j].x
@@ -139,6 +139,8 @@ while iter < iter_num:
             B_sub_values[t][j] = B_sub[t][j].x
             pi = m_sub[t][j].getAttr(GRB.Attr.Pi)
             pi_sub_detail_values[iter-1][t][j] = pi
+            if t > 0 and pi[-1] > -10:
+                print()
             rhs = m_sub[t][j].getAttr(GRB.Attr.RHS)
             if t < T - 1:
                 num_con = len(pi)
@@ -147,6 +149,8 @@ while iter < iter_num:
                 pi_rhs_values[t][j] += -pi[-1]*demand 
             else:
                 pi_rhs_values[t][j] = -pi[-1] * demand
+            if t > 0:
+                print()
             pi_sub_values[t][j] = pi[-1]
             d_sub_values[t][j] = demand
             m_sub[t][j].remove(m_sub[t][j].getConstrs()[-1])
