@@ -28,7 +28,7 @@ ini_I = 0
 vari_cost = 1
 unit_back_cost = 10
 unit_hold_cost = 2
-mean_demands = [10, 20, 10]
+mean_demands = [10, 10]
 T = len(mean_demands)
 sample_nums = [10 for t in range(T)]
 trunQuantile = 0.9999 # affective to the final ordering quantity
@@ -41,9 +41,9 @@ for t in range(T):
 
 # samples_detail = [[5, 15], [5, 15]]
 scenarios = list(itertools.product(*samples_detail)) 
-N = 200
+N = 4
 sample_num = N
-# random.seed(10000)
+random.seed(10000)
 sample_scenarios= random.sample(scenarios, sample_num) # sampling without replacement
 sample_scenarios.sort() # sort to make same numbers together
 node_values, node_index = get_tree_strcture(sample_scenarios)
@@ -66,8 +66,8 @@ B_sub = [[m_sub[t][j].addVar(vtype = GRB.CONTINUOUS, name = 'B_' + str(t+1) + '^
 theta_sub = [[m_sub[t][j].addVar(lb = theta_iniValue*(T-1-t), vtype = GRB.CONTINUOUS, name = 'theta_' + str(t+3) + '^' + str(j+1)) for j in range(t_nodeNum[t])] for t in range(T-1)]
 
 
-iter = 1
-iter_num = 15
+iter = 0
+iter_num = 4
 pi_sub_detail_values = [[[[] for s in range(t_nodeNum[t])] for t in range(T)] for iter in range(iter_num)] 
 q_detail_values = [[[] for t in range(T)] for iter in range(iter_num)] 
 for i in range(iter_num):
@@ -78,14 +78,15 @@ for i in range(iter_num):
             q_detail_values[i][t] = [0 for s in range(t_nodeNum[t-1])]
 
 start = time.process_time()
-while iter <= iter_num:   
+while iter < iter_num:   
         
     # forward computation    
     # solve the first stage model    
     m.setObjective(vari_cost*q + theta, GRB.MINIMIZE)
     m.update()
     m.optimize()
-    # m.write('iter' + str(iter) + '_main.lp')    
+    if iter > 0:
+        m.write('iter' + str(iter) + '_main.lp')    
     # m.write('iter' + str(iter) + '_main.sol')
     
     print(end = '')
@@ -123,12 +124,13 @@ while iter <= iter_num:
                     if node_index[t][j][0] in k:
                         last_index = node_index[t - 1].index(k)
                         break;
-                m_sub[t][j].addConstr(I_sub[t][j] - B_sub[t][j] == I_sub_values[t-1][last_index] - B_sub_values[t-1][last_index] + q_detail_values[iter-1][t-1][last_index] - demand)
+                m_sub[t][j].addConstr(I_sub[t][j] - B_sub[t][j] == I_sub_values[t-1][last_index] - B_sub_values[t-1][last_index] + q_detail_values[iter-1][t][last_index] - demand)
                 print(end = '')
                     
             # optimize
             m_sub[t][j].optimize()
-#           m_sub[t][j].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(j+1) + '.lp')
+            if iter > 0:
+                m_sub[t][j].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(j+1) + '.lp')
 #           m_sub[t][j].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(j+1) + '.dlp')          
 #           m_sub[t][j].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(j+1) + '.sol')
             obj[j] = m_sub[t][j].objVal

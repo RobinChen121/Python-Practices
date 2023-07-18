@@ -1,0 +1,17 @@
+\ LP format - for model browsing. Use MPS format to capture full model detail.
+Minimize
+  q_2^3 + 10 B_1^3 + theta_3^3 - 120 Constant
+Subject To
+ R0: theta_3^3 >= 0
+ R1: I_1^3 - B_1^3 = 1
+ R2: 10 q_2^3 + 10 I_1^3 - 10 B_1^3 + theta_3^3 >= 100
+ R3: 10 q_2^3 + 10 I_1^3 - 10 B_1^3 + theta_3^3 >= 100
+ R4: 10 q_2^3 + 10 I_1^3 - 10 B_1^3 + theta_3^3 >= 100
+ R5: 10 q_2^3 + 10 I_1^3 - 10 B_1^3 + theta_3^3 >= 100
+ R6: 4 q_2^3 + 4 I_1^3 - 4 B_1^3 + theta_3^3 >= 52
+ R7: 4 q_2^3 + 4 I_1^3 - 4 B_1^3 + theta_3^3 >= 52
+ R8: 2 q_2^3 + 2 I_1^3 - 2 B_1^3 + theta_3^3 >= 29
+ R9: theta_3^3 >= 0
+Bounds
+ Constant = 1
+End
