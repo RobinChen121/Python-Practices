@@ -36,9 +36,8 @@ from tree import generate_sample, get_tree_strcture
 
 ini_I = 0
 vari_cost = 1
-price = 10
-unit_back_cost = 0
-unit_hold_cost = 0
+unit_back_cost = 10
+unit_hold_cost = 2
 mean_demands = [10, 10]
 sample_nums = [10, 10]
 T = len(mean_demands)
@@ -56,7 +55,7 @@ scenarios_full = list(itertools.product(*sample_detail))
 
 
 iter = 0
-iter_num = 3
+iter_num = 4
 N = 4 # sampled number of scenarios for forward computing
 
 theta_iniValue = 0 # initial theta values (profit) in each period
@@ -73,6 +72,7 @@ slope1_stage = []
 intercept1_stage = []
 slopes = [[ [] for n in range(N)] for t in range(T-1)]
 intercepts = [[ [] for n in range(N)] for t in range(T-1)]
+q_values = [0 for iter in range(iter_num)]
 start = time.process_time()
 while iter < iter_num:  
     
@@ -83,15 +83,13 @@ while iter < iter_num:
     
     # forward
     if iter > 0:
-        for i in range(iter):
-            m.addConstr(theta >= slope1_stage[i]*q + intercept1_stage[i])
+        m.addConstr(theta >= slope1_stage[-1]*q + intercept1_stage[-1])
     m.update()
     m.optimize()
-    if iter > 0:
-        m.write('iter' + str(iter) + '_main2.lp')    
+    m.write('iter' + str(iter) + '_main2.lp')    
     # m.write('iter' + str(iter) + '_main2.sol')
     
-    q_value = q.x
+    q_values[iter] = q.x
     theta_value = theta.x
     z = m.objVal
     
@@ -110,32 +108,25 @@ while iter < iter_num:
     for t in range(T):
         for n in range(N):
             demand = sample_scenarios[n][t]
-            if t == 0:   
-                if T > 1:
-                    m_forward[t][n].setObjective(vari_cost*q_forward[t][n] - price*(demand - B_forward[t][n]) + theta_forward[t][n], GRB.MINIMIZE)
-                    m_forward[t][n].addConstr(theta_forward[t][n] >= theta_iniValue*(T-1-t))
-                else:
-                    m_forward[t][n].setObjective(-price*(demand - B_forward[t][n]), GRB.MINIMIZE)
-                m_forward[t][n].addConstr(I_forward[t][n] - B_forward[t][n] == ini_I + q_value - demand)
-                print('')               
-            else:
-                if t == T - 1:                   
-                    m_forward[t][n].setObjective(-price*(demand - B_forward[t][n]), GRB.MINIMIZE)
-                else:
-                    m_forward[t][n].setObjective(vari_cost*q_forward[t][n] - price*(demand - B_forward[t][n]) + theta_forward[t][n], GRB.MINIMIZE)
-                    m_forward[t][n].addConstr(theta_forward[t][n] >= theta_iniValue*(T-1-t))
-                m_forward[t][n].addConstr(I_forward[t][n] - B_forward[t][n] == I_forward_values[t-1][n] + q_forward_values[t][n] - demand)
             
+            # put those cuts in the front
             if iter > 0 and t < T - 1:
                 for i in range(iter):
                     for nn in range(N):
                         m_forward[t][n].addConstr(theta_forward[t][n] >= slopes[t][nn][i]*(I_forward[t][n]- B_forward[t][n] + q_forward[t][n]) + intercepts[t][nn][i])
-                
+                           
+            if t == T - 1:                   
+                m_forward[t][n].setObjective(unit_hold_cost*I_forward[t][n] + unit_back_cost*B_forward[t][n], GRB.MINIMIZE)
+            else:
+                m_forward[t][n].setObjective(vari_cost*q_forward[t][n] + unit_hold_cost*I_forward[t][n] + unit_back_cost*B_forward[t][n] + theta_forward[t][n], GRB.MINIMIZE)
+            if t == 0:   
+                m_forward[t][n].addConstr(I_forward[t][n] - B_forward[t][n] == ini_I + q_values[iter] - demand)
+            else:
+                m_forward[t][n].addConstr(I_forward[t][n] - B_forward[t][n] == I_forward_values[t-1][n] - B_forward_values[t-1][n] + q_forward_values[t][n] - demand)
             
             # optimize
             m_forward[t][n].optimize()
-            if iter > 0:
-                m_forward[t][n].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(n+1) + '-2.lp')
+            m_forward[t][n].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(n+1) + '-2.lp')
             
             I_forward_values[t][n] = I_forward[t][n].x 
             B_forward_values[t][n] = B_forward[t][n].x      
@@ -164,24 +155,27 @@ while iter < iter_num:
             K = len(sample_detail[t])
             for k in range(K):
                 demand = sample_detail[t][k]
-                if t == 0:   
-                    if T > 1:
-                        m_backward[t][n][k].setObjective(vari_cost*q_backward[t][n][k] - price*(demand - B_backward[t][n][k]) + theta_backward[t][n][k], GRB.MINIMIZE)
-                        m_backward[t][n][k].addConstr(theta_backward[t][n][k] >= theta_iniValue*(T-1-t))
-                    else:
-                        m_backward[t][n][k].setObjective(-price*(demand - B_backward[t][n][k]), GRB.MINIMIZE)
-                    m_backward[t][n][k].addConstr(I_backward[t][n][k] - B_backward[t][n][k] == ini_I + q_value - demand)
-                    print('')               
+                
+                 # put those cuts in the front
+                if iter > 0 and t < T - 1:
+                    for i in range(iter):
+                        for nn in range(N):
+                             m_backward[t][n][k].addConstr(theta_backward[t][n][k] >= slopes[t][nn][i]*(I_backward[t][n][k]- B_backward[t][n][k] + q_backward[t][n][k]) + intercepts[t][nn][i])
+            
+                if t == T - 1:                   
+                    m_backward[t][n][k].setObjective(unit_hold_cost*I_backward[t][n][k] + unit_back_cost*B_backward[t][n][k], GRB.MINIMIZE)
                 else:
-                    if t == T - 1:                   
-                        m_backward[t][n][k].setObjective(-price*(demand - B_backward[t][n][k]), GRB.MINIMIZE)
-                    else:
-                        m_backward[t][n][k].setObjective(vari_cost*q_backward[t][n][k] - price*(demand - B_backward[t][n][k]) + theta_backward[t][n][k], GRB.MINIMIZE)
-                        m_backward[t][n][k].addConstr(theta_backward[t][n][k] >= theta_iniValue*(T-1-t))
-                    m_backward[t][n][k].addConstr(I_backward[t][n][k] - B_backward[t][n][k] == I_forward_values[t-1][n] + q_forward_values[t-1][n] - demand)
+                    m_backward[t][n][k].setObjective(unit_hold_cost*I_backward[t][n][k] + unit_back_cost*B_backward[t][n][k] + theta_backward[t][n][k], GRB.MINIMIZE)
+                if t == 0:   
+                    m_backward[t][n][k].addConstr(I_backward[t][n][k] - B_backward[t][n][k] == ini_I + q_values[iter] - demand)
+                else:
+                    m_backward[t][n][k].addConstr(I_backward[t][n][k] - B_backward[t][n][k] == I_backward_values[t-1][n][k] - B_backward_values[t-1][n][k] + q_backward_values[t][n][k] - demand)
                     
                 # optimize
                 m_backward[t][n][k].optimize()
+                if t == 0 and n == 0 and iter > 0:
+                    m_backward[t][n][k].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(n+1) + '_' + str(k+1) +'-2back.lp')
+                
                 pi = m_backward[t][n][k].getAttr(GRB.Attr.Pi)
                 rhs = m_backward[t][n][k].getAttr(GRB.Attr.RHS)
                 if t < T - 1:
@@ -192,7 +186,9 @@ while iter < iter_num:
                 else:
                     pi_rhs_values[t][n][k] = -pi[-1] * demand
                 pi_values[t][n][k] = pi[-1]
-                
+            
+            if iter > 0 and t == 0:
+                print()
             avg_pi = sum(pi_values[t][n]) / K
             avg_pi_rhs = sum(pi_rhs_values[t][n]) / K
             

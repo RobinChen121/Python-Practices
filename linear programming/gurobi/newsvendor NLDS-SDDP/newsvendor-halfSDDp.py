@@ -85,8 +85,7 @@ while iter < iter_num:
     m.setObjective(vari_cost*q + theta, GRB.MINIMIZE)
     m.update()
     m.optimize()
-    if iter > 0:
-        m.write('iter' + str(iter) + '_main.lp')    
+    m.write('iter' + str(iter) + '_main.lp')    
     # m.write('iter' + str(iter) + '_main.sol')
     
     print(end = '')
@@ -129,8 +128,7 @@ while iter < iter_num:
                     
             # optimize
             m_sub[t][j].optimize()
-            if iter > 0:
-                m_sub[t][j].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(j+1) + '.lp')
+            m_sub[t][j].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(j+1) + '.lp')
 #           m_sub[t][j].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(j+1) + '.dlp')          
 #           m_sub[t][j].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(j+1) + '.sol')
             obj[j] = m_sub[t][j].objVal
