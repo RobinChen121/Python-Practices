@@ -28,7 +28,7 @@ ini_I = 0
 vari_cost = 1
 unit_back_cost = 10
 unit_hold_cost = 2
-mean_demands = [10, 10]
+mean_demands = [10, 20, 10]
 T = len(mean_demands)
 sample_nums = [10 for t in range(T)]
 trunQuantile = 0.9999 # affective to the final ordering quantity
@@ -41,9 +41,9 @@ for t in range(T):
 
 # samples_detail = [[5, 15], [5, 15]]
 scenarios = list(itertools.product(*samples_detail)) 
-N = 4
+N = 30
 sample_num = N
-random.seed(10000)
+# random.seed(10000)
 sample_scenarios= random.sample(scenarios, sample_num) # sampling without replacement
 sample_scenarios.sort() # sort to make same numbers together
 node_values, node_index = get_tree_strcture(sample_scenarios)
@@ -67,7 +67,7 @@ theta_sub = [[m_sub[t][j].addVar(lb = theta_iniValue*(T-1-t), vtype = GRB.CONTIN
 
 
 iter = 0
-iter_num = 4
+iter_num = 8
 pi_sub_detail_values = [[[[] for s in range(t_nodeNum[t])] for t in range(T)] for iter in range(iter_num)] 
 q_detail_values = [[[] for t in range(T)] for iter in range(iter_num)] 
 for i in range(iter_num):
@@ -128,9 +128,9 @@ while iter < iter_num:
                     
             # optimize
             m_sub[t][j].optimize()
-            m_sub[t][j].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(j+1) + '.lp')
-            m_sub[t][j].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(j+1) + '.dlp')          
-            m_sub[t][j].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(j+1) + '.sol')
+            # m_sub[t][j].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(j+1) + '.lp')
+            # m_sub[t][j].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(j+1) + '.dlp')          
+            # m_sub[t][j].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(j+1) + '.sol')
             obj[j] = m_sub[t][j].objVal
             if t < T - 1:              
                 q_detail_values[iter - 1][t+1][j] = q_sub[t][j].x
@@ -182,20 +182,7 @@ while iter < iter_num:
                 m_sub[t-1][j].update()
                 # m_sub[t][j].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(j+1) + '.lp')
                 print(end='')       
-                    
-        
-        # cut method 3
-        # avg_slope = sum(slope) / t_nodeNum[t]
-        # avg_intercept = sum(intercept) / t_nodeNum[t]
-        # if t == 0:
-        #     m.addConstr(theta >= avg_slope * q + avg_intercept)
-        #     m.write('test2.lp')
-        # else:
-        #     for j in range(t_nodeNum[t-1]): 
-        #         m_sub[t-1][j].addConstr(theta_sub[t-1][j] >= avg_slope * (I_sub[t-1][j] - B_sub[t-1][j] + q_sub[t-1][j]) + avg_intercept)
-        #         m_sub[t-1][j].update()
-        #         # m_sub[t][j].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(j+1) + '.lp')
-        # print(end='')
+
     iter += 1
 
 end = time.process_time()

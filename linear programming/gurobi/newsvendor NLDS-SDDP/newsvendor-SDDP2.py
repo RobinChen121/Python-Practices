@@ -18,7 +18,10 @@ Created on Mon Jul 10 10:52:47 2023
 
 @author: zhenchen
 
-@disp:  
+@disp:  SDDP for newsvendor, gurobi models outsizde the loops;
+
+only slightly faster;
+running time are similar between gurobi models outside and inside the loops; 
     
     
 """
@@ -38,8 +41,8 @@ ini_I = 0
 vari_cost = 1
 unit_back_cost = 10
 unit_hold_cost = 2
-mean_demands = [10, 20, 10]
-sample_nums = [10, 10, 10]
+mean_demands = [10, 10]
+sample_nums = [10, 10]
 T = len(mean_demands)
 trunQuantile = 0.9999 # affective to the final ordering quantity
 scenario_numTotal = 1
@@ -55,8 +58,8 @@ scenarios_full = list(itertools.product(*sample_detail))
 
 
 iter = 0
-iter_num = 4
-N = 4 # sampled number of scenarios for forward computing
+iter_num = 8
+N = 30 # sampled number of scenarios for forward computing
 
 theta_iniValue = 0 # initial theta values (profit) in each period
 m = Model() # linear model in the first stage
@@ -66,6 +69,23 @@ theta = m.addVar(lb = theta_iniValue*T, vtype = GRB.CONTINUOUS, name = 'theta_2'
 m.setObjective(vari_cost*q + theta, GRB.MINIMIZE)
 q_value = 0
 theta_value = 0
+
+# models
+m_forward = [[Model() for n in range(N)] for t in range(T)]
+q_forward = [[m_forward[t][n].addVar(vtype = GRB.CONTINUOUS, name = 'q_' + str(t+2) + '^' + str(n+1)) for n in range(N)]  for t in range(T - 1)]
+I_forward = [[m_forward[t][n].addVar(vtype = GRB.CONTINUOUS, name = 'I_' + str(t+1) + '^' + str(n+1)) for n in range(N)]  for t in range(T)]
+# B is the quantity of lost sale
+B_forward = [[m_forward[t][n].addVar(vtype = GRB.CONTINUOUS, name = 'B_' + str(t+1) + '^' + str(n+1)) for n in range(N)]  for t in range(T)]
+theta_forward = [[m_forward[t][n].addVar(lb = -theta_iniValue*(T-1-t), vtype = GRB.CONTINUOUS, name = 'theta_' + str(t+3) + '^' + str(n+1)) for n in range(N)]  for t in range(T - 1)]
+
+m_backward = [[[Model() for k in range(sample_nums[t])] for n in range(N)] for t in range(T)]
+q_backward = [[[m_backward[t][n][k].addVar(vtype = GRB.CONTINUOUS, name = 'q_' + str(t+2) + '^' + str(n+1)) for k in range(sample_nums[t])]  for n in range(N)] for t in range(T - 1)] 
+I_backward = [[[m_backward[t][n][k].addVar(vtype = GRB.CONTINUOUS, name = 'I_' + str(t+1) + '^' + str(n+1)) for k in range(sample_nums[t])]  for n in range(N)] for t in range(T)]
+# B is the quantity of lost sale
+B_backward = [[[m_backward[t][n][k].addVar(vtype = GRB.CONTINUOUS, name = 'B_' + str(t+1) + '^' + str(n+1)) for k in range(sample_nums[t])] for n in range(N)] for t in range(T)]
+theta_backward = [[[m_backward[t][n][k].addVar(lb = -theta_iniValue*(T-1-t), vtype = GRB.CONTINUOUS, name = 'theta_' + str(t+3) + '^' + str(n+1)) for k in range(sample_nums[t])] for n in range(N)] for t in range(T - 1)]
+
+
 
 # cuts
 slope1_stage = []
@@ -94,12 +114,6 @@ while iter < iter_num:
     theta_value = theta.x
     z = m.objVal
     
-    m_forward = [[Model() for n in range(N)] for t in range(T)]
-    q_forward = [[m_forward[t][n].addVar(vtype = GRB.CONTINUOUS, name = 'q_' + str(t+2) + '^' + str(n+1)) for n in range(N)]  for t in range(T - 1)]
-    I_forward = [[m_forward[t][n].addVar(vtype = GRB.CONTINUOUS, name = 'I_' + str(t+1) + '^' + str(n+1)) for n in range(N)]  for t in range(T)]
-    # B is the quantity of lost sale
-    B_forward = [[m_forward[t][n].addVar(vtype = GRB.CONTINUOUS, name = 'B_' + str(t+1) + '^' + str(n+1)) for n in range(N)]  for t in range(T)]
-    theta_forward = [[m_forward[t][n].addVar(lb = -theta_iniValue*(T-1-t), vtype = GRB.CONTINUOUS, name = 'theta_' + str(t+3) + '^' + str(n+1)) for n in range(N)]  for t in range(T - 1)]
 
     q_forward_values = [[0 for n in range(N)] for t in range(T)] 
     I_forward_values = [[0 for n in range(N)] for t in range(T)]
@@ -111,11 +125,10 @@ while iter < iter_num:
             demand = sample_scenarios[n][t]
             
             # put those cuts in the front
-            if iter > 0 and t < T - 1:
-                for i in range(iter):
-                    for nn in range(1): # N
-                        m_forward[t][n].addConstr(theta_forward[t][n] >= slopes[t][nn][i]*(I_forward[t][n]- B_forward[t][n] + q_forward[t][n]) + intercepts[t][nn][i])
-                           
+            if iter > 0 and t < T - 1:               
+                for nn in range(1): # N
+                    m_forward[t][n].addConstr(theta_forward[t][n] >= slopes[t][nn][iter-1]*(I_forward[t][n]- B_forward[t][n] + q_forward[t][n]) + intercepts[t][nn][iter-1])
+                       
             if t == T - 1:                   
                 m_forward[t][n].setObjective(unit_hold_cost*I_forward[t][n] + unit_back_cost*B_forward[t][n], GRB.MINIMIZE)
             else:
@@ -127,24 +140,17 @@ while iter < iter_num:
             
             # optimize
             m_forward[t][n].optimize()
-            m_forward[t][n].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(n+1) + '-2.lp')
+            # m_forward[t][n].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(n+1) + '-2.lp')
+            m_forward[t][n].remove(m_forward[t][n].getConstrs()[-1])
             
             I_forward_values[t][n] = I_forward[t][n].x 
             B_forward_values[t][n] = B_forward[t][n].x      
             if t < T - 1:
                 q_forward_values[t][n] = q_forward[t][n].x
                 q_sub_values[iter][t][n] = q_forward[t][n].x
-                theta_forward_values[t][n] = theta_forward[t][n]
-            # m_forward[t][n].dispose()
+                theta_forward_values[t][n] = theta_forward[t][n].x
     
     # backward
-    m_backward = [[[Model() for k in range(sample_nums[t])] for n in range(N)] for t in range(T)]
-    q_backward = [[[m_backward[t][n][k].addVar(vtype = GRB.CONTINUOUS, name = 'q_' + str(t+2) + '^' + str(n+1)) for k in range(sample_nums[t])]  for n in range(N)] for t in range(T - 1)] 
-    I_backward = [[[m_backward[t][n][k].addVar(vtype = GRB.CONTINUOUS, name = 'I_' + str(t+1) + '^' + str(n+1)) for k in range(sample_nums[t])]  for n in range(N)] for t in range(T)]
-    # B is the quantity of lost sale
-    B_backward = [[[m_backward[t][n][k].addVar(vtype = GRB.CONTINUOUS, name = 'B_' + str(t+1) + '^' + str(n+1)) for k in range(sample_nums[t])] for n in range(N)] for t in range(T)]
-    theta_backward = [[[m_backward[t][n][k].addVar(lb = -theta_iniValue*(T-1-t), vtype = GRB.CONTINUOUS, name = 'theta_' + str(t+3) + '^' + str(n+1)) for k in range(sample_nums[t])] for n in range(N)] for t in range(T - 1)]
-
     q_backward_values = [[[0  for k in range(sample_nums[t])] for n in range(N)] for t in range(T)]
     I_backward_values = [[[0  for k in range(sample_nums[t])] for n in range(N)] for t in range(T)]
     B_backward_values = [[[0  for k in range(sample_nums[t])] for n in range(N)] for t in range(T)]
@@ -160,12 +166,12 @@ while iter < iter_num:
                 demand = sample_detail[t][k]
                 if t == 0 and n != 0:
                     continue
+                
                  # put those cuts in the front
                 if iter > 0 and t < T - 1:
-                    for i in range(iter):
-                        for nn in range(1): # N
-                             m_backward[t][n][k].addConstr(theta_backward[t][n][k] >= slopes[t][nn][i]*(I_backward[t][n][k]- B_backward[t][n][k] + q_backward[t][n][k]) + intercepts[t][nn][i])
-            
+                    for nn in range(1): # N
+                         m_backward[t][n][k].addConstr(theta_backward[t][n][k] >= slopes[t][nn][iter-1]*(I_backward[t][n][k]- B_backward[t][n][k] + q_backward[t][n][k]) + intercepts[t][nn][iter-1])
+        
                 if t == T - 1:                   
                     m_backward[t][n][k].setObjective(unit_hold_cost*I_backward[t][n][k] + unit_back_cost*B_backward[t][n][k], GRB.MINIMIZE)
                 else:
@@ -176,7 +182,8 @@ while iter < iter_num:
                     m_backward[t][n][k].addConstr(I_backward[t][n][k] - B_backward[t][n][k] == I_forward_values[t-1][n] - B_forward_values[t-1][n] + q_forward_values[t-1][n] - demand)
                     
                 # optimize
-                m_backward[t][n][k].optimize()                
+                m_backward[t][n][k].optimize()
+                m_backward[t][n][k].remove(m_backward[t][n][k].getConstrs()[-1])
                 # if t == 0 and n == 0 and iter > 0:
                 #     m_backward[t][n][k].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(n+1) + '_' + str(k+1) +'-2back.lp')
                 # if t > 0:
@@ -192,10 +199,7 @@ while iter < iter_num:
                 else:
                     pi_rhs_values[t][n][k] = -pi[-1] * demand
                 pi_values[t][n][k] = pi[-1]
-                # m_backward[t][n][k].dispose()
             
-            if iter > 0 and t == 1:
-                print()
             avg_pi = sum(pi_values[t][n]) / K
             avg_pi_rhs = sum(pi_rhs_values[t][n]) / K
             

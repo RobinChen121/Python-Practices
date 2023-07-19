@@ -14,12 +14,13 @@ Created on Mon Jul 17 08:44:23 2023
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Mon Jul 10 10:52:47 2023
+Created on Mon Jul 19 16:52:47 2023
 
 @author: zhenchen
 
-@disp:  
-    
+@disp:  using x_t or Q_t is not practical in linear programming since E_t-the coefficients of 
+decision variables of the last stage can not obtained automatically. So, it is better to get cuts
+by the dual objective. 
     
 """
 
@@ -27,6 +28,7 @@ from gurobipy import *
 import time
 import itertools
 import random
+import numpy as np
 
 import sys 
 sys.path.append("..") 
@@ -38,9 +40,10 @@ ini_I = 0
 vari_cost = 1
 unit_back_cost = 10
 unit_hold_cost = 2
-mean_demands = [10, 20, 10]
-sample_nums = [10, 10, 10]
+mean_demands = [10, 10]
 T = len(mean_demands)
+sample_nums = [10 for t in range(T)]
+
 trunQuantile = 0.9999 # affective to the final ordering quantity
 scenario_numTotal = 1
 for i in sample_nums:
@@ -72,13 +75,19 @@ slope1_stage = []
 intercept1_stage = []
 slopes = [[ [] for n in range(N)] for t in range(T-1)]
 intercepts = [[ [] for n in range(N)] for t in range(T-1)]
+
+coe1_stage = []
+obj1_stage = []
+coes = [[ [] for n in range(N)] for t in range(T-1)]
+objs = [[ [] for n in range(N)] for t in range(T-1)]
+
 q_values = [0 for iter in range(iter_num)]
 q_sub_values = [[[0 for n in range(N)] for t in range(T-1)] for iter in range(iter_num)]
 start = time.process_time()
 while iter < iter_num:  
     
     # sample a numer of scenarios from the full scenario tree
-    # random.seed(10000)
+    random.seed(10000)
     sample_scenarios= random.sample(scenarios_full, N) # sampling without replacement
     sample_scenarios.sort() # sort to make same numbers together
     
@@ -127,7 +136,7 @@ while iter < iter_num:
             
             # optimize
             m_forward[t][n].optimize()
-            m_forward[t][n].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(n+1) + '-2.lp')
+            # m_forward[t][n].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(n+1) + '-2.lp')
             
             I_forward_values[t][n] = I_forward[t][n].x 
             B_forward_values[t][n] = B_forward[t][n].x      
@@ -152,14 +161,18 @@ while iter < iter_num:
     pi_values = [[[0  for k in range(sample_nums[t])] for n in range(N)] for t in range(T)]
     pi_rhs_values = [[[0  for k in range(sample_nums[t])] for n in range(N)] for t in range(T)] 
     
+    objs_sub = [[[0  for k in range(sample_nums[t])] for n in range(N)] for t in range(T)] 
+    coes_sub = [[[[]  for k in range(sample_nums[t])] for n in range(N)] for t in range(T)] 
+    
     # it is better t in the first loop
     for t in range(T - 1, -1, -1):
        for n in range(N):
+            if t == 0 and n != 0:
+                continue
             K = len(sample_detail[t])
             for k in range(K):
                 demand = sample_detail[t][k]
-                if t == 0 and n != 0:
-                    continue
+                
                  # put those cuts in the front
                 if iter > 0 and t < T - 1:
                     for i in range(iter):
@@ -191,22 +204,38 @@ while iter < iter_num:
                     pi_rhs_values[t][n][k] += -pi[-1]*demand 
                 else:
                     pi_rhs_values[t][n][k] = -pi[-1] * demand
+                    objs_sub[t][n][k] = m_backward[t][n][k].objVal
                 pi_values[t][n][k] = pi[-1]
+                
+                var_num = len(m_backward[t][n][k].getVars())
+                col_num = len(m_backward[t][n][k].getConstrs())
+                coe = [m_backward[t][n][k].getCoeff(m_backward[t][n][k].getConstrs()[cc], m_backward[t][n][k].getVars()[vv]) for vv in range(var_num) for cc in range(col_num)]
+                coes_sub[t][n][k] = coe
+                print()
                 # m_backward[t][n][k].dispose()
             
             if iter > 0 and t == 1:
                 print()
             avg_pi = sum(pi_values[t][n]) / K
             avg_pi_rhs = sum(pi_rhs_values[t][n]) / K
+            sum_coe = np.array(coes_sub[t][n][0])
+            for k in range(1, K):
+                sum_coe = sum_coe + np.array(coes_sub[t][n][k])
+            avg_coe = list(sum_coe / K)
+            avg_obj = sum(objs_sub[t][n]) / K
             
             # recording cuts
             if t == 0 and n == 0:
                 slope1_stage.append(avg_pi)
                 intercept1_stage.append(avg_pi_rhs)
+                obj1_stage.append(avg_obj)
+                coe1_stage.append(avg_coe)
             elif t > 0:
                 slopes[t-1][n].append(avg_pi)
                 intercepts[t-1][n].append(avg_pi_rhs)   
-            print()
+                coes[t-1][n].append(avg_coe)
+                objs[t-1][n].append(avg_obj) 
+                print()
             
     iter += 1
 
