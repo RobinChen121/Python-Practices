@@ -1,19 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Mon Jul 17 08:44:23 2023
-
-@author: zhenchen
-
-@disp:  
-    
-    
-"""
-
-
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
 Created on Mon Jul 10 10:52:47 2023
 
 @author: zhenchen

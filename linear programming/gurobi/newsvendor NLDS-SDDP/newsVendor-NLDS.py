@@ -6,7 +6,7 @@ Created on Wed Mar  8 14:14:38 2023
 @author: chen
 @desp: use formal NLDS to solve traditional newsvendor problem without price.
 
-doe snot perform well for small number of scenarios
+does not perform well for small number of scenarios
 
 """
 

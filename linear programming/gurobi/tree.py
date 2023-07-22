@@ -18,7 +18,7 @@ import random
 def generate_sample(sample_num, trunQuantile, mu):
     samples = [0 for i in range(sample_num)]
     for i in range(sample_num):
-        np.random.seed(10000)
+        # np.random.seed(10000)
         rand_p = np.random.uniform(trunQuantile*i/sample_num, trunQuantile*(i+1)/sample_num)
         samples[i] = st.poisson.ppf(rand_p, mu)
     return samples
@@ -66,7 +66,7 @@ for t in range(T):
 
 scenarios_full = list(itertools.product(*samples_detail)) 
 sample_num = 30
-random.seed(10000)
+# random.seed(10000)
 sample_scenarios=  random.sample(scenarios_full, sample_num) # sampling without replacement
 sample_scenarios.sort() # sort to make same numbers together
 node_values, node_index = get_tree_strcture(sample_scenarios)

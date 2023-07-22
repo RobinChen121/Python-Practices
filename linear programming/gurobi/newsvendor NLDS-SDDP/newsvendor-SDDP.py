@@ -19,7 +19,7 @@ Created on Mon Jul 10 10:52:47 2023
 @author: zhenchen
 
 @disp:  
-    
+    large planning horizon requires larger N and longer iterations
     
 """
 
@@ -38,9 +38,10 @@ ini_I = 0
 vari_cost = 1
 unit_back_cost = 10
 unit_hold_cost = 2
-mean_demands = [10, 20, 10]
-sample_nums = [10, 10, 10]
+mean_demands = [10, 20,10, 20, 10, 20]
 T = len(mean_demands)
+sample_nums = [10 for t in range(T)]
+
 trunQuantile = 0.9999 # affective to the final ordering quantity
 scenario_numTotal = 1
 for i in sample_nums:
@@ -55,8 +56,8 @@ scenarios_full = list(itertools.product(*sample_detail))
 
 
 iter = 0
-iter_num = 4
-N = 4 # sampled number of scenarios for forward computing
+iter_num = 12
+N = 30 # sampled number of scenarios for forward computing
 
 theta_iniValue = 0 # initial theta values (profit) in each period
 m = Model() # linear model in the first stage
@@ -127,7 +128,7 @@ while iter < iter_num:
             
             # optimize
             m_forward[t][n].optimize()
-            m_forward[t][n].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(n+1) + '-2.lp')
+            # m_forward[t][n].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(n+1) + '-2.lp')
             
             I_forward_values[t][n] = I_forward[t][n].x 
             B_forward_values[t][n] = B_forward[t][n].x      
