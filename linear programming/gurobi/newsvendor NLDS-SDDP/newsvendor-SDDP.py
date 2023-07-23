@@ -30,7 +30,7 @@ import random
 
 import sys 
 sys.path.append("..") 
-from tree import generate_sample, get_tree_strcture
+from tree import generate_sample, get_tree_strcture, generate_scenario_samples
 
 
 
@@ -38,7 +38,7 @@ ini_I = 0
 vari_cost = 1
 unit_back_cost = 10
 unit_hold_cost = 2
-mean_demands = [10, 20,10, 20, 10, 20]
+mean_demands = [10, 20,10, 20, 10, 20, 10, 20]
 T = len(mean_demands)
 sample_nums = [10 for t in range(T)]
 
@@ -52,12 +52,12 @@ sample_detail = [[0 for i in range(sample_nums[t])] for t in range(T)]
 for t in range(T):
     sample_detail[t] = generate_sample(sample_nums[t], trunQuantile, mean_demands[t])
 # samples_detail = [[5, 15], [5, 15]]
-scenarios_full = list(itertools.product(*sample_detail)) 
+# scenarios_full = list(itertools.product(*sample_detail)) 
 
 
 iter = 0
-iter_num = 12
-N = 30 # sampled number of scenarios for forward computing
+iter_num = 15
+N = 50 # sampled number of scenarios for forward computing
 
 theta_iniValue = 0 # initial theta values (profit) in each period
 m = Model() # linear model in the first stage
@@ -80,7 +80,8 @@ while iter < iter_num:
     
     # sample a numer of scenarios from the full scenario tree
     # random.seed(10000)
-    sample_scenarios= random.sample(scenarios_full, N) # sampling without replacement
+    sample_scenarios = generate_scenario_samples(N, trunQuantile, mean_demands)
+    # sample_scenarios= random.sample(scenarios_full, N) # sampling without replacement
     sample_scenarios.sort() # sort to make same numbers together
     
     # forward
@@ -114,7 +115,7 @@ while iter < iter_num:
             # put those cuts in the front
             if iter > 0 and t < T - 1:
                 for i in range(iter):
-                    for nn in range(1): # N
+                    for nn in range(N): # N
                         m_forward[t][n].addConstr(theta_forward[t][n] >= slopes[t][nn][i]*(I_forward[t][n]- B_forward[t][n] + q_forward[t][n]) + intercepts[t][nn][i])
                            
             if t == T - 1:                   
@@ -164,7 +165,7 @@ while iter < iter_num:
                  # put those cuts in the front
                 if iter > 0 and t < T - 1:
                     for i in range(iter):
-                        for nn in range(1): # N
+                        for nn in range(N): # N
                              m_backward[t][n][k].addConstr(theta_backward[t][n][k] >= slopes[t][nn][i]*(I_backward[t][n][k]- B_backward[t][n][k] + q_backward[t][n][k]) + intercepts[t][nn][i])
             
                 if t == T - 1:                   
