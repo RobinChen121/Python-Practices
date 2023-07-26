@@ -117,7 +117,8 @@ fixOrderCost = 0
 variOderCost = 1
 price = 10
 iniI = 0
-iniCash = 0
+iniCash = 1
+PO0
 holdCost = 0
 penaCost = 0
 truncationQ = 0.9999
