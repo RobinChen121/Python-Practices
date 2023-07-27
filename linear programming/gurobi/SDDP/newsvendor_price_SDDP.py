@@ -26,7 +26,6 @@ ini_I = 0
 ini_cash = 10
 vari_cost = 1
 price = 10
-capacity = 5
 unit_back_cost = 0
 unit_hold_cost = 0
 mean_demands = [10, 10]
@@ -116,7 +115,6 @@ while iter <= iter_num:
             else:
                 m_forward[t][n].setObjective(vari_cost*q_forward[t][n] - price*(demand - B_forward[t][n]) + theta_forward[t][n], GRB.MINIMIZE)  
                 m_forward[n][t].addConstr(theta_forward[n][t] >= theta_iniValue*(T-1-t))
-                m.addConstr(q_forward[t][n] <= capacity)
                 m.addConstr(vari_cost * q_forward[t][n] <= cash_forward_values[t-1][n])
             if t == 0:   
                 m_forward[t][n].addConstr(I_forward[t][n] - B_forward[t][n] == ini_I + q_values[iter] - demand)
@@ -162,7 +160,6 @@ while iter <= iter_num:
                 else:
                     m_backward[t][n][k].setObjective(vari_cost*q_backward[t][n][k] - price*(demand - B_backward[t][n][k]) + theta_backward[t][n][k], GRB.MINIMIZE)  
                     m_backward[n][t].addConstr(theta_backward[n][t] >= theta_iniValue*(T-1-t))
-                    m.addConstr(q_backward[t][n][k] <= capacity)
                     m.addConstr(vari_cost * q_backward[t][n][k] <= cash_forward_values[t-1][n])
                 if t == 0:   
                     m_backward[t][n][k].addConstr(I_backward[t][n][k] - B_backward[t][n][k] == ini_I + q_values[iter] - demand)

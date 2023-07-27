@@ -25,8 +25,8 @@ ini_cash = 10
 vari_cost = 1
 price = 10
 unit_back_cost = 0
-mean_demands = [10, 20, 10, 5]
-sample_nums = [10, 10, 10, 10]
+mean_demands = [10, 20]
+sample_nums = [10, 10]
 T = len(mean_demands)
 trunQuantile = 0.9999 # affective to the final ordering quantity
 scenario_numTotal = reduce(lambda x, y: x * y, sample_nums, 1)
@@ -162,12 +162,12 @@ while iter <= iter_num:
             
             if iter == 2:
                 pass
-            pi_rhs_values[t][j] += -pi[-2] * demand + pi[-1] * price * demand - price*demand
+            pi_rhs_values[t][j] += -pi[-2] * demand + pi[-1] * price * demand - price*demand # put here is better because of demand
             d_sub_values[t][j] = demand
-            pi_sub1_values[t][j] = pi[-2]
-            pi_sub2_values[t][j] = pi[-1]
-            m_sub[t][j].remove(m_sub[t][j].getConstrs()[-1])
-            m_sub[t][j].remove(m_sub[t][j].getConstrs()[-2])          
+            pi_sub1_values[t][j] = pi[-2] # inventory flow constraint
+            pi_sub2_values[t][j] = pi[-1] # cash constraint
+            m_sub[t][j].remove(m_sub[t][j].getConstrs()[-1]) 
+            m_sub[t][j].remove(m_sub[t][j].getConstrs()[-2])         
             if t < T - 1:
                 m_sub[t][j].remove(m_sub[t][j].getConstrs()[-3])
                 m_sub[t][j].remove(m_sub[t][j].getConstrs()[-4])
