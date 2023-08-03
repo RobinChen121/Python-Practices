@@ -14,6 +14,7 @@ from gurobipy import *
 import itertools
 import random
 import time
+import numpy as np
 
 import sys 
 sys.path.append("..") 
@@ -45,7 +46,7 @@ for t in range(T):
 scenarios_full = list(itertools.product(*sample_detail)) 
 
 
-iter = 1
+iter = 0
 iter_num = 15
 N = 20 # sampled number of scenarios for forward computing
 
@@ -55,7 +56,6 @@ m = Model() # linear model in the first stage
 q = m.addVar(vtype = GRB.CONTINUOUS, name = 'q_1')
 theta = m.addVar(lb = theta_iniValue*T, vtype = GRB.CONTINUOUS, name = 'theta_2')
 m.setObjective(vari_cost*q + theta, GRB.MINIMIZE)
-m.addConstr(q <= capacity)
 m.addConstr(vari_cost * q <= ini_cash)
 
 q_value = 0
@@ -70,7 +70,7 @@ q_values = [0 for iter in range(iter_num)]
 q_sub_values = [[[0 for n in range(N)] for t in range(T-1)] for iter in range(iter_num)]
 
 start = time.process_time()
-while iter <= iter_num:  
+while iter < iter_num:  
     
     # sample a numer of scenarios from the full scenario tree
     # random.seed(10000)
@@ -79,7 +79,7 @@ while iter <= iter_num:
     
     # forward
     if iter > 0:
-        m.addConstr(theta >= slope1_stage[-1]*q + intercept1_stage[-1])
+        m.addConstr(theta >= slope1_stage[-1][-2]*(ini_I+q) + slope1_stage[-1][-1]*(ini_cash-vari_cost*q) + intercept1_stage[-1])
     m.update()
     m.optimize()
     # m.write('iter' + str(iter) + '_main2.lp')    
@@ -99,7 +99,7 @@ while iter <= iter_num:
     B_forward = [[m_forward[t][n].addVar(vtype = GRB.CONTINUOUS, name = 'B_' + str(t+1) + '^' + str(n+1)) for n in range(N)]  for t in range(T)]
     theta_forward = [[m_forward[t][n].addVar(lb = -theta_iniValue*(T-1-t), vtype = GRB.CONTINUOUS, name = 'theta_' + str(t+3) + '^' + str(n+1)) for n in range(N)]  for t in range(T - 1)]
 
-    q_forward_values = [[0 for n in range(N)] for t in range(T)] 
+    q_forward_values = [[0 for n in range(N)] for t in range(T-1)] 
     I_forward_values = [[0 for n in range(N)] for t in range(T)]
     B_forward_values = [[0 for n in range(N)] for t in range(T)]
     cash_forward_values = [[0 for n in range(N)] for t in range(T)]
@@ -108,29 +108,38 @@ while iter <= iter_num:
     for t in range(T):
         for n in range(N):
             demand = sample_scenarios[n][t]
-
+            # put those cuts in the front
+            if iter > 0 and t < T - 1:
+                for i in range(iter):
+                    for nn in range(N): # N
+                        m_forward[t][n].addConstr(theta_forward[t][n] >= slopes[t][nn][i][-2]*(I_forward[t][n]+ q_forward[t][n]) + slopes[t][nn][i][-1]*(cash_forward[t][n]- vari_cost*q_forward[t][n]) + intercepts[t][nn][i])
+           
             
             if t == T - 1:                   
                 m_forward[t][n].setObjective(-price*(demand - B_forward[t][n]), GRB.MINIMIZE)
             else:
                 m_forward[t][n].setObjective(vari_cost*q_forward[t][n] - price*(demand - B_forward[t][n]) + theta_forward[t][n], GRB.MINIMIZE)  
-                m_forward[n][t].addConstr(theta_forward[n][t] >= theta_iniValue*(T-1-t))
-                m.addConstr(vari_cost * q_forward[t][n] <= cash_forward_values[t-1][n])
+                m_forward[t][n].addConstr(theta_forward[t][n] >= theta_iniValue*(T-1-t))
+                m_forward[t][n].addConstr(vari_cost * q_forward[t][n] <= cash_forward_values[t-1][n])
             if t == 0:   
                 m_forward[t][n].addConstr(I_forward[t][n] - B_forward[t][n] == ini_I + q_values[iter] - demand)
-                m_forward[t][n].addConstr(cash_forward[t][n] == ini_cash - vari_cost*q_forward[t][n] + price*(demand - B_forward[t][n]))
+                m_forward[t][n].addConstr(cash_forward[t][n] == ini_cash - vari_cost*q_values[iter] + price*(demand - B_forward[t][n]))
             else:
-                m_forward[t][n].addConstr(I_forward[t][n] - B_forward[t][n] == I_forward_values[t-1][n] + q_forward_values[t][n] - demand)
-                m_forward[t][n].addConstr(cash_forward[t][n] == cash_forward[t-1][n]- vari_cost*q_forward[t][n] + price*(demand - B_forward[t][n]))
+                m_forward[t][n].addConstr(I_forward[t][n] - B_forward[t][n] == I_forward_values[t-1][n] + q_forward_values[t-1][n] - demand)
+                
+                try:
+                    m_forward[t][n].addConstr(cash_forward[t][n] == cash_forward_values[t-1][n]- vari_cost*q_forward_values[t-1][n] + price*(demand - B_forward[t][n]))
+                except Exception:
+                    pass
                 
             # optimize
-            m_forward[n][t].optimize()
-            I_forward_values[n][t] = I_forward[n][t].x 
-            B_forward_values[n][t] = B_forward[n][t].x  
-            cash_forward_values[n][t] = cash_forward[n][t].x 
+            m_forward[t][n].optimize()
+            I_forward_values[t][n] = I_forward[t][n].x 
+            B_forward_values[t][n] = B_forward[t][n].x  
+            cash_forward_values[t][n] = cash_forward[t][n].x 
             if t < T - 1:
-                q_forward_values[n][t] = q_forward[n][t].x
-                theta_forward_values[n][t] = theta_forward[n][t].x
+                q_forward_values[t][n] = q_forward[t][n].x
+                theta_forward_values[t][n] = theta_forward[t][n].x
     
     # backward
     m_backward = [[[Model() for k in range(sample_nums[t])] for n in range(N)] for t in range(T)]
@@ -146,27 +155,33 @@ while iter <= iter_num:
     cash_backward_values = [[[0  for k in range(sample_nums[t])] for n in range(N)] for t in range(T)]
     B_backward_values = [[[0  for k in range(sample_nums[t])] for n in range(N)] for t in range(T)]
     theta_backward_values = [[[0  for k in range(sample_nums[t])] for n in range(N)] for t in range(T)]
-    pi_values = [[[0  for k in range(sample_nums[t])] for n in range(N)] for t in range(T)]
+    pi_values = [[[[]  for k in range(sample_nums[t])] for n in range(N)] for t in range(T)]
     pi_rhs_values = [[[0  for k in range(sample_nums[t])] for n in range(N)] for t in range(T)] 
 
     for t in range(T-1, -1, -1):    
         for n in range(N):      
             K = len(sample_detail[t])
             for k in range(K):
-                demand = sample_scenarios[t][k]
+                demand = sample_detail[t][k]
+                # put those cuts in the front
+                if iter > 0 and t < T - 1:
+                    for i in range(iter):
+                        for nn in range(N): # N
+                            m_backward[t][n][k].addConstr(theta_backward[t][n][k] >= slopes[t][nn][i][-2]*(I_backward[t][n][k]+ q_backward[t][n][k]) + slopes[t][nn][i][-1]*(cash_backward[t][n][k]- vari_cost*q_backward[t][n][k]) + intercepts[t][nn][i])
+               
                 
                 if t == T - 1:                   
                     m_backward[t][n][k].setObjective(-price*(demand - B_backward[t][n][k]), GRB.MINIMIZE)
                 else:
                     m_backward[t][n][k].setObjective(vari_cost*q_backward[t][n][k] - price*(demand - B_backward[t][n][k]) + theta_backward[t][n][k], GRB.MINIMIZE)  
-                    m_backward[n][t].addConstr(theta_backward[n][t] >= theta_iniValue*(T-1-t))
-                    m.addConstr(vari_cost * q_backward[t][n][k] <= cash_forward_values[t-1][n])
+                    m_backward[t][n][k].addConstr(theta_backward[t][n][k] >= theta_iniValue*(T-1-t))
+                    m_backward[t][n][k].addConstr(vari_cost * q_backward[t][n][k] <= cash_forward_values[t-1][n])
                 if t == 0:   
                     m_backward[t][n][k].addConstr(I_backward[t][n][k] - B_backward[t][n][k] == ini_I + q_values[iter] - demand)
-                    m_backward[t][n][k].addConstr(cash_backward[t][n][k] == ini_cash - vari_cost*q_backward[t][n][k] + price*(demand - B_backward[t][n][k]))
+                    m_backward[t][n][k].addConstr(cash_backward[t][n][k] == ini_cash - vari_cost*q_values[iter] + price*(demand - B_backward[t][n][k]))
                 else:
-                    m_backward[t][n][k].addConstr(I_backward[t][n][k] - B_backward[t][n][k] == I_backward_values[t-1][n] + q_backward_values[t][n][k] - demand)
-                    m_backward[t][n][k].addConstr(cash_backward[t][n][k] == cash_forward[t-1][n]- vari_cost*q_backward[t][n][k] + price*(demand - B_backward[t][n][k]))
+                    m_backward[t][n][k].addConstr(I_backward[t][n][k] - B_backward[t][n][k] == I_forward_values[t-1][n] + q_forward_values[t-1][n] - demand)
+                    m_backward[t][n][k].addConstr(cash_backward[t][n][k] == cash_forward_values[t-1][n]- vari_cost*q_forward_values[t-1][n] + price*(demand - B_backward[t][n][k]))
                 
                 # optimize
                 m_backward[t][n][k].optimize()                
@@ -177,17 +192,25 @@ while iter <= iter_num:
                 
                 pi = m_backward[t][n][k].getAttr(GRB.Attr.Pi)
                 rhs = m_backward[t][n][k].getAttr(GRB.Attr.RHS)
-                if t < T - 1:
-                    num_con = len(pi)
-                    for kk in range(num_con-1):
-                        pi_rhs_values[t][n][k] += pi[kk]*rhs[kk]
-                    pi_rhs_values[t][n][k] += -pi[-1]*demand 
-                else:
-                    pi_rhs_values[t][n][k] = -pi[-1] * demand
-                pi_values[t][n][k] = pi[-1]
+                num_con = len(pi)
+                for kk in range(num_con):
+                    pi_rhs_values[t][n][k] += pi[kk]*rhs[kk]
+                pi_rhs_values[t][n][k] += price * demand
+                pi_values[t][n][k].append(pi)
             
+            avg_pi = sum(np.array(pi_values[t][n])) / K
+            avg_pi_rhs = sum(pi_rhs_values[t][n]) / K
+            
+            # recording cuts
+            if t == 0 and n == 0:
+                slope1_stage.append(avg_pi)
+                intercept1_stage.append(avg_pi_rhs)
+            elif t > 0:
+                slopes[t-1][n].append(avg_pi)
+                intercepts[t-1][n].append(avg_pi_rhs)   
             print()
 
+    iter += 1
 
 
 

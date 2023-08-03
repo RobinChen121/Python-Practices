@@ -104,7 +104,7 @@ while iter < iter_num:
     B_forward = [[m_forward[t][n].addVar(vtype = GRB.CONTINUOUS, name = 'B_' + str(t+1) + '^' + str(n+1)) for n in range(N)]  for t in range(T)]
     theta_forward = [[m_forward[t][n].addVar(lb = -theta_iniValue*(T-1-t), vtype = GRB.CONTINUOUS, name = 'theta_' + str(t+3) + '^' + str(n+1)) for n in range(N)]  for t in range(T - 1)]
 
-    q_forward_values = [[0 for n in range(N)] for t in range(T)] 
+    q_forward_values = [[0 for n in range(N)] for t in range(T-1)] 
     I_forward_values = [[0 for n in range(N)] for t in range(T)]
     B_forward_values = [[0 for n in range(N)] for t in range(T)]
     theta_forward_values = [[0 for n in range(N)] for t in range(T)]
