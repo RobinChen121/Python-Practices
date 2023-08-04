@@ -50,7 +50,7 @@ iter = 0
 iter_num = 4
 N = 4 # sampled number of scenarios for forward computing
 
-theta_iniValue = -300 # initial theta values (profit) in each period
+theta_iniValue = -400 # initial theta values (profit) in each period
 m = Model() # linear model in the first stage
 # decision variable in the first stage model
 q = m.addVar(vtype = GRB.CONTINUOUS, name = 'q_1')

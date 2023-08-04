@@ -25,7 +25,7 @@ ini_cash = 10
 vari_cost = 1
 price = 10
 unit_back_cost = 0
-mean_demands = [10, 20]
+mean_demands = [10, 10]
 sample_nums = [10, 10]
 T = len(mean_demands)
 trunQuantile = 0.9999 # affective to the final ordering quantity
@@ -36,7 +36,7 @@ samples_detail = [[0 for i in range(sample_nums[t])] for t in range(T)]
 for t in range(T):
     samples_detail[t] = generate_sample(sample_nums[t], trunQuantile, mean_demands[t])
 
-samples_detail = [[5, 15], [15, 20]]
+samples_detail = [[5, 15], [5, 15]]
 scenarios = list(itertools.product(*samples_detail)) 
 sample_num = 4
 
