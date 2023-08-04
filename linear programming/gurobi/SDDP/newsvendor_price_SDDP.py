@@ -47,8 +47,8 @@ scenarios_full = list(itertools.product(*sample_detail))
 
 
 iter = 0
-iter_num = 15
-N = 10 # sampled number of scenarios for forward computing
+iter_num = 4
+N = 4 # sampled number of scenarios for forward computing
 
 theta_iniValue = -300 # initial theta values (profit) in each period
 m = Model() # linear model in the first stage
@@ -75,6 +75,7 @@ while iter < iter_num:
     # sample a numer of scenarios from the full scenario tree
     # random.seed(10000)
     sample_scenarios = generate_scenario_samples(N, trunQuantile, mean_demands)
+    sample_scenarios = [[5, 5], [5, 15], [15, 5], [15, 15]]
     sample_scenarios.sort() # sort to make same numbers together
     
     # forward
@@ -97,7 +98,7 @@ while iter < iter_num:
     
     # B is the quantity of lost sale
     B_forward = [[m_forward[t][n].addVar(vtype = GRB.CONTINUOUS, name = 'B_' + str(t+1) + '^' + str(n+1)) for n in range(N)]  for t in range(T)]
-    theta_forward = [[m_forward[t][n].addVar(lb = -theta_iniValue*(T-1-t), vtype = GRB.CONTINUOUS, name = 'theta_' + str(t+3) + '^' + str(n+1)) for n in range(N)]  for t in range(T - 1)]
+    theta_forward = [[m_forward[t][n].addVar(lb = -GRB.INFINITY, vtype = GRB.CONTINUOUS, name = 'theta_' + str(t+3) + '^' + str(n+1)) for n in range(N)]  for t in range(T - 1)]
 
     q_forward_values = [[0 for n in range(N)] for t in range(T-1)] 
     I_forward_values = [[0 for n in range(N)] for t in range(T)]
@@ -146,7 +147,7 @@ while iter < iter_num:
     cash_backward = [[[m_backward[t][n][k].addVar(vtype = GRB.CONTINUOUS, name = 'C_' + str(t+1) + '^' + str(n+1)) for k in range(sample_nums[t])]  for n in range(N)] for t in range(T)]    
     # B is the quantity of lost sale
     B_backward = [[[m_backward[t][n][k].addVar(vtype = GRB.CONTINUOUS, name = 'B_' + str(t+1) + '^' + str(n+1)) for k in range(sample_nums[t])] for n in range(N)] for t in range(T)]
-    theta_backward = [[[m_backward[t][n][k].addVar(lb = -theta_iniValue*(T-1-t), vtype = GRB.CONTINUOUS, name = 'theta_' + str(t+3) + '^' + str(n+1)) for k in range(sample_nums[t])] for n in range(N)] for t in range(T - 1)]
+    theta_backward = [[[m_backward[t][n][k].addVar(lb = lb = -GRB.INFINITY, vtype = GRB.CONTINUOUS, name = 'theta_' + str(t+3) + '^' + str(n+1)) for k in range(sample_nums[t])] for n in range(N)] for t in range(T - 1)]
 
     q_backward_values = [[[0  for k in range(sample_nums[t])] for n in range(N)] for t in range(T)]
     I_backward_values = [[[0  for k in range(sample_nums[t])] for n in range(N)] for t in range(T)]
