@@ -48,7 +48,7 @@ scenarios_full = list(itertools.product(*sample_detail))
 
 iter = 0
 iter_num = 15
-N = 20 # sampled number of scenarios for forward computing
+N = 10 # sampled number of scenarios for forward computing
 
 theta_iniValue = -300 # initial theta values (profit) in each period
 m = Model() # linear model in the first stage
@@ -108,6 +108,7 @@ while iter < iter_num:
     for t in range(T):
         for n in range(N):
             demand = sample_scenarios[n][t]
+            
             # put those cuts in the front
             if iter > 0 and t < T - 1:
                 for i in range(iter):
@@ -126,11 +127,8 @@ while iter < iter_num:
                 m_forward[t][n].addConstr(cash_forward[t][n] == ini_cash - vari_cost*q_values[iter] + price*(demand - B_forward[t][n]))
             else:
                 m_forward[t][n].addConstr(I_forward[t][n] - B_forward[t][n] == I_forward_values[t-1][n] + q_forward_values[t-1][n] - demand)
-                
-                try:
-                    m_forward[t][n].addConstr(cash_forward[t][n] == cash_forward_values[t-1][n]- vari_cost*q_forward_values[t-1][n] + price*(demand - B_forward[t][n]))
-                except Exception:
-                    pass
+                m_forward[t][n].addConstr(cash_forward[t][n] == cash_forward_values[t-1][n]- vari_cost*q_forward_values[t-1][n] + price*(demand - B_forward[t][n]))
+
                 
             # optimize
             m_forward[t][n].optimize()
@@ -203,10 +201,10 @@ while iter < iter_num:
             
             # recording cuts
             if t == 0 and n == 0:
-                slope1_stage.append(avg_pi)
+                slope1_stage.append(avg_pi[0])
                 intercept1_stage.append(avg_pi_rhs)
             elif t > 0:
-                slopes[t-1][n].append(avg_pi)
+                slopes[t-1][n].append(avg_pi[0])
                 intercepts[t-1][n].append(avg_pi_rhs)   
             print()
 
