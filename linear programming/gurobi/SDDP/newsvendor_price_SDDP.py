@@ -84,7 +84,7 @@ while iter < iter_num:
         m.addConstr(theta >= slope1_stage[-1][-2]*(ini_I+q) + slope1_stage[-1][-1]*(ini_cash-vari_cost*q) + intercept1_stage[-1])
     m.update()
     m.optimize()
-    m.write('iter' + str(iter) + '_main2.lp')    
+    m.write('iter' + str(iter+1) + '_main2.lp')    
     # m.write('iter' + str(iter) + '_main2.sol')
     
     q_values[iter] = q.x
@@ -134,7 +134,7 @@ while iter < iter_num:
                 
             # optimize
             m_forward[t][n].optimize()
-            m_forward[t][n].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(n+1) + '-2.lp')
+            m_forward[t][n].write('iter' + str(iter+1) + '_sub_' + str(t+1) + '^' + str(n+1) + '-2.lp')
             I_forward_values[t][n] = I_forward[t][n].x 
             B_forward_values[t][n] = B_forward[t][n].x  
             cash_forward_values[t][n] = cash_forward[t][n].x 
@@ -149,7 +149,7 @@ while iter < iter_num:
     cash_backward = [[[m_backward[t][n][k].addVar(vtype = GRB.CONTINUOUS, name = 'C_' + str(t+1) + '^' + str(n+1)) for k in range(sample_nums[t])]  for n in range(N)] for t in range(T)]    
     # B is the quantity of lost sale
     B_backward = [[[m_backward[t][n][k].addVar(vtype = GRB.CONTINUOUS, name = 'B_' + str(t+1) + '^' + str(n+1)) for k in range(sample_nums[t])] for n in range(N)] for t in range(T)]
-    theta_backward = [[[m_backward[t][n][k].addVar(lb = lb = -GRB.INFINITY, vtype = GRB.CONTINUOUS, name = 'theta_' + str(t+3) + '^' + str(n+1)) for k in range(sample_nums[t])] for n in range(N)] for t in range(T - 1)]
+    theta_backward = [[[m_backward[t][n][k].addVar(lb = -GRB.INFINITY, vtype = GRB.CONTINUOUS, name = 'theta_' + str(t+3) + '^' + str(n+1)) for k in range(sample_nums[t])] for n in range(N)] for t in range(T - 1)]
 
     q_backward_values = [[[0  for k in range(sample_nums[t])] for n in range(N)] for t in range(T)]
     I_backward_values = [[[0  for k in range(sample_nums[t])] for n in range(N)] for t in range(T)]

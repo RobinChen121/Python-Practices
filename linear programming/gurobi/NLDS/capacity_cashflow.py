@@ -38,7 +38,7 @@ for t in range(T):
 
 samples_detail = [[5, 15], [15, 20]]
 scenarios = list(itertools.product(*samples_detail)) 
-sample_num = 50
+sample_num = 4
 
 # sampling can't be in the while looping
 samples= random.sample(scenarios, sample_num) # sampling without replacement
