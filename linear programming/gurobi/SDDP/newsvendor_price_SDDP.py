@@ -31,7 +31,7 @@ unit_back_cost = 0
 unit_hold_cost = 0
 mean_demands = [10, 10]
 T = len(mean_demands)
-sample_nums = [10 for t in range(T)]
+sample_nums = [2 for t in range(T)]
 
 trunQuantile = 0.9999 # affective to the final ordering quantity
 scenario_numTotal = 1
@@ -42,7 +42,7 @@ for i in sample_nums:
 sample_detail = [[0 for i in range(sample_nums[t])] for t in range(T)] 
 for t in range(T):
     sample_detail[t] = generate_sample(sample_nums[t], trunQuantile, mean_demands[t])
-# samples_detail = [[5, 15], [5, 15]]
+sample_detail = [[5, 15], [5, 15]]
 scenarios_full = list(itertools.product(*sample_detail)) 
 
 
@@ -114,7 +114,7 @@ while iter < iter_num:
             # put those cuts in the front
             if iter > 0 and t < T - 1:
                 for i in range(iter):
-                    for nn in range(N): # N
+                    for nn in range(1): # N
                         m_forward[t][n].addConstr(theta_forward[t][n] >= slopes[t][nn][i][-2]*(I_forward[t][n]+ q_forward[t][n]) + slopes[t][nn][i][-1]*(cash_forward[t][n]- vari_cost*q_forward[t][n]) + intercepts[t][nn][i])
            
             
@@ -123,7 +123,7 @@ while iter < iter_num:
             else:
                 m_forward[t][n].setObjective(vari_cost*q_forward[t][n] - price*(demand - B_forward[t][n]) + theta_forward[t][n], GRB.MINIMIZE)  
                 m_forward[t][n].addConstr(theta_forward[t][n] >= theta_iniValue*(T-1-t))
-                m_forward[t][n].addConstr(vari_cost * q_forward[t][n] <= cash_forward_values[t-1][n])
+                m_forward[t][n].addConstr(vari_cost * q_forward[t][n] <= cash_forward[t][n])
             if t == 0:   
                 m_forward[t][n].addConstr(I_forward[t][n] - B_forward[t][n] == ini_I + q_values[iter] - demand)
                 m_forward[t][n].addConstr(cash_forward[t][n] == ini_cash - vari_cost*q_values[iter] + price*(demand - B_forward[t][n]))
@@ -167,7 +167,7 @@ while iter < iter_num:
                 # put those cuts in the front
                 if iter > 0 and t < T - 1:
                     for i in range(iter):
-                        for nn in range(N): # N
+                        for nn in range(1): # N
                             m_backward[t][n][k].addConstr(theta_backward[t][n][k] >= slopes[t][nn][i][-2]*(I_backward[t][n][k]+ q_backward[t][n][k]) + slopes[t][nn][i][-1]*(cash_backward[t][n][k]- vari_cost*q_backward[t][n][k]) + intercepts[t][nn][i])
                
                 
@@ -176,7 +176,7 @@ while iter < iter_num:
                 else:
                     m_backward[t][n][k].setObjective(vari_cost*q_backward[t][n][k] - price*(demand - B_backward[t][n][k]) + theta_backward[t][n][k], GRB.MINIMIZE)  
                     m_backward[t][n][k].addConstr(theta_backward[t][n][k] >= theta_iniValue*(T-1-t))
-                    m_backward[t][n][k].addConstr(vari_cost * q_backward[t][n][k] <= cash_forward_values[t-1][n])
+                    m_backward[t][n][k].addConstr(vari_cost * q_backward[t][n][k] <= cash_backward[t][n][k])
                 if t == 0:   
                     m_backward[t][n][k].addConstr(I_backward[t][n][k] - B_backward[t][n][k] == ini_I + q_values[iter] - demand)
                     m_backward[t][n][k].addConstr(cash_backward[t][n][k] == ini_cash - vari_cost*q_values[iter] + price*(demand - B_backward[t][n][k]))
@@ -188,15 +188,15 @@ while iter < iter_num:
                 m_backward[t][n][k].optimize()                
                 # if t == 0 and n == 0 and iter > 0:
                 #     m_backward[t][n][k].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(n+1) + '_' + str(k+1) +'-2back.lp')
-                # if t > 0:
-                #     m_backward[t][n][k].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(n+1) + '_' + str(k+1) +'-2back.lp')
+                if t > 0:
+                    m_backward[t][n][k].write('iter' + str(iter+1) + '_sub_' + str(t+1) + '^' + str(n+1) + '_' + str(k+1) +'-2back.lp')
                 
                 pi = m_backward[t][n][k].getAttr(GRB.Attr.Pi)
                 rhs = m_backward[t][n][k].getAttr(GRB.Attr.RHS)
                 num_con = len(pi)
                 for kk in range(num_con):
                     pi_rhs_values[t][n][k] += pi[kk]*rhs[kk]
-                pi_rhs_values[t][n][k] += price * demand
+                pi_rhs_values[t][n][k] -= price * demand
                 pi_values[t][n][k].append(pi)
             
             avg_pi = sum(np.array(pi_values[t][n])) / K
@@ -213,6 +213,12 @@ while iter < iter_num:
 
     iter += 1
 
-
+end = time.process_time()
+print('********************************************')
+final_cash = -z
+print('final expected cash increment is %.2f' % final_cash)
+print('ordering Q in the first peiod is %.2f' % q_value)
+cpu_time = end - start
+print('cpu time is %.3f s' % cpu_time)
 
 
