@@ -54,8 +54,9 @@ theta_iniValue = -300 # initial theta values (profit) in each period
 m = Model() # linear model in the first stage
 # decision variable in the first stage model
 q = m.addVar(vtype = GRB.CONTINUOUS, name = 'q_1')
-theta = m.addVar(lb = theta_iniValue*T, vtype = GRB.CONTINUOUS, name = 'theta_2')
+theta = m.addVar(lb = -GRB.INFINITY, vtype = GRB.CONTINUOUS, name = 'theta_2')
 m.setObjective(vari_cost*q + theta, GRB.MINIMIZE)
+m.addConstr(theta >= theta_iniValue*(T))
 m.addConstr(vari_cost * q <= ini_cash)
 
 q_value = 0
@@ -83,7 +84,7 @@ while iter < iter_num:
         m.addConstr(theta >= slope1_stage[-1][-2]*(ini_I+q) + slope1_stage[-1][-1]*(ini_cash-vari_cost*q) + intercept1_stage[-1])
     m.update()
     m.optimize()
-    # m.write('iter' + str(iter) + '_main2.lp')    
+    m.write('iter' + str(iter) + '_main2.lp')    
     # m.write('iter' + str(iter) + '_main2.sol')
     
     q_values[iter] = q.x
@@ -133,6 +134,7 @@ while iter < iter_num:
                 
             # optimize
             m_forward[t][n].optimize()
+            m_forward[t][n].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(n+1) + '-2.lp')
             I_forward_values[t][n] = I_forward[t][n].x 
             B_forward_values[t][n] = B_forward[t][n].x  
             cash_forward_values[t][n] = cash_forward[t][n].x 
