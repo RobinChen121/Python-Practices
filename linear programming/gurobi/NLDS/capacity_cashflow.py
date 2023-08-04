@@ -36,7 +36,7 @@ samples_detail = [[0 for i in range(sample_nums[t])] for t in range(T)]
 for t in range(T):
     samples_detail[t] = generate_sample(sample_nums[t], trunQuantile, mean_demands[t])
 
-# samples_detail = [[5, 15], [15, 20]]
+samples_detail = [[5, 15], [15, 20]]
 scenarios = list(itertools.product(*samples_detail)) 
 sample_num = 50
 
@@ -64,7 +64,7 @@ C_sub = [[m_sub[t][j].addVar(vtype = GRB.CONTINUOUS, name = 'C_' + str(t+1) + '^
 theta_sub = [[m_sub[t][j].addVar(lb = -GRB.INFINITY, vtype = GRB.CONTINUOUS, name = 'theta_' + str(t+3) + '^' + str(j+1)) for j in range(t_nodeNum[t])] for t in range(T-1)]
 
 iter = 1
-iter_num = 14
+iter_num = 4
 pi_sub_detail_values = [[[[] for s in range(t_nodeNum[t])] for t in range(T)] for iter in range(iter_num)] 
 rhs_sub_detail_values = [[[[] for s in range(t_nodeNum[t])] for t in range(T)] for iter in range(iter_num)] 
 q_detail_values = [[[] for t in range(T)] for iter in range(iter_num)] 
@@ -84,7 +84,7 @@ while iter <= iter_num:
     m.addConstr(theta >= theta_iniValue*(T))
     m.addConstr(vari_cost*q <= ini_cash)
     m.optimize()
-    # m.write('iter' + str(iter) + '_main.lp')
+    m.write('iter' + str(iter) + '_main.lp')
     # m.write('iter' + str(iter) + '_main.sol')
     
     print(end = '')
@@ -139,7 +139,7 @@ while iter <= iter_num:
             m_sub[t][j].optimize()
             if t < T - 1 and theta_sub[t][j].x != theta_iniValue*(T-1-t):
                 print()
-            # m_sub[t][j].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(j+1) + '.lp')
+            m_sub[t][j].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(j+1) + '.lp')
             # m_sub[t][j].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(j+1) + '.dlp')
             # m_sub[t][j].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(j+1) + '.sol')
 
