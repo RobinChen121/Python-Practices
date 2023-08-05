@@ -7,6 +7,9 @@ Created on Mon Jul 10 10:52:47 2023
 
 @disp:  
     
+    lower bound for the variables must in the constraints, not in the defintion of the variables;
+    if rhs in one constraint has the previous stage decision variable, then the rhs_value must be
+    computed separately;
     
 """
 
@@ -31,7 +34,7 @@ unit_back_cost = 0
 unit_hold_cost = 0
 mean_demands = [10, 10]
 T = len(mean_demands)
-sample_nums = [2 for t in range(T)]
+sample_nums = [10 for t in range(T)]
 
 trunQuantile = 0.9999 # affective to the final ordering quantity
 scenario_numTotal = 1
@@ -42,13 +45,13 @@ for i in sample_nums:
 sample_detail = [[0 for i in range(sample_nums[t])] for t in range(T)] 
 for t in range(T):
     sample_detail[t] = generate_sample(sample_nums[t], trunQuantile, mean_demands[t])
-sample_detail = [[5, 15], [5, 15]]
+# sample_detail = [[5, 15], [5, 15]]
 scenarios_full = list(itertools.product(*sample_detail)) 
 
 
 iter = 0
-iter_num = 4
-N = 4 # sampled number of scenarios for forward computing
+iter_num = 8
+N = 20 # sampled number of scenarios for forward computing
 
 theta_iniValue = -400 # initial theta values (profit) in each period
 m = Model() # linear model in the first stage
@@ -76,7 +79,7 @@ while iter < iter_num:
     # sample a numer of scenarios from the full scenario tree
     # random.seed(10000)
     sample_scenarios = generate_scenario_samples(N, trunQuantile, mean_demands)
-    sample_scenarios = [[5, 5], [5, 15], [15, 5], [15, 15]]
+    # sample_scenarios = [[5, 5], [5, 15], [15, 5], [15, 15]]
     sample_scenarios.sort() # sort to make same numbers together
     
     # forward
@@ -84,8 +87,8 @@ while iter < iter_num:
         m.addConstr(theta >= slope1_stage[-1][-2]*(ini_I+q) + slope1_stage[-1][-1]*(ini_cash-vari_cost*q) + intercept1_stage[-1])
     m.update()
     m.optimize()
-    m.write('iter' + str(iter+1) + '_main2.lp')    
-    # m.write('iter' + str(iter) + '_main2.sol')
+    # m.write('iter' + str(iter+1) + '_main2.lp')    
+    # m.write('iter' + str(iter+1) + '_main2.sol')
     
     q_values[iter] = q.x
     theta_value = theta.x
@@ -134,7 +137,7 @@ while iter < iter_num:
                 
             # optimize
             m_forward[t][n].optimize()
-            m_forward[t][n].write('iter' + str(iter+1) + '_sub_' + str(t+1) + '^' + str(n+1) + '-2.lp')
+            # m_forward[t][n].write('iter' + str(iter+1) + '_sub_' + str(t+1) + '^' + str(n+1) + '-2.lp')
             I_forward_values[t][n] = I_forward[t][n].x 
             B_forward_values[t][n] = B_forward[t][n].x  
             cash_forward_values[t][n] = cash_forward[t][n].x 
@@ -187,21 +190,25 @@ while iter < iter_num:
                 # optimize
                 m_backward[t][n][k].optimize()                
                 # if t == 0 and n == 0 and iter > 0:
-                #     m_backward[t][n][k].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(n+1) + '_' + str(k+1) +'-2back.lp')
-                if t > 0:
-                    m_backward[t][n][k].write('iter' + str(iter+1) + '_sub_' + str(t+1) + '^' + str(n+1) + '_' + str(k+1) +'-2back.lp')
+                #     m_backward[t][n][k].write('iter' + str(iter+1) + '_sub_' + str(t+1) + '^' + str(n+1) + '-' + str(k+1) +'back.lp')
+                # if t > 0:
+                #     m_backward[t][n][k].write('iter' + str(iter+1) + '_sub_' + str(t+1) + '^' + str(n+1) + '-' + str(k+1) +'back.lp')
                 
                 pi = m_backward[t][n][k].getAttr(GRB.Attr.Pi)
                 rhs = m_backward[t][n][k].getAttr(GRB.Attr.RHS)
                 num_con = len(pi)
-                for kk in range(num_con):
+                for kk in range(num_con-2):
                     pi_rhs_values[t][n][k] += pi[kk]*rhs[kk]
-                pi_rhs_values[t][n][k] -= price * demand
+                # demand should put here, can not put in the above rhs, 
+                # rhs may be wrong because it have previous stage decision variable
+                pi_rhs_values[t][n][k] += -pi[-2] * demand + pi[-1] * price * demand - price*demand # put here is better because of demand
                 pi_values[t][n][k].append(pi)
-            
+                       
             avg_pi = sum(np.array(pi_values[t][n])) / K
             avg_pi_rhs = sum(pi_rhs_values[t][n]) / K
-            
+            if iter > 0 and t == 0 and n == 0:
+                print()
+                
             # recording cuts
             if t == 0 and n == 0:
                 slope1_stage.append(avg_pi[0])
@@ -217,7 +224,7 @@ end = time.process_time()
 print('********************************************')
 final_cash = -z
 print('final expected cash increment is %.2f' % final_cash)
-print('ordering Q in the first peiod is %.2f' % q_value)
+print('ordering Q in the first peiod is %.2f' % q.x)
 cpu_time = end - start
 print('cpu time is %.3f s' % cpu_time)
 

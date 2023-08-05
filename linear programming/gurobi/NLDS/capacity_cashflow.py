@@ -160,9 +160,9 @@ while iter <= iter_num:
             for k in range(con_num - 2): 
                 pi_rhs_values[t][j] += pi[k]*rhs[k] 
             
-            if iter == 2:
-                pass
             pi_rhs_values[t][j] += -pi[-2] * demand + pi[-1] * price * demand - price*demand # put here is better because of demand
+            if iter > 1:
+                pass
             d_sub_values[t][j] = demand
             pi_sub1_values[t][j] = pi[-2] # inventory flow constraint
             pi_sub2_values[t][j] = pi[-1] # cash constraint
@@ -179,6 +179,8 @@ while iter <= iter_num:
         for j in range(t_nodeNum[t]): 
             sum_pi_rhs += pi_rhs_values[t][j]
         avg_pi_rhs = sum_pi_rhs / t_nodeNum[t]
+        if iter > 1 and t == 0:
+            print()
         if t == 0:
             m.addConstr(theta >= avg_pi1*(ini_I + q) + avg_pi2*ini_cash - avg_pi2*vari_cost*q + avg_pi_rhs) 
         else:
