@@ -7,7 +7,7 @@ Created on Sat Aug  5 15:44:23 2023
 
 MIT Licence.
 
-Python version: 3.8
+Python version: 3.11
 
 
 Description: SDDP to solve newsvendor with lead time
@@ -31,7 +31,7 @@ unit_back_cost = 10
 unit_hold_cost = 2
 mean_demands = [10, 10]
 T = len(mean_demands)
-sample_nums = [10 for t in range(T)]
+sample_nums = [2 for t in range(T)]
 
 trunQuantile = 0.9999 # affective to the final ordering quantity
 scenario_numTotal = 1
@@ -47,8 +47,8 @@ for t in range(T):
 
 
 iter = 0
-iter_num = 15
-N = 50 # sampled number of scenarios for forward computing
+iter_num = 4
+N = 4 # sampled number of scenarios for forward computing
 
 theta_iniValue = 0 # initial theta values (profit) in each period
 m = Model() # linear model in the first stage
@@ -60,10 +60,11 @@ m.setObjective(vari_cost*q + theta, GRB.MINIMIZE)
 # cuts
 slope1_stage = []
 intercept1_stage = []
-slopes = [[ 0 for n in range(N)] for t in range(T-1)]
-slopes2 = [[ 0 for n in range(N)] for t in range(T-1)]
+slopes = [[ [] for n in range(N)] for t in range(T-1)]
+slopes2 = [[ [] for n in range(N)] for t in range(T-1)]
 intercepts = [[ [] for n in range(N)] for t in range(T-1)]
 q_values = [[[0 for n in range(N)] for t in range(T)] for iter in range(iter_num)]
+q_sub_values = [[[0 for n in range(N)] for t in range(T-1)] for iter in range(iter_num)]
 
 start = time.process_time()
 while iter < iter_num:  
@@ -71,13 +72,12 @@ while iter < iter_num:
     # sample a numer of scenarios from the full scenario tree
     # random.seed(10000)
     sample_scenarios = generate_scenario_samples(N, trunQuantile, mean_demands)
-    # sample_scenarios= random.sample(scenarios_full, N) # sampling without replacement
+    sample_scenarios = [[5, 5], [5, 15], [15, 5], [15, 15]]
     sample_scenarios.sort() # sort to make same numbers together
     
     # forward
     if iter > 0:
         m.addConstr(theta >= slope1_stage[-1]*q + intercept1_stage[-1])
-    m.update()
     m.optimize()
     # m.write('iter' + str(iter) + '_main2.lp')    
     # m.write('iter' + str(iter) + '_main2.sol')
@@ -108,7 +108,7 @@ while iter < iter_num:
                         if t < T - 2:
                             m_forward[t][n].addConstr(theta_forward[t][n] >= slopes2[t][nn][i]*(I_forward[t][n]- B_forward[t][n]) + slopes1[t][nn][i]*q_forward[t][n] + intercepts[t][nn][i])
                         else:
-                            m_forward[t][n].addConstr(theta_forward[t][n] >= slopes1[t][nn][i]*q_forward[t][n] + intercepts[t][nn][i]) 
+                            m_forward[t][n].addConstr(theta_forward[t][n] >= slopes[t][nn][i]*q_forward[t][n] + intercepts[t][nn][i]) 
                            
             if t == T - 1:                   
                 m_forward[t][n].setObjective(unit_hold_cost*I_forward[t][n] + unit_back_cost*B_forward[t][n], GRB.MINIMIZE)
@@ -161,7 +161,7 @@ while iter < iter_num:
                             if t < T - 2:
                                 m_forward[t][n].addConstr(theta_forward[t][n] >= slopes2[t][nn][i]*(I_forward[t][n]- B_forward[t][n]) + slopes1[t][nn][i]*q_forward[t][n] + intercepts[t][nn][i])
                             else:
-                                m_forward[t][n].addConstr(theta_forward[t][n] >= slopes1[t][nn][i]*q_forward[t][n] + intercepts[t][nn][i]) 
+                                m_forward[t][n].addConstr(theta_forward[t][n] >= slopes[t][nn][i]*q_forward[t][n] + intercepts[t][nn][i]) 
                 
                 if t == T - 1:                   
                     m_backward[t][n][k].setObjective(unit_hold_cost*I_backward[t][n][k] + unit_back_cost*B_backward[t][n][k], GRB.MINIMIZE)
@@ -189,11 +189,9 @@ while iter < iter_num:
                     pi_rhs_values[t][n][k] += -pi[-1]*demand
                 else:
                     pi_rhs_values[t][n][k] = -pi[-1] * demand + pi[-1]*q_values[iter][t-1][n]
-                if t < 1:
+                if t < T - 1:
                     pi_values[t][n][k] = pi_expect * sum(pi[0:-1])
-                else:
-                    pi_values[t][n][k] = pi_expect * sum(pi[0:-1])
-                    pi_values2[t][n][k] = pi[-1]
+                pi_values2[t][n][k] = pi[-1]
                 
             
             if iter > 0 and t == 1:
@@ -217,6 +215,6 @@ while iter < iter_num:
 end = time.process_time()
 print('********************************************')
 print('final expected total costs is %.2f' % z)
-print('ordering Q in the first peiod is %.2f' % q_values[iter-1])
+print('ordering Q in the first peiod is %.2f' % q_values[iter-1][0][0])
 cpu_time = end - start
 print('cpu time is %.3f s' % cpu_time)
