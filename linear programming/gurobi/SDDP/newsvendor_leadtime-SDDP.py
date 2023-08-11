@@ -79,7 +79,9 @@ while iter < iter_num:
     if iter > 0:
         m.addConstr(theta >= slope1_stage[-1]*q + intercept1_stage[-1])
     m.optimize()
-    m.write('iter' + str(iter) + '_main2.lp')    
+    if iter > 0:
+        m.write('iter' + str(iter) + '_main2.lp')
+        pass
     # m.write('iter' + str(iter) + '_main2.sol')
     
     q_values[iter][0] = [q.x for n in range(N)]
@@ -108,7 +110,7 @@ while iter < iter_num:
                         if t < T - 2:
                             m_forward[t][n].addConstr(theta_forward[t][n] >= slopes1[t][nn][i]*(I_forward[t][n]- B_forward[t][n]) + slopes2[t][nn][i]*q_forward[t][n] + intercepts[t][nn][i])
                         else:
-                            m_forward[t][n].addConstr(theta_forward[t][n] >= slopes2[t][nn][i]*q_forward[t][n] + intercepts[t][nn][i]) 
+                            m_forward[t][n].addConstr(theta_forward[t][n] >= slopes1[t][nn][i]*(I_forward[t][n]- B_forward[t][n]) + intercepts[t][nn][i]) 
                            
             if t == T - 1:                   
                 m_forward[t][n].setObjective(unit_hold_cost*I_forward[t][n] + unit_back_cost*B_forward[t][n], GRB.MINIMIZE)
@@ -121,8 +123,10 @@ while iter < iter_num:
             
             # optimize
             m_forward[t][n].optimize()
-            if iter > 1:
+            if iter > 0:
                 m_forward[t][n].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(n+1) + '-2.lp')
+                m_forward[t][n].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(n+1) + '-2.sol')
+                pass
             
             I_forward_values[t][n] = I_forward[t][n].x 
             B_forward_values[t][n] = B_forward[t][n].x      
@@ -160,10 +164,10 @@ while iter < iter_num:
                     for i in range(iter):
                         for nn in range(1): # N
                             if t < T - 2:
-                                m_forward[t][n].addConstr(theta_forward[t][n] >= slopes1[t][nn][i]*(I_forward[t][n]- B_forward[t][n]) + slopes2[t][nn][i]*q_forward[t][n] + intercepts[t][nn][i])
+                                m_backward[t][n][k].addConstr(theta_backward[t][n][k] >= slopes1[t][nn][i]*(I_backward[t][n][k]- B_backward[t][n][k]) + slopes2[t][nn][i]*q_backward[t][n][k] + intercepts[t][nn][i])
                             else:
-                                m_forward[t][n].addConstr(theta_forward[t][n] >= slopes2[t][nn][i]*q_forward[t][n] + intercepts[t][nn][i]) 
-                
+                                m_backward[t][n][k].addConstr(theta_backward[t][n][k] >= slopes1[t][nn][i]*(I_backward[t][n][k]- B_backward[t][n][k]) + intercepts[t][nn][i]) 
+            
                 if t == T - 1:                   
                     m_backward[t][n][k].setObjective(unit_hold_cost*I_backward[t][n][k] + unit_back_cost*B_backward[t][n][k], GRB.MINIMIZE)
                 else:
@@ -175,9 +179,11 @@ while iter < iter_num:
                     
                 # optimize
                 m_backward[t][n][k].optimize()                
-                # if t == 0 and n == 0 and iter > 0:
-                #     m_backward[t][n][k].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(n+1) + '_' + str(k+1) +'-2back.lp')
-                # m_backward[t][n][k].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(n+1) + '_' + str(k+1) +'-2back.lp')
+                if iter > 1:
+                    m_backward[t][n][k].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(n+1) + '_' + str(k+1) +'-2back.lp')
+                    m_backward[t][n][k].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(n+1) + '_' + str(k+1) +'-2back.sol')
+                    m_backward[t][n][k].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(n+1) + '_' + str(k+1) +'-2back.dlp')
+                    pass
                 
                 pi = m_backward[t][n][k].getAttr(GRB.Attr.Pi)
                 rhs = m_backward[t][n][k].getAttr(GRB.Attr.RHS)
@@ -192,6 +198,8 @@ while iter < iter_num:
                 if t < T - 1:
                     pi_values2[t][n][k] = pi_expect * sum(pi[0:-1])
                 pi_values1[t][n][k] = pi[-1]
+                if iter > 1 and t == 0:
+                    pass
                 
             
             if iter > 0 and t == 1:
@@ -202,7 +210,7 @@ while iter < iter_num:
             
             # recording cuts
             if t == 0 and n == 0:
-                slope1_stage.append(avg_pi1)
+                slope1_stage.append(avg_pi2)
                 intercept1_stage.append(avg_pi_rhs)
             elif t > 0:
                 slopes1[t-1][n].append(avg_pi1)

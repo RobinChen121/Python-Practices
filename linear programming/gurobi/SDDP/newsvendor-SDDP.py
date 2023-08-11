@@ -38,7 +38,7 @@ ini_I = 0
 vari_cost = 1
 unit_back_cost = 10
 unit_hold_cost = 2
-mean_demands = [10, 20,10, 20, 10, 20, 10, 20]
+mean_demands = [10, 10]
 T = len(mean_demands)
 sample_nums = [10 for t in range(T)]
 
@@ -56,8 +56,8 @@ for t in range(T):
 
 
 iter = 0
-iter_num = 15
-N = 50 # sampled number of scenarios for forward computing
+iter_num = 7
+N = 20 # sampled number of scenarios for forward computing
 
 theta_iniValue = 0 # initial theta values (profit) in each period
 m = Model() # linear model in the first stage
@@ -126,7 +126,7 @@ while iter < iter_num:
             if t == 0:   
                 m_forward[t][n].addConstr(I_forward[t][n] - B_forward[t][n] == ini_I + q_values[iter] - demand)
             else:
-                m_forward[t][n].addConstr(I_forward[t][n] - B_forward[t][n] == I_forward_values[t-1][n] - B_forward_values[t-1][n] + q_forward_values[t][n] - demand)
+                m_forward[t][n].addConstr(I_forward[t][n] - B_forward[t][n] == I_forward_values[t-1][n] - B_forward_values[t-1][n] + q_forward_values[t-1][n] - demand)
             
             # optimize
             m_forward[t][n].optimize()
