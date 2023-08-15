@@ -68,6 +68,7 @@ q_values = [[[0 for n in range(N)] for t in range(T)] for iter in range(iter_num
 
 start = time.process_time()
 pi_Iflow = [[[[0  for k in range(sample_nums[t])] for n in range(N)] for t in range(T)] for i in range(iter_num)]
+pi_d = [[[[0  for k in range(sample_nums[t])] for n in range(N)] for t in range(T)] for i in range(iter_num)]
 pi_q = [[[[0  for k in range(sample_nums[t])] for n in range(N)] for t in range(T)] for i in range(iter_num)]
 while iter < iter_num:  
     
@@ -82,9 +83,9 @@ while iter < iter_num:
         for n in range(1): # N
             m.addConstr(theta >= slope1_stage[iter-1][n]*q + intercept1_stage[iter-1][n])
     m.optimize()
-    # if iter > 0:
-    #     m.write('iter' + str(iter) + '_main.lp')
-    #     pass
+    if iter > 0:
+        m.write('iter' + str(iter) + '_main.lp')
+        pass
     # m.write('iter' + str(iter) + '_main.sol')
     
     q_values[iter][0] = [q.x for n in range(N)]
@@ -182,11 +183,11 @@ while iter < iter_num:
                     
                 # optimize
                 m_backward[t][n][k].optimize()                
-                # if  iter > 2 and t == 0:
-                #     m_backward[t][n][k].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(n+1) + '_' + str(k+1) +'-back.lp')
-                #     m_backward[t][n][k].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(n+1) + '_' + str(k+1) +'-back.sol')
-                #     m_backward[t][n][k].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(n+1) + '_' + str(k+1) +'-back.dlp')
-                #     pass
+                if  iter > 1 and t == 0:
+                    m_backward[t][n][k].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(n+1) + '_' + str(k+1) +'-back.lp')
+                    m_backward[t][n][k].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(n+1) + '_' + str(k+1) +'-back.sol')
+                    m_backward[t][n][k].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(n+1) + '_' + str(k+1) +'-back.dlp')
+                    pass
                 
                 pi = m_backward[t][n][k].getAttr(GRB.Attr.Pi)
                 rhs = m_backward[t][n][k].getAttr(GRB.Attr.RHS)
@@ -197,9 +198,11 @@ while iter < iter_num:
                     for kk in range(num_con-1):    
                         index_i = kk // N
                         index_n = kk % N
-                        expect_pi = slopes1[index_i][t][index_n]
+                        # expect_pi = slopes1[index_i][t][index_n]
+                        expect_pi = sum(pi_Iflow[index_i][t][index_n])/K
+                        expect_pid = sum(pi_d[index_i][t][index_n])/K
                         pi_values2[t][n][k] += pi[kk] * expect_pi
-                        pi_rhs_values[t][n][k] += -pi[kk]*expect_pi*expect_d # - piq_expect
+                        pi_rhs_values[t][n][k] += -pi[kk]* expect_pid # expect_pi*expect_d # - piq_expect
                     pi_rhs_values[t][n][k] += -pi[-1]*demand 
                 else:
                     pi_rhs_values[t][n][k] = pi[-1] * rhs[-1] # demand +  pi[-1]*q_values[iter][t-1][n]
@@ -207,6 +210,7 @@ while iter < iter_num:
                 if t > 0:
                     pi_q[iter][t][n][k] = pi[-1] * q_values[iter][t-1][n]  
                 pi_Iflow[iter][t][n][k] = pi[-1]  
+                pi_d[iter][t][n][k] = pi[-1] * demand
                                              
             
             if iter > 0 and t == 1:
