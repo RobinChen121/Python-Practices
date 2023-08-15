@@ -29,9 +29,9 @@ ini_I = 0
 vari_cost = 1
 unit_back_cost = 10
 unit_hold_cost = 2
-mean_demands = [10, 10, 10]
+mean_demands = [10, 10]
 T = len(mean_demands)
-sample_nums = [10 for t in range(T)]
+sample_nums = [2 for t in range(T)]
 
 trunQuantile = 0.9999 # affective to the final ordering quantity
 scenario_numTotal = 1
@@ -42,13 +42,13 @@ for i in sample_nums:
 sample_detail = [[0 for i in range(sample_nums[t])] for t in range(T)] 
 for t in range(T):
     sample_detail[t] = generate_sample(sample_nums[t], trunQuantile, mean_demands[t])
-# sample_detail = [[5, 15], [5, 15]]
+sample_detail = [[5, 15], [5, 15]]
 # scenarios_full = list(itertools.product(*sample_detail)) 
 
 
 iter = 0
-iter_num = 7
-N = 20 # sampled number of scenarios for forward computing
+iter_num = 6
+N = 4 # sampled number of scenarios for forward computing
 
 theta_iniValue = 0 # initial theta values (profit) in each period
 m = Model() # linear model in the first stage
@@ -74,7 +74,7 @@ while iter < iter_num:
     # sample a numer of scenarios from the full scenario tree
     # random.seed(10000)
     sample_scenarios = generate_scenario_samples(N, trunQuantile, mean_demands)
-    # sample_scenarios = [[5, 5], [5, 15], [15, 5], [15, 15]]
+    sample_scenarios = [[5, 5], [5, 15], [15, 5], [15, 15]] # [[5, 5, 5], [5, 5, 15], [5, 15, 5], [5, 15, 15], [15, 5, 5], [15, 5, 15], [15, 15, 5], [15, 15, 15]]
     sample_scenarios.sort() # sort to make same numbers together
     
     # forward
@@ -202,7 +202,7 @@ while iter < iter_num:
                         pi_rhs_values[t][n][k] += -pi[kk]*expect_pi*expect_d # - piq_expect
                     pi_rhs_values[t][n][k] += -pi[-1]*demand 
                 else:
-                    pi_rhs_values[t][n][k] = -pi[-1] * demand + pi[-1]*q_values[iter][t-1][n]
+                    pi_rhs_values[t][n][k] = pi[-1] * rhs[-1] # demand +  pi[-1]*q_values[iter][t-1][n]
                     
                 if t > 0:
                     pi_q[iter][t][n][k] = pi[-1] * q_values[iter][t-1][n]  
