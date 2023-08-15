@@ -29,7 +29,7 @@ ini_I = 0
 vari_cost = 1
 unit_back_cost = 10
 unit_hold_cost = 2
-mean_demands = [10, 10]
+mean_demands = [10, 10, 10]
 T = len(mean_demands)
 sample_nums = [10 for t in range(T)]
 
@@ -48,7 +48,7 @@ for t in range(T):
 
 iter = 0
 iter_num = 7
-N = 30 # sampled number of scenarios for forward computing
+N = 20 # sampled number of scenarios for forward computing
 
 theta_iniValue = 0 # initial theta values (profit) in each period
 m = Model() # linear model in the first stage
