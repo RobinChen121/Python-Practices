@@ -47,7 +47,7 @@ sample_detail = [[5, 15], [5, 15], [5, 15]]
 
 
 iter = 0
-iter_num = 10
+iter_num = 15
 N = 8 # sampled number of scenarios for forward computing
 
 theta_iniValue = 0 # initial theta values (profit) in each period
@@ -83,7 +83,7 @@ while iter < iter_num:
         for n in range(1): # N
             m.addConstr(theta >= slope1_stage[iter-1][n]*q + intercept1_stage[iter-1][n])
     m.optimize()
-    if iter > 1:
+    if iter > 5:
         m.write('iter' + str(iter) + '_main.lp')
         pass
     # m.write('iter' + str(iter) + '_main.sol')
@@ -93,6 +93,7 @@ while iter < iter_num:
     
     m_forward = [[Model() for n in range(N)] for t in range(T)]
     q_forward = [[m_forward[t][n].addVar(vtype = GRB.CONTINUOUS, name = 'q_' + str(t+2) + '^' + str(n+1)) for n in range(N)]  for t in range(T - 1)]
+    
     I_forward = [[m_forward[t][n].addVar(vtype = GRB.CONTINUOUS, name = 'I_' + str(t+1) + '^' + str(n+1)) for n in range(N)]  for t in range(T)]
     # B is the quantity of lost sale
     B_forward = [[m_forward[t][n].addVar(vtype = GRB.CONTINUOUS, name = 'B_' + str(t+1) + '^' + str(n+1)) for n in range(N)]  for t in range(T)]
@@ -127,7 +128,7 @@ while iter < iter_num:
             
             # optimize
             m_forward[t][n].optimize()
-            # if iter > 2:
+            # if iter > 1 and t == 0:
             #     m_forward[t][n].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(n+1) + '-.lp')
             #     m_forward[t][n].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(n+1) + '-.sol')
             #     m_forward[t][n].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(n+1) + '-.dlp')
@@ -137,7 +138,7 @@ while iter < iter_num:
             B_forward_values[t][n] = B_forward[t][n].x      
             if t < T - 1:
                 q_forward_values[t][n] = q_forward[t][n].x
-                # theta_forward_values[t][n] = theta_forward[t][n]
+                q_values[iter][t+1][n] = q_forward[t][n].x
             # m_forward[t][n].dispose()
     
     # backward
@@ -183,11 +184,11 @@ while iter < iter_num:
                     
                 # optimize
                 m_backward[t][n][k].optimize()                
-                # if  iter > 1 and t == 0:
-                #     m_backward[t][n][k].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(n+1) + '_' + str(k+1) +'-back.lp')
-                #     m_backward[t][n][k].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(n+1) + '_' + str(k+1) +'-back.sol')
-                #     m_backward[t][n][k].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(n+1) + '_' + str(k+1) +'-back.dlp')
-                #     pass
+                if  iter > 2 and t == 0 and n == 0:
+                    m_backward[t][n][k].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(n+1) + '_' + str(k+1) +'-back.lp')
+                    m_backward[t][n][k].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(n+1) + '_' + str(k+1) +'-back.sol')
+                    m_backward[t][n][k].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(n+1) + '_' + str(k+1) +'-back.dlp')
+                    pass
                 
                 pi = m_backward[t][n][k].getAttr(GRB.Attr.Pi)
                 rhs = m_backward[t][n][k].getAttr(GRB.Attr.RHS)
@@ -197,10 +198,10 @@ while iter < iter_num:
                     expect_d = sum(sample_detail[t+1])/K      
                     for kk in range(num_con-1):    
                         index_i = kk // N
-                        index_n = kk % N
+                        index_n =  kk % N
                         # expect_pi = slopes1[index_i][t][index_n]
                         expect_pi = sum(pi_Iflow[index_i][t+1][index_n])/K
-                        expect_pid = sum(pi_d[index_i][t+1][index_n])/K
+                        # expect_pid = sum(pi_d[index_i][t+1][index_n])/K
                         expect_piq = sum(pi_q[index_i][t+1][index_n])/K
                         pi_values2[t][n][k] += pi[kk] * expect_pi
                         pi_rhs_values[t][n][k] += pi[kk]*(rhs[kk]-expect_piq) # -pi[kk]* expect_pid # expect_pi*expect_d # - piq_expect
@@ -210,12 +211,11 @@ while iter < iter_num:
                         pi_rhs_values[t][n][k] += -pi[-1]*demand + pi[-1]*ini_I
                 else:
                     pi_rhs_values[t][n][k] = -pi[-1] * demand +  pi[-1]*q_values[iter][t-1][n]
-                    
-                if t > 0:
-                    pi_q[iter][t][n][k] = pi[-1] * q_values[iter][t-1][n]  
+                     
                 pi_Iflow[iter][t][n][k] = pi[-1]  
                 pi_d[iter][t][n][k] = pi[-1] * demand
-                pi_q[iter][t][n][k] = pi[-1] * q_values[iter][t-1][n] 
+                if t > 0:
+                    pi_q[iter][t][n][k] = pi[-1] * q_values[iter][t-1][n] 
                                              
             
             if iter > 0 and t == 1:

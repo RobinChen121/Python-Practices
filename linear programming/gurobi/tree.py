@@ -23,6 +23,19 @@ def generate_sample(sample_num, trunQuantile, mu):
         samples[i] = st.poisson.ppf(rand_p, mu)
     return samples
 
+# get the number of elements in a list of lists
+def getSizeOfNestedList(listOfElem):
+    ''' Get number of elements in a nested list'''
+    count = 0
+    # Iterate over the list
+    for elem in listOfElem:
+        # Check if type of element is list
+        if type(elem) == list:  
+            # Again call this function to get the size of this element
+            count += getSizeOfNestedList(elem)
+        else:
+            count += 1    
+    return count
 
 def generate_scenario_samples(sample_num, trunQuantile, mus):
     T = len(mus)
