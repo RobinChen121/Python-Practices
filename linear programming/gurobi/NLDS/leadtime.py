@@ -25,7 +25,7 @@ ini_I = 0
 vari_cost = 1
 unit_back_cost = 10
 unit_hold_cost = 2
-mean_demands = [10, 10, 10]
+mean_demands = [10, 20, 10]
 T = len(mean_demands)
 sample_nums = [10 for t in range(T)]
 

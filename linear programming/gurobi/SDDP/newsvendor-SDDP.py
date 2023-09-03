@@ -66,7 +66,6 @@ q = m.addVar(vtype = GRB.CONTINUOUS, name = 'q_1')
 theta = m.addVar(lb = theta_iniValue*T, vtype = GRB.CONTINUOUS, name = 'theta_2')
 m.setObjective(vari_cost*q + theta, GRB.MINIMIZE)
 q_value = 0
-theta_value = 0
 
 # cuts
 slope1_stage = []
@@ -94,7 +93,6 @@ while iter < iter_num:
     # m.write('iter' + str(iter) + '_main2.sol')
     
     q_values[iter] = q.x
-    theta_value = theta.x
     z = m.objVal
     
     m_forward = [[Model() for n in range(N)] for t in range(T)]
