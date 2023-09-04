@@ -53,7 +53,9 @@ m.setObjective(overhead_cost[0] + vari_cost*q + r1*W1 - r0*W0 + theta, GRB.MINIM
 m.addConstr(theta >= theta_iniValue*(T))
 # m.addConstr(-vari_cost*q - r1*W1 + r0*W0 >= overhead_cost[0] - ini_cash - limit)
 m.addConstr(vari_cost*q - W0 + W1 == overhead_cost[0] - ini_cash)
-q_value = 0
+
+q_values = [0 for iter in range(iter_num)]
+q_sub_values = [[[0 for n in range(N)] for t in range(T-1)] for iter in range(iter_num)]
 
 iter = 0
 iter_num = 7
@@ -68,9 +70,46 @@ while iter <= iter_num:
     m.write('iter' + str(iter) + '_main.lp')    
     m.write('iter' + str(iter) + '_main.sol')
     
+    if iter == 0:
+        q_values[iter] = 10
+    else:
+        q_values[iter] = q.x
+    z = m.objVal
+    
     # forward
+    m_forward = [[Model() for n in range(N)] for t in range(T)]
+    q_forward = [[m_forward[t][n].addVar(vtype = GRB.CONTINUOUS, name = 'q_' + str(t+2) + '^' + str(n+1)) for n in range(N)]  for t in range(T - 1)]
+    I_forward = [[m_forward[t][n].addVar(vtype = GRB.CONTINUOUS, name = 'I_' + str(t+1) + '^' + str(n+1)) for n in range(N)]  for t in range(T)]
+    # B is the quantity of lost sale
+    B_forward = [[m_forward[t][n].addVar(vtype = GRB.CONTINUOUS, name = 'B_' + str(t+1) + '^' + str(n+1)) for n in range(N)]  for t in range(T)]
+    theta_forward = [[m_forward[t][n].addVar(lb = -theta_iniValue*(T-1-t), vtype = GRB.CONTINUOUS, name = 'theta_' + str(t+3) + '^' + str(n+1)) for n in range(N)]  for t in range(T - 1)]
+    C_forward = [[m_forward[t][n].addVar(vtype = GRB.CONTINUOUS, name = 'C_' + str(t+1) + '^' + str(n+1)) for n in range(N)]  for t in range(T)]
     
+    if iter == 0:
+        q_forward_values = [[10 for n in range(N)] for t in range(T-1)]
+    else:
+        q_forward_values = [[0 for n in range(N)] for t in range(T-1)]     
+    I_forward_values = [[0 for n in range(N)] for t in range(T)]
+    B_forward_values = [[0 for n in range(N)] for t in range(T)]
+    C_forward_values = [[0 for n in range(N)] for t in range(T)]
+    theta_forward_values = [[0 for n in range(N)] for t in range(T)]
     
+    for t in range(T):
+        for n in range(N):
+            demand = sample_scenarios[n][t]
+            
+            if t == T - 1:                   
+                m_forward[t][n].setObjective(-price*(demand - B_forward[t][n]), GRB.MINIMIZE)
+            else:
+                m_forward[t][n].setObjective(-price*(demand - B_forward[t][n]) + overhead_cost[t+1] + vari_cost*q + r1*W1-r0*W0 + theta_forward[t][n], GRB.MINIMIZE)
+            if t == 0:   
+                m_forward[t][n].addConstr(I_forward[t][n] - B_forward[t][n] == ini_I + q_values[iter] - demand)
+            else:
+                m_forward[t][n].addConstr(I_forward[t][n] - B_forward[t][n] == I_forward_values[t-1][n] - B_forward_values[t-1][n] + q_forward_values[t-1][n] - demand)
+            if t == 0:
+                m_forward[t][n].addConstr(C_forward[t][n] == ini_cash)
+            else:
+                m_forward[t][n].addConstr(C_forward[t][n] == C_forward_values[t-1][n]) 
     iter += 1
     pass
 
