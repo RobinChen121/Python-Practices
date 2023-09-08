@@ -109,7 +109,7 @@ while iter < iter_num:
     
     for t in range(T):
         for n in range(N):
-            demand = sample_scenarios[n][t]
+            demand = 5 # sample_scenarios[n][t]
             
             # put those cuts in the front
             if iter > 0 and t < T - 1:
