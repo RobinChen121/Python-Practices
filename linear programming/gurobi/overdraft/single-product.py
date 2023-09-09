@@ -32,7 +32,7 @@ r1 = 0
 r2 = 0.1
 r3 = 1
 V = 25
-U = 40 # overdraft limit
+U = 80 # overdraft limit
 T = len(mean_demands)
 
 sample_nums = [10 for t in range(T)]
@@ -113,7 +113,7 @@ while iter <= iter_num:
     
     for t in range(T):
         for n in range(N):
-            demand = sample_scenarios[n][t]
+            demand =  5 # sample_scenarios[n][t]
             
             if t == T - 1:                   
                 m_forward[t][n].setObjective(-price*(demand - B_forward[t][n]), GRB.MINIMIZE)
@@ -125,13 +125,12 @@ while iter <= iter_num:
             else:
                 m_forward[t][n].addConstr(I_forward[t][n] - B_forward[t][n] == I_forward_values[t-1][n] - B_forward_values[t-1][n] + q_forward_values[t-1][n] - demand)
             if t == 0:
-                m_forward[t][n].addConstr(C_forward[t][n] + price*B_forward[t][n] == ini_cash - overhead_cost[t] - vari_cost*q_values[iter] -r1*W1_values[iter]-r2*W2_values[iter]-r3*W3_values[iter] + r0*W0_values[iter] + price*demand)
+                m_forward[t][n].addConstr(C_forward[t][n] + price*B_forward[t][n] == ini_cash - overhead_cost[t] - vari_cost*q_values[iter]\
+                                          -r1*W1_values[iter]-r2*W2_values[iter]-r3*W3_values[iter] + r0*W0_values[iter] + price*demand)
             else:
                 m_forward[t][n].addConstr(C_forward[t][n] + price*B_forward[t][n] == C_forward_values[t-1][n]- overhead_cost[t] - vari_cost*q_forward_values[t-1][n] -r1*W1_forward_values[t-1][n]\
                                           -r2*W2_forward_values[t-1][n] -r3*W3_forward_values[t-1][n]+ r0*W0_forward_values[t-1][n] + price*demand) 
-                
-            if iter == 0:
-                m_forward[t][n].addConstr(q_forward[t][n] == 10)    
+                    
             # optimize
             m_forward[t][n].optimize()
             m_forward[t][n].write('iter' + str(iter) + '_sub_' + str(t) + '^' + str(n) + '.lp')
