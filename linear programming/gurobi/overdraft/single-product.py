@@ -130,20 +130,35 @@ while iter <= iter_num:
             else:
                 m_forward[t][n].addConstr(C_forward[t][n] + price*B_forward[t][n] == C_forward_values[t-1][n]- overhead_cost[t] - vari_cost*q_forward_values[t-1][n] -r1*W1_forward_values[t-1][n]\
                                           -r2*W2_forward_values[t-1][n] -r3*W3_forward_values[t-1][n]+ r0*W0_forward_values[t-1][n] + price*demand) 
-                    
+            m_forward[t][n].addConstr(C_forward[t][n] - vari_cost*q_forward[t][n] - W0_forward[t][n] + W1_forward[t][n] + W2_forward[t][n] + W3_forward[t][n] == overhead_cost[t] - C_forward_values[t-1][n])
+            m_forward[t][n].addConstr(W1_forward[t][n] <= V)
+            m_forward[t][n].addConstr(W1_forward[t][n] + W2_forward[t][n] <= U)
+            
             # optimize
             m_forward[t][n].optimize()
             m_forward[t][n].write('iter' + str(iter) + '_sub_' + str(t) + '^' + str(n) + '.lp')
             m_forward[t][n].write('iter' + str(iter) + '_sub_' + str(t) + '^' + str(n) + '.sol')
             
             I_forward_values[t][n] = I_forward[t][n].x 
-            B_forward_values[t][n] = B_forward[t][n].x      
+            B_forward_values[t][n] = B_forward[t][n].x    
+            C_forward_values[t][n] = C_forward[t][n].x
+            W1_forward_values[t][n] = W1_forward[t][n].x
+            W2_forward_values[t][n] = W2_forward[t][n].x
+            W3_forward_values[t][n] = W3_forward[t][n].x
             if t < T - 1:
                 q_forward_values[t][n] = q_forward[t][n].x
                 q_sub_values[iter][t][n] = q_forward[t][n].x
                 theta_forward_values[t][n] = theta_forward[t][n]
                 
-            
+            # backward
+            m_backward = [[[Model() for k in range(sample_nums[t])] for n in range(N)] for t in range(T)]
+            q_backward = [[[m_backward[t][n][k].addVar(vtype = GRB.CONTINUOUS, name = 'q_' + str(t+2) + '^' + str(n+1)) for k in range(sample_nums[t])]  for n in range(N)] for t in range(T - 1)] 
+            I_backward = [[[m_backward[t][n][k].addVar(vtype = GRB.CONTINUOUS, name = 'I_' + str(t+1) + '^' + str(n+1)) for k in range(sample_nums[t])]  for n in range(N)] for t in range(T)]
+            # B is the quantity of lost sale
+            B_backward = [[[m_backward[t][n][k].addVar(vtype = GRB.CONTINUOUS, name = 'B_' + str(t+1) + '^' + str(n+1)) for k in range(sample_nums[t])] for n in range(N)] for t in range(T)]
+            theta_backward = [[[m_backward[t][n][k].addVar(lb = -theta_iniValue*(T-1-t), vtype = GRB.CONTINUOUS, name = 'theta_' + str(t+3) + '^' + str(n+1)) for k in range(sample_nums[t])] for n in range(N)] for t in range(T - 1)]
+            C_backward = [[[m_backward[t][n][k].addVar(vtype = GRB.CONTINUOUS, name = 'C_' + str(t+1) + '^' + str(n+1)) for k in range(sample_nums[t])] for n in range(N)] for t in range(T)]
+           
     
     
     iter += 1
