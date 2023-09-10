@@ -113,7 +113,7 @@ while iter <= iter_num:
     
     for t in range(T):
         for n in range(N):
-            demand =  5 # sample_scenarios[n][t]
+            demand = sample_scenarios[n][t]
             
             if t == T - 1:                   
                 m_forward[t][n].setObjective(-price*(demand - B_forward[t][n]), GRB.MINIMIZE)
@@ -158,9 +158,36 @@ while iter <= iter_num:
             B_backward = [[[m_backward[t][n][k].addVar(vtype = GRB.CONTINUOUS, name = 'B_' + str(t+1) + '^' + str(n+1)) for k in range(sample_nums[t])] for n in range(N)] for t in range(T)]
             theta_backward = [[[m_backward[t][n][k].addVar(lb = -theta_iniValue*(T-1-t), vtype = GRB.CONTINUOUS, name = 'theta_' + str(t+3) + '^' + str(n+1)) for k in range(sample_nums[t])] for n in range(N)] for t in range(T - 1)]
             C_backward = [[[m_backward[t][n][k].addVar(vtype = GRB.CONTINUOUS, name = 'C_' + str(t+1) + '^' + str(n+1)) for k in range(sample_nums[t])] for n in range(N)] for t in range(T)]
-           
-    
-    
+            W0_backward = [[[m_backward[t][n][k].addVar(vtype = GRB.CONTINUOUS, name = 'W0_' + str(t+2) + '^' + str(n+1)) for k in range(sample_nums[t])]  for n in range(N)] for t in range(T - 1)] 
+            W1_backward = [[[m_backward[t][n][k].addVar(vtype = GRB.CONTINUOUS, name = 'W1_' + str(t+2) + '^' + str(n+1)) for k in range(sample_nums[t])]  for n in range(N)] for t in range(T - 1)] 
+            W2_backward = [[[m_backward[t][n][k].addVar(vtype = GRB.CONTINUOUS, name = 'W2_' + str(t+2) + '^' + str(n+1)) for k in range(sample_nums[t])]  for n in range(N)] for t in range(T - 1)] 
+            W3_backward = [[[m_backward[t][n][k].addVar(vtype = GRB.CONTINUOUS, name = 'W3_' + str(t+2) + '^' + str(n+1)) for k in range(sample_nums[t])]  for n in range(N)] for t in range(T - 1)] 
+            
+            
+            for t in range(T - 1, -1, -1):
+               for n in range(N):
+                    K = len(sample_detail[t])
+                    for k in range(K):
+                        demand = sample_detail[t][k]
+                        if t == T - 1:                   
+                            m_backward[t][n][k].setObjective(-price*(demand - B_backward[t][n][k]), GRB.MINIMIZE)
+                        else:
+                            m_backward[t][n][k].setObjective(-price*(demand - B_backward[t][n][k]) + overhead_cost[t+1] + vari_cost*q_backward[t][n][k] + r3*W3_backward[t][n][k] + r2*W2_backward[t][n][k] + r1*W1_backward[t][n][k] - r0*W0_backward[t][n][k] + theta_backward[t][n][k], GRB.MINIMIZE) # 
+                        
+                        if t == 0:   
+                            m_backward[t][n][k].addConstr(I_backward[t][n][k] - B_backward[t][n][k] == ini_I + q_values[iter] - demand)
+                        else:
+                            m_backward[t][n][k].addConstr(I_backward[t][n][k] - B_backward[t][n][k] == I_forward_values[t-1][n] - B_forward_values[t-1][n] + q_forward_values[t-1][n] - demand)
+                        if t == 0:
+                            m_backward[t][n][k].addConstr(C_forward[t][n][k] + price*B_forward[t][n][k] == ini_cash - overhead_cost[t] - vari_cost*q_values[iter]\
+                                                      -r1*W1_values[iter]-r2*W2_values[iter]-r3*W3_values[iter] + r0*W0_values[iter] + price*demand)
+                        else:
+                            m_backward[t][n][k].addConstr(C_forward[t][n][k] + price*B_forward[t][n][k] == C_forward_values[t-1][n]- overhead_cost[t] - vari_cost*q_forward_values[t-1][n] -r1*W1_forward_values[t-1][n]\
+                                                      -r2*W2_forward_values[t-1][n] -r3*W3_forward_values[t-1][n]+ r0*W0_forward_values[t-1][n] + price*demand) 
+                        m_backward[t][n][k].addConstr(C_forward[t][n][k] - vari_cost*q_forward[t][n][k] - W0_forward[t][n][k] + W1_forward[t][n][k] + W2_forward[t][n][k] + W3_forward[t][n][k] == overhead_cost[t] - C_forward_values[t-1][n])
+                        m_backward[t][n][k].addConstr(W1_forward[t][n][k] <= V)
+                        m_backward[t][n][k].addConstr(W1_forward[t][n][k] + W2_forward[t][n][k] <= U)
+                        
     iter += 1
     pass
 
