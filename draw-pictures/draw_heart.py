@@ -15,7 +15,7 @@ import numpy as np
 import math
 
 x = np.linspace(-2, 2, 1000)
-y1 = [math.sqrt(2*math.sqrt(i**2) - i**2) for i in x]
+y1 = [math.sqrt(2*abs(i) - i**2) for i in x]
 y2 = [-2.14*math.sqrt(math.sqrt(2)-math.sqrt(abs(i))) for i in x]
 
 plt.plot(x, y1, 'r')
