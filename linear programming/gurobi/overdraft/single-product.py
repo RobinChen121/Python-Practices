@@ -14,6 +14,7 @@ from gurobipy import *
 import time
 import itertools
 import random
+import numpy as np
 from functools import reduce # 从工具包 functools 中导入 reduce
 
 import sys 
@@ -45,6 +46,7 @@ sample_detail = [[0 for i in range(sample_nums[t])] for t in range(T)]
 trunQuantile = 0.9999 # can influence the final ordering quantity
 for t in range(T):
     sample_detail[t] = generate_sample(sample_nums[t], trunQuantile, mean_demands[t])
+sample_nums = [2, 2]
 sample_detail = [[5, 15], [5, 15]]
 
 theta_iniValue = -500 # initial theta values (profit) in each period
@@ -73,12 +75,23 @@ W1_values = [0 for iter in range(iter_num)]
 W2_values = [0 for iter in range(iter_num)]
 W3_values = [0 for iter in range(iter_num)]
 
+slopes1 = []
+slopes2 = []
+intercept = []
+
+start = time.process_time()
 while iter <= iter_num:  
     # sample a numer of scenarios from the full scenario tree
     # random.seed(10000)
     # sample_scenarios = generate_scenario_samples(N, trunQuantile, mean_demands)
     sample_scenarios = [[5, 5], [5, 15], [15, 5], [15, 15]]
     sample_scenarios.sort() # sort to make same numbers together
+    
+    # cuts
+    if iter > 0:
+        m.addConstr(theta >= slopes1[0][0][-1]*q + slopes2[0][0][-1]*(-vari_cost*q-r3*W3-r2*W2-r1*W1+r0*W0)\
+                                + intercept[0][0][-1])
+    m.update()
     
     m.optimize()    
     m.write('iter' + str(iter) + '_main.lp')    
@@ -118,6 +131,13 @@ while iter <= iter_num:
         for n in range(N):
             demand = 5 #sample_scenarios[n][t]
             
+            for i in range(iter):
+                for nn in range(N): 
+                    m_forward[t][n].addConstr(slopes1[t][nn][i]*q_forward[t][n]\
+                                              + slopes2[t][nn][i]*(-vari_cost*q_forward[t][n]\
+                                        -r3*W3_forward[t][n]-r2*W2_forward[t][n]-r1*W1_forward[t][n]+r0*W0_forward[t][n])\
+                                            + intercept[t][nn][i])
+                         
             if t == T - 1:                   
                 m_forward[t][n].setObjective(-price*(demand - B_forward[t][n]) - unit_sal*I_forward[t][n], GRB.MINIMIZE)
             else:
@@ -172,12 +192,22 @@ while iter <= iter_num:
     W3_backward = [[[m_backward[t][n][k].addVar(vtype = GRB.CONTINUOUS, name = 'W3_' + str(t+2) + '^' + str(n+1)) for k in range(sample_nums[t])]  for n in range(N)] for t in range(T - 1)] 
     
     pi_values = [[[[0, 0]  for k in range(sample_nums[t])] for n in range(N)] for t in range(T)]
-    pi_rhs_values = [[[0  for k in range(sample_nums[t])] for n in range(N)] for t in range(T)] 
+    pi_rhs_value = [[[0  for k in range(sample_nums[t])] for n in range(N)] for t in range(T)] 
     for t in range(T - 1, -1, -1):
        for n in range(N):
             K = len(sample_detail[t])
             for k in range(K):
                 demand = sample_detail[t][k]
+                
+                # put those cuts in the front
+                if iter > 0 and t < T - 1:
+                    for i in range(iter):
+                        for nn in range(N): # N
+                             m_backward[t][n][k].addConstr(theta_backward[t][n][k] >= slopes1[t][nn][i]*q_backward[t][n][k]\
+                                                           + slopes2[t][nn][i]*(-vari_cost*q_backward[t][n][k]\
+                                                     -r3*W3_backward[t][n][k]-r2*W2_forward[t][n][k]-r1*W1_forward[t][n][k]+r0*W0_forward[t][n][k])\
+                                                           + intercept[t][nn][i])
+                       
                 if t == T - 1:                   
                     m_backward[t][n][k].setObjective(-price*(demand - B_backward[t][n][k]) - unit_sal*I_backward[t][n][k], GRB.MINIMIZE)
                 else:
@@ -201,23 +231,38 @@ while iter <= iter_num:
                                               -r2*W2_forward_values[t-1][n] -r3*W3_forward_values[t-1][n]+ r0*W0_forward_values[t-1][n] + price*demand) 
       
                 # optimize
-                m_backward[t][n][k].optimize()                
+                m_backward[t][n][k].optimize()                                   
                 m_backward[t][n][k].write('iter' + str(iter) + '_sub_' + str(t) + '^' + str(n) + '_' + str(k) +'-back.lp')
                 m_backward[t][n][k].write('iter' + str(iter) + '_sub_' + str(t) + '^' + str(n) + '_' + str(k) +'-back.sol')
                 
                 pi = m_backward[t][n][k].getAttr(GRB.Attr.Pi)
                 rhs = m_backward[t][n][k].getAttr(GRB.Attr.RHS)
                 
-                if t < T - 1:
-                    num_con = len(pi)
-                    for kk in range(num_con-1):
-                        pi_rhs_values[t][n][k] += pi[kk]*rhs[kk]
-                    pi_rhs_values[t][n][k] += -pi[-1]*demand 
+                num_con = len(pi)
+                if t < T - 1:  
+                    for kk in range(num_con - 2):
+                        pi_rhs_value[t][n][k] += pi[kk]*rhs[kk]
+                    pi_rhs_value[t][n][k] += -pi[-2] * demand - pi[-1]*overhead_cost[t] + pi[-1]*price*demand
+                    if t == 0:
+                        pi_rhs_value[t][n][k] += pi[-1] * ini_cash
                 else:
-                    pi_rhs_values[t][n][k] = -pi[-1] * demand
-                pi_values[t][n][k] = [pi[-1], pi[-2]]
+                    pi_rhs_value[t][n][k] = -pi[-2] * demand - pi[-1]*overhead_cost[t] + pi[-1]*price*demand
+                pi_values[t][n][k] = [pi[-2], pi[-1]]
+            
+            arr = np.array(pi_values[t][n])    
+            avg_pi = np.mean(arr, axis = 0)
+            avg_pi_rhs = sum(pi_rhs_value[t][n]) / K
+            
+            slopes1[t][n].append(avg_pi[0])
+            slopes2[t][n].append(avg_pi[1])
+            intercept[t][n].append(avg_pi_rhs) 
                         
     iter += 1
     pass
 
-
+end = time.process_time()
+print('********************************************')
+print('final expected total profits is %.2f', -z)
+print('ordering Q in the first peiod is %.2f' % q_values[iter-1])
+cpu_time = end - start
+print('cpu time is %.3f s' % cpu_time)
