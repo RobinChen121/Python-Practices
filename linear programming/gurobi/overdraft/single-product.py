@@ -75,9 +75,9 @@ W1_values = [0 for iter in range(iter_num)]
 W2_values = [0 for iter in range(iter_num)]
 W3_values = [0 for iter in range(iter_num)]
 
-slopes1 = []
-slopes2 = []
-intercept = []
+slopes1 = [[ [] for n in range(N)] for t in range(T)]
+slopes2 = [[ [] for n in range(N)] for t in range(T)]
+intercept = [[ [] for n in range(N)] for t in range(T)]
 
 start = time.process_time()
 while iter <= iter_num:  
@@ -133,10 +133,9 @@ while iter <= iter_num:
             
             for i in range(iter):
                 for nn in range(N): 
-                    m_forward[t][n].addConstr(slopes1[t][nn][i]*q_forward[t][n]\
-                                              + slopes2[t][nn][i]*(-vari_cost*q_forward[t][n]\
-                                        -r3*W3_forward[t][n]-r2*W2_forward[t][n]-r1*W1_forward[t][n]+r0*W0_forward[t][n])\
-                                            + intercept[t][nn][i])
+                    m_forward[t][n].addConstr(theta_forward[t][n] >= slopes1[t][nn][i]*q_forward[t][n]\
+                                    + slopes2[t][nn][i]*(-vari_cost*q_forward[t][n]-r3*W3_forward[t][n]-r2*W2_forward[t][n]\
+                                    - r1*W1_forward[t][n]+r0*W0_forward[t][n]) + intercept[t][nn][i])
                          
             if t == T - 1:                   
                 m_forward[t][n].setObjective(-price*(demand - B_forward[t][n]) - unit_sal*I_forward[t][n], GRB.MINIMIZE)
