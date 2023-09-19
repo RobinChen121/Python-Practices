@@ -80,7 +80,7 @@ slopes2 = [[ [] for n in range(N)] for t in range(T)]
 intercept = [[ [] for n in range(N)] for t in range(T)]
 
 start = time.process_time()
-while iter <= iter_num:  
+while iter < iter_num:  
     # sample a numer of scenarios from the full scenario tree
     # random.seed(10000)
     # sample_scenarios = generate_scenario_samples(N, trunQuantile, mean_demands)
@@ -129,7 +129,7 @@ while iter <= iter_num:
     
     for t in range(T):
         for n in range(N):
-            demand = 5 #sample_scenarios[n][t]
+            demand = sample_scenarios[n][t]
             
             # put those cuts in the front
             if iter > 0 and t < T - 1:
@@ -152,7 +152,7 @@ while iter <= iter_num:
             if t == 0:   
                 m_forward[t][n].addConstr(I_forward[t][n] - B_forward[t][n] == ini_I + q_values[iter] - demand)
             else:
-                m_forward[t][n].addConstr(I_forward[t][n] - B_forward[t][n] == I_forward_values[t-1][n] - B_forward_values[t-1][n] + q_forward_values[t-1][n] - demand)
+                m_forward[t][n].addConstr(I_forward[t][n] - B_forward[t][n] == I_forward_values[t-1][n] + q_forward_values[t-1][n] - demand)
             if t == 0:
                 m_forward[t][n].addConstr(C_forward[t][n] + price*B_forward[t][n] == ini_cash - overhead_cost[t] - vari_cost*q_values[iter]\
                                           -r1*W1_values[iter]-r2*W2_values[iter]-r3*W3_values[iter] + r0*W0_values[iter] + price*demand)
@@ -163,8 +163,10 @@ while iter <= iter_num:
             
             # optimize
             m_forward[t][n].optimize()
-            # m_forward[t][n].write('iter' + str(iter) + '_sub_' + str(t) + '^' + str(n) + '.lp')
-            # m_forward[t][n].write('iter' + str(iter) + '_sub_' + str(t) + '^' + str(n) + '.sol')
+            if t == 0 and n == 0:
+                m_forward[t][n].write('iter' + str(iter) + '_sub_' + str(t) + '^' + str(n) + '.lp')
+                m_forward[t][n].write('iter' + str(iter) + '_sub_' + str(t) + '^' + str(n) + '.sol')
+                pass
             
             I_forward_values[t][n] = I_forward[t][n].x 
             B_forward_values[t][n] = B_forward[t][n].x    
@@ -205,8 +207,8 @@ while iter <= iter_num:
                         for nn in range(N): # N
                              m_backward[t][n][k].addConstr(theta_backward[t][n][k] >= slopes1[t][nn][i]*q_backward[t][n][k]\
                                                            + slopes2[t][nn][i]*(-vari_cost*q_backward[t][n][k]\
-                                                     -r3*W3_backward[t][n][k]-r2*W2_forward[t][n][k]-r1*W1_forward[t][n][k]+r0*W0_forward[t][n][k])\
-                                                           + intercept[t][nn][i])
+                                                     -r3*W3_backward[t][n][k]-r2*W2_backward[t][n][k]-r1*W1_backward[t][n][k]\
+                                                     +r0*W0_backward[t][n][k])+ intercept[t][nn][i])
                        
                 if t == T - 1:                   
                     m_backward[t][n][k].setObjective(-price*(demand - B_backward[t][n][k]) - unit_sal*I_backward[t][n][k], GRB.MINIMIZE)
@@ -222,7 +224,7 @@ while iter <= iter_num:
                 if t == 0:   
                     m_backward[t][n][k].addConstr(I_backward[t][n][k] - B_backward[t][n][k] == ini_I + q_values[iter] - demand)
                 else:
-                    m_backward[t][n][k].addConstr(I_backward[t][n][k] - B_backward[t][n][k] == I_forward_values[t-1][n] - B_forward_values[t-1][n] + q_forward_values[t-1][n] - demand)
+                    m_backward[t][n][k].addConstr(I_backward[t][n][k] - B_backward[t][n][k] == I_forward_values[t-1][n] + q_forward_values[t-1][n] - demand)
                 if t == 0:
                     m_backward[t][n][k].addConstr(C_backward[t][n][k] + price*B_backward[t][n][k] == ini_cash - overhead_cost[t] - vari_cost*q_values[iter]\
                                               -r1*W1_values[iter]-r2*W2_values[iter]-r3*W3_values[iter] + r0*W0_values[iter] + price*demand)
@@ -232,8 +234,8 @@ while iter <= iter_num:
       
                 # optimize
                 m_backward[t][n][k].optimize()                                   
-                m_backward[t][n][k].write('iter' + str(iter) + '_sub_' + str(t) + '^' + str(n) + '_' + str(k) +'-back.lp')
-                m_backward[t][n][k].write('iter' + str(iter) + '_sub_' + str(t) + '^' + str(n) + '_' + str(k) +'-back.sol')
+                # m_backward[t][n][k].write('iter' + str(iter) + '_sub_' + str(t) + '^' + str(n) + '_' + str(k) +'-back.lp')
+                # m_backward[t][n][k].write('iter' + str(iter) + '_sub_' + str(t) + '^' + str(n) + '_' + str(k) +'-back.sol')
                 
                 pi = m_backward[t][n][k].getAttr(GRB.Attr.Pi)
                 rhs = m_backward[t][n][k].getAttr(GRB.Attr.RHS)
