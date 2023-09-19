@@ -131,12 +131,13 @@ while iter <= iter_num:
         for n in range(N):
             demand = 5 #sample_scenarios[n][t]
             
-            for i in range(iter):
-                for nn in range(N): 
-                    m_forward[t][n].addConstr(theta_forward[t][n] >= slopes1[t][nn][i]*q_forward[t][n]\
+            # put those cuts in the front
+            if iter > 0 and t < T - 1:
+                for i in range(iter):
+                    for nn in range(N): 
+                        m_forward[t][n].addConstr(theta_forward[t][n] >= slopes1[t][nn][i]*q_forward[t][n]\
                                     + slopes2[t][nn][i]*(-vari_cost*q_forward[t][n]-r3*W3_forward[t][n]-r2*W2_forward[t][n]\
                                     - r1*W1_forward[t][n]+r0*W0_forward[t][n]) + intercept[t][nn][i])
-                         
             if t == T - 1:                   
                 m_forward[t][n].setObjective(-price*(demand - B_forward[t][n]) - unit_sal*I_forward[t][n], GRB.MINIMIZE)
             else:
@@ -162,8 +163,8 @@ while iter <= iter_num:
             
             # optimize
             m_forward[t][n].optimize()
-            m_forward[t][n].write('iter' + str(iter) + '_sub_' + str(t) + '^' + str(n) + '.lp')
-            m_forward[t][n].write('iter' + str(iter) + '_sub_' + str(t) + '^' + str(n) + '.sol')
+            # m_forward[t][n].write('iter' + str(iter) + '_sub_' + str(t) + '^' + str(n) + '.lp')
+            # m_forward[t][n].write('iter' + str(iter) + '_sub_' + str(t) + '^' + str(n) + '.sol')
             
             I_forward_values[t][n] = I_forward[t][n].x 
             B_forward_values[t][n] = B_forward[t][n].x    
