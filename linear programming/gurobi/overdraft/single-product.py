@@ -147,7 +147,7 @@ while iter < iter_num:
             if t < T - 1:
                 m_forward[t][n].addConstr(W1_forward[t][n] <= V)
                 m_forward[t][n].addConstr(W1_forward[t][n] + W2_forward[t][n] <= U)
-                m_forward[t][n].addConstr(C_forward[t][n] - vari_cost*q_forward[t][n] - W0_forward[t][n] + W1_forward[t][n] + W2_forward[t][n] + W3_forward[t][n] == overhead_cost[t] - C_forward_values[t-1][n])
+                m_forward[t][n].addConstr(C_forward[t][n] - vari_cost*q_forward[t][n] - W0_forward[t][n] + W1_forward[t][n] + W2_forward[t][n] + W3_forward[t][n] == overhead_cost[t])
                 
             if t == 0:   
                 m_forward[t][n].addConstr(I_forward[t][n] - B_forward[t][n] == ini_I + q_values[iter] - demand)
