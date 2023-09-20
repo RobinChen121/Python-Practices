@@ -135,7 +135,7 @@ while iter < iter_num:
             if iter > 0 and t < T - 1:
                 for i in range(iter):
                     for nn in range(N): 
-                        m_forward[t][n].addConstr(theta_forward[t][n] >= slopes1[t][nn][i]*q_forward[t][n]\
+                        m_forward[t][n].addConstr(theta_forward[t][n] >= slopes1[t][nn][i]*(I_forward[t][n]+q_forward[t][n])\
                                     + slopes2[t][nn][i]*(-vari_cost*q_forward[t][n]-r3*W3_forward[t][n]-r2*W2_forward[t][n]\
                                     - r1*W1_forward[t][n]+r0*W0_forward[t][n]) + intercept[t][nn][i])
             if t == T - 1:                   
@@ -163,7 +163,7 @@ while iter < iter_num:
             
             # optimize
             m_forward[t][n].optimize()
-            if t == 0 and n == 0:
+            if iter == 1 and t == 0 and n == 0:
                 m_forward[t][n].write('iter' + str(iter) + '_sub_' + str(t) + '^' + str(n) + '.lp')
                 m_forward[t][n].write('iter' + str(iter) + '_sub_' + str(t) + '^' + str(n) + '.sol')
                 pass
@@ -205,7 +205,7 @@ while iter < iter_num:
                 if iter > 0 and t < T - 1:
                     for i in range(iter):
                         for nn in range(N): # N
-                             m_backward[t][n][k].addConstr(theta_backward[t][n][k] >= slopes1[t][nn][i]*q_backward[t][n][k]\
+                             m_backward[t][n][k].addConstr(theta_backward[t][n][k] >= slopes1[t][nn][i]*(I_backward[t][n][k]+q_backward[t][n][k])\
                                                            + slopes2[t][nn][i]*(-vari_cost*q_backward[t][n][k]\
                                                      -r3*W3_backward[t][n][k]-r2*W2_backward[t][n][k]-r1*W1_backward[t][n][k]\
                                                      +r0*W0_backward[t][n][k])+ intercept[t][nn][i])
