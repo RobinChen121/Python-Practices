@@ -11,7 +11,9 @@ Created on Mon May 15 14:52:57 2023
 """
 
 
-from sample_tree import generate_sample, get_tree_strcture, getSizeOfNestedList
+import sys 
+sys.path.append("../..") 
+from tree import generate_sample, get_tree_strcture, generate_scenario_samples
 from gurobipy import *
 import time
 from functools import reduce
@@ -21,17 +23,18 @@ import time
 
 
 start = time.process_time()
+
+
 ini_I = 0
-ini_cash = 30
+ini_cash = 0
 vari_cost = 1
+unit_sal = 0.5
 price = 5
-unit_back_cost = 0
-mean_demands = [5, 5, 15]
+mean_demands = [10, 10]
+overhead_cost = [50, 50]
+r0 = 0.01
+r1 = 0.1
 T = len(mean_demands)
-overhead_cost = [25 for t in range(T)]
-draft_limit = 100
-loan_rate = 0.03
-deposite_rate = 0.003
 
 sample_nums = [10 for t in range(T)]
 trunQuantile = 0.9999 # affective to the final ordering quantity
@@ -42,9 +45,9 @@ samples_detail = [[0 for i in range(sample_nums[t])] for t in range(T)]
 for t in range(T):
     samples_detail[t] = generate_sample(sample_nums[t], trunQuantile, mean_demands[t])
 
-# samples_detail = [[5, 15], [5, 15]]
+samples_detail = [[5, 15], [5, 15]]
 scenarios = list(itertools.product(*samples_detail)) 
-sample_num = 30
+sample_num = 4
 
 # sampling can't be in the while looping
 samples= random.sample(scenarios, sample_num) # sampling without replacement
@@ -98,9 +101,8 @@ while iter <= iter_num:
     
     # forward computation    
     # solve the first stage model    
-    m.setObjective(overhead_cost[0] + vari_cost*q + loan_rate * W1 - deposite_rate * W0 + theta, GRB.MINIMIZE)
+    m.setObjective(overhead_cost[0] + vari_cost*q + r1* W1 - r0* W0 + theta, GRB.MINIMIZE)
     m.addConstr(theta >= theta_iniValue*(T))
-    m.addConstr(-vari_cost*q - loan_rate*W1 + deposite_rate*W0 >= overhead_cost[0] - ini_cash - draft_limit)
     m.addConstr(-vari_cost*q - W0 + W1 == overhead_cost[0] - ini_cash)
     
     m.optimize()
@@ -126,14 +128,30 @@ while iter <= iter_num:
         for j in range(t_nodeNum[t]): 
             index = node_index[t][j][0]
             demand = samples[index][t]
+            
+            if t == T - 1:                   
+                m_forward[t][n].setObjective(-price*(demand - B_forward[t][n]) - unit_sal*I_forward[t][n], GRB.MINIMIZE)
+            else:
+                m_forward[t][n].setObjective(-price*(demand - B_forward[t][n]) + overhead_cost[t+1] + vari_cost*q_forward[t][n] + r1*W1_forward[t][n] - r0*W0_forward[t][n] + theta_forward[t][n], GRB.MINIMIZE) # 
+            
+            # constraints
+            for k in node_index[t - 1]:
+                if node_index[t][j][0] in k:
+                    last_index = node_index[t - 1].index(k)
+            if t < T - 1:
+                m_forward[t][n].addConstr(C_forward[t][n] - vari_cost*q_forward[t][n] - W0_forward[t][n] + W1_forward[t][n] == overhead_cost[t])
+                     
+            if t == 0:
+                m_sub[t][j].addConstr(I_sub[t][j] - B_sub[t][j] == ini_I + q_value - demand)
+            else:
+                m_sub[t][j].addConstr(I_sub[t][j] - B_sub[t][j] == I_sub_values[t-1][last_index]  + q_detail_values[iter-1][t][last_index] - demand)
+            
             if t == 0:   
                 if t != T - 1: # wheter should add theta
-                    m_sub[t][j].setObjective(vari_cost*q_sub[t][j] - price*(demand - B_sub[t][j]) +theta_sub[t][j], GRB.MINIMIZE)
+                    m_sub[t][j].setObjective(vari_cost*q_sub[t][j] - price*(demand - B_sub[t][j]) - r0*W0_sub[t][j] + r1*W1_sub[t][j] + theta_sub[t][j], GRB.MINIMIZE)
                     m_sub[t][j].addConstr(theta_sub[t][j] >= theta_iniValue*(T-1-t))
                 else:
-                    m_sub[t][j].setObjective(- price*(demand - B_sub[t][j]), GRB.MINIMIZE)
-                if t < T - 1:
-                    m_sub[t][j].addConstr(vari_cost*q_sub[t][j] <= C_sub[t][j])      
+                    m_sub[t][j].setObjective(- price*(demand - B_sub[t][j]) - r0*W0_sub[t][j] + r1*W1_sub[t][j], GRB.MINIMIZE)  
                 m_sub[t][j].addConstr(I_sub[t][j] - B_sub[t][j] == ini_I + q_value - demand)
                 m_sub[t][j].addConstr(C_sub[t][j] == ini_cash + price*(demand - B_sub[t][j]) - vari_cost*q_value)  
             else:
