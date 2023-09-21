@@ -219,7 +219,7 @@ while iter < iter_num:
                 if t < T - 1:
                     m_backward[t][n][k].addConstr(W1_backward[t][n][k] <= V)
                     m_backward[t][n][k].addConstr(W1_backward[t][n][k] + W2_backward[t][n][k] <= U)
-                    m_backward[t][n][k].addConstr(C_backward[t][n][k] - vari_cost*q_backward[t][n][k] - W0_backward[t][n][k] + W1_backward[t][n][k] + W2_backward[t][n][k] + W3_backward[t][n][k] == overhead_cost[t] - C_forward_values[t-1][n])
+                    m_backward[t][n][k].addConstr(C_backward[t][n][k] - vari_cost*q_backward[t][n][k] - W0_backward[t][n][k] + W1_backward[t][n][k] + W2_backward[t][n][k] + W3_backward[t][n][k] == overhead_cost[t])
                 
                 if t == 0:   
                     m_backward[t][n][k].addConstr(I_backward[t][n][k] - B_backward[t][n][k] == ini_I + q_values[iter] - demand)
