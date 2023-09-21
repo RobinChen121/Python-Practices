@@ -83,7 +83,7 @@ start = time.process_time()
 while iter < iter_num:  
     # sample a numer of scenarios from the full scenario tree
     # random.seed(10000)
-    # sample_scenarios = generate_scenario_samples(N, trunQuantile, mean_demands)
+    sample_scenarios = generate_scenario_samples(N, trunQuantile, mean_demands)
     sample_scenarios = [[5, 5], [5, 15], [15, 5], [15, 15]]
     sample_scenarios.sort() # sort to make same numbers together
     
@@ -114,8 +114,8 @@ while iter < iter_num:
     I_forward = [[m_forward[t][n].addVar(vtype = GRB.CONTINUOUS, name = 'I_' + str(t+1) + '^' + str(n+1)) for n in range(N)]  for t in range(T)]
     # B is the quantity of lost sale
     B_forward = [[m_forward[t][n].addVar(vtype = GRB.CONTINUOUS, name = 'B_' + str(t+1) + '^' + str(n+1)) for n in range(N)]  for t in range(T)]
-    theta_forward = [[m_forward[t][n].addVar(lb = theta_iniValue*(T-1-t), vtype = GRB.CONTINUOUS, name = 'theta_' + str(t+3) + '^' + str(n+1)) for n in range(N)]  for t in range(T - 1)]
-    C_forward = [[m_forward[t][n].addVar(lb = theta_iniValue*(t+1), vtype = GRB.CONTINUOUS, name = 'C_' + str(t+1) + '^' + str(n+1)) for n in range(N)]  for t in range(T)]
+    theta_forward = [[m_forward[t][n].addVar(lb = -GRB.INFINITY, vtype = GRB.CONTINUOUS, name = 'theta_' + str(t+3) + '^' + str(n+1)) for n in range(N)]  for t in range(T - 1)]
+    C_forward = [[m_forward[t][n].addVar(lb = -GRB.INFINITY, vtype = GRB.CONTINUOUS, name = 'C_' + str(t+1) + '^' + str(n+1)) for n in range(N)]  for t in range(T)]
     
     q_forward_values = [[0 for n in range(N)] for t in range(T-1)]  
     W0_forward_values = [[0 for n in range(N)] for t in range(T-1)] 
@@ -145,6 +145,7 @@ while iter < iter_num:
             
             # constraints
             if t < T - 1:
+                m_forward[t][n].addConstr(theta_forward[t][n] >= theta_iniValue*T)
                 m_forward[t][n].addConstr(W1_forward[t][n] <= V)
                 m_forward[t][n].addConstr(W1_forward[t][n] + W2_forward[t][n] <= U)
                 m_forward[t][n].addConstr(C_forward[t][n] - vari_cost*q_forward[t][n] - W0_forward[t][n] + W1_forward[t][n] + W2_forward[t][n] + W3_forward[t][n] == overhead_cost[t])
@@ -163,10 +164,10 @@ while iter < iter_num:
             
             # optimize
             m_forward[t][n].optimize()
-            if iter == 1 and t == 0 and n == 0:
-                m_forward[t][n].write('iter' + str(iter) + '_sub_' + str(t) + '^' + str(n) + '.lp')
-                m_forward[t][n].write('iter' + str(iter) + '_sub_' + str(t) + '^' + str(n) + '.sol')
-                pass
+            # if iter == 1 and t == 0 and n == 0:
+            #     m_forward[t][n].write('iter' + str(iter) + '_sub_' + str(t) + '^' + str(n) + '.lp')
+            #     m_forward[t][n].write('iter' + str(iter) + '_sub_' + str(t) + '^' + str(n) + '.sol')
+            #     pass
             
             I_forward_values[t][n] = I_forward[t][n].x 
             B_forward_values[t][n] = B_forward[t][n].x    
@@ -186,8 +187,8 @@ while iter < iter_num:
     I_backward = [[[m_backward[t][n][k].addVar(vtype = GRB.CONTINUOUS, name = 'I_' + str(t+1) + '^' + str(n+1)) for k in range(sample_nums[t])]  for n in range(N)] for t in range(T)]
     # B is the quantity of lost sale
     B_backward = [[[m_backward[t][n][k].addVar(vtype = GRB.CONTINUOUS, name = 'B_' + str(t+1) + '^' + str(n+1)) for k in range(sample_nums[t])] for n in range(N)] for t in range(T)]
-    theta_backward = [[[m_backward[t][n][k].addVar(lb = -theta_iniValue*(T-1-t), vtype = GRB.CONTINUOUS, name = 'theta_' + str(t+3) + '^' + str(n+1)) for k in range(sample_nums[t])] for n in range(N)] for t in range(T - 1)]
-    C_backward = [[[m_backward[t][n][k].addVar(lb = theta_iniValue*(t + 1), name = 'C_' + str(t+1) + '^' + str(n+1)) for k in range(sample_nums[t])] for n in range(N)] for t in range(T)]
+    theta_backward = [[[m_backward[t][n][k].addVar(lb = -GRB.INFINITY, vtype = GRB.CONTINUOUS, name = 'theta_' + str(t+3) + '^' + str(n+1)) for k in range(sample_nums[t])] for n in range(N)] for t in range(T - 1)]
+    C_backward = [[[m_backward[t][n][k].addVar(lb = -GRB.INFINITY, vtype = GRB.CONTINUOUS, name = 'C_' + str(t+1) + '^' + str(n+1)) for k in range(sample_nums[t])] for n in range(N)] for t in range(T)]
     W0_backward = [[[m_backward[t][n][k].addVar(vtype = GRB.CONTINUOUS, name = 'W0_' + str(t+2) + '^' + str(n+1)) for k in range(sample_nums[t])]  for n in range(N)] for t in range(T - 1)] 
     W1_backward = [[[m_backward[t][n][k].addVar(vtype = GRB.CONTINUOUS, name = 'W1_' + str(t+2) + '^' + str(n+1)) for k in range(sample_nums[t])]  for n in range(N)] for t in range(T - 1)] 
     W2_backward = [[[m_backward[t][n][k].addVar(vtype = GRB.CONTINUOUS, name = 'W2_' + str(t+2) + '^' + str(n+1)) for k in range(sample_nums[t])]  for n in range(N)] for t in range(T - 1)] 
@@ -217,6 +218,8 @@ while iter < iter_num:
                 
                 # constraints
                 if t < T - 1:
+                    m_backward[t][n][k].addConstr(theta_backward[t][n][k] >= theta_iniValue*T)
+                    m_backward[t][n][k].addConstr(C_backward[t][n][k] >= theta_iniValue*T)
                     m_backward[t][n][k].addConstr(W1_backward[t][n][k] <= V)
                     m_backward[t][n][k].addConstr(W1_backward[t][n][k] + W2_backward[t][n][k] <= U)
                     m_backward[t][n][k].addConstr(C_backward[t][n][k] - vari_cost*q_backward[t][n][k] - W0_backward[t][n][k] + W1_backward[t][n][k] + W2_backward[t][n][k] + W3_backward[t][n][k] == overhead_cost[t])
