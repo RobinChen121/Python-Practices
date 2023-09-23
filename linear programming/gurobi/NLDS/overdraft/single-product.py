@@ -96,8 +96,8 @@ while iter < iter_num:
     m.addConstr(-vari_cost*q - W0 + W1 == overhead_cost[0] - ini_cash)
     
     m.optimize()
-    m.write('iter' + str(iter) + '_main.lp')
-    m.write('iter' + str(iter) + '_main.sol')
+    # m.write('iter' + str(iter) + '_main.lp')
+    # m.write('iter' + str(iter) + '_main.sol')
     
     print(end = '')
     q_value = q.x
