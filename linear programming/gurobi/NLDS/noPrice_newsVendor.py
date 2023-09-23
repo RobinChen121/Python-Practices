@@ -187,7 +187,7 @@ while iter <= iter_num:
         if t == 0:
             avg_pi = sum(pi_values[t]) / t_nodeNum[t]
             sum_pi_rhs = 0
-            for j in range(t_nodeNum[t]): 
+            for j in range(t_node[t]): 
                 sum_pi_rhs += pi_rhs_values[t][j]
             avg_pi_rhs = sum_pi_rhs / t_nodeNum[t]
             m.addConstr(theta >= avg_pi*q + avg_pi_rhs) # just the benders optimality cut, same as the below constraint
