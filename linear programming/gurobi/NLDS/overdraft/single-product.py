@@ -70,8 +70,6 @@ for t in range(T):
     
 iter = 0
 iter_num = 6
-pi_sub_detail_values = [[[[] for s in range(t_nodeNum[t])] for t in range(T)] for iter in range(iter_num)] 
-rhs_sub_detail_values = [[[[] for s in range(t_nodeNum[t])] for t in range(T)] for iter in range(iter_num)] 
 q_detail_values = [[[] for t in range(T)] for iter in range(iter_num)] 
 W0_detail_values = [[[] for t in range(T)] for iter in range(iter_num)] 
 W1_detail_values = [[[] for t in range(T)] for iter in range(iter_num)] 
@@ -91,7 +89,7 @@ slopes2 = [[[0 for n in range(t_nodeNum[t])] for t in range(T)] for iter in rang
 intercept = [[[0 for n in range(t_nodeNum[t])] for t in range(T)] for iter in range(iter_num)] 
 while iter < iter_num: 
     
-    # forward computation    
+    # sub computation    
     # solve the first stage model    
     m.setObjective(overhead_cost[0] + vari_cost*q + r1* W1 - r0* W0 + theta, GRB.MINIMIZE)
     m.addConstr(theta >= theta_iniValue*(T))
@@ -103,9 +101,9 @@ while iter < iter_num:
     
     print(end = '')
     q_value = q.x
+    q_detail_values[iter][0] = q_value
     W0_value = W0.x
     W1_value = W1.x
-    q_detail_values[iter][0] = q_value
     theta_value = theta.x
     z = m.objVal
     
@@ -130,53 +128,56 @@ while iter < iter_num:
     pi_values2 = [[0 for s in range(sample_num)] for t in range(T)]
     pi_rhs_values = [[0 for s in range(sample_num)] for t in range(T)] 
     
-    # forward and backward  
+    # sub and backward  
     for t in range(T):       
-        for j in range(t_nodeNum[t]): 
-            index = node_index[t][j][0]
+        for n in range(t_nodeNum[t]): 
+            index = node_index[t][n][0]
             demand = samples[index][t]
             
             if t == T - 1:                   
-                m_sub[t][n].setObjective(-price*(demand - B_forward[t][n]) - unit_sal*I_forward[t][n], GRB.MINIMIZE)
+                m_sub[t][n].setObjective(-price*(demand - B_sub[t][n]) - unit_sal*I_sub[t][n], GRB.MINIMIZE)
             else:
-                m_sub[t][n].setObjective(-price*(demand - B_forward[t][n]) + overhead_cost[t+1] + vari_cost*q_forward[t][n] + r1*W1_forward[t][n] - r0*W0_forward[t][n] + theta_forward[t][n], GRB.MINIMIZE) # 
+                m_sub[t][n].setObjective(-price*(demand - B_sub[t][n]) + overhead_cost[t+1] + vari_cost*q_sub[t][n] + r1*W1_sub[t][n] - r0*W0_sub[t][n] + theta_sub[t][n], GRB.MINIMIZE) # 
             
             # constraints
             for k in node_index[t - 1]:
-                if node_index[t][j][0] in k:
+                if node_index[t][n][0] in k:
                     last_index = node_index[t - 1].index(k)
             if t < T - 1:
-                m_sub[t][n].addConstr(theta_forward[t][n] >= theta_iniValue*(T))
-                m_sub[t][n].addConstr(C_forward[t][n] - vari_cost*q_forward[t][n] - W0_forward[t][n] + W1_forward[t][n] == overhead_cost[t])
+                m_sub[t][n].addConstr(theta_sub[t][n] >= theta_iniValue*(T))
+                m_sub[t][n].addConstr(C_sub[t][n] - vari_cost*q_sub[t][n] - W0_sub[t][n] + W1_sub[t][n] == overhead_cost[t])
                      
             if t == 0:
-                m_sub[t][j].addConstr(I_sub[t][j] - B_sub[t][j] == ini_I + q_value - demand)
+                m_sub[t][n].addConstr(I_sub[t][n] - B_sub[t][n] == ini_I + q_value - demand)
             else:
-                m_sub[t][j].addConstr(I_sub[t][j] - B_sub[t][j] == I_sub_values[t-1][last_index] + q_detail_values[iter][t][last_index] - demand)
+                m_sub[t][n].addConstr(I_sub[t][n] - B_sub[t][n] == I_sub_values[t-1][last_index] + q_detail_values[iter][t][last_index] - demand)
             if t == 0:
-                m_sub[t][n].addConstr(C_sub[t][n] + price*B_sub[t][n] == ini_cash - overhead_cost[t] - vari_cost*q_values[iter][t][last_index]\
-                                          -r1*W1_values[iter] + r0*W0_values[iter] + price*demand)
+                m_sub[t][n].addConstr(C_sub[t][n] + price*B_sub[t][n] == ini_cash - overhead_cost[t] - vari_cost*q_value\
+                                          -r1*W1_detail_values[iter][0] + r0*W0_detail_values[iter][0] + price*demand)
             else:
-                m_sub[t][n].addConstr(C_sub[t][n] + price*B_sub[t][n] == C_sub_values[t-1][last_index]- overhead_cost[t] - vari_cost*q_detail_values[iter-1][t][last_index]\
-                                          -r1*W1_sub_values[t-1][last_index]\
-                                          + r0*W0_sub_values[t-1][last_index] + price*demand) 
+                m_sub[t][n].addConstr(C_sub[t][n] + price*B_sub[t][n] == C_sub_values[t-1][last_index]- overhead_cost[t] - vari_cost*q_detail_values[iter][t][last_index]\
+                                          -r1*W1_detail_values[iter][t][last_index]\
+                                          + r0*W0_detail_values[iter][t][last_index] + price*demand) 
            
                    
             
             # optimize
-            m_sub[t][j].optimize()
+            m_sub[t][n].optimize()
             # m_sub[t][j].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(j+1) + '.lp')
             # m_sub[t][j].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(j+1) + '.dlp')
             # m_sub[t][j].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(j+1) + '.sol')
             
             if t < T - 1:              
-                q_detail_values[iter - 1][t+1][j] = q_sub[t][j].x
+                q_detail_values[iter][t+1][n] = q_sub[t][n].x
+                W0_detail_values[iter][t+1][n] = W0_sub[t][n].x
+                W1_detail_values[iter][t+1][n] = W1_sub[t][n].x
                 
-            I_sub_values[t][j] = I_sub[t][j].x 
-            B_sub_values[t][j] = B_sub[t][j].x
-            C_sub_values[t][j] = C_sub[t][j].x
-            pi = m_sub[t][j].getAttr(GRB.Attr.Pi)
-            rhs = m_sub[t][j].getAttr(GRB.Attr.RHS)
+            I_sub_values[t][n] = I_sub[t][n].x 
+            B_sub_values[t][n] = B_sub[t][n].x
+            C_sub_values[t][n] = C_sub[t][n].x
+
+            pi = m_sub[t][n].getAttr(GRB.Attr.Pi)
+            rhs = m_sub[t][n].getAttr(GRB.Attr.RHS)
             
             con_num = len(pi)
             pi_rhs = 0
@@ -189,29 +190,29 @@ while iter < iter_num:
                 pi_rhs += pi[-1] * ini_cash
                 pi_rhs += pi[-2] * ini_I
                 
-            for k in node_index[t][j]:
+            for k in node_index[t][n]:
                 pi_values1[t][k] = pi[-2]
                 pi_values2[t][k] = pi[-1]
                 pi_rhs_values[t][k] = pi_rhs
             
         if t == 0:
-            avg_pi1 = sum(pi_values1) / sample_num
-            avg_pi2 = sum(pi_values2) / sample_num
-            avg_pi_rhs = sum(pi_rhs_values) / sample_num
+            avg_pi1 = sum(pi_values1[t]) / sample_num
+            avg_pi2 = sum(pi_values2[t]) / sample_num
+            avg_pi_rhs = sum(pi_rhs_values[t]) / sample_num
             m.addConstr(theta >= avg_pi1*q + avg_pi2*(-vari_cost*q - r1* W1 + r0* W0) + avg_pi_rhs)
         else:
-            for j in range(t_nodeNum[t-1]): 
+            for n in range(t_nodeNum[t-1]): 
                 sum_pi1 = 0
                 sum_pi2 = 0
                 sum_pi_rhs = 0
-                for k in node_index[t-1][j]:
+                for k in node_index[t-1][n]:
                     sum_pi1 += pi_values1[t][k]
                     sum_pi2 += pi_values2[t][k]
                     sum_pi_rhs += pi_rhs_values[t][k]
-                avg_pi1 = sum_pi1 / len(node_index[t-1][j])
-                avg_pi2 = sum_pi1 / len(node_index[t-1][j])
-                avg_pi_rhs = sum_pi_rhs / len(node_index[t-1][j])
-                m_sub[t-1][j].addConstr(theta_sub[t-1][j] >= avg_pi1*(I_sub[t-1][j] + q_sub[t-1][j])+ avg_pi2*(-vari_cost*q_sub[t-1][j] - r1* W1 + r0* W0) + avg_pi_rhs)
+                avg_pi1 = sum_pi1 / len(node_index[t-1][n])
+                avg_pi2 = sum_pi1 / len(node_index[t-1][n])
+                avg_pi_rhs = sum_pi_rhs / len(node_index[t-1][n])
+                m_sub[t-1][n].addConstr(theta_sub[t-1][n] >= avg_pi1*(I_sub[t-1][n] + q_sub[t-1][n])+ avg_pi2*(-vari_cost*q_sub[t-1][n] - r1* W1_sub[t-1][n] + r0* W0_sub[t-1][n]) + avg_pi_rhs)
                   
     iter += 1
 
