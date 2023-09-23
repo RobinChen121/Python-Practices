@@ -17,69 +17,9 @@ from functools import reduce
 import itertools
 import random
 import time
- 
-    
-def generate_sample(sample_num, trunQuantile, mu):
-    samples = [0 for i in range(sample_num)]
-    for i in range(sample_num):
-        rand_p = np.random.uniform(trunQuantile*i/sample_num, trunQuantile*(i+1)/sample_num)
-        samples[i] = st.poisson.ppf(rand_p, mu)
-    return samples
-
-# get the number of elements in a list of lists
-def getSizeOfNestedList(listOfElem):
-    ''' Get number of elements in a nested list'''
-    count = 0
-    # Iterate over the list
-    for elem in listOfElem:
-        # Check if type of element is list
-        if type(elem) == list:  
-            # Again call this function to get the size of this element
-            count += getSizeOfNestedList(elem)
-        else:
-            count += 1    
-    return count
-
-def get_tree_strcture(samples):
-    T = len(samples[0])
-    N = len(samples)
-    node_values = [[] for t in range(T)]
-    node_index = [[] for t in range(T)] # this is the wanted value
-    for t in range(T):
-        node_num = 0
-        if t == 0:           
-            for i in range(N):           
-                if samples[i][t] not in node_values[t]:
-                    node_values[t].append(samples[i][t]) 
-                    node_index[t].append([])
-                    node_index[t][node_num].append(i)
-                    node_num = node_num + 1
-                else:
-                    temp_m = len(node_values[t])
-                    for j in range(temp_m): # should revise
-                        if samples[i][t] == node_values[t][j]:
-                            node_index[t][j].append(i)
-                            break
-        else:
-            lastNodeNum = len(node_index[t-1])
-            for i in range(lastNodeNum):
-                child_num = len(node_index[t-1][i])
-                node_values[t].append([])
-                for j in range(child_num):
-                    index = node_index[t-1][i][j]
-                    if samples[index][t] not in node_values[t][i]:
-                        node_values[t][i].append(samples[index][t]) 
-                        node_index[t].append([])
-                        node_index[t][node_num].append(index)
-                        node_num = node_num + 1
-                    else:
-                        temp_m = len(node_values[t][i]) #2
-                        for k in range(temp_m): 
-                            if samples[index][t] == node_values[t][i][k]:
-                                node_index[t][k].append(index)
-                                break
-                    
-    return node_values, node_index
+import sys 
+sys.path.append("..") 
+from tree import * 
 
 
 start = time.process_time()
@@ -100,7 +40,7 @@ for t in range(T):
 
 # samples_detail = [[5, 15], [5, 15]]
 scenarios = list(itertools.product(*samples_detail)) 
-sample_num = 30
+sample_num = 20
 samples= random.sample(scenarios, sample_num) # sampling without replacement
 samples.sort() # sort to make same numbers together
 node_values, node_index = get_tree_strcture(samples)
@@ -152,10 +92,11 @@ while iter <= iter_num:
     
     I_sub_values = [[0 for s in range(t_nodeNum[t])] for t in range(T)] 
     B_sub_values = [[0 for s in range(t_nodeNum[t])] for t in range(T)] 
-    pi_sub_values = [[0 for s in range(t_nodeNum[t])] for t in range(T)] 
+    pi_values = [[0 for s in range(t_nodeNum[t])] for t in range(T)] 
     pi_rhs_values = [[0 for s in range(t_nodeNum[t])] for t in range(T)] 
     d_sub_values = [[0 for s in range(t_nodeNum[t])] for t in range(T)]
-    pi_rhs_values = [[0 for s in range(t_nodeNum[t])] for t in range(T)] 
+    pi_values2 = [[0 for s in range(sample_num)] for t in range(T)] 
+    pi_rhs_values2 = [[0 for s in range(sample_num)] for t in range(T)] 
     
     # forward and backward  
     for t in range(T):     
@@ -202,16 +143,20 @@ while iter <= iter_num:
                 pi_rhs_values[t][j] += -pi[-1]*demand 
             else:
                 pi_rhs_values[t][j] = -pi[-1] * demand
-            pi_sub_values[t][j] = pi[-1]
+            pi_values[t][j] = pi[-1]
             d_sub_values[t][j] = demand
             m_sub[t][j].remove(m_sub[t][j].getConstrs()[-1])
+            for k in node_index[t][j]:
+                pi_values2[t][k] = pi[-1]
+                pi_rhs_values2[t][k] = pi_rhs_values[t][j]
             
-            # get slope and intercept
-            slope[j] = pi[0]
-            if t == 0:
-                intercept[j] = obj[j] - pi[0] * q_value
-            else:
-                intercept[j] = obj[j] - pi[0] * (I_sub_values[t-1][last_index]- B_sub_values[t-1][last_index] + q_detail_values[iter-1][t][last_index])
+            
+            # # get slope and intercept
+            # slope[j] = pi[0]
+            # if t == 0:
+            #     intercept[j] = obj[j] - pi[0] * q_value
+            # else:
+            #     intercept[j] = obj[j] - pi[0] * (I_sub_values[t-1][last_index]- B_sub_values[t-1][last_index] + q_detail_values[iter-1][t][last_index])
             
             
         # get and add the cut  
@@ -219,14 +164,15 @@ while iter <= iter_num:
         # actually every node in stage t share the same cut
         # this is not the formal handling of NLDS, nor the formal handling of SDDP
         # but the result seems close to optimal       
-        avg_pi = sum(pi_sub_values[t]) / t_nodeNum[t]
+        
+        avg_pi = sum(pi_values[t]) / t_nodeNum[t]
         sum_pi_rhs = 0
         for j in range(t_nodeNum[t]): 
             sum_pi_rhs += pi_rhs_values[t][j]
         avg_pi_rhs = sum_pi_rhs / t_nodeNum[t]
         if t == 0:
             m.addConstr(theta >= avg_pi*q + avg_pi_rhs) # just the benders optimality cut, same as the below constraint
-            m.write('test.lp')
+            # m.write('test.lp')
            
         else:
             for j in range(t_nodeNum[t-1]):                  
@@ -237,24 +183,26 @@ while iter <= iter_num:
         
         # cut method 2
         # formal handling of NLDS
+        
         if t == 0:
-            avg_pi = sum(pi_sub_values[t]) / t_nodeNum[t]
+            avg_pi = sum(pi_values[t]) / t_nodeNum[t]
             sum_pi_rhs = 0
             for j in range(t_nodeNum[t]): 
                 sum_pi_rhs += pi_rhs_values[t][j]
             avg_pi_rhs = sum_pi_rhs / t_nodeNum[t]
             m.addConstr(theta >= avg_pi*q + avg_pi_rhs) # just the benders optimality cut, same as the below constraint
-            m.write('test.lp')
+            # m.write('test.lp')
         else:
             for j in range(t_nodeNum[t-1]):  
                 sum_pi = 0
-                for k in node_index[t-1][j]:
-                    sum_pi += pi_sub_values[t]
-                avg_pi = sum(pi_sub_values[t]) / t_nodeNum[t]
                 sum_pi_rhs = 0
-                for j in range(t_nodeNum[t]): 
-                    sum_pi_rhs += pi_rhs_values[t][j]
-                avg_pi_rhs = sum_pi_rhs / t_nodeNum[t]
+                for k in node_index[t-1][j]:
+                    sum_pi += pi_values2[t][k]
+                    sum_pi_rhs += pi_rhs_values2[t][k]
+                avg_pi = sum_pi / len(node_index[t-1][j])
+                avg_pi_rhs = sum_pi_rhs / len(node_index[t-1][j])
+                m_sub[t-1][j].addConstr(theta_sub[t-1][j] >= avg_pi*(I_sub[t-1][j] - B_sub[t-1][j] + q_sub[t-1][j]) + avg_pi_rhs)
+               
                     
         
         # cut method 3

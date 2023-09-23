@@ -173,8 +173,11 @@ while iter <= iter_num:
                 m_sub[t][j].remove(m_sub[t][j].getConstrs()[-4])
             
         # get and add the cut  
+        # not formal NLSD cut
         avg_pi1 = sum(pi_sub1_values[t]) / t_nodeNum[t]
         avg_pi2 = sum(pi_sub2_values[t]) / t_nodeNum[t]
+        if t == 1:
+            pass
         sum_pi_rhs = 0
         for j in range(t_nodeNum[t]): 
             sum_pi_rhs += pi_rhs_values[t][j]

@@ -247,11 +247,12 @@ while iter < iter_num:
                 if t < T - 1:  
                     for kk in range(num_con - 2):
                         pi_rhs_value[t][n][k] += pi[kk]*rhs[kk]
-                    pi_rhs_value[t][n][k] += -pi[-2] * demand - pi[-1]*overhead_cost[t] + pi[-1]*price*demand
+                    pi_rhs_value[t][n][k] += -pi[-2] * demand - pi[-1]*overhead_cost[t] + pi[-1]*price*demand - price*demand + overhead_cost[t]
                     if t == 0:
                         pi_rhs_value[t][n][k] += pi[-1] * ini_cash
+                        pi_rhs_value[t][n][k] += pi[-2] * ini_I
                 else:
-                    pi_rhs_value[t][n][k] = -pi[-2] * demand - pi[-1]*overhead_cost[t] + pi[-1]*price*demand
+                    pi_rhs_value[t][n][k] = -pi[-2] * demand - pi[-1]*overhead_cost[t] + pi[-1]*price*demand - price*demand 
                 pi_values[t][n][k] = [pi[-2], pi[-1]]
             
             arr = np.array(pi_values[t][n])    
@@ -261,6 +262,7 @@ while iter < iter_num:
             slopes1[t][n].append(avg_pi[0])
             slopes2[t][n].append(avg_pi[1])
             intercept[t][n].append(avg_pi_rhs) 
+            
                         
     iter += 1
     pass

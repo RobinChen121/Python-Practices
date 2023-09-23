@@ -13,13 +13,14 @@ Created on Mon May 15 14:52:57 2023
 
 import sys 
 sys.path.append("../..") 
-from tree import generate_sample, get_tree_strcture, generate_scenario_samples
+from tree import *
 from gurobipy import *
 import time
 from functools import reduce
 import itertools
 import random
 import time
+import numpy as np
 
 
 start = time.process_time()
@@ -67,18 +68,7 @@ t_nodeNum = [0 for i in range(T)]
 for t in range(T):
     t_nodeNum[t] = getSizeOfNestedList(node_values[t])
     
-# decision variables from stage 2 to stage T+1
-m_sub = [[Model() for j in range(t_nodeNum[t])] for t in range(T)] 
-q_sub = [[m_sub[t][j].addVar(vtype = GRB.CONTINUOUS, name = 'q_' + str(t+2) + '^' + str(j+1)) for j in range(t_nodeNum[t])] for t in range(T-1)]
-I_sub = [[m_sub[t][j].addVar(vtype = GRB.CONTINUOUS, name = 'I_' + str(t+1) + '^' + str(j+1)) for j in range(t_nodeNum[t])] for t in range(T)]
-B_sub = [[m_sub[t][j].addVar(vtype = GRB.CONTINUOUS, name = 'B_' + str(t+1) + '^' + str(j+1)) for j in range(t_nodeNum[t])] for t in range(T)]
-C_sub = [[m_sub[t][j].addVar(lb = -GRB.INFINITY, name = 'C_' + str(t+1) + '^' + str(j+1)) for j in range(t_nodeNum[t])] for t in range(T)]
-# the number of W0, W1 is similar to q
-W0_sub = [[m_sub[t][j].addVar(vtype = GRB.CONTINUOUS, name = 'W1_' + str(t+1) + '^' + str(j+1)) for j in range(t_nodeNum[t])] for t in range(T-1)]
-W1_sub = [[m_sub[t][j].addVar(vtype = GRB.CONTINUOUS, name = 'W2_' + str(t+1) + '^' + str(j+1)) for j in range(t_nodeNum[t])] for t in range(T-1)]
-theta_sub = [[m_sub[t][j].addVar(lb = -GRB.INFINITY, vtype = GRB.CONTINUOUS, name = 'theta_' + str(t+3) + '^' + str(j+1)) for j in range(t_nodeNum[t])] for t in range(T-1)]
-
-iter = 1
+iter = 0
 iter_num = 6
 pi_sub_detail_values = [[[[] for s in range(t_nodeNum[t])] for t in range(T)] for iter in range(iter_num)] 
 rhs_sub_detail_values = [[[[] for s in range(t_nodeNum[t])] for t in range(T)] for iter in range(iter_num)] 
@@ -96,8 +86,10 @@ for i in range(iter_num):
             W0_detail_values[i][t] = [0 for s in range(t_nodeNum[t-1])]
             W1_detail_values[i][t] = [0 for s in range(t_nodeNum[t-1])]
 
-result_iter = []
-while iter <= iter_num: 
+slopes1 = [[[0 for n in range(t_nodeNum[t])] for t in range(T)] for iter in range(iter_num)] 
+slopes2 = [[[0 for n in range(t_nodeNum[t])] for t in range(T)] for iter in range(iter_num)] 
+intercept = [[[0 for n in range(t_nodeNum[t])] for t in range(T)] for iter in range(iter_num)] 
+while iter < iter_num: 
     
     # forward computation    
     # solve the first stage model    
@@ -113,15 +105,30 @@ while iter <= iter_num:
     q_value = q.x
     W0_value = W0.x
     W1_value = W1.x
-    q_detail_values[iter - 1][0] = q_value
+    q_detail_values[iter][0] = q_value
     theta_value = theta.x
     z = m.objVal
+    
+    # decision variables from stage 2 to stage T+1
+    m_sub = [[Model() for j in range(t_nodeNum[t])] for t in range(T)] 
+    q_sub = [[m_sub[t][j].addVar(vtype = GRB.CONTINUOUS, name = 'q_' + str(t+2) + '^' + str(j+1)) for j in range(t_nodeNum[t])] for t in range(T-1)]
+    I_sub = [[m_sub[t][j].addVar(vtype = GRB.CONTINUOUS, name = 'I_' + str(t+1) + '^' + str(j+1)) for j in range(t_nodeNum[t])] for t in range(T)]
+    B_sub = [[m_sub[t][j].addVar(vtype = GRB.CONTINUOUS, name = 'B_' + str(t+1) + '^' + str(j+1)) for j in range(t_nodeNum[t])] for t in range(T)]
+    C_sub = [[m_sub[t][j].addVar(lb = -GRB.INFINITY, name = 'C_' + str(t+1) + '^' + str(j+1)) for j in range(t_nodeNum[t])] for t in range(T)]
+    # the number of W0, W1 is similar to q
+    W0_sub = [[m_sub[t][j].addVar(vtype = GRB.CONTINUOUS, name = 'W1_' + str(t+1) + '^' + str(j+1)) for j in range(t_nodeNum[t])] for t in range(T-1)]
+    W1_sub = [[m_sub[t][j].addVar(vtype = GRB.CONTINUOUS, name = 'W2_' + str(t+1) + '^' + str(j+1)) for j in range(t_nodeNum[t])] for t in range(T-1)]
+    theta_sub = [[m_sub[t][j].addVar(lb = -GRB.INFINITY, vtype = GRB.CONTINUOUS, name = 'theta_' + str(t+3) + '^' + str(j+1)) for j in range(t_nodeNum[t])] for t in range(T-1)]
+
     
     I_sub_values = [[0 for s in range(t_nodeNum[t])] for t in range(T)] 
     B_sub_values = [[0 for s in range(t_nodeNum[t])] for t in range(T)] 
     C_sub_values = [[0 for s in range(t_nodeNum[t])] for t in range(T)] 
-    pi_rhs_values = [[0 for s in range(t_nodeNum[t])] for t in range(T)] 
     d_sub_values = [[0 for s in range(t_nodeNum[t])] for t in range(T)]
+    
+    pi_values1 = [[0 for s in range(sample_num)] for t in range(T)]
+    pi_values2 = [[0 for s in range(sample_num)] for t in range(T)]
+    pi_rhs_values = [[0 for s in range(sample_num)] for t in range(T)] 
     
     # forward and backward  
     for t in range(T):       
@@ -130,56 +137,82 @@ while iter <= iter_num:
             demand = samples[index][t]
             
             if t == T - 1:                   
-                m_forward[t][n].setObjective(-price*(demand - B_forward[t][n]) - unit_sal*I_forward[t][n], GRB.MINIMIZE)
+                m_sub[t][n].setObjective(-price*(demand - B_forward[t][n]) - unit_sal*I_forward[t][n], GRB.MINIMIZE)
             else:
-                m_forward[t][n].setObjective(-price*(demand - B_forward[t][n]) + overhead_cost[t+1] + vari_cost*q_forward[t][n] + r1*W1_forward[t][n] - r0*W0_forward[t][n] + theta_forward[t][n], GRB.MINIMIZE) # 
+                m_sub[t][n].setObjective(-price*(demand - B_forward[t][n]) + overhead_cost[t+1] + vari_cost*q_forward[t][n] + r1*W1_forward[t][n] - r0*W0_forward[t][n] + theta_forward[t][n], GRB.MINIMIZE) # 
             
             # constraints
             for k in node_index[t - 1]:
                 if node_index[t][j][0] in k:
                     last_index = node_index[t - 1].index(k)
             if t < T - 1:
-                m_forward[t][n].addConstr(C_forward[t][n] - vari_cost*q_forward[t][n] - W0_forward[t][n] + W1_forward[t][n] == overhead_cost[t])
+                m_sub[t][n].addConstr(theta_forward[t][n] >= theta_iniValue*(T))
+                m_sub[t][n].addConstr(C_forward[t][n] - vari_cost*q_forward[t][n] - W0_forward[t][n] + W1_forward[t][n] == overhead_cost[t])
                      
             if t == 0:
                 m_sub[t][j].addConstr(I_sub[t][j] - B_sub[t][j] == ini_I + q_value - demand)
             else:
-                m_sub[t][j].addConstr(I_sub[t][j] - B_sub[t][j] == I_sub_values[t-1][last_index]  + q_detail_values[iter-1][t][last_index] - demand)
-            
-            if t == 0:   
-                if t != T - 1: # wheter should add theta
-                    m_sub[t][j].setObjective(vari_cost*q_sub[t][j] - price*(demand - B_sub[t][j]) - r0*W0_sub[t][j] + r1*W1_sub[t][j] + theta_sub[t][j], GRB.MINIMIZE)
-                    m_sub[t][j].addConstr(theta_sub[t][j] >= theta_iniValue*(T-1-t))
-                else:
-                    m_sub[t][j].setObjective(- price*(demand - B_sub[t][j]) - r0*W0_sub[t][j] + r1*W1_sub[t][j], GRB.MINIMIZE)  
-                m_sub[t][j].addConstr(I_sub[t][j] - B_sub[t][j] == ini_I + q_value - demand)
-                m_sub[t][j].addConstr(C_sub[t][j] == ini_cash + price*(demand - B_sub[t][j]) - vari_cost*q_value)  
+                m_sub[t][j].addConstr(I_sub[t][j] - B_sub[t][j] == I_sub_values[t-1][last_index] + q_detail_values[iter][t][last_index] - demand)
+            if t == 0:
+                m_sub[t][n].addConstr(C_sub[t][n] + price*B_sub[t][n] == ini_cash - overhead_cost[t] - vari_cost*q_values[iter][t][last_index]\
+                                          -r1*W1_values[iter] + r0*W0_values[iter] + price*demand)
             else:
-                if t == T - 1:                   
-                    m_sub[t][j].setObjective(- price*(demand - B_sub[t][j]), GRB.MINIMIZE)
-                else:
-                    m_sub[t][j].setObjective(vari_cost*q_sub[t][j] - price*(demand - B_sub[t][j]) + theta_sub[t][j], GRB.MINIMIZE)
-                    m_sub[t][j].addConstr(theta_sub[t][j] >= theta_iniValue*(T-1-t))
-                last_index = 0
-                for k in node_index[t - 1]:
-                    if node_index[t][j][0] in k:
-                        last_index = node_index[t - 1].index(k)
-                if t < T - 1:
-                    m_sub[t][j].addConstr(vari_cost*q_sub[t][j] <= C_sub[t][j])
-                pass
-                m_sub[t][j].addConstr(I_sub[t][j] - B_sub[t][j] == I_sub_values[t-1][last_index] + q_detail_values[iter-1][t][last_index] - demand)
-                m_sub[t][j].addConstr(C_sub[t][j] == C_sub_values[t-1][last_index] + price*(demand - B_sub[t][j]) - vari_cost*q_detail_values[iter-1][t][last_index])
-                
+                m_sub[t][n].addConstr(C_sub[t][n] + price*B_sub[t][n] == C_sub_values[t-1][last_index]- overhead_cost[t] - vari_cost*q_detail_values[iter-1][t][last_index]\
+                                          -r1*W1_sub_values[t-1][last_index]\
+                                          + r0*W0_sub_values[t-1][last_index] + price*demand) 
+           
+                   
             
             # optimize
             m_sub[t][j].optimize()
-            if t < T - 1 and theta_sub[t][j].x != theta_iniValue*(T-1-t):
-                print()
             # m_sub[t][j].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(j+1) + '.lp')
             # m_sub[t][j].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(j+1) + '.dlp')
             # m_sub[t][j].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(j+1) + '.sol')
-    
-    
+            
+            if t < T - 1:              
+                q_detail_values[iter - 1][t+1][j] = q_sub[t][j].x
+                
+            I_sub_values[t][j] = I_sub[t][j].x 
+            B_sub_values[t][j] = B_sub[t][j].x
+            C_sub_values[t][j] = C_sub[t][j].x
+            pi = m_sub[t][j].getAttr(GRB.Attr.Pi)
+            rhs = m_sub[t][j].getAttr(GRB.Attr.RHS)
+            
+            con_num = len(pi)
+            pi_rhs = 0
+            for k in range(con_num - 2): 
+                pi_rhs += pi[k]*rhs[k]             
+            pi_rhs += -pi[-2] * demand - pi[-1]*overhead_cost[t] + pi[-1]*price*demand - price*demand  # put here is better because of demand
+            if t < T - 1:
+                pi_rhs += overhead_cost[t]
+            if t == 0:
+                pi_rhs += pi[-1] * ini_cash
+                pi_rhs += pi[-2] * ini_I
+                
+            for k in node_index[t][j]:
+                pi_values1[t][k] = pi[-2]
+                pi_values2[t][k] = pi[-1]
+                pi_rhs_values[t][k] = pi_rhs
+            
+        if t == 0:
+            avg_pi1 = sum(pi_values1) / sample_num
+            avg_pi2 = sum(pi_values2) / sample_num
+            avg_pi_rhs = sum(pi_rhs_values) / sample_num
+            m.addConstr(theta >= avg_pi1*q + avg_pi2*(-vari_cost*q - r1* W1 + r0* W0) + avg_pi_rhs)
+        else:
+            for j in range(t_nodeNum[t-1]): 
+                sum_pi1 = 0
+                sum_pi2 = 0
+                sum_pi_rhs = 0
+                for k in node_index[t-1][j]:
+                    sum_pi1 += pi_values1[t][k]
+                    sum_pi2 += pi_values2[t][k]
+                    sum_pi_rhs += pi_rhs_values[t][k]
+                avg_pi1 = sum_pi1 / len(node_index[t-1][j])
+                avg_pi2 = sum_pi1 / len(node_index[t-1][j])
+                avg_pi_rhs = sum_pi_rhs / len(node_index[t-1][j])
+                m_sub[t-1][j].addConstr(theta_sub[t-1][j] >= avg_pi1*(I_sub[t-1][j] + q_sub[t-1][j])+ avg_pi2*(-vari_cost*q_sub[t-1][j] - r1* W1 + r0* W0) + avg_pi_rhs)
+                  
     iter += 1
 
 
