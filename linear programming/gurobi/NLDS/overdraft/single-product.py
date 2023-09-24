@@ -96,14 +96,14 @@ while iter < iter_num:
     m.addConstr(-vari_cost*q - W0 + W1 == overhead_cost[0] - ini_cash)
     
     m.optimize()
-    # m.write('iter' + str(iter) + '_main.lp')
-    # m.write('iter' + str(iter) + '_main.sol')
+    m.write('iter' + str(iter) + '_main.lp')
+    m.write('iter' + str(iter) + '_main.sol')
     
     print(end = '')
     q_value = q.x
     q_detail_values[iter][0] = q_value
-    W0_value = W0.x
-    W1_value = W1.x
+    W0_detail_value[iter][0] = W0.x
+    W1_detail_value[iter][0] = W1.x
     theta_value = theta.x
     z = m.objVal
     
@@ -114,8 +114,8 @@ while iter < iter_num:
     B_sub = [[m_sub[t][j].addVar(vtype = GRB.CONTINUOUS, name = 'B_' + str(t+1) + '^' + str(j+1)) for j in range(t_nodeNum[t])] for t in range(T)]
     C_sub = [[m_sub[t][j].addVar(lb = -GRB.INFINITY, name = 'C_' + str(t+1) + '^' + str(j+1)) for j in range(t_nodeNum[t])] for t in range(T)]
     # the number of W0, W1 is similar to q
-    W0_sub = [[m_sub[t][j].addVar(vtype = GRB.CONTINUOUS, name = 'W1_' + str(t+1) + '^' + str(j+1)) for j in range(t_nodeNum[t])] for t in range(T-1)]
-    W1_sub = [[m_sub[t][j].addVar(vtype = GRB.CONTINUOUS, name = 'W2_' + str(t+1) + '^' + str(j+1)) for j in range(t_nodeNum[t])] for t in range(T-1)]
+    W0_sub = [[m_sub[t][j].addVar(vtype = GRB.CONTINUOUS, name = 'W0_' + str(t+1) + '^' + str(j+1)) for j in range(t_nodeNum[t])] for t in range(T-1)]
+    W1_sub = [[m_sub[t][j].addVar(vtype = GRB.CONTINUOUS, name = 'W1_' + str(t+1) + '^' + str(j+1)) for j in range(t_nodeNum[t])] for t in range(T-1)]
     theta_sub = [[m_sub[t][j].addVar(lb = -GRB.INFINITY, vtype = GRB.CONTINUOUS, name = 'theta_' + str(t+3) + '^' + str(j+1)) for j in range(t_nodeNum[t])] for t in range(T-1)]
 
     
@@ -163,9 +163,9 @@ while iter < iter_num:
             
             # optimize
             m_sub[t][n].optimize()
-            # m_sub[t][j].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(j+1) + '.lp')
+            m_sub[t][n].write('iter' + str(iter) + '_sub_' + str(t) + '^' + str(n) + '.lp')
+            m_sub[t][n].write('iter' + str(iter) + '_sub_' + str(t) + '^' + str(n) + '.sol')
             # m_sub[t][j].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(j+1) + '.dlp')
-            # m_sub[t][j].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(j+1) + '.sol')
             
             if t < T - 1:              
                 q_detail_values[iter][t+1][n] = q_sub[t][n].x
