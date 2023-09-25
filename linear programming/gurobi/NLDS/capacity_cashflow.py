@@ -85,7 +85,7 @@ while iter <= iter_num:
     m.addConstr(vari_cost*q <= ini_cash)
     m.optimize()
     m.write('iter' + str(iter) + '_main.lp')
-    # m.write('iter' + str(iter) + '_main.sol')
+    m.write('iter' + str(iter) + '_main.sol')
     
     print(end = '')
     q_value = q.x
@@ -139,7 +139,7 @@ while iter <= iter_num:
             m_sub[t][j].optimize()
             if t < T - 1 and theta_sub[t][j].x != theta_iniValue*(T-1-t):
                 print()
-            m_sub[t][j].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(j+1) + '.lp')
+            # m_sub[t][j].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(j+1) + '.lp')
             # m_sub[t][j].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(j+1) + '.dlp')
             # m_sub[t][j].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(j+1) + '.sol')
 

@@ -87,14 +87,14 @@ for i in range(iter_num):
 slopes1 = [[[0 for n in range(t_nodeNum[t])] for t in range(T)] for iter in range(iter_num)] 
 slopes2 = [[[0 for n in range(t_nodeNum[t])] for t in range(T)] for iter in range(iter_num)] 
 intercept = [[[0 for n in range(t_nodeNum[t])] for t in range(T)] for iter in range(iter_num)] 
+m.addConstr(theta >= theta_iniValue*(T))
+m.addConstr(-vari_cost*q - W0 + W1 == overhead_cost[0] - ini_cash)
 while iter < iter_num: 
     
     # sub computation    
     # solve the first stage model    
     m.setObjective(overhead_cost[0] + vari_cost*q + r1* W1 - r0* W0 + theta, GRB.MINIMIZE)
-    m.addConstr(theta >= theta_iniValue*(T))
-    m.addConstr(-vari_cost*q - W0 + W1 == overhead_cost[0] - ini_cash)
-    
+ 
     m.optimize()
     m.write('iter' + str(iter) + '_main.lp')
     m.write('iter' + str(iter) + '_main.sol')
@@ -102,8 +102,8 @@ while iter < iter_num:
     print(end = '')
     q_value = q.x
     q_detail_values[iter][0] = q_value
-    W0_detail_value[iter][0] = W0.x
-    W1_detail_value[iter][0] = W1.x
+    W0_detail_values[iter][0] = W0.x
+    W1_detail_values[iter][0] = W1.x
     theta_value = theta.x
     z = m.objVal
     
@@ -163,8 +163,8 @@ while iter < iter_num:
             
             # optimize
             m_sub[t][n].optimize()
-            m_sub[t][n].write('iter' + str(iter) + '_sub_' + str(t) + '^' + str(n) + '.lp')
-            m_sub[t][n].write('iter' + str(iter) + '_sub_' + str(t) + '^' + str(n) + '.sol')
+            # m_sub[t][n].write('iter' + str(iter) + '_sub_' + str(t) + '^' + str(n) + '.lp')
+            # m_sub[t][n].write('iter' + str(iter) + '_sub_' + str(t) + '^' + str(n) + '.sol')
             # m_sub[t][j].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(j+1) + '.dlp')
             
             if t < T - 1:              
@@ -189,7 +189,8 @@ while iter < iter_num:
             if t == 0:
                 pi_rhs += pi[-1] * ini_cash
                 pi_rhs += pi[-2] * ini_I
-                
+            if iter == 4:
+                pass
             for k in node_index[t][n]:
                 pi_values1[t][k] = pi[-2]
                 pi_values2[t][k] = pi[-1]
@@ -216,4 +217,9 @@ while iter < iter_num:
                   
     iter += 1
 
-
+end = time.process_time()
+print('********************************************')
+print('final expected total profits is %.2f', -z)
+print('ordering Q in the first peiod is %.2f' % q_detail_values[iter-1][0])
+cpu_time = end - start
+print('cpu time is %.3f s' % cpu_time)
