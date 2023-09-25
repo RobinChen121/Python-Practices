@@ -28,8 +28,8 @@ vari_cost = 1
 price = 10
 unit_back_cost = 10
 unit_hold_cost = 2
-mean_demands = [10, 20]
-sample_nums = [10, 10]
+mean_demands = [10, 10]
+sample_nums = [2, 2]
 T = len(mean_demands)
 trunQuantile = 0.9999 # affective to the final ordering quantity
 scenario_numTotal = reduce(lambda x, y: x * y, sample_nums, 1)
@@ -39,14 +39,14 @@ samples_detail = [[0 for i in range(sample_nums[t])] for t in range(T)]
 for t in range(T):
     samples_detail[t] = generate_sample(sample_nums[t], trunQuantile, mean_demands[t])
 
-# samples_detail = [[5, 15], [5, 15], [5, 15]]
+samples_detail = [[5, 15], [5, 15]]
 scenarios = list(itertools.product(*samples_detail)) 
-sample_num = 30
+sample_num = 4
 samples= random.sample(scenarios, sample_num) # sampling without replacement
 samples.sort() # sort to make same numbers together
 node_values, node_index = get_tree_strcture(samples)
 
-theta_iniValue = -300 # initial theta values in each period
+theta_iniValue = -400 # initial theta values in each period
 m = Model() # linear model in the first stage
 # decision variable in the first stage model
 q = m.addVar(vtype = GRB.CONTINUOUS, name = 'q_1')
@@ -63,8 +63,8 @@ I_sub = [[m_sub[t][j].addVar(vtype = GRB.CONTINUOUS, name = 'I_' + str(t+1) + '^
 B_sub = [[m_sub[t][j].addVar(vtype = GRB.CONTINUOUS, name = 'B_' + str(t+1) + '^' + str(j+1)) for j in range(t_nodeNum[t])] for t in range(T)]
 theta_sub = [[m_sub[t][j].addVar(lb = -GRB.INFINITY, vtype = GRB.CONTINUOUS, name = 'theta_' + str(t+3) + '^' + str(j+1)) for j in range(t_nodeNum[t])] for t in range(T-1)]
 
-iter = 1
-iter_num = 15
+iter = 0
+iter_num = 7
 pi_sub_detail_values = [[[[] for s in range(t_nodeNum[t])] for t in range(T)] for iter in range(iter_num)] 
 rhs_sub_detail_values = [[[[] for s in range(t_nodeNum[t])] for t in range(T)] for iter in range(iter_num)] 
 q_detail_values = [[[] for t in range(T)] for iter in range(iter_num)] 
@@ -75,7 +75,7 @@ for i in range(iter_num):
         else:
             q_detail_values[i][t] = [0 for s in range(t_nodeNum[t-1])]
 
-while iter <= iter_num:       
+while iter < iter_num:       
     
     # forward computation    
     # solve the first stage model    
@@ -87,7 +87,7 @@ while iter <= iter_num:
     
     print(end = '')
     q_value = q.x
-    q_detail_values[iter - 1][0] = q_value
+    q_detail_values[iter][0] = q_value
     theta_value = theta.x
     z = m.objVal
     
@@ -121,24 +121,25 @@ while iter <= iter_num:
                 for k in node_index[t - 1]:
                     if node_index[t][j][0] in k:
                         last_index = node_index[t - 1].index(k)
-                m_sub[t][j].addConstr(I_sub[t][j] - B_sub[t][j] == I_sub_values[t-1][last_index] - B_sub_values[t-1][last_index] + q_detail_values[iter-1][t][last_index] - demand)
+                m_sub[t][j].addConstr(I_sub[t][j] - B_sub[t][j] == I_sub_values[t-1][last_index] - B_sub_values[t-1][last_index] + q_detail_values[iter
+                                                                                                                                                   ][t][last_index] - demand)
                 print(end = '')
                     
             # optimize
             m_sub[t][j].optimize()
-            # m_sub[t][j].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(j+1) + '.lp')
+            m_sub[t][j].write('iter' + str(iter) + '_sub_' + str(t) + '^' + str(j) + '.lp')
             # m_sub[t][j].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(j+1) + '.dlp')
-            # m_sub[t][j].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(j+1) + '.sol')
+            m_sub[t][j].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(j+1) + '.sol')
             obj[j] = m_sub[t][j].objVal
             if t < T - 1:              
-                q_detail_values[iter - 1][t+1][j] = q_sub[t][j].x
+                q_detail_values[iter][t+1][j] = q_sub[t][j].x
                 
             I_sub_values[t][j] = I_sub[t][j].x 
             B_sub_values[t][j] = B_sub[t][j].x
             pi = m_sub[t][j].getAttr(GRB.Attr.Pi)
-            pi_sub_detail_values[iter-1][t][j] = pi
+            pi_sub_detail_values[iter][t][j] = pi
             rhs = m_sub[t][j].getAttr(GRB.Attr.RHS)
-            rhs_sub_detail_values[iter-1][t][j] = rhs
+            rhs_sub_detail_values[iter][t][j] = rhs
             
             if iter == 2:
                 pass

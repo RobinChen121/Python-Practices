@@ -5,7 +5,9 @@ Created on Fri Apr  7 10:55:53 2023
 
 @author: zhenchen
 
-@disp:  test sddp for cash constrained multi period problem
+@disp:  test NLSD for cash constrained multi period problem,
+
+may be there are some errors
     
     
 """
@@ -63,10 +65,8 @@ B_sub = [[m_sub[t][j].addVar(vtype = GRB.CONTINUOUS, name = 'B_' + str(t+1) + '^
 C_sub = [[m_sub[t][j].addVar(vtype = GRB.CONTINUOUS, name = 'C_' + str(t+1) + '^' + str(j+1)) for j in range(t_nodeNum[t])] for t in range(T)]
 theta_sub = [[m_sub[t][j].addVar(lb = -GRB.INFINITY, vtype = GRB.CONTINUOUS, name = 'theta_' + str(t+3) + '^' + str(j+1)) for j in range(t_nodeNum[t])] for t in range(T-1)]
 
-iter = 1
+iter = 0
 iter_num = 4
-pi_sub_detail_values = [[[[] for s in range(t_nodeNum[t])] for t in range(T)] for iter in range(iter_num)] 
-rhs_sub_detail_values = [[[[] for s in range(t_nodeNum[t])] for t in range(T)] for iter in range(iter_num)] 
 q_detail_values = [[[] for t in range(T)] for iter in range(iter_num)] 
 for i in range(iter_num):
     for t in range(T):
@@ -75,21 +75,26 @@ for i in range(iter_num):
         else:
             q_detail_values[i][t] = [0 for s in range(t_nodeNum[t-1])]
 
-result_iter = []
-while iter <= iter_num:       
+
+m.addConstr(theta >= theta_iniValue*(T))
+# m.addConstr(vari_cost*q <= ini_cash)
+m.setObjective(vari_cost*q + theta, GRB.MINIMIZE)
+
+slope1 = [[0 for t in range(T-1)] for iter in range(iter_num)]
+slope2 = [[0 for t in range(T-1)] for iter in range(iter_num)]
+intercept = [[0 for t in range(T-1)] for iter in range(iter_num)]
+while iter < iter_num:       
     
     # forward computation    
     # solve the first stage model    
-    m.setObjective(vari_cost*q + theta, GRB.MINIMIZE)
-    m.addConstr(theta >= theta_iniValue*(T))
-    m.addConstr(vari_cost*q <= ini_cash)
+        
     m.optimize()
     m.write('iter' + str(iter) + '_main.lp')
     m.write('iter' + str(iter) + '_main.sol')
     
     print(end = '')
     q_value = q.x
-    q_detail_values[iter - 1][0] = q_value
+    q_detail_values[iter][0] = q_value
     theta_value = theta.x
     z = m.objVal
     
@@ -100,61 +105,66 @@ while iter <= iter_num:
     d_sub_values = [[0 for s in range(t_nodeNum[t])] for t in range(T)]
     pi_sub1_values = [[0 for s in range(t_nodeNum[t])] for t in range(T)]
     pi_sub2_values = [[0 for s in range(t_nodeNum[t])] for t in range(T)]
-    pi_sub3_values = [[0 for s in range(t_nodeNum[t])] for t in range(T)]
-    pi_rhs_values = [[0 for s in range(t_nodeNum[t])] for t in range(T)] 
+    
+    pi_values1 = [[0 for s in range(sample_num)] for t in range(T)]
+    pi_values2 = [[0 for s in range(sample_num)] for t in range(T)]
+    pi_rhs = [[0 for s in range(sample_num)] for t in range(T)] 
     
     # forward and backward  
     for t in range(T):       
         for j in range(t_nodeNum[t]): 
             index = node_index[t][j][0]
             demand = samples[index][t]
+            
+            # add cust
+            if t < T - 1:
+                for k in range(iter):
+                    if t == 0:
+                        m_sub[t][j].addConstr(theta_sub[t][j] >= slope1[k][t]*(I_sub[t][j] + q_sub[t][j])+ slope2[k][t]*(-vari_cost*q_sub[t][j]) + intercept[k][t])
+                    else:
+                        m_sub[t][j].addConstr(theta_sub[t][j] >= slope1[k][t]*(I_sub[t][j] + q_sub[t][j])+ slope2[k][t]*(C_sub[t][j] -vari_cost*q_sub[t][j]) + intercept[k][t])
+            
+            if t < T - 1:
+                m_sub[t][j].setObjective(vari_cost*q_sub[t][j] - price*(demand - B_sub[t][j]) +theta_sub[t][j], GRB.MINIMIZE)
+                m_sub[t][j].addConstr(theta_sub[t][j] >= theta_iniValue*(T-1-t))
+            else:
+                m_sub[t][j].setObjective(- price*(demand - B_sub[t][j]), GRB.MINIMIZE)
+                
             if t == 0:   
-                if t != T - 1: # wheter should add theta
-                    m_sub[t][j].setObjective(vari_cost*q_sub[t][j] - price*(demand - B_sub[t][j]) +theta_sub[t][j], GRB.MINIMIZE)
-                    m_sub[t][j].addConstr(theta_sub[t][j] >= theta_iniValue*(T-1-t))
-                else:
-                    m_sub[t][j].setObjective(- price*(demand - B_sub[t][j]), GRB.MINIMIZE)
-                if t < T - 1:
-                    m_sub[t][j].addConstr(vari_cost*q_sub[t][j] <= C_sub[t][j])      
                 m_sub[t][j].addConstr(I_sub[t][j] - B_sub[t][j] == ini_I + q_value - demand)
                 m_sub[t][j].addConstr(C_sub[t][j] == ini_cash + price*(demand - B_sub[t][j]) - vari_cost*q_value)  
             else:
-                if t == T - 1:                   
-                    m_sub[t][j].setObjective(- price*(demand - B_sub[t][j]), GRB.MINIMIZE)
-                else:
-                    m_sub[t][j].setObjective(vari_cost*q_sub[t][j] - price*(demand - B_sub[t][j]) + theta_sub[t][j], GRB.MINIMIZE)
-                    m_sub[t][j].addConstr(theta_sub[t][j] >= theta_iniValue*(T-1-t))
                 last_index = 0
                 for k in node_index[t - 1]:
                     if node_index[t][j][0] in k:
                         last_index = node_index[t - 1].index(k)
-                if t < T - 1:
-                    m_sub[t][j].addConstr(vari_cost*q_sub[t][j] <= C_sub[t][j])
-                pass
-                m_sub[t][j].addConstr(I_sub[t][j] - B_sub[t][j] == I_sub_values[t-1][last_index] + q_detail_values[iter-1][t][last_index] - demand)
-                m_sub[t][j].addConstr(C_sub[t][j] == C_sub_values[t-1][last_index] + price*(demand - B_sub[t][j]) - vari_cost*q_detail_values[iter-1][t][last_index])
+                
+                m_sub[t][j].addConstr(I_sub[t][j] - B_sub[t][j] == I_sub_values[t-1][last_index] + q_detail_values[iter][t][last_index] - demand)
+                m_sub[t][j].addConstr(C_sub[t][j] == C_sub_values[t-1][last_index] + price*(demand - B_sub[t][j]) - vari_cost*q_detail_values[iter][t][last_index])               
+                # if t < T - 1:
+                #     m_sub[t][j].addConstr(vari_cost*q_sub[t][j] <= C_sub[t][j])
+ 
                 
             
             # optimize
+            m_sub[t][j].update()
             m_sub[t][j].optimize()
-            if t < T - 1 and theta_sub[t][j].x != theta_iniValue*(T-1-t):
-                print()
-            # m_sub[t][j].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(j+1) + '.lp')
+            m_sub[t][j].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(j+1) + '.lp')
             # m_sub[t][j].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(j+1) + '.dlp')
             # m_sub[t][j].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(j+1) + '.sol')
 
             if t < T - 1:              
-                q_detail_values[iter - 1][t+1][j] = q_sub[t][j].x
+                try:
+                    q_detail_values[iter][t+1][j] = q_sub[t][j].x
+                except:
+                    pass
                 
             I_sub_values[t][j] = I_sub[t][j].x 
             B_sub_values[t][j] = B_sub[t][j].x
             C_sub_values[t][j] = C_sub[t][j].x
             pi = m_sub[t][j].getAttr(GRB.Attr.Pi)
             
-            pi_sub_detail_values[iter-1][t][j] = pi
-            
             rhs = m_sub[t][j].getAttr(GRB.Attr.RHS)
-            rhs_sub_detail_values[iter-1][t][j] = rhs
             
             con_num = len(pi)
             for k in range(con_num - 2): 
@@ -166,35 +176,37 @@ while iter <= iter_num:
             d_sub_values[t][j] = demand
             pi_sub1_values[t][j] = pi[-2] # inventory flow constraint
             pi_sub2_values[t][j] = pi[-1] # cash constraint
-            m_sub[t][j].remove(m_sub[t][j].getConstrs()[-1]) 
-            m_sub[t][j].remove(m_sub[t][j].getConstrs()[-2])         
-            if t < T - 1:
-                m_sub[t][j].remove(m_sub[t][j].getConstrs()[-3])
-                m_sub[t][j].remove(m_sub[t][j].getConstrs()[-4])
+
+            for k in node_index[t][j]:
+                pi_values1[t][k] = pi[-2]
+                pi_values2[t][k] = pi[-1]
+                pi_rhs[t][k] = pi_rhs_values[t][j]
             
         # get and add the cut  
-        # not formal NLSD cut
+        # formal NLSD cut
         avg_pi1 = sum(pi_sub1_values[t]) / t_nodeNum[t]
         avg_pi2 = sum(pi_sub2_values[t]) / t_nodeNum[t]
-        if t == 1:
-            pass
         sum_pi_rhs = 0
         for j in range(t_nodeNum[t]): 
             sum_pi_rhs += pi_rhs_values[t][j]
         avg_pi_rhs = sum_pi_rhs / t_nodeNum[t]
-        if iter > 1 and t == 0:
-            print()
         if t == 0:
             m.addConstr(theta >= avg_pi1*(ini_I + q) + avg_pi2*ini_cash - avg_pi2*vari_cost*q + avg_pi_rhs) 
+            
         else:
-            for j in range(t_nodeNum[t-1]):  
-                m_sub[t-1][j].addConstr(theta_sub[t-1][j] >= avg_pi1*(I_sub[t-1][j] + q_sub[t-1][j]) + avg_pi2*C_sub[t-1][j] - avg_pi2*vari_cost*q_sub[t-1][j] + avg_pi_rhs)
-                m_sub[t-1][j].update()
-
-    m.remove(m.getConstrs()[-2])  
-    m.remove(m.getConstrs()[-1])  
-    m.update()  
-    result_iter.append(-z)
+            for n in range(t_nodeNum[t-1]): 
+                sum_pi1 = 0
+                sum_pi2 = 0
+                sum_pi_rhs = 0
+                for k in node_index[t-1][n]:
+                    sum_pi1 += pi_values1[t][k]
+                    sum_pi2 += pi_values2[t][k]
+                    sum_pi_rhs += pi_rhs[t][k]
+                avg_pi1 = sum_pi1 / len(node_index[t-1][n])
+                avg_pi2 = sum_pi2 / len(node_index[t-1][n])
+                avg_pi_rhs = sum_pi_rhs / len(node_index[t-1][n])
+                
+ 
     iter += 1
 
 end = time.process_time()

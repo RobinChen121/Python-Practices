@@ -5,7 +5,8 @@ Created on Mon May 15 14:52:57 2023
 
 @author: zhenchen
 
-@disp:  single product cash flow with overdraft, no lead time
+@disp:  single product cash flow with overdraft, no lead time.
+NLDS large gap sometimes
     
     
 """
@@ -30,11 +31,11 @@ ini_I = 0
 ini_cash = 0
 vari_cost = 1
 unit_sal = 0.5
-price = 5
+price = 10
 mean_demands = [10, 10]
 overhead_cost = [50, 50]
-r0 = 0.01
-r1 = 0.1
+r0 = 0
+r1 = 0
 T = len(mean_demands)
 
 sample_nums = [10 for t in range(T)]
@@ -69,7 +70,7 @@ for t in range(T):
     t_nodeNum[t] = getSizeOfNestedList(node_values[t])
     
 iter = 0
-iter_num = 6
+iter_num = 10
 q_detail_values = [[[] for t in range(T)] for iter in range(iter_num)] 
 W0_detail_values = [[[] for t in range(T)] for iter in range(iter_num)] 
 W1_detail_values = [[[] for t in range(T)] for iter in range(iter_num)] 
@@ -89,6 +90,9 @@ slopes2 = [[[0 for n in range(t_nodeNum[t])] for t in range(T)] for iter in rang
 intercept = [[[0 for n in range(t_nodeNum[t])] for t in range(T)] for iter in range(iter_num)] 
 m.addConstr(theta >= theta_iniValue*(T))
 m.addConstr(-vari_cost*q - W0 + W1 == overhead_cost[0] - ini_cash)
+slope1 = [[0 for t in range(T-1)] for iter in range(iter_num)]
+slope2 = [[0 for t in range(T-1)] for iter in range(iter_num)]
+intercept = [[0 for t in range(T-1)] for iter in range(iter_num)]
 while iter < iter_num: 
     
     # sub computation    
@@ -134,6 +138,14 @@ while iter < iter_num:
             index = node_index[t][n][0]
             demand = samples[index][t]
             
+            # add cust
+            if t < T - 1:
+                for k in range(iter):
+                    if t == 0:
+                        m_sub[t][n].addConstr(theta_sub[t][n] >= slope1[k][t]*(I_sub[t][n] + q_sub[t][n])+ slope2[k][t]*(-vari_cost*q_sub[t][n] - r1* W1_sub[t][n] + r0* W0_sub[t][n]) + intercept[k][t])
+                    else:
+                        m_sub[t][n].addConstr(theta_sub[t][n] >= slope1[k][t]*(I_sub[t][n] + q_sub[t][n])+ slope2[k][t]*(C_sub[t][n] -vari_cost*q_sub[t][n] - r1* W1_sub[t][n] + r0* W0_sub[t][n]) + intercept[k][t])
+                    
             if t == T - 1:                   
                 m_sub[t][n].setObjective(-price*(demand - B_sub[t][n]) - unit_sal*I_sub[t][n], GRB.MINIMIZE)
             else:
@@ -144,7 +156,7 @@ while iter < iter_num:
                 if node_index[t][n][0] in k:
                     last_index = node_index[t - 1].index(k)
             if t < T - 1:
-                m_sub[t][n].addConstr(theta_sub[t][n] >= theta_iniValue*(T))
+                m_sub[t][n].addConstr(theta_sub[t][n] >= theta_iniValue*(T-1-t))
                 m_sub[t][n].addConstr(C_sub[t][n] - vari_cost*q_sub[t][n] - W0_sub[t][n] + W1_sub[t][n] == overhead_cost[t])
                      
             if t == 0:
@@ -163,8 +175,8 @@ while iter < iter_num:
             
             # optimize
             m_sub[t][n].optimize()
-            # m_sub[t][n].write('iter' + str(iter) + '_sub_' + str(t) + '^' + str(n) + '.lp')
-            # m_sub[t][n].write('iter' + str(iter) + '_sub_' + str(t) + '^' + str(n) + '.sol')
+            # m_sub[t][n].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(n+1) + '.lp')
+            # m_sub[t][n].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(n+1) + '.sol')
             # m_sub[t][j].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(j+1) + '.dlp')
             
             if t < T - 1:              
@@ -189,18 +201,21 @@ while iter < iter_num:
             if t == 0:
                 pi_rhs += pi[-1] * ini_cash
                 pi_rhs += pi[-2] * ini_I
-            if iter == 4:
+            if iter == 3:
                 pass
             for k in node_index[t][n]:
                 pi_values1[t][k] = pi[-2]
                 pi_values2[t][k] = pi[-1]
                 pi_rhs_values[t][k] = pi_rhs
+            if t == 1 and iter == 0:
+                pass
             
         if t == 0:
             avg_pi1 = sum(pi_values1[t]) / sample_num
             avg_pi2 = sum(pi_values2[t]) / sample_num
             avg_pi_rhs = sum(pi_rhs_values[t]) / sample_num
             m.addConstr(theta >= avg_pi1*q + avg_pi2*(-vari_cost*q - r1* W1 + r0* W0) + avg_pi_rhs)
+            m.update()
         else:
             for n in range(t_nodeNum[t-1]): 
                 sum_pi1 = 0
@@ -211,10 +226,12 @@ while iter < iter_num:
                     sum_pi2 += pi_values2[t][k]
                     sum_pi_rhs += pi_rhs_values[t][k]
                 avg_pi1 = sum_pi1 / len(node_index[t-1][n])
-                avg_pi2 = sum_pi1 / len(node_index[t-1][n])
+                avg_pi2 = sum_pi2 / len(node_index[t-1][n])
                 avg_pi_rhs = sum_pi_rhs / len(node_index[t-1][n])
-                m_sub[t-1][n].addConstr(theta_sub[t-1][n] >= avg_pi1*(I_sub[t-1][n] + q_sub[t-1][n])+ avg_pi2*(-vari_cost*q_sub[t-1][n] - r1* W1_sub[t-1][n] + r0* W0_sub[t-1][n]) + avg_pi_rhs)
-                  
+                slope1[iter][t-1] = avg_pi1
+                slope2[iter][t-1] = avg_pi2
+                intercept[iter][t-1] = avg_pi_rhs
+                pass 
     iter += 1
 
 end = time.process_time()

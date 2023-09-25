@@ -27,7 +27,7 @@ ini_I = 0
 vari_cost = 1
 unit_back_cost = 10
 unit_hold_cost = 2
-mean_demands = [10, 20]
+mean_demands = [10, 10]
 sample_nums = [10, 10]
 T = len(mean_demands)
 trunQuantile = 0.9999 # affective to the final ordering quantity
@@ -187,7 +187,7 @@ while iter <= iter_num:
         if t == 0:
             avg_pi = sum(pi_values[t]) / t_nodeNum[t]
             sum_pi_rhs = 0
-            for j in range(t_node[t]): 
+            for j in range(t_nodeNum[t]): 
                 sum_pi_rhs += pi_rhs_values[t][j]
             avg_pi_rhs = sum_pi_rhs / t_nodeNum[t]
             m.addConstr(theta >= avg_pi*q + avg_pi_rhs) # just the benders optimality cut, same as the below constraint
