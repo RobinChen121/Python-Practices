@@ -26,22 +26,22 @@ start = time.process_time()
 ini_I = 0
 vari_cost = 1
 price = 10
-unit_back_cost = 10
-unit_hold_cost = 2
+unit_back_cost = 0
+unit_hold_cost = 0
 mean_demands = [10, 10]
-sample_nums = [2, 2]
 T = len(mean_demands)
 trunQuantile = 0.9999 # affective to the final ordering quantity
-scenario_numTotal = reduce(lambda x, y: x * y, sample_nums, 1)
 
 # samples_detail is the detailed samples in each period
+sample_nums = [2 for t in range(T)]
+samples_detail = [[5, 15], [5, 15]]
+sample_num = 4
 samples_detail = [[0 for i in range(sample_nums[t])] for t in range(T)] 
 for t in range(T):
     samples_detail[t] = generate_sample(sample_nums[t], trunQuantile, mean_demands[t])
 
-samples_detail = [[5, 15], [5, 15]]
+
 scenarios = list(itertools.product(*samples_detail)) 
-sample_num = 4
 samples= random.sample(scenarios, sample_num) # sampling without replacement
 samples.sort() # sort to make same numbers together
 node_values, node_index = get_tree_strcture(samples)

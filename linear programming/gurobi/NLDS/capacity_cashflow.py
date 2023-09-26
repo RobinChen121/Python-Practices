@@ -23,7 +23,7 @@ import time
 
 start = time.process_time()
 ini_I = 0
-ini_cash = 10
+ini_cash = 0
 vari_cost = 1
 price = 10
 unit_back_cost = 0
@@ -57,16 +57,9 @@ theta = m.addVar(lb = -GRB.INFINITY, vtype = GRB.CONTINUOUS, name = 'theta_2')
 t_nodeNum = [0 for i in range(T)]
 for t in range(T):
     t_nodeNum[t] = getSizeOfNestedList(node_values[t])
-# decision variables from stage 2 to stage T+1
-m_sub = [[Model() for j in range(t_nodeNum[t])] for t in range(T)] 
-q_sub = [[m_sub[t][j].addVar(vtype = GRB.CONTINUOUS, name = 'q_' + str(t+2) + '^' + str(j+1)) for j in range(t_nodeNum[t])] for t in range(T-1)]
-I_sub = [[m_sub[t][j].addVar(vtype = GRB.CONTINUOUS, name = 'I_' + str(t+1) + '^' + str(j+1)) for j in range(t_nodeNum[t])] for t in range(T)]
-B_sub = [[m_sub[t][j].addVar(vtype = GRB.CONTINUOUS, name = 'B_' + str(t+1) + '^' + str(j+1)) for j in range(t_nodeNum[t])] for t in range(T)]
-C_sub = [[m_sub[t][j].addVar(vtype = GRB.CONTINUOUS, name = 'C_' + str(t+1) + '^' + str(j+1)) for j in range(t_nodeNum[t])] for t in range(T)]
-theta_sub = [[m_sub[t][j].addVar(lb = -GRB.INFINITY, vtype = GRB.CONTINUOUS, name = 'theta_' + str(t+3) + '^' + str(j+1)) for j in range(t_nodeNum[t])] for t in range(T-1)]
 
 iter = 0
-iter_num = 4
+iter_num = 7
 q_detail_values = [[[] for t in range(T)] for iter in range(iter_num)] 
 for i in range(iter_num):
     for t in range(T):
@@ -98,17 +91,21 @@ while iter < iter_num:
     theta_value = theta.x
     z = m.objVal
     
+    # decision variables from stage 2 to stage T+1
+    m_sub = [[Model() for j in range(t_nodeNum[t])] for t in range(T)] 
+    q_sub = [[m_sub[t][j].addVar(vtype = GRB.CONTINUOUS, name = 'q_' + str(t+2) + '^' + str(j+1)) for j in range(t_nodeNum[t])] for t in range(T-1)]
+    I_sub = [[m_sub[t][j].addVar(vtype = GRB.CONTINUOUS, name = 'I_' + str(t+1) + '^' + str(j+1)) for j in range(t_nodeNum[t])] for t in range(T)]
+    B_sub = [[m_sub[t][j].addVar(vtype = GRB.CONTINUOUS, name = 'B_' + str(t+1) + '^' + str(j+1)) for j in range(t_nodeNum[t])] for t in range(T)]
+    C_sub = [[m_sub[t][j].addVar(vtype = GRB.CONTINUOUS, name = 'C_' + str(t+1) + '^' + str(j+1)) for j in range(t_nodeNum[t])] for t in range(T)]
+    theta_sub = [[m_sub[t][j].addVar(lb = -GRB.INFINITY, vtype = GRB.CONTINUOUS, name = 'theta_' + str(t+3) + '^' + str(j+1)) for j in range(t_nodeNum[t])] for t in range(T-1)]
+
     I_sub_values = [[0 for s in range(t_nodeNum[t])] for t in range(T)] 
     B_sub_values = [[0 for s in range(t_nodeNum[t])] for t in range(T)] 
     C_sub_values = [[0 for s in range(t_nodeNum[t])] for t in range(T)] 
-    pi_rhs_values = [[0 for s in range(t_nodeNum[t])] for t in range(T)] 
-    d_sub_values = [[0 for s in range(t_nodeNum[t])] for t in range(T)]
-    pi_sub1_values = [[0 for s in range(t_nodeNum[t])] for t in range(T)]
-    pi_sub2_values = [[0 for s in range(t_nodeNum[t])] for t in range(T)]
     
     pi_values1 = [[0 for s in range(sample_num)] for t in range(T)]
     pi_values2 = [[0 for s in range(sample_num)] for t in range(T)]
-    pi_rhs = [[0 for s in range(sample_num)] for t in range(T)] 
+    pi_rhs_values = [[0 for s in range(sample_num)] for t in range(T)] 
     
     # forward and backward  
     for t in range(T):       
@@ -150,14 +147,14 @@ while iter < iter_num:
             m_sub[t][j].update()
             m_sub[t][j].optimize()
             m_sub[t][j].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(j+1) + '.lp')
+            m_sub[t][j].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(j+1) + '.sol')
             # m_sub[t][j].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(j+1) + '.dlp')
-            # m_sub[t][j].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(j+1) + '.sol')
-
+            
+            if iter == 1 and t == 0:
+                pass
+            
             if t < T - 1:              
-                try:
-                    q_detail_values[iter][t+1][j] = q_sub[t][j].x
-                except:
-                    pass
+                q_detail_values[iter][t+1][j] = q_sub[t][j].x
                 
             I_sub_values[t][j] = I_sub[t][j].x 
             B_sub_values[t][j] = B_sub[t][j].x
@@ -165,34 +162,25 @@ while iter < iter_num:
             pi = m_sub[t][j].getAttr(GRB.Attr.Pi)
             
             rhs = m_sub[t][j].getAttr(GRB.Attr.RHS)
-            
+            pi_rhs = 0
             con_num = len(pi)
             for k in range(con_num - 2): 
-                pi_rhs_values[t][j] += pi[k]*rhs[k] 
+                pi_rhs += pi[k]*rhs[k] 
             
-            pi_rhs_values[t][j] += -pi[-2] * demand + pi[-1] * price * demand - price*demand # put here is better because of demand
-            if iter > 1:
-                pass
-            d_sub_values[t][j] = demand
-            pi_sub1_values[t][j] = pi[-2] # inventory flow constraint
-            pi_sub2_values[t][j] = pi[-1] # cash constraint
+            pi_rhs += -pi[-2] * demand + pi[-1] * price * demand - price*demand # put here is better because of demand
 
             for k in node_index[t][j]:
                 pi_values1[t][k] = pi[-2]
                 pi_values2[t][k] = pi[-1]
-                pi_rhs[t][k] = pi_rhs_values[t][j]
+                pi_rhs_values[t][k] = pi_rhs
             
         # get and add the cut  
         # formal NLSD cut
-        avg_pi1 = sum(pi_sub1_values[t]) / t_nodeNum[t]
-        avg_pi2 = sum(pi_sub2_values[t]) / t_nodeNum[t]
-        sum_pi_rhs = 0
-        for j in range(t_nodeNum[t]): 
-            sum_pi_rhs += pi_rhs_values[t][j]
-        avg_pi_rhs = sum_pi_rhs / t_nodeNum[t]
         if t == 0:
-            m.addConstr(theta >= avg_pi1*(ini_I + q) + avg_pi2*ini_cash - avg_pi2*vari_cost*q + avg_pi_rhs) 
-            
+            avg_pi1 = sum(pi_values1[t]) / sample_num
+            avg_pi2 = sum(pi_values2[t]) / sample_num
+            avg_pi_rhs = sum(pi_rhs_values[t]) / sample_num
+            m.addConstr(theta >= avg_pi1*(ini_I + q) + avg_pi2*(ini_cash - vari_cost*q) + avg_pi_rhs)            
         else:
             for n in range(t_nodeNum[t-1]): 
                 sum_pi1 = 0
@@ -201,11 +189,14 @@ while iter < iter_num:
                 for k in node_index[t-1][n]:
                     sum_pi1 += pi_values1[t][k]
                     sum_pi2 += pi_values2[t][k]
-                    sum_pi_rhs += pi_rhs[t][k]
+                    sum_pi_rhs += pi_rhs_values[t][k]
                 avg_pi1 = sum_pi1 / len(node_index[t-1][n])
                 avg_pi2 = sum_pi2 / len(node_index[t-1][n])
                 avg_pi_rhs = sum_pi_rhs / len(node_index[t-1][n])
-                
+                slope1[iter][t-1] = avg_pi1
+                slope2[iter][t-1] = avg_pi2
+                intercept[iter][t-1] = avg_pi_rhs
+                pass
  
     iter += 1
 
