@@ -7,7 +7,7 @@ Created on Thu May 18 09:31:46 2023
 
 @disp:  use sddp to solve traditional newsvendor problem without price.
 
-sampling is in the while loop
+sampling is in the while loop--slow
     
     
 """

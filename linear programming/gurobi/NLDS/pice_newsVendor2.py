@@ -5,8 +5,8 @@ Created on Sat Apr  1 11:03:26 2023
 
 @author: zhenchen
 
-@disp:  sddp for multi period newsvendor, inventoryl level I in the objective function,
-have backorder;
+@disp:  sddp for multi period newsvendor, inventoryl level I in the objective function;
+this is half NLSD cut, better than pure NLSD cut;
     
     
 """
@@ -24,7 +24,7 @@ ini_I = 0
 vari_cost = 1
 price = 10
 unit_back_cost = 0
-unit_hold_cost = 2
+unit_hold_cost = 0
 mean_demands = [10, 20]
 sample_nums = [10, 10]
 T = len(mean_demands)
@@ -38,7 +38,7 @@ for t in range(T):
 
 # samples_detail = [[5, 15], [5, 15]]
 scenarios = list(itertools.product(*samples_detail)) 
-sample_num = 50
+sample_num = 30
 samples= random.sample(scenarios, sample_num) # sampling without replacement
 samples.sort() # sort to make same numbers together
 node_values, node_index = get_tree_strcture(samples)
@@ -160,13 +160,15 @@ while iter <= iter_num:
             for k in range(num_con - 1): # all the previous constraints
                 pi_rhs_values[t][j] += pi[k]*rhs[k] # should not include the inventory flow constrints (q inside)
             pi_rhs_values[t][j] += -pi[-1] * demand  # the inventory flow constraints
+            if t == 0:
+                pi_rhs_values[t][j] += -price*(ini_I + q_value)
+            else:
+                pi_rhs_values[t][j] += -price*(I_sub_values[t-1][last_index] + q_sub_values[t-1][last_index])
             pi_sub_values[t][j] = pi[-1]
             d_sub_values[t][j] = demand
             m_sub[t][j].remove(m_sub[t][j].getConstrs()[-1])
             
         # get and add the cut      
-        if iter == 2:
-            pass
         avg_pi = sum(pi_sub_values[t]) / t_nodeNum[t]
         sum_pi_rhs = 0
         for j in range(t_nodeNum[t]): 
