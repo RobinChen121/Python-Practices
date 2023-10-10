@@ -127,7 +127,8 @@ while iter < iter_num:
                 m_forward[t][n].setObjective(vari_cost*q_forward[t][n] - price*(demand - B_forward[t][n]) + theta_forward[t][n], GRB.MINIMIZE)  
                 m_forward[t][n].addConstr(theta_forward[t][n] >= theta_iniValue*(T-1-t))
                 # m_forward[t][n].addConstr(vari_cost * q_forward[t][n] <= cash_forward[t][n])
-            # m_forward[t][n].addConstr(B_forward[t][n] <= demand)
+            # m_forward[t][n].addConstr(B_forward[t][n] <= demand) # not necessary
+
             if t == 0:   
                 m_forward[t][n].addConstr(I_forward[t][n] - B_forward[t][n] == ini_I + q_values[iter] - demand)
                 m_forward[t][n].addConstr(cash_forward[t][n] == ini_cash - vari_cost*q_values[iter] + price*(demand - B_forward[t][n]))
@@ -185,6 +186,7 @@ while iter < iter_num:
                     m_backward[t][n][k].addConstr(theta_backward[t][n][k] >= theta_iniValue*(T-1-t))
                     # m_backward[t][n][k].addConstr(vari_cost * q_backward[t][n][k] <= cash_backward[t][n][k])
                 # m_backward[t][n][k].addConstr(B_backward[t][n][k] <= demand)
+
                 if t == 0:   
                     m_backward[t][n][k].addConstr(I_backward[t][n][k] - B_backward[t][n][k] == ini_I + q_values[iter] - demand)
                     m_backward[t][n][k].addConstr(cash_backward[t][n][k] == ini_cash - vari_cost*q_values[iter] + price*(demand - B_backward[t][n][k]))

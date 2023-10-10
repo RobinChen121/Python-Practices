@@ -5,7 +5,7 @@ Created on Mon Jul 19 16:52:47 2023
 
 @author: zhenchen
 
-@disp:  using x_t or Q_t is not practical in linear programming since E_t-the coefficients of 
+@disp:  using close form of cut is not practical, since 
 decision variables of the last stage can not obtained automatically. So, it is better to get cuts
 by the dual objective. 
     
