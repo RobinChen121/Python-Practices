@@ -28,7 +28,7 @@ vari_cost = 1
 price = 10
 unit_back_cost = 0
 unit_hold_cost = 0
-mean_demands = [15, 20, 10]
+mean_demands = [15, 10]
 T = len(mean_demands)
 trunQuantile = 0.9999 # affective to the final ordering quantity
 
@@ -122,7 +122,7 @@ while iter < iter_num:
             m_sub[t][j].optimize()
             # m_sub[t][j].write('iter' + str(iter) + '_sub_' + str(t) + '^' + str(j) + '.lp')
             # m_sub[t][j].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(j+1) + '.dlp')
-            m_sub[t][j].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(j+1) + '.sol')
+            # m_sub[t][j].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(j+1) + '.sol')
             obj[j] = m_sub[t][j].objVal
             if t < T - 1:              
                 q_detail_values[iter][t+1][j] = q_sub[t][j].x

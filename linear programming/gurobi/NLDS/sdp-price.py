@@ -64,6 +64,7 @@ class StochasticInventory:
 
     def get_feasible_action(self, state:State):
         Q_bound = min(capacity, state.iniCash / variOderCost)
+        Q_bound = capacity
         return range(int(Q_bound) + 1)
 
     def state_tran(self, state:State, action, demand):
