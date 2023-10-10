@@ -82,8 +82,8 @@ while iter < iter_num:
     # solve the first stage model    
         
     m.optimize()
-    m.write('iter' + str(iter) + '_main.lp')
-    m.write('iter' + str(iter) + '_main.sol')
+    # m.write('iter' + str(iter) + '_main.lp')
+    # m.write('iter' + str(iter) + '_main.sol')
     
     print(end = '')
     q_value = q.x

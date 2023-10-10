@@ -10,7 +10,8 @@ MIT Licence.
 Python version: 3.11
 
 
-Description: SDDP to solve newsvendor with lead time
+Description: SDDP to solve newsvendor with lead time. Currently not perfect, should revise following the file 
+leadtime.py in the folder NLDS.
     
 """
 
