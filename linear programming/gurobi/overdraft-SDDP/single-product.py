@@ -141,7 +141,7 @@ while iter < iter_num:
             if t == T - 1:                   
                 m_forward[t][n].setObjective(-price*(demand - B_forward[t][n]) - unit_sal*I_forward[t][n], GRB.MINIMIZE)
             else:
-                m_forward[t][n].setObjective(-price*(demand - B_forward[t][n]) + overhead_cost[t+1] + vari_cost*q_forward[t][n] + r3*W3_forward[t][n] + r2*W2_forward[t][n] + r1*W1_forward[t][n] - r0*W0_forward[t][n] + theta_forward[t][n], GRB.MINIMIZE) # 
+                m_forward[t][n].setObjective(overhead_cost[t] - price*(demand - B_forward[t][n]) + overhead_cost[t+1] + vari_cost*q_forward[t][n] + r3*W3_forward[t][n] + r2*W2_forward[t][n] + r1*W1_forward[t][n] - r0*W0_forward[t][n] + theta_forward[t][n], GRB.MINIMIZE) # 
             
             # constraints
             if t < T - 1:
@@ -214,7 +214,7 @@ while iter < iter_num:
                 if t == T - 1:                   
                     m_backward[t][n][k].setObjective(-price*(demand - B_backward[t][n][k]) - unit_sal*I_backward[t][n][k], GRB.MINIMIZE)
                 else:
-                    m_backward[t][n][k].setObjective(-price*(demand - B_backward[t][n][k]) + overhead_cost[t+1] + vari_cost*q_backward[t][n][k] + r3*W3_backward[t][n][k] + r2*W2_backward[t][n][k] + r1*W1_backward[t][n][k] - r0*W0_backward[t][n][k] + theta_backward[t][n][k], GRB.MINIMIZE) # 
+                    m_backward[t][n][k].setObjective(overhead_cost[t] - price*(demand - B_backward[t][n][k]) + overhead_cost[t+1] + vari_cost*q_backward[t][n][k] + r3*W3_backward[t][n][k] + r2*W2_backward[t][n][k] + r1*W1_backward[t][n][k] - r0*W0_backward[t][n][k] + theta_backward[t][n][k], GRB.MINIMIZE) # 
                 
                 # constraints
                 if t < T - 1:
