@@ -34,13 +34,17 @@ price = 10
 unit_back_cost = 0
 unit_hold_cost = 0
 unit_salvage = 0.5
-mean_demands = [10, 15, 10]
+mean_demands = [10, 15]
 T = len(mean_demands)
 sample_nums = [10 for t in range(T)]
 overhead_cost = [50 for t in range(T)]
 
 r0 = 0.01
-r1 = 0.1
+r1 = 0
+r2 = 0.1
+r3 = 1
+V = 20 # free-interest limit
+U = 100 # overdraft limit
 
 trunQuantile = 0.9999 # affective to the final ordering quantity
 scenario_numTotal = 1
@@ -65,10 +69,12 @@ m = Model() # linear model in the first stage
 q = m.addVar(vtype = GRB.CONTINUOUS, name = 'q_1')
 W0 = m.addVar(vtype = GRB.CONTINUOUS, name = 'w_1^0')
 W1 = m.addVar(vtype = GRB.CONTINUOUS, name = 'w_1^1')
+W2 = m.addVar(vtype = GRB.CONTINUOUS, name = 'w_1^2')
+W3 = m.addVar(vtype = GRB.CONTINUOUS, name = 'w_1^3')
 theta = m.addVar(lb = -GRB.INFINITY, vtype = GRB.CONTINUOUS, name = 'theta_2')
-m.setObjective(overhead_cost[0] + vari_cost*q + r1*W1 - r0*W0 + theta, GRB.MINIMIZE)
+m.setObjective(overhead_cost[0] + vari_cost*q + r3*W3 + r2*W2 + r1*W1 - r0*W0 + theta, GRB.MINIMIZE)
 m.addConstr(theta >= theta_iniValue*(T))
-m.addConstr(-vari_cost*q - W0 + W1 == overhead_cost[0] - ini_cash)
+m.addConstr(-vari_cost*q - W0 + W1 + W2 + W3 == overhead_cost[0] - ini_cash)
 # m.addConstr(vari_cost * q <= ini_cash)
 
 theta_value = 0 
@@ -82,6 +88,8 @@ q_values = [0 for iter in range(iter_num)]
 q_sub_values = [[[0 for n in range(N)] for t in range(T-1)] for iter in range(iter_num)]
 W0_values = [0 for iter in range(iter_num)]
 W1_values = [0 for iter in range(iter_num)]
+W2_values = [0 for iter in range(iter_num)]
+W3_values = [0 for iter in range(iter_num)]
 
 start = time.process_time()
 while iter < iter_num:  
@@ -97,12 +105,18 @@ while iter < iter_num:
         m.addConstr(theta >= slope1_stage[-1][-2]*(ini_I+q) + slope1_stage[-1][-1]*(ini_cash-vari_cost*q) + intercept1_stage[-1])
     m.update()
     m.optimize()
-    # m.write('iter' + str(iter+1) + '_main2.lp')    
-    # m.write('iter' + str(iter+1) + '_main2.sol')
+      
+    try:
+        q_values[iter] = q.x     
+    except Exception:
+        m.write('iter' + str(iter+1) + '_main2.lp')    
+        # m.write('iter' + str(iter+1) + '_main2.sol')
+        pass
     
-    q_values[iter] = q.x
     W0_values[iter] = W0.x
     W1_values[iter] = W1.x
+    W2_values[iter] = W2.x
+    W3_values[iter] = W3.x
     theta_value = theta.x
     z = m.objVal
     
@@ -135,15 +149,20 @@ while iter < iter_num:
                 for i in range(iter):
                     for nn in range(N): # N
                         m_forward[t][n].addConstr(theta_forward[t][n] >= slopes[t][nn][i][-2]*(I_forward[t][n]+ q_forward[t][n]) + slopes[t][nn][i][-1]*(cash_forward[t][n]- vari_cost*q_forward[t][n]\
-                                                                                            - r1*W1_forward[t][n]+r0*W0_forward[t][n]) + intercepts[t][nn][i])
+                                                                            -r3*W3_forward[t][n]-r2*W2_forward[t][n]\
+                                                                                - r1*W1_forward[t][n]+r0*W0_forward[t][n]) + intercepts[t][nn][i])
                       
             if t == T - 1:                   
                 m_forward[t][n].setObjective(-price*(demand - B_forward[t][n]) - unit_salvage*I_forward[t][n], GRB.MINIMIZE)
             else:
                 m_forward[t][n].setObjective(overhead_cost[t] + vari_cost*q_forward[t][n] - price*(demand - B_forward[t][n])\
+                                             + r3*W3_forward[t][n] + r2*W2_forward[t][n]\
                                              + r1*W1_forward[t][n] - r0*W0_forward[t][n] + theta_forward[t][n], GRB.MINIMIZE)  
                 m_forward[t][n].addConstr(theta_forward[t][n] >= theta_iniValue*(T-1-t))
-                m_forward[t][n].addConstr(cash_forward[t][n] - vari_cost*q_forward[t][n] - W0_forward[t][n] + W1_forward[t][n] == overhead_cost[t])
+                m_forward[t][n].addConstr(cash_forward[t][n] - vari_cost*q_forward[t][n] - W0_forward[t][n]\
+                                          + W1_forward[t][n] + W2_forward[t][n] + W3_forward[t][n]== overhead_cost[t])
+                m_forward[t][n].addConstr(W1_forward[t][n] <= V)
+                m_forward[t][n].addConstr(W1_forward[t][n] + W2_forward[t][n] <= U)
                 
                 # m_forward[t][n].addConstr(vari_cost * q_forward[t][n] <= cash_forward[t][n])
             # m_forward[t][n].addConstr(B_forward[t][n] <= demand) # not necessary
@@ -151,12 +170,14 @@ while iter < iter_num:
             if t == 0:   
                 m_forward[t][n].addConstr(I_forward[t][n] - B_forward[t][n] == ini_I + q_values[iter] - demand)
                 m_forward[t][n].addConstr(cash_forward[t][n] + price*B_forward[t][n] == ini_cash - overhead_cost[t] - vari_cost*q_values[iter]\
-                                          -r1*W1_values[iter] + r0*W0_values[iter]+ price*demand)
+                                          -r1*W1_values[iter] + r0*W0_values[iter]\
+                                              -r2*W2_values[iter]-r3*W3_values[iter]+ price*demand)
             else:
                 m_forward[t][n].addConstr(I_forward[t][n] - B_forward[t][n] == I_forward_values[t-1][n] + q_forward_values[t-1][n] - demand)
                 m_forward[t][n].addConstr(cash_forward[t][n] == cash_forward_values[t-1][n] - overhead_cost[t] \
                                                  - vari_cost*q_forward_values[t-1][n]\
-                                                     -r1*W1_forward_values[t-1][n] + r0*W0_forward_values[t-1][n]+ price*(demand - B_forward[t][n]))
+                                                     -r1*W1_forward_values[t-1][n] + r0*W0_forward_values[t-1][n]\
+                                                         -r2*W2_values[iter]-r3*W3_values[iter] + price*(demand - B_forward[t][n]))
                
             # optimize
             m_forward[t][n].optimize()
@@ -172,6 +193,8 @@ while iter < iter_num:
                 theta_forward_values[t][n] = theta_forward[t][n].x
                 W1_forward_values[t][n] = W1_forward[t][n].x
                 W0_forward_values[t][n] = W0_forward[t][n].x
+                W2_forward_values[t][n] = W2_forward[t][n].x
+                W3_forward_values[t][n] = W3_forward[t][n].x
     
     # backward
     m_backward = [[[Model() for k in range(sample_nums[t])] for n in range(N)] for t in range(T)]
@@ -180,6 +203,9 @@ while iter < iter_num:
     cash_backward = [[[m_backward[t][n][k].addVar(lb = -GRB.INFINITY, vtype = GRB.CONTINUOUS, name = 'C_' + str(t+1) + '^' + str(n+1)) for k in range(sample_nums[t])]  for n in range(N)] for t in range(T)]    
     W0_backward = [[[m_backward[t][n][k].addVar(vtype = GRB.CONTINUOUS, name = 'W0_' + str(t+2) + '^' + str(n+1)) for k in range(sample_nums[t])]  for n in range(N)] for t in range(T - 1)] 
     W1_backward = [[[m_backward[t][n][k].addVar(vtype = GRB.CONTINUOUS, name = 'W1_' + str(t+2) + '^' + str(n+1)) for k in range(sample_nums[t])]  for n in range(N)] for t in range(T - 1)] 
+    W2_backward = [[[m_backward[t][n][k].addVar(vtype = GRB.CONTINUOUS, name = 'W2_' + str(t+2) + '^' + str(n+1)) for k in range(sample_nums[t])]  for n in range(N)] for t in range(T - 1)] 
+    W3_backward = [[[m_backward[t][n][k].addVar(vtype = GRB.CONTINUOUS, name = 'W3_' + str(t+2) + '^' + str(n+1)) for k in range(sample_nums[t])]  for n in range(N)] for t in range(T - 1)] 
+    
     # B is the quantity of lost sale
     B_backward = [[[m_backward[t][n][k].addVar(vtype = GRB.CONTINUOUS, name = 'B_' + str(t+1) + '^' + str(n+1)) for k in range(sample_nums[t])] for n in range(N)] for t in range(T)]
     theta_backward = [[[m_backward[t][n][k].addVar(lb = -GRB.INFINITY, vtype = GRB.CONTINUOUS, name = 'theta_' + str(t+3) + '^' + str(n+1)) for k in range(sample_nums[t])] for n in range(N)] for t in range(T - 1)]
@@ -202,16 +228,21 @@ while iter < iter_num:
                     for i in range(iter):
                         for nn in range(N): # N
                             m_backward[t][n][k].addConstr(theta_backward[t][n][k] >= slopes[t][nn][i][-2]*(I_backward[t][n][k]+ q_backward[t][n][k]) + slopes[t][nn][i][-1]*(cash_backward[t][n][k]- vari_cost*q_backward[t][n][k]\
-                                                                                                - r1*W1_backward[t][n][k] + r0*W0_backward[t][n][k]) + intercepts[t][nn][i])
+                                                                                   -r3*W3_backward[t][n][k]-r2*W2_backward[t][n][k]\
+                                                                                      - r1*W1_backward[t][n][k] + r0*W0_backward[t][n][k]) + intercepts[t][nn][i])
                
                 
                 if t == T - 1:                   
                     m_backward[t][n][k].setObjective(-price*(demand - B_backward[t][n][k]) - unit_salvage*I_backward[t][n][k], GRB.MINIMIZE)
                 else:
                     m_backward[t][n][k].setObjective(overhead_cost[t] + vari_cost*q_backward[t][n][k] - price*(demand - B_backward[t][n][k])\
+                                                     + r3*W3_backward[t][n][k] + r2*W2_backward[t][n][k]
                                                      + r1*W1_backward[t][n][k] - r0*W0_backward[t][n][k] + theta_backward[t][n][k], GRB.MINIMIZE)  
                     m_backward[t][n][k].addConstr(theta_backward[t][n][k] >= theta_iniValue*(T-1-t))
-                    m_backward[t][n][k].addConstr(cash_backward[t][n][k] - vari_cost*q_backward[t][n][k] - W0_backward[t][n][k] + W1_backward[t][n][k] == overhead_cost[t])
+                    m_backward[t][n][k].addConstr(W1_backward[t][n][k] <= V)
+                    m_backward[t][n][k].addConstr(W1_backward[t][n][k] + W2_backward[t][n][k] <= U)
+                    m_backward[t][n][k].addConstr(cash_backward[t][n][k] - vari_cost*q_backward[t][n][k] - W0_backward[t][n][k]\
+                                                  + W1_backward[t][n][k] + W2_backward[t][n][k] + W3_backward[t][n][k]== overhead_cost[t])
                 
                     # m_backward[t][n][k].addConstr(vari_cost * q_backward[t][n][k] <= cash_backward[t][n][k])
                 # m_backward[t][n][k].addConstr(B_backward[t][n][k] <= demand)
@@ -219,12 +250,13 @@ while iter < iter_num:
                 if t == 0:   
                     m_backward[t][n][k].addConstr(I_backward[t][n][k] - B_backward[t][n][k] == ini_I + q_values[iter] - demand)
                     m_backward[t][n][k].addConstr(cash_backward[t][n][k] == ini_cash - overhead_cost[t] - vari_cost*q_values[iter]\
-                                                  -r1*W1_values[iter] + r0*W0_values[iter] + price*(demand - B_backward[t][n][k]))
+                                                  -r3*W3_values[iter] - r2*W2_values[iter] - r1*W1_values[iter] + r0*W0_values[iter] + price*(demand - B_backward[t][n][k]))
                 else:
                     m_backward[t][n][k].addConstr(I_backward[t][n][k] - B_backward[t][n][k] == I_forward_values[t-1][n] + q_forward_values[t-1][n] - demand)
-                    m_backward[t][n][k].addConstr(cash_backward[t][n][k] == cash_forward_values[t-1][n]- overhead_cost[t] \
+                    m_backward[t][n][k].addConstr(cash_backward[t][n][k] == cash_forward_values[t-1][n]- overhead_cost[t]\
                                                   - vari_cost*q_forward_values[t-1][n]\
-                                                  - r1*W1_forward_values[t-1][n] + r0*W0_forward_values[t-1][n] + price*(demand - B_backward[t][n][k]))
+                                                  - r3*W3_forward_values[t-1][n]- r2*W2_forward_values[t-1][n]- r1*W1_forward_values[t-1][n]\
+                                                  + r0*W0_forward_values[t-1][n] + price*(demand - B_backward[t][n][k]))
                 
                 # optimize
                 m_backward[t][n][k].optimize()                
