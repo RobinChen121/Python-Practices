@@ -12,6 +12,8 @@ Created on Mon Jul 10 10:52:47 2023
     computed separately;
     
     larger T results in larger gaps, more samples/iterations results in smaller gaps.
+    more decision variables require more samples.
+    3 periods with 60 samples and 15 iterations, gap very close to optimal.
 """
 
 from gurobipy import *
@@ -34,7 +36,7 @@ price = 10
 unit_back_cost = 0
 unit_hold_cost = 0
 unit_salvage = 0.5
-mean_demands = [10, 15]
+mean_demands = [10, 15, 10]
 T = len(mean_demands)
 sample_nums = [10 for t in range(T)]
 overhead_cost = [50 for t in range(T)]
@@ -60,8 +62,8 @@ scenarios_full = list(itertools.product(*sample_detail))
 
 
 iter = 0
-iter_num = 10
-N = 30 # sampled number of scenarios for forward computing
+iter_num = 15
+N = 60 # sampled number of scenarios for forward computing
 
 theta_iniValue = -500 # initial theta values (profit) in each period
 m = Model() # linear model in the first stage
@@ -74,6 +76,8 @@ W3 = m.addVar(vtype = GRB.CONTINUOUS, name = 'w_1^3')
 theta = m.addVar(lb = -GRB.INFINITY, vtype = GRB.CONTINUOUS, name = 'theta_2')
 m.setObjective(overhead_cost[0] + vari_cost*q + r3*W3 + r2*W2 + r1*W1 - r0*W0 + theta, GRB.MINIMIZE)
 m.addConstr(theta >= theta_iniValue*(T))
+m.addConstr(W1 <= V)
+m.addConstr(W1 + W2 <= U)
 m.addConstr(-vari_cost*q - W0 + W1 + W2 + W3 == overhead_cost[0] - ini_cash)
 # m.addConstr(vari_cost * q <= ini_cash)
 
@@ -127,7 +131,9 @@ while iter < iter_num:
     cash_forward = [[m_forward[t][n].addVar(lb = -GRB.INFINITY, vtype = GRB.CONTINUOUS, name = 'C_' + str(t+1)+ '^' + str(n+1)) for n in range(N)] for t in range(T)]
     W0_forward = [[m_forward[t][n].addVar(vtype = GRB.CONTINUOUS, name = 'W0_' + str(t+2) + '^' + str(n+1)) for n in range(N)]  for t in range(T - 1)]
     W1_forward = [[m_forward[t][n].addVar(vtype = GRB.CONTINUOUS, name = 'W1_' + str(t+2) + '^' + str(n+1)) for n in range(N)]  for t in range(T - 1)]
-   
+    W2_forward = [[m_forward[t][n].addVar(vtype = GRB.CONTINUOUS, name = 'W2_' + str(t+2) + '^' + str(n+1)) for n in range(N)]  for t in range(T - 1)]
+    W3_forward = [[m_forward[t][n].addVar(vtype = GRB.CONTINUOUS, name = 'W3_' + str(t+2) + '^' + str(n+1)) for n in range(N)]  for t in range(T - 1)]
+    
     # B is the quantity of lost sale
     B_forward = [[m_forward[t][n].addVar(vtype = GRB.CONTINUOUS, name = 'B_' + str(t+1) + '^' + str(n+1)) for n in range(N)]  for t in range(T)]
     theta_forward = [[m_forward[t][n].addVar(lb = -GRB.INFINITY, vtype = GRB.CONTINUOUS, name = 'theta_' + str(t+3) + '^' + str(n+1)) for n in range(N)]  for t in range(T - 1)]
@@ -139,6 +145,8 @@ while iter < iter_num:
     theta_forward_values = [[0 for n in range(N)] for t in range(T)]
     W0_forward_values = [[0 for n in range(N)] for t in range(T-1)] 
     W1_forward_values = [[0 for n in range(N)] for t in range(T-1)]
+    W2_forward_values = [[0 for n in range(N)] for t in range(T-1)] 
+    W3_forward_values = [[0 for n in range(N)] for t in range(T-1)]
     
     for t in range(T):
         for n in range(N):
