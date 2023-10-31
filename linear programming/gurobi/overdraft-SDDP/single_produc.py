@@ -13,7 +13,8 @@ Created on Mon Jul 10 10:52:47 2023
     
     larger T results in larger gaps, more samples/iterations results in smaller gaps.
     more decision variables require more samples.
-    3 periods with 60 samples and 15 iterations, gap very close to optimal.
+    3 periods with 60 samples and 15 iterations, gap very close to optimal, takes over 400s;
+    4 periods with 50 samples and 13 iterations, gap very close to optimal, takes time about 990s;
 """
 
 from gurobipy import *
@@ -36,7 +37,7 @@ price = 10
 unit_back_cost = 0
 unit_hold_cost = 0
 unit_salvage = 0.5
-mean_demands = [10, 15, 10]
+mean_demands = [10, 15, 10, 15]
 T = len(mean_demands)
 sample_nums = [10 for t in range(T)]
 overhead_cost = [50 for t in range(T)]
@@ -62,8 +63,8 @@ scenarios_full = list(itertools.product(*sample_detail))
 
 
 iter = 0
-iter_num = 15
-N = 60 # sampled number of scenarios for forward computing
+iter_num = 13
+N = 50 # sampled number of scenarios for forward computing
 
 theta_iniValue = -500 # initial theta values (profit) in each period
 m = Model() # linear model in the first stage
