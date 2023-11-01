@@ -156,7 +156,7 @@ while iter < iter_num:
             # put those cuts in the front
             if iter > 0 and t < T - 1:
                 for i in range(iter):
-                    for nn in range(N): # N
+                    for nn in range(1): # N
                         m_forward[t][n].addConstr(theta_forward[t][n] >= slopes[t][nn][i][-2]*(I_forward[t][n]+ q_forward[t][n]) + slopes[t][nn][i][-1]*(cash_forward[t][n]- vari_cost*q_forward[t][n]\
                                                                             -r3*W3_forward[t][n]-r2*W2_forward[t][n]\
                                                                                 - r1*W1_forward[t][n]+r0*W0_forward[t][n]) + intercepts[t][nn][i])
@@ -235,7 +235,7 @@ while iter < iter_num:
                 # put those cuts in the front
                 if iter > 0 and t < T - 1:
                     for i in range(iter):
-                        for nn in range(N): # N
+                        for nn in range(1): # N
                             m_backward[t][n][k].addConstr(theta_backward[t][n][k] >= slopes[t][nn][i][-2]*(I_backward[t][n][k]+ q_backward[t][n][k]) + slopes[t][nn][i][-1]*(cash_backward[t][n][k]- vari_cost*q_backward[t][n][k]\
                                                                                    -r3*W3_backward[t][n][k]-r2*W2_backward[t][n][k]\
                                                                                       - r1*W1_backward[t][n][k] + r0*W0_backward[t][n][k]) + intercepts[t][nn][i])
