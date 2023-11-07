@@ -8,6 +8,8 @@ Created on Mon Jul 19 16:52:47 2023
 @disp:  using close form of cut is not practical, since 
 decision variables of the last stage can not obtained automatically. So, it is better to get cuts
 by the dual objective. 
+
+this file is actually same with newsvendor-SDDP.py
     
 """
 
