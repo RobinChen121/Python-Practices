@@ -19,20 +19,29 @@ from matplotlib import animation
 
 fig = plt.figure()
 sub = fig.add_subplot(111,xlim=(-3, 3), ylim=(-2, 4))
-PLOT,  = sub.plot([],[])
+PLOT, = sub.plot([],[])
 plt.text(-1.6, 3, r'$f(x)=x^{2/3}+0.9(3.3-x^2)^{1/2}\sin(\alpha\pi x)$') 
+time_text = sub.text(0.6, 0.75,"",transform = sub.transAxes, ha="right")
+t = 0
 
-
+def init():
+    x = np.linspace(-2,2,1000)
+    PLOT.set_data([],[])
+    time_text.set_text("")
+    return PLOT,time_text
 
 def animate(alpha):
-    alpha_s = str(round(alpha, 2))
-    # tx = plt.text(-0.5, 2.5, r'$\alpha=$' + alpha_s)
-    x = np.linspace(-2,2,1000) 
-    y = abs(x)**(2/3)+ 0.9*np.sqrt(3.3 - x**2)*np.sin(alpha*(np.pi)*x)
+    # alpha_s = str(round(alpha, 2))
+    # plt.text(-0.5, 2.5, r'$\alpha=$' + alpha_s)
+    global t
+    x = np.linspace(-2,2,1000)
+    y = abs(x)**(2/3) + 0.9*np.sqrt(3.3 - x**2)*np.sin(alpha*(np.pi)*x)
+    t += 1
 
     PLOT.set_data(x,y)
-    return PLOT, 
+    time_text.set_text("alpha = "+str(round(alpha,2)))
+    return PLOT, time_text
 
-ani = animation.FuncAnimation(fig, animate, frames=np.arange(1, 20, 0.1), interval=100)
+ani = animation.FuncAnimation(fig, animate, init_func=init, frames=np.arange(1,20,0.1), interval=20,repeat=False)
 
 plt.show()
