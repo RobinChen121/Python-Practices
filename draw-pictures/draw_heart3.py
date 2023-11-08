@@ -24,11 +24,11 @@ plt.text(-1.6, 3, r'$f(x)=x^{2/3}+0.9(3.3-x^2)^{1/2}\sin(\alpha\pi x)$')
 time_text = sub.text(0.6, 0.75,"",transform = sub.transAxes, ha="right")
 t = 0
 
-def init():
-    x = np.linspace(-2,2,1000)
-    PLOT.set_data([],[])
-    time_text.set_text("")
-    return PLOT,time_text
+# def init():
+#     x = np.linspace(-2,2,1000)
+#     PLOT.set_data([],[])
+#     time_text.set_text("")
+#     return PLOT,time_text
 
 def animate(alpha):
     # alpha_s = str(round(alpha, 2))
@@ -42,6 +42,6 @@ def animate(alpha):
     time_text.set_text("alpha = "+str(round(alpha,2)))
     return PLOT, time_text
 
-ani = animation.FuncAnimation(fig, animate, init_func=init, frames=np.arange(1,20,0.1), interval=20,repeat=False)
+ani = animation.FuncAnimation(fig, animate, frames=np.arange(1,20.1,0.1), interval=20,repeat=True)
 
 plt.show()

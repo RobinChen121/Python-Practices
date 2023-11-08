@@ -6,7 +6,6 @@ Created on Wed Nov  1 13:43:06 2023
 """
 import matplotlib.pyplot as plt
 import numpy as np
-import time
 
 
 # type %matplotlib qt to shown figure in a separate window
