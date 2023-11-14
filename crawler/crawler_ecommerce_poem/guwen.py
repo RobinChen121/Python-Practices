@@ -37,7 +37,7 @@ def get_url_links(url_head_content):
     links = links.findAll('span')
     link_list = []
     for each in links:
-        link_list.append('https://so.gushiwen.cn' + each.a.get('href'))  # 获取每一回的链接，存储到列表里
+        link_list.append(each.a.get('href'))  # 获取每一回的链接，存储到列表里
     return link_list
 
 
@@ -47,10 +47,10 @@ def filter_info(chapter_num, url_text):
     contents = soup.find('div', class_='contson')
     # 使用 get_text 可以读取网页里面的换行，而 text 不能
     chapter_title = contents.find('p').get_text()  # 第一句话是本回的标题
-    chapter_titel = '第' + str(chapter_num) + '回 ' + chapter_title.lstrip()
+    chapter_title = '第' + str(chapter_num) + '回 ' + chapter_title.lstrip()
     chapter_content = contents.get_text(separator="\n")  # find 返回的不是列表，不用跟 [0]
     chapter_content = chapter_content.lstrip() # 结掉字符串左边的空字符
-    this_chapter = [chapter_titel, chapter_content]
+    this_chapter = [chapter_title, chapter_content]
     return this_chapter
 
 

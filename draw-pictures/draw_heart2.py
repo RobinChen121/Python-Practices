@@ -9,8 +9,7 @@ import numpy as np
 
 
 # type %matplotlib qt to shown figure in a separate window
-
-x = np.linspace(-2, 2, 1000)
+x = np.linspace(-1.8, 1.8, 1000)
 alpha = 1
 
 while alpha <= 21:
@@ -22,10 +21,10 @@ while alpha <= 21:
     plt.text(-1.6, 3, r'$f(x)=x^{2/3}+0.9(3.3-x^2)^{1/2}\sin(\alpha\pi x)$')   
     alpha_s = str(round(alpha, 2))
     tx = plt.text(-0.5, 2.5, r'$\alpha=$' + alpha_s)
-    plt.pause(0.1) 
+    plt.pause(0.02) # 停顿 0.02 s
     if alpha <= 20:
         alpha += 0.1
-        plt.clf()
+        plt.clf() # 清除当前图像
     else:
         break
     
