@@ -21,12 +21,12 @@ import os
 
 # 获取单个网页信息
 def get_url_content(url):
-    headers = {
-        'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.108 Safari/537.36'
-    }  # 主要是模拟浏览器登录，防止反爬，一般的网站没有这个也行，谷歌浏览器 按 F12 能够找到网站支持的 headers
-    r = requests.get(url, headers=headers, timeout=30)  # 获取网页的内容，并返回给r变量，timeout 为超时时间
-    r.raise_for_status()  # 检查返回网页的内容的状态码，200表示成功
-    r.encoding = r.apparent_encoding  # 统一编码方式
+    # headers = {
+    #     'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.108 Safari/537.36'
+    # }  # 主要是模拟浏览器登录，防止反爬，一般的网站没有这个也行，谷歌浏览器 按 F12 能够找到网站支持的 headers
+    r = requests.get(url, timeout=30)  # 获取网页的内容，并返回给r变量，timeout 为超时时间
+    # r.raise_for_status()  # 检查返回网页的内容的状态码，200表示成功
+    # r.encoding = r.apparent_encoding  # 统一编码方式
     return r.text  # 返回网页中的文本内容，数据内容为 r.content
 
 
@@ -65,7 +65,7 @@ def write_txt(string_array):
 
 # 主函数
 def main():
-    url = 'https://so.gushiwen.cn/guwen/book_46653FD803893E4F7F702BCF1F7CCE17.aspx'  # 古诗文网三国演义网址
+    url = 'https://so.gushiwen.cn/gushi/tangshi.aspx'  # 古诗文网三国演义网址
     url_head_content = get_url_content(url)  # 获取网页
     links = get_url_links(url_head_content)  # 获取每一回的链接地址
     for index, each in enumerate(links):
