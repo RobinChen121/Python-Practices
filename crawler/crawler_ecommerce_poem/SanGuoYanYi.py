@@ -68,6 +68,8 @@ def main():
     url = 'https://so.gushiwen.cn/gushi/tangshi.aspx'  # 古诗文网三国演义网址
     url_head_content = get_url_content(url)  # 获取网页
     links = get_url_links(url_head_content)  # 获取每一回的链接地址
+    # enumerate() 函数用于将一个可遍历的数据对象(如列表、元组或字符串)组合为一个索引序列
+    # 同时列出数据下标和数据
     for index, each in enumerate(links):
         url_link_content = get_url_content(each)  # 获取每一回的网页内容
         chapter_content = filter_info(index + 1, url_link_content)  # 解析每一回的网页内容，获取小说文本

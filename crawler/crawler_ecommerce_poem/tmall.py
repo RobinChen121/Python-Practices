@@ -24,12 +24,6 @@ import time
 import random
 import datetime
 
-#宏变量存储目标js的URL列表，全局变量
-COMMENT_PAGE_URL = []
-ITEM_ID = 591120591607 # 商品代码， 鼠标
-ITEM_ID = 588953969527 # 商品为暗鸦之眼pro 二合一 耳机
-#ITEM_ID = 587914055973 # 防水键盘104
-#ITEM_ID = 588788936455 # 黑色标准版鼠标
 
 
 #生成链接列表
@@ -85,7 +79,14 @@ def GetInfo(num):
     f.close()
 
 #主函数
-if __name__ == "__main__":
-    Page_Num = 30  # 最大支持 Page_Num*20 个评论
-    Get_Url(Page_Num)
-    GetInfo(Page_Num)
+
+#宏变量存储目标js的URL列表，全局变量
+COMMENT_PAGE_URL = []
+ITEM_ID = 591120591607 # 商品代码， 鼠标
+ITEM_ID = 588953969527 # 商品为暗鸦之眼pro 二合一 耳机
+#ITEM_ID = 587914055973 # 防水键盘104
+#ITEM_ID = 588788936455 # 黑色标准版鼠标
+
+Page_Num = 30  # 最大支持 Page_Num*20 个评论
+Get_Url(Page_Num)
+GetInfo(Page_Num)
