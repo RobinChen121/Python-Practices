@@ -28,11 +28,14 @@ unit_back_cost = 10
 unit_hold_cost = 2
 mean_demands = [10, 20, 10, 20, 10, 20, 10, 20]
 ----
-optimal cost for above problem is 218.41, java 0.5s;
+218.41 for sdp optimal cost, java 0.5s;
+
 199.84 for sddp, 1345.88s on a desktop for iter number 15, sample number 50;
 198.09 for sddp, 884.52s on a desktop for iter number 15, sample number 30;
 209.04 for sddp, 638.28s on a desktop for iter number 18, sample number 20;    
 220.98 for sddp, 806s on a desktop for iter number 21, sample number 20;
+
+219.61 for sddp tree traverse strategy, 447s on a desktop for iter number 21, sample number 20;
 """
 
 from gurobipy import *
