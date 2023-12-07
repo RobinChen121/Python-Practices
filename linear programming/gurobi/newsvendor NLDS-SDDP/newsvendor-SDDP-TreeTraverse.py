@@ -35,8 +35,7 @@ mean_demands = [10, 20, 10, 20, 10, 20, 10, 20]
 209.04 for sddp, 638.28s on a desktop for iter number 18, sample number 20;    
 220.98 for sddp, 806s on a desktop for iter number 21, sample number 20;
 
-219.61 for sddp and only 1 cut in backward and forward, 447s on a desktop for iter number 21, sample number 20;
-
+221.79 for sddp tree traverse strategy(N=1), 28.6s on a desktop for iter number 21, sample number 20;
 
 """
 
@@ -127,7 +126,7 @@ while iter < iter_num:
     theta_forward_values = [[0 for n in range(N)] for t in range(T)]
     
     for t in range(T):
-        for n in range(N):
+        for n in range(1):
             demand = sample_scenarios[n][t]
             
             # put those cuts in the front
@@ -175,7 +174,7 @@ while iter < iter_num:
     
     # it is better t in the first loop
     for t in range(T - 1, -1, -1):
-       for n in range(N):
+       for n in range(1):
             K = len(sample_detail[t])
             for k in range(K):
                 demand = sample_detail[t][k]
