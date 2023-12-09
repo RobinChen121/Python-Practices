@@ -73,7 +73,7 @@ for t in range(T):
 
 iter = 0
 iter_num = 21
-N = 20 # sampled number of scenarios for forward computing
+NN = 20 # sampled number of scenarios for forward computing
 
 theta_iniValue = 0 # initial theta values (profit) in each period
 m = Model() # linear model in the first stage
@@ -91,8 +91,11 @@ slopes = [[ [] for n in range(N)] for t in range(T-1)]
 intercepts = [[ [] for n in range(N)] for t in range(T-1)]
 q_values = [0 for iter in range(iter_num)]
 
+kk = [1, 2, 4, 5]
 start = time.process_time()
 while iter < iter_num:  
+    
+    N = kk[iter] if iter < len(kk) else kk[-1]
     
     # sample a numer of scenarios from the full scenario tree
     # random.seed(10000)
@@ -125,7 +128,7 @@ while iter < iter_num:
     theta_forward_values = [[0 for n in range(N)] for t in range(T)]
     
     for t in range(T):
-        for n in range(1):
+        for n in range(N):
             demand = sample_scenarios[n][t]
             
             # put those cuts in the front
@@ -172,7 +175,7 @@ while iter < iter_num:
     
     # it is better t in the first loop
     for t in range(T - 1, -1, -1):
-       for n in range(1):
+       for n in range(N):
             S = len(sample_detail[t])
             for s in range(S):
                 demand = sample_detail[t][s]
