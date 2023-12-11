@@ -87,15 +87,17 @@ theta_value = 0
 # cuts
 slope1_stage = []
 intercept1_stage = []
-slopes = [[ [] for n in range(N)] for t in range(T-1)]
-intercepts = [[ [] for n in range(N)] for t in range(T-1)]
 q_values = [0 for iter in range(iter_num)]
 
-kk = [1, 2, 4, 5]
+kk = [1, 1, 1, 1]
+slopes = [[] for i in range(iter_num)]
+intercepts = [[] for i in range(iter_num)]
 start = time.process_time()
 while iter < iter_num:  
     
     N = kk[iter] if iter < len(kk) else kk[-1] # this N is the k in the JCAM 2015 paper
+    slopes[iter] = [[0 for n in range(N)] for t in range(T-1)]
+    intercepts[iter] = [[0 for n in range(N)] for t in range(T-1)]
     
     # sample a numer of scenarios from the full scenario tree
     # random.seed(10000)
@@ -128,14 +130,14 @@ while iter < iter_num:
     theta_forward_values = [[0 for n in range(N)] for t in range(T)]
     
     for t in range(T):
-        for n in range(NN / N):
+        for n in range(N):
             demand = sample_scenarios[n][t]
             
             # put those cuts in the front
             if iter > 0 and t < T - 1:
                 for i in range(iter):
                     for nn in range(1): # N
-                        m_forward[t][n].addConstr(theta_forward[t][n] >= slopes[t][nn][i]*(I_forward[t][n]- B_forward[t][n] + q_forward[t][n]) + intercepts[t][nn][i])
+                        m_forward[t][n].addConstr(theta_forward[t][n] >= slopes[i][t][nn]*(I_forward[t][n]- B_forward[t][n] + q_forward[t][n]) + intercepts[i][t][nn])
                            
             if t == T - 1:                   
                 m_forward[t][n].setObjective(unit_hold_cost*I_forward[t][n] + unit_bacs_cost*B_forward[t][n], GRB.MINIMIZE)
@@ -185,7 +187,7 @@ while iter < iter_num:
                 if iter > 0 and t < T - 1:
                     for i in range(iter):
                         for nn in range(1): # N
-                             m_bacsward[t][n][s].addConstr(theta_bacsward[t][n][s] >= slopes[t][nn][i]*(I_bacsward[t][n][s]- B_bacsward[t][n][s] + q_bacsward[t][n][s]) + intercepts[t][nn][i])
+                             m_bacsward[t][n][s].addConstr(theta_bacsward[t][n][s] >= slopes[i][t][nn]*(I_bacsward[t][n][s]- B_bacsward[t][n][s] + q_bacsward[t][n][s]) + intercepts[i][t][nn])
             
                 if t == T - 1:                   
                     m_bacsward[t][n][s].setObjective(unit_hold_cost*I_bacsward[t][n][s] + unit_bacs_cost*B_bacsward[t][n][s], GRB.MINIMIZE)
@@ -225,8 +227,8 @@ while iter < iter_num:
                 slope1_stage.append(avg_pi)
                 intercept1_stage.append(avg_pi_rhs)
             elif t > 0:
-                slopes[t-1][n].append(avg_pi)
-                intercepts[t-1][n].append(avg_pi_rhs)   
+                slopes[iter][t-1][n] = avg_pi
+                intercepts[iter][t-1][n] = avg_pi_rhs   
             print()
             
     iter += 1
