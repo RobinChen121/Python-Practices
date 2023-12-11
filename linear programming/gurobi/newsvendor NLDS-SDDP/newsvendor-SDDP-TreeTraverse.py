@@ -101,7 +101,7 @@ while iter < iter_num:
     # random.seed(10000)
     sample_scenarios = generate_scenario_samples(N, trunQuantile, mean_demands)
     # sample_scenarios= random.sample(scenarios_full, N) # sampling without replacement
-    sample_scenarios.sort() # sort to mase same numbers together
+    sample_scenarios.sort() # sort to make same numbers together
     
     # forward
     if iter > 0:
