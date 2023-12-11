@@ -95,7 +95,7 @@ kk = [1, 2, 4, 5]
 start = time.process_time()
 while iter < iter_num:  
     
-    N = kk[iter] if iter < len(kk) else kk[-1]
+    N = kk[iter] if iter < len(kk) else kk[-1] # this N is the k in the JCAM 2015 paper
     
     # sample a numer of scenarios from the full scenario tree
     # random.seed(10000)
@@ -128,7 +128,7 @@ while iter < iter_num:
     theta_forward_values = [[0 for n in range(N)] for t in range(T)]
     
     for t in range(T):
-        for n in range(N):
+        for n in range(NN / N):
             demand = sample_scenarios[n][t]
             
             # put those cuts in the front
