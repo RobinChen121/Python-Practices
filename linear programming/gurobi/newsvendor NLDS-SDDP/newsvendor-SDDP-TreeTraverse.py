@@ -36,6 +36,7 @@ mean_demands = [10, 20, 10, 20, 10, 20, 10, 20]
 220.98 for sddp, 806s on a desstop for iter number 21, sample number 20;
 
 221.79 for sddp tree traverse strategy(N=1), 28.6s on a desktop for iter number 21, sample number 20;
+217.85 for sddp tree traverse strategy(N=1, 2, 4, 5..), 89.2s on a desktop for iter number 21, sample number 20;
 
 """
 
@@ -89,7 +90,7 @@ slope1_stage = []
 intercept1_stage = []
 q_values = [0 for iter in range(iter_num)]
 
-kk = [1, 1, 1, 1]
+kk = [1, 2, 4, 5]
 slopes = [[] for i in range(iter_num)]
 intercepts = [[] for i in range(iter_num)]
 start = time.process_time()
