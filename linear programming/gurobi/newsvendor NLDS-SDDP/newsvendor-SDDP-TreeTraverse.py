@@ -36,7 +36,7 @@ mean_demands = [10, 20, 10, 20, 10, 20, 10, 20]
 220.98 for sddp, 806s on a desstop for iter number 21, sample number 20;
 
 221.79 for sddp tree traverse strategy(N=1), 28.6s on a desktop for iter number 21, sample number 20;
-217.85 for sddp tree traverse strategy(N=1, 2, 4, 5..), 89.2s on a desktop for iter number 21, sample number 20;
+217.85 for sddp tree traverse strategy(N=1, 2, 4, 5..), 96.2s on a desktop for iter number 21, sample number 20;
 
 """
 
@@ -137,7 +137,8 @@ while iter < iter_num:
             # put those cuts in the front
             if iter > 0 and t < T - 1:
                 for i in range(iter):
-                    for nn in range(1): # N
+                    cut_num = len(slopes[i][t])
+                    for nn in range(cut_num): # N
                         m_forward[t][n].addConstr(theta_forward[t][n] >= slopes[i][t][nn]*(I_forward[t][n]- B_forward[t][n] + q_forward[t][n]) + intercepts[i][t][nn])
                            
             if t == T - 1:                   
@@ -187,7 +188,8 @@ while iter < iter_num:
                  # put those cuts in the front
                 if iter > 0 and t < T - 1:
                     for i in range(iter):
-                        for nn in range(1): # N
+                        cut_num = len(slopes[i][t])
+                        for nn in range(cut_num): # N
                              m_bacsward[t][n][s].addConstr(theta_bacsward[t][n][s] >= slopes[i][t][nn]*(I_bacsward[t][n][s]- B_bacsward[t][n][s] + q_bacsward[t][n][s]) + intercepts[i][t][nn])
             
                 if t == T - 1:                   

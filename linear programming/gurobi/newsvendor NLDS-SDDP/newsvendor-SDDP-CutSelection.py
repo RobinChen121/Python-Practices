@@ -92,6 +92,7 @@ intercept1_stage = []
 q_values = [0 for iter in range(iter_num)]
 
 kk = [1, 2, 4, 5]
+kk = [NN for i in range(4)]
 slopes = [[] for i in range(iter_num)]
 intercepts = [[] for i in range(iter_num)]
 start = time.process_time()
@@ -138,6 +139,7 @@ while iter < iter_num:
             # put those cuts in the front
             if iter > 0 and t < T - 1:
                 for i in range(iter):
+                    
                     for nn in range(1): # N
                         m_forward[t][n].addConstr(theta_forward[t][n] >= slopes[i][t][nn]*(I_forward[t][n]- B_forward[t][n] + q_forward[t][n]) + intercepts[i][t][nn])
                            
