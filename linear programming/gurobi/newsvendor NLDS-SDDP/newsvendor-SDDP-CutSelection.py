@@ -139,8 +139,8 @@ while iter < iter_num:
             # put those cuts in the front
             if iter > 0 and t < T - 1:
                 for i in range(iter):
-                    
-                    for nn in range(1): # N
+                    cut_num = len(slopes[i][t])
+                    for nn in range(cut_num): # N
                         m_forward[t][n].addConstr(theta_forward[t][n] >= slopes[i][t][nn]*(I_forward[t][n]- B_forward[t][n] + q_forward[t][n]) + intercepts[i][t][nn])
                            
             if t == T - 1:                   
@@ -190,7 +190,8 @@ while iter < iter_num:
                  # put those cuts in the front
                 if iter > 0 and t < T - 1:
                     for i in range(iter):
-                        for nn in range(1): # N
+                        cut_num = len(slopes[i][t])
+                        for nn in range(cut_num): # N
                              m_bacsward[t][n][s].addConstr(theta_bacsward[t][n][s] >= slopes[i][t][nn]*(I_bacsward[t][n][s]- B_bacsward[t][n][s] + q_bacsward[t][n][s]) + intercepts[i][t][nn])
             
                 if t == T - 1:                   
