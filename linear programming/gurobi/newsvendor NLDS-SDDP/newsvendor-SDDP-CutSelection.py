@@ -73,7 +73,6 @@ for t in range(T):
 # scenarios_full = list(itertools.product(*sample_detail)) 
 
 
-iter = 0
 iter_num = 21
 NN = 20 # sampled number of scenarios for forward computing
 
@@ -95,7 +94,9 @@ kk = [1, 2, 4, 5]
 kk = [NN for i in range(4)]
 slopes = [[] for i in range(iter_num)]
 intercepts = [[] for i in range(iter_num)]
+cut_index = [[0 for t in range(T)] for i in range(iter_num)]
 start = time.process_time()
+iter = 0
 while iter < iter_num:  
     
     N = kk[iter] if iter < len(kk) else kk[-1] # this N is the k in the JCAM 2015 paper
@@ -138,31 +139,39 @@ while iter < iter_num:
             
             # put those cuts in the front
             if iter > 0 and t < T - 1:
-                for i in range(iter):
-                    cut_num = len(slopes[i][t])
-                    for nn in range(cut_num): # N
-                        m_forward[t][n].addConstr(theta_forward[t][n] >= slopes[i][t][nn]*(I_forward[t][n]- B_forward[t][n] + q_forward[t][n]) + intercepts[i][t][nn])
+                # for i in range(iter-1):
+                #     nn = cut_index[i][t]
+                #     m_forward[t][n].addConstr(theta_forward[t][n] >= slopes[i][t][nn]*(I_forward[t][n]- B_forward[t][n] + q_forward[t][n]) + intercepts[i][t][nn])
+                NewJustAdd = True
+                nn = 0
+                max_value = float('-inf')
+                while NewJustAdd:
+                    NewJustAdd = False
+                    m_forward[t][n].addConstr(theta_forward[t][n] >= slopes[iter-1][t][nn]*(I_forward[t][n]- B_forward[t][n] + q_forward[t][n]) + intercepts[iter-1][t][nn])
                            
-            if t == T - 1:                   
-                m_forward[t][n].setObjective(unit_hold_cost*I_forward[t][n] + unit_bacs_cost*B_forward[t][n], GRB.MINIMIZE)
-            else:
-                m_forward[t][n].setObjective(vari_cost*q_forward[t][n] + unit_hold_cost*I_forward[t][n] + unit_bacs_cost*B_forward[t][n] + theta_forward[t][n], GRB.MINIMIZE)
-            if t == 0:   
-                m_forward[t][n].addConstr(I_forward[t][n] - B_forward[t][n] == ini_I + q_values[iter] - demand)
-            else:
-                m_forward[t][n].addConstr(I_forward[t][n] - B_forward[t][n] == I_forward_values[t-1][n] - B_forward_values[t-1][n] + q_forward_values[t-1][n] - demand)   
-
-                
-            # optimize
-            m_forward[t][n].optimize()
-            # m_forward[t][n].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(n+1) + '-2.lp')
-            
-            I_forward_values[t][n] = I_forward[t][n].x 
-            B_forward_values[t][n] = B_forward[t][n].x      
-            if t < T - 1:
-                q_forward_values[t][n] = q_forward[t][n].x
-                theta_forward_values[t][n] = theta_forward[t][n]
-            # m_forward[t][n].dispose()
+                    if t == T - 1:                   
+                        m_forward[t][n].setObjective(unit_hold_cost*I_forward[t][n] + unit_bacs_cost*B_forward[t][n], GRB.MINIMIZE)
+                    else:
+                        m_forward[t][n].setObjective(vari_cost*q_forward[t][n] + unit_hold_cost*I_forward[t][n] + unit_bacs_cost*B_forward[t][n] + theta_forward[t][n], GRB.MINIMIZE)
+                    if t == 0:   
+                        m_forward[t][n].addConstr(I_forward[t][n] - B_forward[t][n] == ini_I + q_values[iter] - demand)
+                    else:
+                        m_forward[t][n].addConstr(I_forward[t][n] - B_forward[t][n] == I_forward_values[t-1][n] - B_forward_values[t-1][n] + q_forward_values[t-1][n] - demand)   
+        
+                        
+                    # optimize
+                    m_forward[t][n].optimize()
+                    # m_forward[t][n].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(n+1) + '-2.lp')                 
+                    I_forward_values[t][n] = I_forward[t][n].x 
+                    B_forward_values[t][n] = B_forward[t][n].x      
+                    if t < T - 1:
+                        q_forward_values[t][n] = q_forward[t][n].x
+                        theta_forward_values[t][n] = theta_forward[t][n]
+                    this_cut_value = slopes[i][t][nn]*(I_forward_values[t][n]- B_forward_values[t][n] + q_forward_values[t][n]) + intercepts[i][t][nn]
+                    if this_cut_value > max:
+                        max = this_cut_value
+                        NewJustAdd = True
+                    
     
     # bacsward
     m_bacsward = [[[Model() for s in range(sample_nums[t])] for n in range(N)] for t in range(T)]
