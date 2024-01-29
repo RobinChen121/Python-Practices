@@ -126,6 +126,7 @@ while iter < iter_num:
     B_forward_values = [[0 for n in range(N)] for t in range(T)]
     theta_forward_values = [[0 for n in range(N)] for t in range(T)]
     
+    # forward loop
     for t in range(T):
         for n in range(N):
             demand = sample_scenarios[n][t]
@@ -166,14 +167,12 @@ while iter < iter_num:
     B_bacsward = [[[m_bacsward[t][n][s].addVar(vtype = GRB.CONTINUOUS, name = 'B_' + str(t+1) + '^' + str(n+1)) for s in range(sample_nums[t])] for n in range(N)] for t in range(T)]
     theta_bacsward = [[[m_bacsward[t][n][s].addVar(lb = -theta_iniValue*(T-1-t), vtype = GRB.CONTINUOUS, name = 'theta_' + str(t+3) + '^' + str(n+1)) for s in range(sample_nums[t])] for n in range(N)] for t in range(T - 1)]
 
-    q_bacsward_values = [[[0  for s in range(sample_nums[t])] for n in range(N)] for t in range(T)]
-    I_bacsward_values = [[[0  for s in range(sample_nums[t])] for n in range(N)] for t in range(T)]
-    B_bacsward_values = [[[0  for s in range(sample_nums[t])] for n in range(N)] for t in range(T)]
     theta_bacsward_values = [[[0  for s in range(sample_nums[t])] for n in range(N)] for t in range(T)]
     pi_values = [[[0  for s in range(sample_nums[t])] for n in range(N)] for t in range(T)]
     pi_rhs_values = [[[0  for s in range(sample_nums[t])] for n in range(N)] for t in range(T)] 
     
     # it is better t in the first loop
+    # backward loop
     for t in range(T - 1, -1, -1):
        for n in range(N):
             S = len(sample_detail[t])

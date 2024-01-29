@@ -1,19 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Mon Jul 17 08:44:23 2023
-
-@author: zhenchen
-
-@disp:  
-    
-    
-"""
-
-
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
 Created on Mon Jul 10 10:52:47 2023
 
 @author: zhenchen
@@ -30,13 +17,13 @@ mean_demands = [10, 20, 10, 20, 10, 20, 10, 20]
 ----
 218.41 for sdp optimal cost, java 0.5s;
 
-199.84 for sddp, 1345.88s on a desstop for iter number 15, sample number 50;
-198.09 for sddp, 884.52s on a desstop for iter number 15, sample number 30;
-209.04 for sddp, 638.28s on a desstop for iter number 18, sample number 20;    
-220.98 for sddp, 806s on a desstop for iter number 21, sample number 20;
+199.84 for sddp, 1345.88s on a desktop for iter number 15, sample number 50;
+198.09 for sddp, 884.52s on a desktop for iter number 15, sample number 30;
+209.04 for sddp, 638.28s on a desktop for iter number 18, sample number 20;    
+220.98 for sddp, 806s on a desktop for iter number 21, sample number 20;
 
-221.79 for sddp tree traverse strategy(N=1), 28.6s on a desktop for iter number 21, sample number 20;
-217.85 for sddp tree traverse strategy(N=1, 2, 4, 5..), 96.2s on a desktop for iter number 21, sample number 20;
+221.79 for sddp tree traverse strategy(N=1), 28.6s on a desktop(13.99s for mac) for iter number 21, sample number 20;
+217.85 for sddp tree traverse strategy(N=1, 2, 4, 5..), 96.2s on a desktop(55s for mac) for iter number 21, sample number 20;
 
 """
 
@@ -90,7 +77,7 @@ slope1_stage = []
 intercept1_stage = []
 q_values = [0 for iter in range(iter_num)]
 
-kk = [1, 2, 4, 5]
+kk = [1, 1, 1, 1]
 slopes = [[] for i in range(iter_num)]
 intercepts = [[] for i in range(iter_num)]
 start = time.process_time()
@@ -170,10 +157,6 @@ while iter < iter_num:
     B_bacsward = [[[m_bacsward[t][n][s].addVar(vtype = GRB.CONTINUOUS, name = 'B_' + str(t+1) + '^' + str(n+1)) for s in range(sample_nums[t])] for n in range(N)] for t in range(T)]
     theta_bacsward = [[[m_bacsward[t][n][s].addVar(lb = -theta_iniValue*(T-1-t), vtype = GRB.CONTINUOUS, name = 'theta_' + str(t+3) + '^' + str(n+1)) for s in range(sample_nums[t])] for n in range(N)] for t in range(T - 1)]
 
-    q_bacsward_values = [[[0  for s in range(sample_nums[t])] for n in range(N)] for t in range(T)]
-    I_bacsward_values = [[[0  for s in range(sample_nums[t])] for n in range(N)] for t in range(T)]
-    B_bacsward_values = [[[0  for s in range(sample_nums[t])] for n in range(N)] for t in range(T)]
-    theta_bacsward_values = [[[0  for s in range(sample_nums[t])] for n in range(N)] for t in range(T)]
     pi_values = [[[0  for s in range(sample_nums[t])] for n in range(N)] for t in range(T)]
     pi_rhs_values = [[[0  for s in range(sample_nums[t])] for n in range(N)] for t in range(T)] 
     
