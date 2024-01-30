@@ -92,7 +92,7 @@ while iter < iter_num:
     slopes[iter] = [[0 for n in range(N)] for t in range(T-1)]
     intercepts[iter] = [[0 for n in range(N)] for t in range(T-1)]
     cut_index[iter] = [[0 for n in range(N)] for t in range(T-1)]
-    cut_index_back[iter] = [[[0 for n in range(N)] for n in range(N)] for t in range(T-1)]
+    cut_index_back[iter] = [[0 for n in range(N)] for t in range(T-1)]
     
     # sample a numer of scenarios from the full scenario tree
     # random.seed(10000)
@@ -138,31 +138,37 @@ while iter < iter_num:
                 m_forward[t][n].addConstr(I_forward[t][n] - B_forward[t][n] == I_forward_values[t-1][n] - B_forward_values[t-1][n] + q_forward_values[t-1][n] - demand)   
 
 
-            # put those cuts 
+            # put those cuts in the back
             if iter > 0 and t < T - 1:
                 # cuts selected in previous iterations
-                for i in range(iter-1):
+                for i in range(iter-1):               
                     nn = cut_index[i][t][n] # i is the iter index
+
                     m_forward[t][n].addConstr(theta_forward[t][n] >= slopes[i][t][nn]*(I_forward[t][n]- B_forward[t][n] + q_forward[t][n]) + intercepts[i][t][nn])
-                NewJustAdd = True
-                max_value = float('-inf')
-                while NewJustAdd:
-                    nn = cut_index[i][t][n] # default initiallly select the first cut
-                    NewJustAdd = False
+            NewJustAdd = True
+            max_value = float('-inf')
+            while NewJustAdd:      
+                NewJustAdd = False
+                if iter > 0 and t < T - 1:                  
+                    try:
+                        nn = cut_index[iter-1][t][n] # default initiallly select the first cut
+                    except Exception:
+                        pass
+                    
                     m_forward[t][n].addConstr(theta_forward[t][n] >= slopes[iter-1][t][nn]*(I_forward[t][n]- B_forward[t][n] + q_forward[t][n]) + intercepts[iter-1][t][nn])
-                                           
-                    # optimize
-                    m_forward[t][n].optimize()
-                    # m_forward[t][n].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(n+1) + '-2.lp')                 
-                    I_forward_values[t][n] = I_forward[t][n].x 
-                    B_forward_values[t][n] = B_forward[t][n].x      
-                    if t < T - 1:
-                        q_forward_values[t][n] = q_forward[t][n].x
-                        theta_forward_values[t][n] = theta_forward[t][n]
-                    # this_cut_value = slopes[i][t][nn]*(I_forward_values[t][n]- B_forward_values[t][n] + q_forward_values[t][n]) + intercepts[i][t][nn]
-                    values = [slopes[i][t][k]*(I_forward_values[t][n]- B_forward_values[t][n] + q_forward_values[t][n]) + intercepts[i][t][nn] for k in range(N)]               
+                                       
+                # optimize
+                m_forward[t][n].optimize()
+                # m_forward[t][n].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(n+1) + '-2.lp')                 
+                I_forward_values[t][n] = I_forward[t][n].x 
+                B_forward_values[t][n] = B_forward[t][n].x      
+                if t < T - 1:
+                    q_forward_values[t][n] = q_forward[t][n].x
+                    theta_forward_values[t][n] = theta_forward[t][n]
+                if iter > 0 and t < T - 1:
+                    values = [slopes[iter-1][t][k]*(I_forward_values[t][n]- B_forward_values[t][n] + q_forward_values[t][n]) + intercepts[iter-1][t][nn] for k in range(N)]               
                     if np.argmax(values) != nn:
-                        cut_index[i][t][n] = nn
+                        cut_index[iter - 1][t][n] = nn
                         m_forward[t][n].remove(m_forward[t][n].getConstrs()[-1])
                         NewJustAdd = True
                     
@@ -197,27 +203,32 @@ while iter < iter_num:
                     m_backward[t][n][s].addConstr(I_backward[t][n][s] - B_backward[t][n][s] == I_forward_values[t-1][n] - B_forward_values[t-1][n] + q_forward_values[t-1][n] - demand)
                 
 
-                 # put those cuts 
+                 # put those cuts in the back
                 if iter > 0 and t < T - 1:
                     for i in range(iter - 1):
                         nn = cut_index[i][t][n]
                         m_backward[t][n][s].addConstr(theta_backward[t][n][s] >= slopes[i][t][nn]*(I_backward[t][n][s]- B_backward[t][n][s] + q_backward[t][n][s]) + intercepts[i][t][nn])
-                    NewJustAdd = True
-                    max_value = float('-inf')
-                    while NewJustAdd:
-                        NewJustAdd = False
-                        nn = cut_index_back[i][t][n]
-                        m_backward[t][n][s].addConstr(theta_backward[t][n][s] >= slopes[i][t][nn]*(I_backward[t][n][s]- B_backward[t][n][s] + q_backward[t][n][s]) + intercepts[i][t][nn])
-                    
-                    
-                        # optimize
-                        m_backward[t][n][s].optimize()   
-                        I_backward_values[t][n][s] = I_backward[t][n][s].x 
-                        B_backward_values[t][n][s] = B_backward[t][n][s].x      
-                        if t < T - 1:
-                            q_backward_values[t][n][s] = q_backward[t][n][s].x
-                        # this_cut_value = slopes[i][t][nn]*(I_backward_values[t][n][s]- B_backward_values[t][n][s] + q_backward_values[t][n][s]) + intercepts[i][t][nn]
-                        values = [slopes[i][t][k]*(I_backward_values[t][n][s]- B_backward_values[t][n][s] + q_backward_values[t][n][s]) + intercepts[i][t][nn] for k in range(N)]
+                NewJustAdd = True
+                max_value = float('-inf')
+                while NewJustAdd:
+                    NewJustAdd = False
+                    if iter > 0 and t < T - 1:
+                        nn = cut_index_back[iter - 1][t][n]
+                        
+                        try:
+                            m_backward[t][n][s].addConstr(theta_backward[t][n][s] >= slopes[iter-1][t][nn]*(I_backward[t][n][s]- B_backward[t][n][s] + q_backward[t][n][s]) + intercepts[iter-1][t][nn])
+                        except Exception:
+                            pass
+                        
+                
+                    # optimize
+                    m_backward[t][n][s].optimize()   
+                    I_backward_values[t][n][s] = I_backward[t][n][s].x 
+                    B_backward_values[t][n][s] = B_backward[t][n][s].x      
+                    if t < T - 1:
+                        q_backward_values[t][n][s] = q_backward[t][n][s].x
+                    if iter > 0 and t < T - 1:
+                        values = [slopes[iter-1][t][k]*(I_backward_values[t][n][s]- B_backward_values[t][n][s] + q_backward_values[t][n][s]) + intercepts[iter-1][t][nn] for k in range(N)]
                         if np.argmax(values) != nn:
                             cut_index_back[i][t][n][s] = nn
                             m_backward[t][n].remove(m_backward[t][n].getConstrs()[-1])
@@ -241,8 +252,7 @@ while iter < iter_num:
                 pi_values[t][n][s] = pi[-1]
                 # m_backward[t][n][s].dispose()
             
-            if iter > 0 and t == 1:
-                print()
+
             avg_pi = sum(pi_values[t][n]) / S
             avg_pi_rhs = sum(pi_rhs_values[t][n]) / S
             

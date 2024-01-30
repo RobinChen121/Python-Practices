@@ -203,8 +203,6 @@ while iter < iter_num:
                 pi_values[t][n][s] = pi[-1]
                 # m_bacsward[t][n][s].dispose()
             
-            if iter > 0 and t == 1:
-                print()
             avg_pi = sum(pi_values[t][n]) / S
             avg_pi_rhs = sum(pi_rhs_values[t][n]) / S
             
