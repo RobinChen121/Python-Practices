@@ -1,13 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Dec 17 10:52:47 2023
+Created on Fri Feb  2 18:39:57 2024
 
 @author: zhenchen
 
 @disp:  
-    large planning horizon requires larger N and longer iterations;
-    longer iterations seems more important than longer N;
+
 -----
 ini_I = 0
 vari_cost = 1
@@ -25,10 +24,11 @@ mean_demands = [10, 20, 10, 20, 10, 20, 10, 20]
 221.79 for sddp tree traverse strategy(N=1), 28.6s on a desktop for iter number 21, sample number 20;
 217.85 for sddp tree traverse strategy(N=1, 2, 4, 5..), 89.2s on a desktop for iter number 21, sample number 20;
 
-cut selection(select cut for every iteration):
+cut selection(select cut for all iteration):
 215.08 for sddp dynamic cut selection with tree traverse(N=1), 14.88s on a mac for iter no. 21, sample no. 20;
 216.22 for sddp dynamic cut selection with tree traverse(N=1,2,4,5), 62.77s on a mac for iter no. 21, sample no. 20;
 
+    
 """
 
 from gurobipy import *
@@ -83,8 +83,8 @@ q_values = [0 for iter in range(iter_num)]
 
 kk = [1, 1, 1, 1]
 # kk = [NN for i in range(4)]
-slopes = [[] for i in range(iter_num)]
-intercepts = [[] for i in range(iter_num)]
+slopes[iter] = [[0 for n in range(N)] for t in range(T-1)]
+intercepts[iter] = [[0 for n in range(N)] for t in range(T-1)]
 cut_index = [[]for i in range(iter_num)]
 cut_index_back = [[]for i in range(iter_num)]
 start = time.process_time()
@@ -92,8 +92,7 @@ iter = 0
 while iter < iter_num:  
     
     N = kk[iter] if iter < len(kk) else kk[-1] # this N is the k in the JCAM 2015 paper
-    slopes[iter] = [[0 for n in range(N)] for t in range(T-1)]
-    intercepts[iter] = [[0 for n in range(N)] for t in range(T-1)]
+    
     
     cut_index[iter] = [0 for t in range(T-1)]
     cut_index_back[iter] = [0 for t in range(T-1)]
@@ -278,8 +277,3 @@ print('final expected total costs is %.2f' % z)
 print('ordering Q in the first peiod is %.2f' % q_values[iter-1])
 cpu_time = end - start
 print('cpu time is %.3f s' % cpu_time)
-
-
-
-
-
