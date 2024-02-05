@@ -26,7 +26,7 @@ mean_demands = [10, 20, 10, 20, 10, 20, 10, 20]
 217.85 for sddp tree traverse strategy(N=1, 2, 4, 5..), 89.2s on a desktop for iter number 21, sample number 20;
 
 cut selection(select cut for every iteration):
-215.08 for sddp dynamic cut selection with tree traverse(N=1), 14.88s on a mac for iter no. 21, sample no. 20;
+219.08 for sddp dynamic cut selection with tree traverse(N=1), 12.92s on a mac for iter no. 21, sample no. 20;
 216.22 for sddp dynamic cut selection with tree traverse(N=1,2,4,5), 62.77s on a mac for iter no. 21, sample no. 20;
 
 """
@@ -81,7 +81,7 @@ slope1_stage = []
 intercept1_stage = []
 q_values = [0 for iter in range(iter_num)]
 
-kk = [1, 1, 1, 1]
+kk = [1, 2, 4, 5]
 # kk = [NN for i in range(4)]
 slopes = [[] for i in range(iter_num)]
 intercepts = [[] for i in range(iter_num)]
@@ -167,7 +167,7 @@ while iter < iter_num:
                     theta_forward_values[t][n] = theta_forward[t][n]
                 if iter > 0 and t < T - 1:                    
                     N2 = kk[iter-1] if iter <= len(kk) else kk[-1]
-                    values = [slopes[iter-1][t][k]*(I_forward_values[t][n]- B_forward_values[t][n] + q_forward_values[t][n]) + intercepts[iter-1][t][nn] for k in range(N2)]               
+                    values = [slopes[iter-1][t][k]*(I_forward_values[t][n]- B_forward_values[t][n] + q_forward_values[t][n]) + intercepts[iter-1][t][k] for k in range(N2)]               
                     if np.argmax(values) != nn:                       
                         NewJustAdd = True
                         loop_no += 1
@@ -230,14 +230,19 @@ while iter < iter_num:
                         q_backward_values[t][n][s] = q_backward[t][n][s].x
                     if iter > 0 and t < T - 1:
                         N2 = kk[iter-1] if iter <= len(kk) else kk[-1]
-                        values = [slopes[iter-1][t][k]*(I_backward_values[t][n][s]- B_backward_values[t][n][s] + q_backward_values[t][n][s]) + intercepts[iter-1][t][nn] for k in range(N2)]
+                        values = [slopes[iter-1][t][k]*(I_backward_values[t][n][s]- B_backward_values[t][n][s] + q_backward_values[t][n][s]) + intercepts[iter-1][t][k] for k in range(N2)]
                         if np.argmax(values) != nn:                          
                             NewJustAdd = True
                             loop_no += 1
                             # if loop_no > 3:
                             #     break
-                            cut_index_back[i][t] = np.argmax(values)                          
-                            m_backward[t][n].remove(m_backward[t][n].getConstrs()[-1])
+                            cut_index_back[iter-1][t] = np.argmax(values)    
+                            
+                            try:
+                                m_backward[t][n][s].remove(m_backward[t][n][s].getConstrs()[-1])
+                            except Exception:
+                                pass
+                            
                         
                         
                 # if t == 0 and n == 0 and iter > 0:
