@@ -27,7 +27,7 @@ unit_back_cost = 10
 unit_hold_cost = 2
 mean_demands = [10, 20, 10]
 T = len(mean_demands)
-sample_nums = [10 for t in range(T)]
+sample_nums = [10 for t in range(T)] # sample number in one stage
 
 trunQuantile = 0.9999 # affective to the final ordering quantity
 scenario_numTotal = 1
@@ -43,6 +43,8 @@ for t in range(T):
 
 N = 20 # sampled number of scenarios for forward computing
 sample_num = N
+iter = 0
+iter_num = 15
 # sample_scenarios = [[5, 5, 5], [5, 5, 15], [5, 15, 5], [5, 15, 15], [15, 5, 5], [15, 5, 15], [15, 15, 5], [15, 15, 15]]
 sample_scenarios = generate_scenario_samples(N, trunQuantile, mean_demands)
 sample_scenarios.sort() # sort to make same numbers together
@@ -61,8 +63,7 @@ q = m.addVar(vtype = GRB.CONTINUOUS, name = 'q_1')
 theta = m.addVar(lb = theta_iniValue*T, vtype = GRB.CONTINUOUS, name = 'theta_2')
 m.setObjective(vari_cost*q + theta, GRB.MINIMIZE)
 
-iter = 0
-iter_num = 15
+
 
 I_values = [[[0 for n in range(N)] for t in range(T)] for iter in range(iter_num)]
 B_values = [[[0 for n in range(N)] for t in range(T)] for iter in range(iter_num)]
@@ -103,21 +104,24 @@ while iter < iter_num:
         for n in range(N): 
             demand = sample_scenarios[n][t]
             
-            # add cut
-            if t < T - 1:
-                for i in range(iter):
-                    m_sub[t][n].addConstr(theta_forward[t][n] >= slopes1[i][t][n]*q_forward[t][n] + slopes2[i][t][n]*(I[t][n] - B[t][n] + q_pre[t][n]) + intercepts[i][t][n])                
             if t == T - 1:                   
                 m_sub[t][n].setObjective(unit_hold_cost*I[t][n] + unit_back_cost*B[t][n], GRB.MINIMIZE)
             else:
-                m_sub[t][n].setObjective(vari_cost*q_forward[t][n] + unit_hold_cost*I[t][n] + unit_back_cost*B[t][n] + theta_forward[t][n], GRB.MINIMIZE)          
-            if t < T - 1:
-                m_sub[t][n].addConstr(q_pre[t][n] == q_values[iter][t][n])
+                m_sub[t][n].setObjective(vari_cost*q_forward[t][n] + unit_hold_cost*I[t][n] + unit_back_cost*B[t][n] + theta_forward[t][n], GRB.MINIMIZE)                     
             if t == 0:   
                 m_sub[t][n].addConstr(I[t][n] - B[t][n] == ini_I  - demand)
             else:
                 m_sub[t][n].addConstr(I[t][n] - B[t][n] == I_values[iter][t-1][n] - B_values[iter][t-1][n] + qpre_values[iter][t-1][n] - demand)
-                       
+            if t < T - 1:
+                m_sub[t][n].addConstr(q_pre[t][n] == q_values[iter][t][n])
+                
+            # add cut
+            if t < T - 1:
+                for i in range(iter):
+                    m_sub[t][n].addConstr(theta_forward[t][n] >= slopes1[i][t][n]*q_forward[t][n] + slopes2[i][t][n]*(I[t][n] - B[t][n] + q_pre[t][n]) + intercepts[i][t][n])                
+               
+            
+            
             # optimize
             m_sub[t][n].optimize()
             # if iter == 2 and t == 1 and n == 4:
@@ -147,18 +151,19 @@ while iter < iter_num:
                 num_con = len(pi[iter][t][n])
                 if iter == 0 and t == T - 1: 
                     pass
-                for kk in range(num_con-2):  # actually iter > 0 and t< T-1, below for cuts in iter > 1
+                for kk in range(2, num_con):  # actually iter > 0 and t< T-1, below for cuts in iter > 1
                     intercept_sum += pi[iter][t][n][kk]*rhs[iter][t][n][kk]
                     # col = m_sub[t][n].getConstrs()[kk]
                     # row = m_sub[t][n].getRow(col)
                     # a = m_sub[t][n].getCol(q_pre[t][n]).getCoeff(kk)
                 if iter > 0 and t < T - 1:
-                    slope1_sum += pi[iter][t][n][-2]
+                    slope1_sum += pi[iter][t][n][1]
                 if t > 0:
-                    intercept_sum += pi[iter][t][n][-1] * (-demand) 
+                    intercept_sum += pi[iter][t][n][0] * (-demand) 
+
                 else:
-                    intercept_sum += pi[iter][t][n][-1] * (ini_I - demand)
-                slope2_sum += pi[iter][t][n][-1]   
+                    intercept_sum += pi[iter][t][n][0] * (ini_I - demand)
+                slope2_sum += pi[iter][t][n][0]   
                 if t == T - 1: # consider T - 1 separately
                     pass
             avg_intercept = intercept_sum / len(indice)

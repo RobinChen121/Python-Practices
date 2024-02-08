@@ -12,6 +12,17 @@ Python version: 3.11
 
 Description: SDDP to solve newsvendor with lead time. Currently not perfect, should revise following the file 
 leadtime.py in the folder NLDS.
+
+for case:
+demands = [10, 20, 10]
+capacity = 200
+fixOrderCost = 0
+variOderCost = 1
+holdCost = 2
+penaCost = 10
+
+optimal cost is 175.75 and Q*_1 is 35, python cpu time is about 270s.
+
     
 """
 
@@ -30,9 +41,9 @@ ini_I = 0
 vari_cost = 1
 unit_back_cost = 10
 unit_hold_cost = 2
-mean_demands = [10, 10, 10]
+mean_demands = [10, 20, 10] 
 T = len(mean_demands)
-sample_nums = [2 for t in range(T)]
+sample_nums = [10 for t in range(T)] # sample number in one stage
 
 trunQuantile = 0.9999 # affective to the final ordering quantity
 scenario_numTotal = 1
@@ -43,13 +54,13 @@ for i in sample_nums:
 sample_detail = [[0 for i in range(sample_nums[t])] for t in range(T)] 
 for t in range(T):
     sample_detail[t] = generate_sample(sample_nums[t], trunQuantile, mean_demands[t])
-sample_detail = [[5, 15], [5, 15], [5, 15]]
+# sample_detail = [[5, 15], [5, 15], [5, 15]]
 # scenarios_full = list(itertools.product(*sample_detail)) 
 
 
 iter = 0
 iter_num = 15
-N = 8 # sampled number of scenarios for forward computing
+N = 20 # sampled number of scenarios for forward computing
 
 theta_iniValue = 0 # initial theta values (profit) in each period
 m = Model() # linear model in the first stage
@@ -59,41 +70,45 @@ theta = m.addVar(lb = theta_iniValue*T, vtype = GRB.CONTINUOUS, name = 'theta_2'
 m.setObjective(vari_cost*q + theta, GRB.MINIMIZE)
 
 # cuts
-slope1_stage = [[0 for n in range(N)] for i in range(iter_num)]
-intercept1_stage = [[0 for n in range(N)] for i in range(iter_num)]
+slope1_stage = [0 for i in range(iter_num)]
+intercept1_stage = [0 for i in range(iter_num)]
 slopes1 = [[[ 0 for n in range(N)] for t in range(T-1)] for i in range(iter_num)]
 slopes2 = [[[0 for n in range(N)] for t in range(T-1)] for i in range(iter_num)]
 intercepts = [[[0 for n in range(N)] for t in range(T-1)] for i in range(iter_num)]
-q_values = [[[0 for n in range(N)] for t in range(T)] for iter in range(iter_num)]
+q_values = [0 for iter in range(iter_num)]
 
 
 start = time.process_time()
+pi = [[[ [] for n in range(N)] for t in range(T)] for i in range(iter_num)]
+rhs = [[[ [] for n in range(N)] for t in range(T)] for i in range(iter_num)]
+
 pi_Iflow = [[[[0  for k in range(sample_nums[t])] for n in range(N)] for t in range(T)] for i in range(iter_num)]
 pi_d = [[[[0  for k in range(sample_nums[t])] for n in range(N)] for t in range(T)] for i in range(iter_num)]
 pi_q = [[[[0  for k in range(sample_nums[t])] for n in range(N)] for t in range(T)] for i in range(iter_num)]
+
 while iter < iter_num:  
     
     # sample a numer of scenarios from the full scenario tree
     # random.seed(10000)
     sample_scenarios = generate_scenario_samples(N, trunQuantile, mean_demands)
-    sample_scenarios = [[5, 5, 5], [5, 5, 15], [5, 15, 5], [5, 15, 15], [15, 5, 5], [15, 5, 15], [15, 15, 5], [15, 15, 15]]
+    # sample_scenarios = [[5, 5, 5], [5, 5, 15], [5, 15, 5], [5, 15, 15], [15, 5, 5], [15, 5, 15], [15, 15, 5], [15, 15, 15]]
     sample_scenarios.sort() # sort to make same numbers together
     
     # forward
     if iter > 0:
-        for n in range(1): # N
-            m.addConstr(theta >= slope1_stage[iter-1][n]*q + intercept1_stage[iter-1][n])
+        m.addConstr(theta >= slope1_stage[iter-1]*q + intercept1_stage[iter-1])
     m.optimize()
-    if iter > 5:
-        m.write('iter' + str(iter) + '_main.lp')
-        pass
+    # if iter > 5:
+    #     m.write('iter' + str(iter) + '_main.lp')
+    #     pass
     # m.write('iter' + str(iter) + '_main.sol')
     
-    q_values[iter][0] = [q.x for n in range(N)]
+    q_values[iter] = q.x 
     z = m.objVal
     
     m_forward = [[Model() for n in range(N)] for t in range(T)]
     q_forward = [[m_forward[t][n].addVar(vtype = GRB.CONTINUOUS, name = 'q_' + str(t+2) + '^' + str(n+1)) for n in range(N)]  for t in range(T - 1)]
+    q_pre_forward = [[m_forward[t][n].addVar(vtype = GRB.CONTINUOUS, name = 'qpre_' + str(t+2) + '^' + str(n+1)) for n in range(N)]  for t in range(T - 1)]
     
     I_forward = [[m_forward[t][n].addVar(vtype = GRB.CONTINUOUS, name = 'I_' + str(t+1) + '^' + str(n+1)) for n in range(N)]  for t in range(T)]
     # B is the quantity of lost sale
@@ -226,9 +241,9 @@ while iter < iter_num:
             avg_pi_rhs = sum(pi_rhs_values[t][n]) / K
             
             # recording cuts
-            if t == 0: # n not necessary many
-                slope1_stage[iter][n] = avg_pi2
-                intercept1_stage[iter][n] = avg_pi_rhs
+            if t == 0 and n == 0: # n not necessary many
+                slope1_stage[iter] = avg_pi2
+                intercept1_stage[iter] = avg_pi_rhs
             elif t > 0:
                 slopes1[iter][t-1][n] = avg_pi1
                 slopes2[iter][t-1][n] = avg_pi2

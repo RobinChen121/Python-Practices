@@ -7,6 +7,16 @@ Created on Sun Aug  6 20:03:14 2023
 
 @disp:  
     
+    very slow compared with java,   
+    for case:
+    demands = [10, 20, 10]
+    capacity = 200
+    fixOrderCost = 0
+    variOderCost = 1
+    holdCost = 2
+    penaCost = 10
+    
+    optimal cost is 175.75 and Q*_1 is 35, cpu time is about 270s.
     
 """
 
@@ -101,14 +111,14 @@ class StochasticInventory:
         return bestQValue
 
 
-demands = [10, 10, 10]
+demands = [10, 20, 10]
 capacity = 200
 fixOrderCost = 0
 variOderCost = 1
 holdCost = 2
 penaCost = 10
 truncationQ = 0.9999
-leadtime = 1
+leadtime = 1 # lead time is reflected in the state preQ
 
 start = time.process_time()
 lot_sizing = StochasticInventory(capacity, fixOrderCost, variOderCost, holdCost, penaCost, demands, truncationQ)
