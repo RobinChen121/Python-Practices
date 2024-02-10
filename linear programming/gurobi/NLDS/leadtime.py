@@ -160,7 +160,6 @@ while iter < iter_num:
                     slope1_sum += pi[iter][t][n][1]
                 if t > 0:
                     intercept_sum += pi[iter][t][n][0] * (-demand) 
-
                 else:
                     intercept_sum += pi[iter][t][n][0] * (ini_I - demand)
                 slope2_sum += pi[iter][t][n][0]   
