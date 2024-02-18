@@ -20,8 +20,8 @@ from bs4 import BeautifulSoup # 分析网页数据的包，a package for webstie
 import matplotlib.pyplot as plt # 画图的包
 import time 
 import random
-import jieba # 中文分词包
-from wordcloud import WordCloud # 词云包
+# import jieba # 中文分词包
+# from wordcloud import WordCloud # 词云包
 import re  # 正则表达式包
 import seaborn as sns
 
@@ -188,40 +188,40 @@ plt.legend()
 plt.show()
 
 # 画词云图
-jieba.add_word('久石让')
-jieba.add_word('谢耳朵')
-# 一些语气词和没有意义的词
-del_words = [ '就是', '一个', '被', '电影', '我们',
-              '不是', '每个',  '不会',  '没有', 
-              '这样', '那么', '不要', '如果',
-              '不能',  '一种', '不过', '只有', '不得不', 
-              '不得不', '一部']
-all_quotes = ''.join(quote_list) # 将所有代表性评论拼接为一个文本
-# 去掉标点符号
-all_quotes = re.sub(r"[0-9\s+\.\!\/_,$%^*()?;；:-【】+\"\']+|[+——！，;:。？、~@#￥%……&*（）]+", " ", all_quotes)
-words = jieba.lcut(all_quotes)
-words_final = []
-for i in range(len(words)): 
-    if len(words[i]) > 1 and  words[i] not in del_words: # 去掉一些语气词，单字词 
-        words_final.append(words[i])
-df_text = pd.DataFrame(words_final, columns = ['词语'])
-df_text2 = df_text.groupby('词语').size() # 查找词频，也可以用 from collections import Counter， 然后用 Counter(words_final) 来查找词频
-cloud = WordCloud(
-    font_path = 'C:\Windows\Fonts\FZSTK.TTF', # 中文字体地址 C:\Windows\Fonts\FZSTK.TTF，提前下载字体或指定，否则中文无法显示
-    # mask = '' 通过 mask 参数指定一个图片地址作为词云的背景图像 
-    background_color = 'white',
-    width = 1000,
-    height = 860,
-    max_words = 25   
-  )
-#wc = cloud.generate(words) # 这种方法对中文支持不太好，this mehtod is better for only english string
-wc = cloud.generate_from_frequencies(df_text2)
-wc.to_file("豆瓣 TOP 250 词云.jpg") 
-plt.figure(3)
-plt.imshow(wc)
-plt.axis('off')
-plt.title('豆瓣 TOP 250 电影代表性评论的词云分析')
-plt.show()
+# jieba.add_word('久石让')
+# jieba.add_word('谢耳朵')
+# # 一些语气词和没有意义的词
+# del_words = [ '就是', '一个', '被', '电影', '我们',
+#               '不是', '每个',  '不会',  '没有', 
+#               '这样', '那么', '不要', '如果',
+#               '不能',  '一种', '不过', '只有', '不得不', 
+#               '不得不', '一部']
+# all_quotes = ''.join(quote_list) # 将所有代表性评论拼接为一个文本
+# # 去掉标点符号
+# all_quotes = re.sub(r"[0-9\s+\.\!\/_,$%^*()?;；:-【】+\"\']+|[+——！，;:。？、~@#￥%……&*（）]+", " ", all_quotes)
+# words = jieba.lcut(all_quotes)
+# words_final = []
+# for i in range(len(words)): 
+#     if len(words[i]) > 1 and  words[i] not in del_words: # 去掉一些语气词，单字词 
+#         words_final.append(words[i])
+# df_text = pd.DataFrame(words_final, columns = ['词语'])
+# df_text2 = df_text.groupby('词语').size() # 查找词频，也可以用 from collections import Counter， 然后用 Counter(words_final) 来查找词频
+# cloud = WordCloud(
+#     font_path = 'C:\Windows\Fonts\FZSTK.TTF', # 中文字体地址 C:\Windows\Fonts\FZSTK.TTF，提前下载字体或指定，否则中文无法显示
+#     # mask = '' 通过 mask 参数指定一个图片地址作为词云的背景图像 
+#     background_color = 'white',
+#     width = 1000,
+#     height = 860,
+#     max_words = 25   
+#   )
+# #wc = cloud.generate(words) # 这种方法对中文支持不太好，this mehtod is better for only english string
+# wc = cloud.generate_from_frequencies(df_text2)
+# wc.to_file("豆瓣 TOP 250 词云.jpg") 
+# plt.figure(3)
+# plt.imshow(wc)
+# plt.axis('off')
+# plt.title('豆瓣 TOP 250 电影代表性评论的词云分析')
+# plt.show()
 
 # 评分最高的 15 部电影
 # 用 seaborn 画柱状图，因为自动将不同柱子分配不同的颜色
