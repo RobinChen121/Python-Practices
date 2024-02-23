@@ -25,7 +25,7 @@ ini_I = 0
 vari_cost = 1
 unit_back_cost = 10
 unit_hold_cost = 2
-mean_demands = [10, 20, 10]
+mean_demands = [10, 10]
 T = len(mean_demands)
 sample_nums = [10 for t in range(T)] # sample number in one stage
 
@@ -38,7 +38,7 @@ for i in sample_nums:
 sample_detail = [[0 for i in range(sample_nums[t])] for t in range(T)] 
 for t in range(T):
     sample_detail[t] = generate_sample(sample_nums[t], trunQuantile, mean_demands[t])
-sample_detail = [[5, 15], [5, 15], [5, 15]]
+sample_detail = [[5, 15], [5, 15]]
 # scenarios_full = list(itertools.product(*sample_detail)) 
 
 N = 4 # sampled number of scenarios for forward computing
@@ -46,7 +46,7 @@ sample_num = N
 iter = 0
 iter_num = 5
 sample_scenarios = generate_scenario_samples(N, trunQuantile, mean_demands)
-# sample_scenarios = [[5, 5], [5, 15], [15, 5], [15, 15]]
+sample_scenarios = [[5, 5], [5, 15], [15, 5], [15, 15]]
 sample_scenarios.sort() # sort to make same numbers together
 node_values, node_index = get_tree_strcture(sample_scenarios)
 node_index.insert(0, [list(range(N))])
@@ -84,8 +84,8 @@ while iter < iter_num:
     if iter > 0:
         m.addConstr(theta >= slope_1stage[iter-1]*q + intercept_1stage[iter-1])
     m.optimize()
-    # if iter >= 1:
-    #     m.write('iter' + str(iter) + '_main.lp')    
+    if iter >= 1:
+        m.write('iter' + str(iter) + '_main.lp')    
     # m.write('iter' + str(iter) + '_main.sol')
     # pass
     
@@ -124,10 +124,11 @@ while iter < iter_num:
             
             # optimize
             m_sub[t][n].optimize()
-            if iter == 1 and t == 0:
-                m_sub[t][n].write('iter' + str(iter) + '_sub_' + str(t) + '^' + str(n) + '.lp')
+            if iter == 3 and t == 0 and n == 2:
+                m_sub[t][n].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(n+1) + '.lp')
+                m_sub[t][n].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(n+1) + '.sol')
                 pass
-            #     m_sub[t][n].write('iter' + str(iter) + '_sub_' + str(t) + '^' + str(n) + '.sol')
+          
             #     # m_sub[t][n].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(n+1) + '-.dlp')
             #     pass
             
@@ -172,6 +173,7 @@ while iter < iter_num:
             if t == 0:
                 slope_1stage[iter] = avg_slope1
                 intercept_1stage[iter] = avg_intercept
+                pass
             else:
                 for n in indice:
                     slopes1[iter][t-1][n] = avg_slope1 
