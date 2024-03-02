@@ -13,8 +13,38 @@ Created on Mon Jul 10 10:52:47 2023
     
     larger T results in larger gaps, more samples/iterations results in smaller gaps.
     more decision variables require more samples.
+    
+    ini_I = 0
+    ini_cash = 0
+    vari_cost = 1
+    price = 10
+    unit_back_cost = 0
+    unit_hold_cost = 0
+    unit_salvage = 0.5
+    mean_demands = [10, 15, 10]
+    T = len(mean_demands)
+    sample_nums = [10 for t in range(T)]
+    overhead_cost = [100 for t in range(T)]
+
+    r0 = 0.01
+    r1 = 0
+    r2 = 0.1
+    r3 = 1 # penalty interest rate for overdraft exceeding the limit
+    V = 20 # free-interest limit
+    U = 100 # overdraft limit
+    
     3 periods with 60 samples and 15 iterations, gap very close to optimal, takes over 400s;
     4 periods with 50 samples and 13 iterations, gap very close to optimal, takes time about 990s;
+    
+    for parameters:
+        mean_demands = [20, 35, 20]
+        V = 200 # free-interest limit
+        U = 1000 # overdraft limit
+        iter_num = 15
+        N = 20 # sampled number of scenarios for forward computing
+        
+        SDP result 371, Q1=39
+        SDDP result 375.09, Q1=27, cpu time 73s;
 """
 
 from gurobipy import *
@@ -37,17 +67,17 @@ price = 10
 unit_back_cost = 0
 unit_hold_cost = 0
 unit_salvage = 0.5
-mean_demands = [10, 15, 10, 15]
+mean_demands = [20, 35, 20]
 T = len(mean_demands)
 sample_nums = [10 for t in range(T)]
-overhead_cost = [50 for t in range(T)]
+overhead_cost = [100 for t in range(T)]
 
 r0 = 0.01
 r1 = 0
 r2 = 0.1
-r3 = 1
-V = 20 # free-interest limit
-U = 100 # overdraft limit
+r3 = 1 # penalty interest rate for overdraft exceeding the limit
+V = 200 # free-interest limit
+U = 1000 # overdraft limit
 
 trunQuantile = 0.9999 # affective to the final ordering quantity
 scenario_numTotal = 1
@@ -63,8 +93,8 @@ scenarios_full = list(itertools.product(*sample_detail))
 
 
 iter = 0
-iter_num = 13
-N = 50 # sampled number of scenarios for forward computing
+iter_num = 15
+N = 20 # sampled number of scenarios for forward computing
 
 theta_iniValue = -500 # initial theta values (profit) in each period
 m = Model() # linear model in the first stage

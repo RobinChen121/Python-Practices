@@ -10,8 +10,7 @@ MIT Licence.
 Python version: 3.11
 
 
-Description: SDDP to solve newsvendor with lead time. Currently not perfect, should revise following the file 
-leadtime.py in the folder NLDS.
+Description: SDDP to solve newsvendor with lead time. 
 
 for case:
 demands = [10, 20, 10]
@@ -21,9 +20,13 @@ variOderCost = 1
 holdCost = 2
 penaCost = 10
 
-optimal cost is 175.75 and Q*_1 is 35, python cpu time is about 270s.
+optimal cost is 178.13 and Q*_1 is 35, python cpu time is about 270s.
 
-    
+iter_num = 15
+N = 20 # sampled number of scenarios for forward computing
+
+SDP cost 178.52, Q*_1 = 35, cpu time 101.73s
+SDDP cost 174.46, Q1=35, cpu time is 88.17s    
 """
 
 from gurobipy import *
