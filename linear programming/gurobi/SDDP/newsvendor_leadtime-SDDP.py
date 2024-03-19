@@ -5,12 +5,11 @@ Created on Sat Aug  5 15:44:23 2023
 @author: zhen chen
 @Email: chen.zhen5526@gmail.com
 
-MIT Licence.
-
 Python version: 3.11
 
 
-Description: SDDP to solve newsvendor with lead time. 
+Description: SDDP to solve newsvendor with lead time; 
+longer iterations seems more important than longer N;
 
 for case:
 demands = [10, 20, 10]
@@ -104,7 +103,7 @@ while iter < iter_num:
         # pass
         # m.write('iter' + str(iter) + '_main.sol')
     
-    q_values[iter][t] = [q.x for n in range(N)]
+    q_values[iter][0] = [q.x for n in range(N)]
     z = m.objVal
     
     m_forward = [[Model() for n in range(N)] for t in range(T)]
@@ -132,7 +131,7 @@ while iter < iter_num:
             else:
                 m_forward[t][n].addConstr(I_forward[t][n] - B_forward[t][n] == I_forward_values[t-1][n] - B_forward_values[t-1][n] + qpre_values[iter][t-1][n] - demand)
             if t < T - 1:
-                m_forward[t][n].addConstr(q_pre_forward[t][n] == q_values[iter][t][n])
+                m_forward[t][n].addConstr(q_pre_forward[t][n] == q_values[iter][t][n]) # q_values only shown here
                 
             # add cut in the back
             if t < T - 1:
@@ -210,7 +209,7 @@ while iter < iter_num:
                 intercept_sum = 0
                 slope1_sum = 0
                 slope2_sum = 0
-                for kk in range(2, num_con):  # actually iter > 0 and t< T-1, below for cuts in iter > 1
+                for kk in range(2, num_con):  # when t=T-1, num_con < 2
                     intercept_sum += pi[kk]*rhs[kk]
                 if iter > 0 and t < T - 1:
                     slope1_sum += pi[1]

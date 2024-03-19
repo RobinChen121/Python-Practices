@@ -5,7 +5,7 @@ Created on Wed Aug 16 14:33:18 2023
 
 @author: zhenchen
 
-@disp:  
+@disp:  NLDS for newsvendor lead time
     
     
 """
@@ -25,7 +25,7 @@ ini_I = 0
 vari_cost = 1
 unit_back_cost = 10
 unit_hold_cost = 2
-mean_demands = [10, 20, 10]
+mean_demands = [10, 10, 10]
 T = len(mean_demands)
 sample_nums = [10 for t in range(T)] # sample number in one stage
 
@@ -41,12 +41,12 @@ for t in range(T):
 sample_detail = [[5, 15], [5, 15], [5, 15]]
 # scenarios_full = list(itertools.product(*sample_detail)) 
 
-N = 4 # sampled number of scenarios for forward computing
+N = 8 # sampled number of scenarios for forward computing
 sample_num = N
 iter = 0
 iter_num = 5
 sample_scenarios = generate_scenario_samples(N, trunQuantile, mean_demands)
-# sample_scenarios = [[5, 5], [5, 15], [15, 5], [15, 15]]
+sample_scenarios = [[5, 5, 5], [5, 5, 15], [5, 15, 5], [15,5,5], [15,15,5], [15,5, 15], [5,15,15],[15,15,15]]
 sample_scenarios.sort() # sort to make same numbers together
 node_values, node_index = get_tree_strcture(sample_scenarios)
 node_index.insert(0, [list(range(N))])
@@ -124,7 +124,7 @@ while iter < iter_num:
             
             # optimize
             m_sub[t][n].optimize()
-            if iter == 1 and t == 0:
+            if iter == 2 and t == 1:
                 m_sub[t][n].write('iter' + str(iter) + '_sub_' + str(t) + '^' + str(n) + '.lp')
                 pass
             #     m_sub[t][n].write('iter' + str(iter) + '_sub_' + str(t) + '^' + str(n) + '.sol')
