@@ -73,9 +73,6 @@ m.setObjective(vari_cost*q + theta, GRB.MINIMIZE)
 # cuts
 slope1_stage = [0 for i in range(iter_num)]
 intercept1_stage = [0 for i in range(iter_num)]
-slopes1 = [[[ 0 for n in range(N)] for t in range(T)] for i in range(iter_num)]
-slopes2 = [[[0 for n in range(N)] for t in range(T)] for i in range(iter_num)]
-intercepts = [[[0 for n in range(N)] for t in range(T-1)] for i in range(iter_num)]
 q_values = [[[0 for n in range(N)] for t in range(T)] for iter in range(iter_num)] 
 qpre_values = [[[0 for n in range(N)] for t in range(T)] for iter in range(iter_num)] 
 
@@ -108,7 +105,7 @@ while iter < iter_num:
     
     m_forward = [[Model() for n in range(N)] for t in range(T)]
     q_forward = [[m_forward[t][n].addVar(vtype = GRB.CONTINUOUS, name = 'q_' + str(t+2) + '^' + str(n+1)) for n in range(N)]  for t in range(T - 1)]
-    q_pre_forward = [[m_forward[t][n].addVar(vtype = GRB.CONTINUOUS, name = 'qpre_' + str(t+1) + '^' + str(n+1)) for n in range(N)]  for t in range(T - 1)]
+    q_pre_forward = [[m_forward[t][n].addVar(vtype = GRB.CONTINUOUS, name = 'qpre_' + str(t+1) + '^' + str(n+1)) for n in range(N)]  for t in range(T)]
     
     I_forward = [[m_forward[t][n].addVar(vtype = GRB.CONTINUOUS, name = 'I_' + str(t+1) + '^' + str(n+1)) for n in range(N)]  for t in range(T)]    
     B_forward = [[m_forward[t][n].addVar(vtype = GRB.CONTINUOUS, name = 'B_' + str(t+1) + '^' + str(n+1)) for n in range(N)]  for t in range(T)] # B is the quantity of lost sale
@@ -130,8 +127,7 @@ while iter < iter_num:
                 m_forward[t][n].addConstr(I_forward[t][n] - B_forward[t][n] == ini_I  - demand)
             else:
                 m_forward[t][n].addConstr(I_forward[t][n] - B_forward[t][n] == I_forward_values[t-1][n] - B_forward_values[t-1][n] + qpre_values[iter][t-1][n] - demand)
-            if t < T - 1:
-                m_forward[t][n].addConstr(q_pre_forward[t][n] == q_values[iter][t][n]) # q_values only shown here
+            m_forward[t][n].addConstr(q_pre_forward[t][n] == q_values[iter][t][n]) # q_values only shown here
                 
             # add cut in the back
             if t < T - 1:
@@ -161,7 +157,7 @@ while iter < iter_num:
     # backward
     m_backward = [[[Model() for s in range(sample_nums[t])] for n in range(N)] for t in range(T)]
     q_backward = [[[m_backward[t][n][s].addVar(vtype = GRB.CONTINUOUS, name = 'q_' + str(t+2) + '^' + str(n+1)) for s in range(sample_nums[t])]  for n in range(N)] for t in range(T - 1)] 
-    q_pre_backward = [[[m_backward[t][n][s].addVar(vtype = GRB.CONTINUOUS, name = 'qpre_' + str(t+1) + '^' + str(n+1)) for s in range(sample_nums[t])]  for n in range(N)] for t in range(T - 1)] 
+    q_pre_backward = [[[m_backward[t][n][s].addVar(vtype = GRB.CONTINUOUS, name = 'qpre_' + str(t+1) + '^' + str(n+1)) for s in range(sample_nums[t])]  for n in range(N)] for t in range(T)] 
     I_backward = [[[m_backward[t][n][s].addVar(vtype = GRB.CONTINUOUS, name = 'I_' + str(t+1) + '^' + str(n+1)) for s in range(sample_nums[t])]  for n in range(N)] for t in range(T)]
     # B is the quantity of lost sale
     B_backward = [[[m_backward[t][n][s].addVar(vtype = GRB.CONTINUOUS, name = 'B_' + str(t+1) + '^' + str(n+1)) for s in range(sample_nums[t])] for n in range(N)] for t in range(T)]
@@ -169,6 +165,7 @@ while iter < iter_num:
     intercept_values = [[[0  for s in range(sample_nums[t])] for n in range(N)] for t in range(T)]
     slope1_values = [[[0  for s in range(sample_nums[t])] for n in range(N)] for t in range(T)] 
     slope2_values = [[[0  for s in range(sample_nums[t])] for n in range(N)] for t in range(T)] 
+    slope3_values = [[[0  for s in range(sample_nums[t])] for n in range(N)] for t in range(T)] 
     
     # it is better t in the first loop
     for t in range(T - 1, -1, -1):
@@ -184,8 +181,7 @@ while iter < iter_num:
                     m_backward[t][n][s].addConstr(I_backward[t][n][s] - B_backward[t][n][s] == ini_I - demand)
                 else:
                     m_backward[t][n][s].addConstr(I_backward[t][n][s] - B_backward[t][n][s] == I_forward_values[t-1][n] - B_forward_values[t-1][n] + q_values[iter][t-1][n] - demand)
-                if t < T - 1:
-                    m_backward[t][n][s].addConstr(q_pre_backward[t][n][s] == q_values[iter][t][n])
+                m_backward[t][n][s].addConstr(q_pre_backward[t][n][s] == q_values[iter][t][n])
                     
                 # put those cuts in the back
                 if iter > 0 and t < T - 1:
@@ -207,36 +203,29 @@ while iter < iter_num:
                 rhs = m_backward[t][n][s].getAttr(GRB.Attr.RHS)
                 num_con = len(pi)
                 intercept_sum = 0
-                slope1_sum = 0
-                slope2_sum = 0
                 for kk in range(2, num_con):  # when t=T-1, num_con < 2
                     intercept_sum += pi[kk]*rhs[kk]
-                if iter > 0 and t < T - 1:
-                    slope1_sum += pi[1]
                 if t > 0:
                     intercept_sum += pi[0] * (-demand) 
                 else:
                     intercept_sum += pi[0] * (ini_I - demand)
-                slope2_sum += pi[0] 
-                slope1_values[t][n][s] = slope1_sum                                                           
-                slope2_values[t][n][s] = slope2_sum
+                slope1_values[t][n][s] = pi[1]                                                          
+                slope2_values[t][n][s] = pi[0]
                 intercept_values[t][n][s] = intercept_sum
 
             
             avg_intercept = sum(intercept_values[t][n]) / S
             avg_slope1 = sum(slope1_values[t][n]) / S
             avg_slope2 = sum(slope2_values[t][n]) / S
+            avg_slope3 = sum(slope3_values[t][n]) / S
             if t == 0:
-                slope1_stage[iter] = avg_slope1
+                slope1_stage[iter] = avg_slope1 # a vector
                 intercept1_stage[iter] = avg_intercept
-                if iter == 2:
-                    pass
             else:
-                slopes1[iter][t-1][n] = avg_slope1 
-                slopes2[iter][t-1][n] = avg_slope2               
+                slopes1[iter][t-1][n] = avg_slope1 # a scaler
+                slopes2[iter][t-1][n] = avg_slope2 
+                slopes3[iter][t-1][n] = avg_slope3 
                 intercepts[iter][t-1][n] = avg_intercept  
-                if iter == 2 and t == 1:
-                    pass
                 
     iter += 1
 

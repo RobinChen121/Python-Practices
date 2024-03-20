@@ -328,8 +328,6 @@ while iter < iter_num:
             if t == 0 and n == 0:
                 slope1_stage.append(avg_pi[0])
                 intercept1_stage.append(avg_pi_rhs)
-                if iter == 1:
-                    pass
             elif t > 0:
                 slopes[t-1][n].append(avg_pi[0])
                 intercepts[t-1][n].append(avg_pi_rhs)   
