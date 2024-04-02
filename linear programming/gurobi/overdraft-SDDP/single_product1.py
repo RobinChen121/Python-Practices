@@ -49,6 +49,8 @@ Created on Mon Jul 10 10:52:47 2023
         SDDP result 384.82, Q1=33, cpu time 121s;
         SDDP result 374.82(iter_num=20), Q1=26, cpu time 181s;
         overhead_cost = [100 for t in range(T)];
+        
+        for 0 interest free quantity, the result is similar.
 """
 
 from gurobipy import *
@@ -80,7 +82,7 @@ r0 = 0.01
 r1 = 0
 r2 = 0.1
 r3 = 1 # penalty interest rate for overdraft exceeding the limit
-V = 200 # free-interest limit
+V = 0 # free-interest limit
 U = 1000 # overdraft limit
 
 trunQuantile = 0.9999 # affective to the final ordering quantity
@@ -302,7 +304,6 @@ while iter < iter_num:
                 # optimize
                 m_backward[t][n][k].optimize()                
                 # if t == 0 and n == 0 and iter > 0:
-                #     m_backward[t][n][k].write('iter' + str(iter+1) + '_sub_' + str(t+1) + '^' + str(n+1) + '-' + str(k+1) +'back.lp')
                 try:
                     pi = m_backward[t][n][k].getAttr(GRB.Attr.Pi)
                 except Exception:

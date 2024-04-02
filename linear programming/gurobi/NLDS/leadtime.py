@@ -124,10 +124,13 @@ while iter < iter_num:
             
             # optimize
             m_sub[t][n].optimize()
-            if iter == 2 and t == 1:
+            pi[iter][t][n] = m_sub[t][n].getAttr(GRB.Attr.Pi)
+            rhs[iter][t][n] = m_sub[t][n].getAttr(GRB.Attr.RHS)
+            
+            if iter == 2 and t == 0:
                 m_sub[t][n].write('iter' + str(iter) + '_sub_' + str(t) + '^' + str(n) + '.lp')
-                pass
-            #     m_sub[t][n].write('iter' + str(iter) + '_sub_' + str(t) + '^' + str(n) + '.sol')
+                m_sub[t][n].write('iter' + str(iter) + '_sub_' + str(t) + '^' + str(n) + '.sol')
+                pass   
             #     # m_sub[t][n].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(n+1) + '-.dlp')
             #     pass
             
@@ -138,8 +141,7 @@ while iter < iter_num:
                 qpre_values[iter][t][n] = q_pre[t][n].x
             
             
-            pi[iter][t][n] = m_sub[t][n].getAttr(GRB.Attr.Pi)
-            rhs[iter][t][n] = m_sub[t][n].getAttr(GRB.Attr.RHS)
+            
             
     # get cuts
     for t in range(T-1, -1, -1):
