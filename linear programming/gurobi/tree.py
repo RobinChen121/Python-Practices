@@ -23,6 +23,27 @@ def generate_sample(sample_num, trunQuantile, mu):
         samples[i] = st.poisson.ppf(rand_p, mu)
     return samples
 
+# gamma distribution:mean demand is shape / beta and variance is shape / beta^2
+# beta = 1 / scale
+# shape = demand * beta
+# variance = demand / beta
+def generate_gamma_sample(sample_num, trunQuantile, mean, beta):
+    samples = [0 for i in range(sample_num)]
+    for i in range(sample_num):
+        # np.random.seed(10000)
+        rand_p = np.random.uniform(trunQuantile*i/sample_num, trunQuantile*(i+1)/sample_num)
+        samples[i] = st.gamma.ppf(rand_p, mean*beta, loc=0, scale=1/beta)
+    return samples
+
+def generate_sample_gamma(sample_num, trunQuantile, mu):
+    samples = [0 for i in range(sample_num)]
+    for i in range(sample_num):
+        # np.random.seed(10000)
+        rand_p = np.random.uniform(trunQuantile*i/sample_num, trunQuantile*(i+1)/sample_num)
+        samples[i] = st.poisson.ppf(rand_p, mu)
+    return samples
+
+
 # get the number of elements in a list of lists
 def getSizeOfNestedList(listOfElem):
     ''' Get number of elements in a nested list'''
@@ -76,18 +97,14 @@ def get_tree_strcture(samples):
 
 
 
-# mean_demands = [10, 20, 10]
-# T = len(mean_demands)
-# sample_nums = [10 for t in range(T)]
-# trunQuantile = 0.9999 
-# scenario_numTotal = 1
-# for i in sample_nums:
-#     scenario_numTotal *= i    
+# mean_demand = 10
+# beta = 1
+# N = 10
+# trunQuantile = 0.9999   
 
 # # samples_detail is the detailed samples in each period
-# samples_detail = [[0 for i in range(sample_nums[t])] for t in range(T)] 
-# for t in range(T):
-#     samples_detail[t] = generate_sample(sample_nums[t], trunQuantile, mean_demands[t])
+# sample_detail = [0 for i in range(N)] 
+# sample_detail = generate_gamma_sample(N, trunQuantile, mean_demand, beta)
 
 # scenarios_full = list(itertools.product(*samples_detail)) 
 # sample_num = 30

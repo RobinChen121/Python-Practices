@@ -7,7 +7,7 @@ Created on Mon Jul 10 10:52:47 2023
 
 @disp:  
     
-    constraints of benders cuts are in the front;    
+    constraints of benders cuts are in the back;    
     longer iterations seems more important than longer N;
     
     lower bound for the variables must in the constraints, not in the defintion of the variables;
