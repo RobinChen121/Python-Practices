@@ -33,15 +33,9 @@ def generate_gamma_sample(sample_num, trunQuantile, mean, beta):
         # np.random.seed(10000)
         rand_p = np.random.uniform(trunQuantile*i/sample_num, trunQuantile*(i+1)/sample_num)
         samples[i] = st.gamma.ppf(rand_p, mean*beta, loc=0, scale=1/beta)
+    random.shuffle(samples)
     return samples
 
-def generate_sample_gamma(sample_num, trunQuantile, mu):
-    samples = [0 for i in range(sample_num)]
-    for i in range(sample_num):
-        # np.random.seed(10000)
-        rand_p = np.random.uniform(trunQuantile*i/sample_num, trunQuantile*(i+1)/sample_num)
-        samples[i] = st.poisson.ppf(rand_p, mu)
-    return samples
 
 
 # get the number of elements in a list of lists
@@ -97,14 +91,14 @@ def get_tree_strcture(samples):
 
 
 
-# mean_demand = 10
-# beta = 1
-# N = 10
-# trunQuantile = 0.9999   
+mean_demand = 10
+beta = 1
+N = 10
+trunQuantile = 0.9999   
 
-# # samples_detail is the detailed samples in each period
-# sample_detail = [0 for i in range(N)] 
-# sample_detail = generate_gamma_sample(N, trunQuantile, mean_demand, beta)
+# samples_detail is the detailed samples in each period
+sample_detail = [0 for i in range(N)] 
+sample_detail = generate_gamma_sample(N, trunQuantile, mean_demand, beta)
 
 # scenarios_full = list(itertools.product(*samples_detail)) 
 # sample_num = 30

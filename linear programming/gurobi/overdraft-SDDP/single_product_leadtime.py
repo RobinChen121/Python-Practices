@@ -307,8 +307,6 @@ while iter < iter_num:
             avg_slope1 = sum(slope1_values[t][n]) / S
             avg_slope2 = sum(slope2_values[t][n]) / S
             avg_slope3 = sum(slope3_values[t][n]) / S
-            if t == 1:
-                pass
             if t == 0:
                 temp = [avg_slope1, avg_slope2, avg_slope3]
                 slope1_stage.append(temp)
