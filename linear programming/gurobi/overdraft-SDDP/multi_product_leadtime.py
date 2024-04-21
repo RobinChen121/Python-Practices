@@ -28,11 +28,13 @@ def generate_samples(sample_details, N):
     MM = len(sample_details)    
     random_samples = [[[0 for t in range(T)] for m in range(MM)] for n in range(N)]      
     for n in range(N):
-        random_index = np.random.randint(low = 0, high = sample_num_1stage, size = T).tolist()
+        random_index1 = np.random.randint(low = 0, high = sample_num_1stage, size = T).tolist()
+        random_index2 = np.random.randint(low = 0, high = sample_num_1stage, size = T).tolist()
         for t in range(T):
-            index = random_index[t]
-            random_samples[n][0][t] = sample_details[0][t][index]
-            random_samples[n][1][t] = sample_details[1][t][index]
+            index1 = random_index1[t]
+            index2 = random_index2[t]
+            random_samples[n][0][t] = sample_details[0][t][index1]
+            random_samples[n][1][t] = sample_details[1][t][index2]
     return random_samples
     
 
@@ -46,19 +48,19 @@ MM = len(prices)
 unit_salvages = [0.5* vari_costs[m] for m in range(MM)]
 overhead_cost = [100 for t in range(T)]
 
-r0 = 0.01
-r1 = 0.1
-r2 = 3 # penalty interest rate for overdraft exceeding the limit
+r0 = 0
+r1 = 0
+r2 = 0 # penalty interest rate for overdraft exceeding the limit
 U = 2000 # overdraft limit
 
-sample_num = 10 # sample number in one stage when forming the scenario tree
+sample_num = 2 # sample number in one stage when forming the scenario tree #
 scenario_numTotal = sample_num ** T
 
 # gamma distribution:mean demand is shape / beta and variance is shape / beta^2
 # beta = 1 / scale
 # shape = demand * beta
 # variance = demand / beta
-mean_demands =[30, 10] # higher average demand vs lower average demand
+mean_demands =[20, 10] # higher average demand vs lower average demand
 betas = [10, 1] # lower variance vs higher variance
 
 # detailed samples in each period
@@ -68,6 +70,7 @@ for m in range(MM):
     for t in range(T):
             sample_details[m][t] = generate_gamma_sample(sample_num, trunQuantile, mean_demands[m], betas[m])
 
+sample_details = [[[10, 20], [10, 20], [10, 20]], [[5, 15], [5, 15], [5, 15]]] #
 
 theta_iniValue = -5000 # initial theta values (profit) in each period
 m = Model() # linear model in the first stage
@@ -86,7 +89,7 @@ m.addConstr(-vari_costs[0]*q1 - vari_costs[1]*q2- W0 + W1 + W2 == overhead_cost[
 
 # cuts recording arrays
 iter_num = 4
-N = 10 # sampled number of scenarios in forward computing
+N = 2 # sampled number of scenarios in forward computing 2
 slope_stage1_1 = []
 slope_stage1_2 = []
 slope_stage1_3 = []
@@ -107,7 +110,9 @@ start = time.process_time()
 iter = 0
 while iter < iter_num:  
     sample_scenarios = generate_samples(sample_details, N)
-
+    sample_scenarios = [[[10, 10, 10], [10, 10, 30], [10, 30, 10], [10,30,30], [30,10,10], [30,10,30],[30,30,10],  [30,30,30]],\
+                        [[5, 5, 5], [5, 5, 15], [5, 15, 5], [5,15,15],[15,5,5], [15,5, 15], [15,15,5], [15,15,15]]]
+    
     # forward
     if iter > 0:        
         m.addConstr(theta >= slope_stage1_1[-1][0]*(ini_Is[0]) + slope_stage1_1[-1][1]*(ini_Is[1])\
@@ -116,6 +121,11 @@ while iter < iter_num:
     m.update()
     m.optimize()
     
+    if iter == 0:
+        m.write('iter' + str(iter+1) + '_main.lp')    
+        m.write('iter' + str(iter+1) + '_main.sol')
+        pass
+
     q1_values[iter][0] = [q1.x for n in range(N)]  
     q2_values[iter][0] = [q2.x for n in range(N)] 
     
@@ -165,7 +175,7 @@ while iter < iter_num:
                 m_forward[t][n].addConstr(I1_forward[t][n] - B1_forward[t][n] == I1_forward_values[t-1][n] + qpre1_values[iter][t-1][n] - demand1)
                 m_forward[t][n].addConstr(I2_forward[t][n] - B2_forward[t][n] == I2_forward_values[t-1][n] + qpre2_values[iter][t-1][n] - demand2)
                 m_forward[t][n].addConstr(cash_forward[t][n] + prices[0]*B1_forward[t][n] + + prices[1]*B2_forward[t][n] == cash_forward_values[t-1][n] - overhead_cost[t]\
-                                          - vari_costs[0]*q1_values[iter][t][n] - vari_costs[1]*q2_values[iter][t][n] -r1*W1_values[iter] + r0*W0_values[iter]\
+                                          - vari_costs[0]*q1_values[iter][t][n] - vari_costs[1]*q2_values[iter][t][n]-r2*W2_values[iter] -r1*W1_values[iter] + r0*W0_values[iter]\
                                               -r2*W2_values[iter] + prices[0]*demand1 + prices[1]*demand2)
              
             if t < T - 1:
@@ -183,8 +193,8 @@ while iter < iter_num:
                                              + r1*W1_forward[t][n] - r0*W0_forward[t][n] + theta_forward[t][n], GRB.MINIMIZE)  
                     
                 m_forward[t][n].addConstr(W1_forward[t][n] <= U) 
-                m_forward[t][n].addConstr(cash_forward[t][n] - vari_costs[0]*q1_forward[t][n] - vari_costs[1]*q2_forward[t][n] - W0_forward[t][n]\
-                                          + W1_forward[t][n] + W2_forward[t][n] == overhead_cost[t]) 
+                m_forward[t][n].addConstr(- vari_costs[0]*q1_forward[t][n] - vari_costs[1]*q2_forward[t][n] - W0_forward[t][n]\
+                                          + W1_forward[t][n] + W2_forward[t][n] == overhead_cost[t] - cash_forward_values[t-1][n]) 
                 m_forward[t][n].addConstr(theta_forward[t][n] >= theta_iniValue*(T-1-t))                  
             
             # put those cuts in the back
@@ -200,16 +210,18 @@ while iter < iter_num:
             
             # optimize
             m_forward[t][n].optimize()
+            if iter == 1 and t == 0:
+                m_forward[t][n].write('iter' + str(iter+1) + '_sub_' + str(t+1) + '^' + str(n+1) + '.lp') 
+                m_forward[t][n].write('iter' + str(iter+1) + '_sub_' + str(t+1) + '^' + str(n+1) + '.sol') 
+                pass
+        
             I1_forward_values[t][n] = I1_forward[t][n].x 
             I2_forward_values[t][n] = I2_forward[t][n].x 
                            
             B1_forward_values[t][n] = B1_forward[t][n].x  
             B2_forward_values[t][n] = B2_forward[t][n].x 
             cash_forward_values[t][n] = cash_forward[t][n].x 
-            # if iter == 1 and t == 0:
-            #     m_forward[t][n].write('iter' + str(iter+1) + '_sub_' + str(t+1) + '^' + str(n+1) + '.lp') 
-            #     m_forward[t][n].write('iter' + str(iter+1) + '_sub_' + str(t+1) + '^' + str(n+1) + '.sol') 
-            #     pass
+        
             if t < T - 1:
                 q1_values[iter][t+1][n] = q1_forward[t][n].x
                 qpre1_values[iter][t][n] = qpre1_forward[t][n].x
@@ -263,7 +275,7 @@ while iter < iter_num:
                     m_backward[t][n][s].addConstr(I1_backward[t][n][s] - B1_backward[t][n][s] == ini_Is[0] - demand1)
                     m_backward[t][n][s].addConstr(I2_backward[t][n][s] - B2_backward[t][n][s] == ini_Is[1] - demand2)
                     m_backward[t][n][s].addConstr(cash_backward[t][n][s] == ini_cash - overhead_cost[t] - vari_costs[0]*q1_values[iter][t][n]-vari_costs[1]*q2_values[iter][t][n]\
-                                                  - r2*W2_values[iter] - r1*W1_values[iter] + r0*W0_values[iter]\
+                                                  - r2*W2_values[iter]- r2*W2_values[iter] - r1*W1_values[iter] + r0*W0_values[iter]\
                                                   + prices[0]*(demand1 - B1_backward[t][n][s])+ prices[1]*(demand2 - B2_backward[t][n][s]))
                 else:
                     m_backward[t][n][s].addConstr(I1_backward[t][n][s] - B1_backward[t][n][s] == I1_forward_values[t-1][n] + qpre1_values[iter][t-1][n] - demand1)
@@ -280,8 +292,8 @@ while iter < iter_num:
                 m_backward[t][n][s].addConstr(B2_backward[t][n][s] <= demand2)
                 if t < T - 1:                   
                     m_backward[t][n][s].addConstr(W1_backward[t][n][s] <= U)
-                    m_backward[t][n][s].addConstr(cash_backward[t][n][s] - vari_costs[0]*q1_backward[t][n][s]- vari_costs[1]*q2_backward[t][n][s] - W0_backward[t][n][s]\
-                                                  + W1_backward[t][n][s] + W2_backward[t][n][s] == overhead_cost[t])
+                    m_backward[t][n][s].addConstr(-vari_costs[0]*q1_backward[t][n][s]- vari_costs[1]*q2_backward[t][n][s] - W0_backward[t][n][s]\
+                                                  + W1_backward[t][n][s] + W2_backward[t][n][s] == overhead_cost[t] - cash_forward_values[t-1][n])
                     m_backward[t][n][s].addConstr(theta_backward[t][n][s] >= theta_iniValue*(T-1-t))
                     
                 # put those cuts in the back

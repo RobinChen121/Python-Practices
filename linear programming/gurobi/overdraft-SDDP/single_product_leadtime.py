@@ -8,6 +8,7 @@ Created on Sat Mar  2 19:18:39 2024
 @disp:  business overdraft for lead time in single product problem;
 
 longer iterations seems more important than longer N;
+* should not have interest free amount since this would cause the solver obtain the wrong values for Ws when initial cash is larger than overhead cost;
 
 
 ini_I = 0
@@ -16,7 +17,7 @@ vari_cost = 1
 price = 10
 unit_back_cost = 0
 unit_hold_cost = 0
-unit_salvage = 0.5
+unit_salvage = 0
 mean_demands = [20, 35, 20]
 T = len(mean_demands)
 sample_nums = [10 for t in range(T)]
@@ -30,8 +31,8 @@ iter_num = 15
 N = 15 # sampled number of scenarios for forward computing
 
 
-SDP optimal is 137, q=47;    
-SDDP optimal is 145, q=52, cpu time is 73s;
+SDP optimal is 133, q=46;    
+SDDP optimal is 134, q=43, cpu time is 73s;
     
 """
 
@@ -54,18 +55,18 @@ vari_cost = 1
 price = 10
 unit_back_cost = 0
 unit_hold_cost = 0
-unit_salvage = 0.5
+unit_salvage = 0
 mean_demands = [20, 35, 20]
 T = len(mean_demands)
 sample_nums = [10 for t in range(T)]
 overhead_cost = [100 for t in range(T)]
 
-r0 = 0.01
-r1 = 0.1
-r2 = 1 # penalty interest rate for overdraft exceeding the limit
+r0 = 0
+r1 = 0
+r2 = 0 # penalty interest rate for overdraft exceeding the limit
 U = 1000 # overdraft limit
 iter_num = 15
-N = 15 # sampled number of scenarios for forward computing
+N = 10 # sampled number of scenarios for forward computing
 
 trunQuantile = 0.9999 # affective to the final ordering quantity
 scenario_numTotal = 1
@@ -175,7 +176,7 @@ while iter < iter_num:
              
             if t < T - 1:
                 m_forward[t][n].addConstr(q_pre_forward[t][n] == q_values[iter][t][n]) 
-            m_forward[t][n].addConstr(B_forward[t][n] <= demand)           
+            # m_forward[t][n].addConstr(B_forward[t][n] <= demand)           
             if t == T - 1:                   
                 m_forward[t][n].setObjective(-price*(demand - B_forward[t][n]) - unit_salvage*I_forward[t][n], GRB.MINIMIZE)
             else:
@@ -261,7 +262,7 @@ while iter < iter_num:
             
                 if t < T - 1:
                     m_backward[t][n][s].addConstr(q_pre_backward[t][n][s] == q_values[iter][t][n]) 
-                m_backward[t][n][s].addConstr(B_backward[t][n][s] <= demand)
+                # m_backward[t][n][s].addConstr(B_backward[t][n][s] <= demand)
                 if t < T - 1:                   
                     m_backward[t][n][s].addConstr(W1_backward[t][n][s] <= U)
                     m_backward[t][n][s].addConstr(cash_backward[t][n][s] - vari_cost*q_backward[t][n][s] - W0_backward[t][n][s]\

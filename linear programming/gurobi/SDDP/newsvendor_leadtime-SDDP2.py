@@ -14,7 +14,7 @@ price newsvendor;
 * longer iterations seems more important than longer N;
 * variable theta should be free in the initialization and set its lower bound in the constraints,
 or else affecting its dual value;
-* it is better to have another constratint B <= d to avoid multiple solutions in the LPs and affect the cuts;
+* it is better to have another constratint B <= d to avoid multiple solutions in the LPs and affect the cuts (not necessary);
 
 
 for case:

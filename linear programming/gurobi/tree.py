@@ -23,6 +23,14 @@ def generate_sample(sample_num, trunQuantile, mu):
         samples[i] = st.poisson.ppf(rand_p, mu)
     return samples
 
+def generate_poisson_sample(sample_num, trunQuantile, mu):
+    samples = [0 for i in range(sample_num)]
+    for i in range(sample_num):
+        # np.random.seed(10000)
+        rand_p = np.random.uniform(trunQuantile*i/sample_num, trunQuantile*(i+1)/sample_num)
+        samples[i] = st.poisson.ppf(rand_p, mu)
+    return samples
+
 # gamma distribution:mean demand is shape / beta and variance is shape / beta^2
 # beta = 1 / scale
 # shape = demand * beta
