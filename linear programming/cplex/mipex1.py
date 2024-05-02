@@ -1,44 +1,55 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Created on Wed May  1 17:42:26 2024
+
+@author: zhenchen
+
+@disp:  
+    
+    
+"""
+
 #!/usr/bin/python
 # ---------------------------------------------------------------------------
 # File: mipex1.py
-# Version 12.7.0
+# Version 22.1.1
 # ---------------------------------------------------------------------------
 # Licensed Materials - Property of IBM
 # 5725-A06 5725-A29 5724-Y48 5724-Y49 5724-Y54 5724-Y55 5655-Y21
-# Copyright IBM Corporation 2009, 2016. All Rights Reserved.
+# Copyright IBM Corporation 2009, 2022. All Rights Reserved.
 #
 # US Government Users Restricted Rights - Use, duplication or
 # disclosure restricted by GSA ADP Schedule Contract with
 # IBM Corp.
 # ---------------------------------------------------------------------------
-#
-# mipex1.py - Entering and optimizing a mixed integer programming problem
-#             Demonstrates different methods for creating a problem.
-#
-# The user has to choose the method on the command line:
-#
-#    python mipex1.py -r     generates the problem by adding rows
-#    python mipex1.py -c     generates the problem by adding columns
-#    python mipex1.py -n     generates the problem by adding a
-#                            list of coefficients
-#
-# The MIP problem solved in this example is:
-#
-#   Maximize  x1 + 2 x2 + 3 x3 + x4
-#   Subject to
-#      - x1 +   x2 + x3 + 10 x4 <= 20
-#        x1 - 3 x2 + x3         <= 30
-#               x2      - 3.5x4  = 0
-#   Bounds
-#        0 <= x1 <= 40
-#        0 <= x2
-#        0 <= x3
-#        2 <= x4 <= 3
-#   Integers
-#       x4
+"""
+Entering and optimizing a mixed integer programming problem.
 
-from __future__ import print_function
+Demonstrates different methods for creating a problem.
 
+The user has to choose the method on the command line:
+
+   python mipex1.py -r     generates the problem by adding rows
+   python mipex1.py -c     generates the problem by adding columns
+   python mipex1.py -n     generates the problem by adding a
+                           list of coefficients
+
+The MIP problem solved in this example is:
+
+  Maximize  x1 + 2 x2 + 3 x3 + x4
+  Subject to
+     - x1 +   x2 + x3 + 10 x4 <= 20
+       x1 - 3 x2 + x3         <= 30
+              x2      - 3.5x4  = 0
+  Bounds
+       0 <= x1 <= 40
+       0 <= x2
+       0 <= x3
+       2 <= x4 <= 3
+  Integers
+      x4
+"""
 import sys
 
 import cplex
@@ -135,6 +146,7 @@ def mipex1(pop_method):
         print("Row %d:  Slack = %10f" % (j, slack[j]))
     for j in range(numcols):
         print("Column %d:  Value = %10f" % (j, x[j]))
+
 
 if __name__ == "__main__":
     if len(sys.argv) != 2 or sys.argv[1] not in ["-r", "-c", "-n"]:

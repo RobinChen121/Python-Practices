@@ -15,6 +15,9 @@ price newsvendor;
 * variable theta should be free in the initialization and set its lower bound in the constraints,
 or else affecting its dual value;
 * it is better to have another constratint B <= d to avoid multiple solutions in the LPs and affect the cuts (not necessary);
+* when adding custs, if adding more than 2 cuts, the solver will automatically make one of B and I be 0;
+* and during iterations, theta tends to be stable and the solver will get the right values for B and I;
+ 
 
 
 for case:
@@ -61,7 +64,7 @@ overhead_cost = [0 for t in range(T)]
 
 
 iter = 0
-iter_num = 21
+iter_num = 10
 N = 8 # sampled number of scenarios for forward computing
 
 
@@ -163,7 +166,7 @@ while iter < iter_num:
             # add cut in the back
             if t < T - 1:
                 for i in range(iter):
-                    for nn in range(N):
+                    for nn in range(1):
                         # careful, some notations should be nn
                         m_forward[t][n].addConstr(theta_forward[t][n] >= slopes1[i][t][nn]*(I_forward[t][n] + q_pre_forward[t][n]) + slopes2[i][t][nn]*(cash_forward[t][n]- vari_cost*q_forward[t][n])\
                                                           + slopes3[i][t][nn]*q_forward[t][n] + intercepts[i][t][nn])               
@@ -171,10 +174,10 @@ while iter < iter_num:
             
             # optimize
             m_forward[t][n].optimize()
-            # if iter == 1 and t == 0 and n == 0:
-            #     m_forward[t][n].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(n+1) + '.lp')
-            #     m_forward[t][n].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(n+1) + '.sol')
-            #     pass
+            if iter == 6 and t == 0 and n == 0:
+                m_forward[t][n].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(n+1) + '.lp')
+                m_forward[t][n].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(n+1) + '.sol')
+                pass
                 # m_forward[t][n].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(n+1) + '-.dlp')
             
             I_forward_values[t][n] = I_forward[t][n].x 
@@ -227,7 +230,7 @@ while iter < iter_num:
                 # put those cuts in the back
                 if iter > 0 and t < T - 1:
                     for i in range(iter):
-                        for nn in range(N): # N
+                        for nn in range(1): # N
                             m_backward[t][n][s].addConstr(theta_backward[t][n][s] >= slopes1[i][t][nn]*(I_backward[t][n][s] + q_pre_backward[t][n][s]) +\
                                                           slopes2[i][t][nn]*(cash_backward[t][n][s]- vari_cost*q_backward[t][n][s])\
                                                               + slopes3[i][t][nn]*q_backward[t][n][s] + intercepts[i][t][nn])
@@ -237,10 +240,10 @@ while iter < iter_num:
                 pi = m_backward[t][n][s].getAttr(GRB.Attr.Pi)
                 rhs = m_backward[t][n][s].getAttr(GRB.Attr.RHS)
                 
-                # if  iter == 2 and t == 2:
-                #     m_backward[t][n][s].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(n+1) + '_' + str(s+1) +'-back.lp')
-                #     m_backward[t][n][s].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(n+1) + '_' + str(s+1) +'-back.sol')  
-                #     pass
+                if  iter == 1 and t == 0:
+                    m_backward[t][n][s].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(n+1) + '_' + str(s+1) +'-back.lp')
+                    m_backward[t][n][s].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(n+1) + '_' + str(s+1) +'-back.sol')  
+                    pass
                 
                 #     m_backward[t][n][s].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(n+1) + '_' + str(s+1) +'-back.dlp')
                                

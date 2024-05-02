@@ -60,7 +60,7 @@ sample_detail = [[5, 15], [5, 15], [5, 15]]
 
 
 iter = 0
-iter_num = 4
+iter_num = 8
 N = 8 # sampled number of scenarios for forward computing
 
 theta_iniValue = 0 # initial theta values (profit) in each period

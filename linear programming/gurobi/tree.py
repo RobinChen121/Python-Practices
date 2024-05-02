@@ -68,9 +68,29 @@ def generate_scenario_samples(sample_num, trunQuantile, mus):
         for t in range(T):
             rand_p = np.random.uniform(trunQuantile*i/sample_num, trunQuantile*(i+1)/sample_num)
             samples[i][t] = st.poisson.ppf(rand_p, mus[t])
+            random.shuffle(samples[i])
             
     return samples
 
+def generate_scenario_samples_gamma(sample_num, trunQuantile, mean, beta, T):
+    samples = [[0 for t in range(T)] for i in range(sample_num)]
+    for i in range(sample_num):
+        # np.random.seed(10000)
+        for t in range(T):
+            rand_p = np.random.uniform(trunQuantile*i/sample_num, trunQuantile*(i+1)/sample_num)
+            samples[i][t] = st.gamma.ppf(rand_p, mean*beta, loc=0, scale=1/beta)
+        random.shuffle(samples[i])
+    return samples
+
+def generate_scenario_samples_poisson(sample_num, trunQuantile, mean, T):
+    samples = [[0 for t in range(T)] for i in range(sample_num)]
+    for i in range(sample_num):
+        # np.random.seed(10000)
+        for t in range(T):
+            rand_p = np.random.uniform(trunQuantile*i/sample_num, trunQuantile*(i+1)/sample_num)
+            samples[i][t] = st.poisson.ppf(rand_p, mean)
+        random.shuffle(samples[i])
+    return samples
 
 def get_tree_strcture(samples):
     T = len(samples[0])
