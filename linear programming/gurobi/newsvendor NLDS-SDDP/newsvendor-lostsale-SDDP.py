@@ -38,7 +38,7 @@ import numpy as np
 
 import sys 
 sys.path.append("..") 
-from tree import generate_sample, get_tree_strcture, generate_scenario_samples
+from tree import generate_sample, generate_scenario_samples, compute_ub
 
 
 
@@ -49,10 +49,10 @@ vari_cost = 1
 price = 10
 unit_back_cost = 0
 unit_hold_cost = 0
-mean_demands = [10, 10]
+mean_demands = [10, 10, 10]
 T = len(mean_demands)
 sample_nums = [10 for t in range(T)]
-iter_num = 8
+iter_num = 15
 N = 10 # sampled number of scenarios for forward computing
 
 trunQuantile = 0.9999 # affective to the final ordering quantity
@@ -93,6 +93,7 @@ q_sub_values = [[[0 for n in range(N)] for t in range(T-1)] for iter in range(it
 
 start = time.process_time()
 while iter < iter_num:  
+    z_values = [[0 for t in range(T)] for n in range(N)]
     
     # sample a numer of scenarios from the full scenario tree
     # random.seed(10000)
@@ -105,7 +106,7 @@ while iter < iter_num:
     if iter > 0:
         m.addConstr(theta >= slope1_stage[-1][-2]*(ini_I+q) + slope1_stage[-1][-1]*(ini_cash-vari_cost*q) + intercept1_stage[-1])
     m.update()
-    m.Params.LogToConsole = 0
+    # m.Params.LogToConsole = 0
     m.optimize()
     # m.write('iter' + str(iter+1) + '_main2.lp')    
     # m.write('iter' + str(iter+1) + '_main2.sol')
@@ -162,9 +163,14 @@ while iter < iter_num:
 
                 
             # optimize
-            m_forward[t][n].Params.LogToConsole = 0
+            # m_forward[t][n].Params.LogToConsole = 0
             m_forward[t][n].optimize()
             I_forward_values[t][n] = I_forward[t][n].x 
+            
+            if t < T - 1:
+                z_values[n][t] = -m_forward[t][n].objVal + theta_forward[t][n].x
+            else:
+                z_values[n][t] = -m_forward[t][n].objVal
 
             B_forward_values[t][n] = B_forward[t][n].x  
             cash_forward_values[t][n] = cash_forward[t][n].x 
@@ -221,12 +227,12 @@ while iter < iter_num:
                     m_backward[t][n][k].addConstr(cash_backward[t][n][k] == cash_forward_values[t-1][n]- vari_cost*q_forward_values[t-1][n] + price*(demand - B_backward[t][n][k]))
                 
                 # optimize
-                m_backward[t][n][k].Params.LogToConsole = 0
+                # m_backward[t][n][k].Params.LogToConsole = 0
                 m_backward[t][n][k].optimize()                
                 pi = m_backward[t][n][k].getAttr(GRB.Attr.Pi)
-                if t == 0 and n == 0 and iter == 0:
-                    m_backward[t][n][k].write('iter' + str(iter+1) + '_sub_' + str(t+1) + '^' + str(n+1) + '-' + str(k+1) +'back.lp')
-                    pass
+                # if t == 0 and n == 0 and iter == 0:
+                #     m_backward[t][n][k].write('iter' + str(iter+1) + '_sub_' + str(t+1) + '^' + str(n+1) + '-' + str(k+1) +'back.lp')
+                #     pass
                 
                 
                 rhs = m_backward[t][n][k].getAttr(GRB.Attr.RHS)
@@ -252,8 +258,12 @@ while iter < iter_num:
             elif t > 0:
                 slopes[t-1][n].append(avg_pi[0])
                 intercepts[t-1][n].append(avg_pi_rhs)   
-            print()
-
+    
+    z_lb, z_ub = compute_ub(z_values)
+    if -z <= z_ub and -z >= z_lb:
+        print('********************************************')
+        print('iteration ends in iter + 1 = %d' % iter)
+        break
     iter += 1
 
 end = time.process_time()

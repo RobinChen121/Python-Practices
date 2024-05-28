@@ -33,7 +33,35 @@ N = 15 # sampled number of scenarios for forward computing
 
 SDP optimal is 133, q=46;    
 SDDP optimal is 134, q=43, cpu time is 73s;
-    
+
+******************************
+ini_I = 0
+ini_cash = 0
+vari_cost = 1
+price = 10
+unit_back_cost = 0
+unit_hold_cost = 0
+unit_salvage = 0.5
+mean_demands = [20, 10, 20, 10]
+T = len(mean_demands)
+sample_nums = [10 for t in range(T)]
+overhead_cost = [50 for t in range(T)]
+
+r0 = 0
+r1 = 0.1
+r2 = 2 # penalty interest rate for overdraft exceeding the limit
+U = 500 # overdraft limit
+iter_num = 15
+N = 10 # sampled number of scenarios for forward computing
+
+SDP optimal result is 118.77; 
+SDDP is 127.23, time 11.87s; (N=N, iter_num=15) # the first N is the number of cuts added in the LPs
+SDDP is 122.45, time 36.40s;(N=N, iter_num=27)
+SDDP is 122.47, time 36.40s;(N=N, iter_num=35)
+SDDP with confidence interval is 134.70, time 14.94s;
+SDDP is 121.15, time 20.55s; (N=N, iter_num=20)
+SDDP is 116.87, time 4.09s; (N=1, iter_num=20)
+SDDP is 137.89, time is 49.04s; (N=1, iter_num=15)    
 """
 
 from gurobipy import *
@@ -44,7 +72,7 @@ import numpy as np
 
 import sys 
 sys.path.append("..") 
-from tree import generate_sample, get_tree_strcture, generate_scenario_samples
+from tree import generate_sample, generate_scenario_samples, compute_ub
 
 
 
@@ -55,17 +83,17 @@ vari_cost = 1
 price = 10
 unit_back_cost = 0
 unit_hold_cost = 0
-unit_salvage = 0
-mean_demands = [20, 35, 20]
+unit_salvage = 0.5
+mean_demands = [20, 10, 20, 10]
 T = len(mean_demands)
 sample_nums = [10 for t in range(T)]
-overhead_cost = [100 for t in range(T)]
+overhead_cost = [50 for t in range(T)]
 
 r0 = 0
-r1 = 0
-r2 = 0 # penalty interest rate for overdraft exceeding the limit
-U = 1000 # overdraft limit
-iter_num = 15
+r1 = 0.1
+r2 = 2 # penalty interest rate for overdraft exceeding the limit
+U = 500 # overdraft limit
+iter_num = 35
 N = 10 # sampled number of scenarios for forward computing
 
 trunQuantile = 0.9999 # affective to the final ordering quantity
@@ -113,6 +141,8 @@ W2_values = [0 for iter in range(iter_num)]
 start = time.process_time()
 while iter < iter_num:  
     
+    z_values = [[0 for t in range(T)] for n in range(N)]
+    
     # sample a numer of scenarios from the full scenario tree
     # random.seed(10000)
     sample_scenarios = generate_scenario_samples(N, trunQuantile, mean_demands)
@@ -123,6 +153,7 @@ while iter < iter_num:
     if iter > 0:        
         m.addConstr(theta >= slope1_stage[-1][0]*(ini_I) + slope1_stage[-1][1]*(ini_cash-vari_cost*q) + slope1_stage[-1][2]*q + intercept1_stage[-1])        
         m.update()
+    m.Params.LogToConsole = 0
     m.optimize()
     
     q_values[iter][0] = [q.x for n in range(N)]  
@@ -201,8 +232,14 @@ while iter < iter_num:
                                                 + intercepts[i][t][nn])
             
             # optimize
+            m_forward[t][n].Params.LogToConsole = 0
             m_forward[t][n].optimize()
             I_forward_values[t][n] = I_forward[t][n].x 
+            
+            if t < T - 1:
+                z_values[n][t] = -m_forward[t][n].objVal + theta_forward[t][n].x
+            else:
+                z_values[n][t] = -m_forward[t][n].objVal
                            
             B_forward_values[t][n] = B_forward[t][n].x  
             cash_forward_values[t][n] = cash_forward[t][n].x 
@@ -280,6 +317,7 @@ while iter < iter_num:
                                                     + intercepts[i][t][nn])
                                
                 # optimize
+                m_backward[t][n][s].Params.LogToConsole = 0
                 m_backward[t][n][s].optimize()
                 
                 pi = m_backward[t][n][s].getAttr(GRB.Attr.Pi)
@@ -316,8 +354,13 @@ while iter < iter_num:
                 slopes1[iter][t-1][n] = avg_slope1 
                 slopes2[iter][t-1][n] = avg_slope2  
                 slopes3[iter][t-1][n] = avg_slope3
-                intercepts[iter][t-1][n] = avg_intercept  
-
+                intercepts[iter][t-1][n] = avg_intercept 
+                
+    z_lb, z_ub = compute_ub(z_values)
+    # if -z <= z_ub and -z >= z_lb:
+    #     print('********************************************')
+    #     print('iteration ends in iter + 1 = %d' % iter)
+    #     break
     iter += 1
 
 end = time.process_time()

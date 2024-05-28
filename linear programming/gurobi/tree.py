@@ -118,6 +118,19 @@ def get_tree_strcture(samples):
     return node_values, node_index
 
 
+def compute_ub(twoDArray):
+    N = len(twoDArray)
+    T = len(twoDArray[0])
+    z_sub_values = [0 for n in range(N)]
+    for n in range(N):
+        for t in range(T):
+            z_sub_values[n] += twoDArray[n][t]
+    
+    z_mean = np.mean(z_sub_values)    
+    z_std = np.std(z_sub_values, ddof = 1)
+    z_ub = z_mean + 1.96*z_std/np.sqrt(N)
+    z_lb = z_mean - 1.96*z_std/np.sqrt(N)
+    return [z_lb, z_ub]
 
 mean_demand = 10
 beta = 1

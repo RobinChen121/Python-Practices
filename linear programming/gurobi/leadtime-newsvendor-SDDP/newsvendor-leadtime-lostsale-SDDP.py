@@ -36,7 +36,7 @@ iter_num = 21
 N = 10 # sampled number of scenarios for forward computing
 
 SDP cost is 171.8, and Q*_1 is 24;
-SDDP cost is 170.9 and Q*_1 is 17, python cpu time is about 62s.
+SDDP cost is 172.48 and Q*_1 is 17, python cpu time is about 62s. (N=N, iter_num=20)
   
 """
 
@@ -44,10 +44,12 @@ from gurobipy import *
 import time
 import itertools
 import random
+import numpy as np
 
 import sys 
 sys.path.append("..") 
-from tree import generate_sample, get_tree_strcture, generate_scenario_samples
+from tree import generate_sample, generate_scenario_samples, compute_ub
+
 
 
 
@@ -64,8 +66,8 @@ overhead_cost = [0 for t in range(T)]
 
 
 iter = 0
-iter_num = 10
-N = 8 # sampled number of scenarios for forward computing
+iter_num = 20
+N = 10 # sampled number of scenarios for forward computing
 
 
 
@@ -78,7 +80,7 @@ for i in sample_nums:
 sample_detail = [[0 for i in range(sample_nums[t])] for t in range(T)] 
 for t in range(T):
     sample_detail[t] = generate_sample(sample_nums[t], trunQuantile, mean_demands[t])
-sample_detail = [[5, 15], [5, 15], [5, 15]]
+# sample_detail = [[5, 15], [5, 15], [5, 15]]
 
 
 
@@ -110,22 +112,24 @@ rhs = [[[ [] for n in range(N)] for t in range(T)] for i in range(iter_num)]
 pi_d = [[[[0  for s in range(sample_nums[t])] for n in range(N)] for t in range(T)] for i in range(iter_num)]
 pi_q = [[[[0  for s in range(sample_nums[t])] for n in range(N)] for t in range(T)] for i in range(iter_num)]
 
+
 while iter < iter_num:  
+    z_values = [[0 for t in range(T)] for n in range(N)]
     
     # sample a numer of scenarios from the full scenario tree
     # random.seed(10000)
     sample_scenarios = generate_scenario_samples(N, trunQuantile, mean_demands)
-    sample_scenarios = [[5, 5, 5], [5, 5, 15], [5, 15, 5], [15,5,5], [15,15,5], [15,5, 15], [5,15,15],[15,15,15]]
+    # sample_scenarios = [[5, 5, 5], [5, 5, 15], [5, 15, 5], [15,5,5], [15,15,5], [15,5, 15], [5,15,15],[15,15,15]]
     sample_scenarios.sort() # sort to make same numbers together
     
     # forward
     if iter > 0:
         m.addConstr(theta >= slope2_stage[iter-1]*(-vari_cost*q) + slope3_stage[iter-1]*q + intercept1_stage[iter-1])
     m.optimize()
-    if iter == 3:
-        m.write('iter' + str(iter) + '_main.lp')
-        m.write('iter' + str(iter) + '_main.sol')
-        pass
+    # if iter == 3:
+    #     m.write('iter' + str(iter) + '_main.lp')
+    #     m.write('iter' + str(iter) + '_main.sol')
+    #     pass
     
     q_values[iter][0] = [q.x for n in range(N)]
     z = m.objVal
@@ -166,7 +170,7 @@ while iter < iter_num:
             # add cut in the back
             if t < T - 1:
                 for i in range(iter):
-                    for nn in range(1):
+                    for nn in range(N):
                         # careful, some notations should be nn
                         m_forward[t][n].addConstr(theta_forward[t][n] >= slopes1[i][t][nn]*(I_forward[t][n] + q_pre_forward[t][n]) + slopes2[i][t][nn]*(cash_forward[t][n]- vari_cost*q_forward[t][n])\
                                                           + slopes3[i][t][nn]*q_forward[t][n] + intercepts[i][t][nn])               
@@ -174,15 +178,22 @@ while iter < iter_num:
             
             # optimize
             m_forward[t][n].optimize()
-            if iter == 6 and t == 0 and n == 0:
-                m_forward[t][n].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(n+1) + '.lp')
-                m_forward[t][n].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(n+1) + '.sol')
-                pass
+            # if iter == 6 and t == 0 and n == 0:
+            #     m_forward[t][n].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(n+1) + '.lp')
+            #     m_forward[t][n].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(n+1) + '.sol')
+            #     pass
                 # m_forward[t][n].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(n+1) + '-.dlp')
             
             I_forward_values[t][n] = I_forward[t][n].x 
             B_forward_values[t][n] = B_forward[t][n].x   
             cash_forward_values[t][n] = cash_forward[t][n].x  
+            
+            if t < T - 1:
+                z_values[n][t] = -m_forward[t][n].objVal + theta_forward[t][n].x
+            else:
+                z_values[n][t] = -m_forward[t][n].objVal
+
+            
             if iter == 2 and t == 1:
                 pass
             if t < T - 1:
@@ -230,7 +241,7 @@ while iter < iter_num:
                 # put those cuts in the back
                 if iter > 0 and t < T - 1:
                     for i in range(iter):
-                        for nn in range(1): # N
+                        for nn in range(N): # N
                             m_backward[t][n][s].addConstr(theta_backward[t][n][s] >= slopes1[i][t][nn]*(I_backward[t][n][s] + q_pre_backward[t][n][s]) +\
                                                           slopes2[i][t][nn]*(cash_backward[t][n][s]- vari_cost*q_backward[t][n][s])\
                                                               + slopes3[i][t][nn]*q_backward[t][n][s] + intercepts[i][t][nn])
@@ -240,10 +251,10 @@ while iter < iter_num:
                 pi = m_backward[t][n][s].getAttr(GRB.Attr.Pi)
                 rhs = m_backward[t][n][s].getAttr(GRB.Attr.RHS)
                 
-                if  iter == 1 and t == 0:
-                    m_backward[t][n][s].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(n+1) + '_' + str(s+1) +'-back.lp')
-                    m_backward[t][n][s].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(n+1) + '_' + str(s+1) +'-back.sol')  
-                    pass
+                # if  iter == 1 and t == 0:
+                #     m_backward[t][n][s].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(n+1) + '_' + str(s+1) +'-back.lp')
+                #     m_backward[t][n][s].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(n+1) + '_' + str(s+1) +'-back.sol')  
+                #     pass
                 
                 #     m_backward[t][n][s].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(n+1) + '_' + str(s+1) +'-back.dlp')
                                
@@ -279,7 +290,12 @@ while iter < iter_num:
                 slopes2[iter][t-1][n] = avg_slope2 
                 slopes3[iter][t-1][n] = avg_slope3 
                 intercepts[iter][t-1][n] = avg_intercept  
-                
+    
+    z_lb, z_ub = compute_ub(z_values)
+    if -z <= z_ub and -z >= z_lb:
+        print('********************************************')
+        print('iteration ends in iter + 1 = %d' % iter)
+        break
     iter += 1
 
 end = time.process_time()
