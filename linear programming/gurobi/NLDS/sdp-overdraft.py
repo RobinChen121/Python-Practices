@@ -110,6 +110,7 @@ class StochasticInventory:
 
 
 demands = [10, 20]
+T = len(demands)
 holdingCost = [30, 60]
 capacity = 100
 fixOrderCost = 0
