@@ -8,8 +8,8 @@ Created on Wed May 29 16:11:39 2024
 @disp:  
     
 for 3 periods [10, 20, 10], python running about 26s, while java 0s;
-for 4 periods [10, 20, 10, 20], python running about , while java 72s
-    
+for 4 periods [10, 20, 10, 20], solution 215.48, python running more than 4 hours and can't get a solution, while java 31s
+for 4 periods [10, 10, 10, 10], solution 26.67, python running more than 1249s, while java 29s    
 """
 
 import scipy.stats as sp
@@ -126,10 +126,10 @@ class StochasticInventory:
         return bestQValue
 
 
-demands = [10, 20, 10, 20]
+demands = [10, 10, 10, 10]
 T = len(demands)
 overheadCosts = [50 for t in range(T)]
-capacity = 35
+capacity = 20
 fixOrderCost = 0
 variOderCost = 1
 holdCost = 0

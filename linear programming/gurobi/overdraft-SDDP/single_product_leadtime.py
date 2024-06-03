@@ -62,6 +62,12 @@ SDDP with confidence interval is 134.70, time 14.94s;
 SDDP is 121.15, time 20.55s; (N=N, iter_num=20)
 SDDP is 116.87, time 4.09s; (N=1, iter_num=20)
 SDDP is 137.89, time is 49.04s; (N=1, iter_num=15)    
+
+******************************
+mean_demands = [10, 10, 10, 10]
+SDP optimal result is 26.68;
+for 4 periods [10, 20, 10, 20], solution 215.48, python running more than 4 hours and can't get a solution, while java 31s; 
+
 """
 
 from gurobipy import *
@@ -73,6 +79,7 @@ import numpy as np
 import sys 
 sys.path.append("..") 
 from tree import generate_sample, generate_scenario_samples, compute_ub
+from write_to_file import write_to_csv
 
 
 
@@ -372,5 +379,6 @@ print('cpu time is %.3f s' % cpu_time)
                
     
     
-    
+headers = ['ini_cash', 'ini_inventory', 'price', 'unit_order_cost', 'unit_salvage_value', 'deposit_interest_rate', 'overdraft_interest_rate', 'penalty_interest_rate', 'overdraft_limit', 'mean_demands',\
+           'sample_num', 'scenario_num', 'cut_select_number', 'iter_num', 'stop_condition']    
 
