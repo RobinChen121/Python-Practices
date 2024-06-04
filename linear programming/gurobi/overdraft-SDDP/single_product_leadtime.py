@@ -83,8 +83,7 @@ from write_to_file import write_to_csv
 
 
 
-first_write = True # whether first output the result to a csv file
-stop_condition = 'iter_limit'
+
 ini_I = 0
 ini_cash = 0
 vari_cost = 1
@@ -94,6 +93,11 @@ unit_hold_cost = 0
 unit_salvage = 0.5
 mean_demands = [10, 20, 10, 20]
 T = len(mean_demands)
+if T == 4:
+    opt = 215.48
+elif T == 3:
+    opt = 26.68
+    
 sample_nums = [10 for t in range(T)]
 overhead_cost = [50 for t in range(T)]
 
@@ -101,7 +105,8 @@ r0 = 0
 r1 = 0.1
 r2 = 2 # penalty interest rate for overdraft exceeding the limit
 U = 500 # overdraft limit
-iter_num = 15
+iter_limit = 15
+time_limit = 120 # time limit
 N = 10 # sampled number of scenarios for forward computing
 cut_select_num = N
 
@@ -109,6 +114,7 @@ trunQuantile = 0.9999 # affective to the final ordering quantity
 scenario_numTotal = 1
 for i in sample_nums:
     scenario_numTotal *= i
+
     
 # detailed samples in each period
 sample_detail = [[0 for i in range(sample_nums[t])] for t in range(T)] 
@@ -118,8 +124,6 @@ for t in range(T):
 scenarios_full = list(itertools.product(*sample_detail)) 
 
 iter = 0
-
-
 theta_iniValue = -500 # initial theta values (profit) in each period
 m = Model() # linear model in the first stage
 # decision variable in the first stage model
@@ -137,21 +141,28 @@ theta_value = 0
 # cuts
 slope1_stage = []
 intercept1_stage = []
-slopes1 = [[[ 0 for n in range(N)] for t in range(T)] for i in range(iter_num)]
-slopes2 = [[[0 for n in range(N)] for t in range(T)] for i in range(iter_num)]
-slopes3 = [[[0 for n in range(N)] for t in range(T)] for i in range(iter_num)]
-intercepts = [[[0 for n in range(N)] for t in range(T-1)] for i in range(iter_num)]
-q_values = [[[0 for n in range(N)] for t in range(T)] for iter in range(iter_num)] 
-qpre_values = [[[0 for n in range(N)] for t in range(T)] for iter in range(iter_num)] 
-W0_values = [0 for iter in range(iter_num)]
-W1_values = [0 for iter in range(iter_num)]
-W2_values = [0 for iter in range(iter_num)]
+slopes1 = []
+slopes2 = []
+slopes3 = []
+intercepts = []
+q_values = []
+qpre_values = [] 
+W0_values = []
+W1_values = []
+W2_values = []
 
-
+cpu_time = 0
 start = time.process_time()
-while iter < iter_num:  
+while iter < iter_limit:  
     
-    z_values = [[0 for t in range(T)] for n in range(N)]
+    slopes1.append([[ 0 for n in range(N)] for t in range(T)])
+    slopes2.append([[0 for n in range(N)] for t in range(T)])
+    slopes3.append([[0 for n in range(N)] for t in range(T)])
+    intercepts.append([[0 for n in range(N)] for t in range(T-1)])
+    q_values.append([[0 for n in range(N)] for t in range(T)])
+    qpre_values.append([[0 for n in range(N)] for t in range(T)])
+    
+    # z_values = [[0 for t in range(T)] for n in range(N)] # for compute confidence interval
     
     # sample a numer of scenarios from the full scenario tree
     # random.seed(10000)
@@ -166,15 +177,15 @@ while iter < iter_num:
     m.Params.LogToConsole = 0
     m.optimize()
     
-    q_values[iter][0] = [q.x for n in range(N)]  
+    q_values[-1][0] = [q.x for n in range(N)]  
     # if iter == 4:
     #     m.write('iter' + str(iter+1) + '_main.lp')    
     #     m.write('iter' + str(iter+1) + '_main.sol')
     #     pass
     
-    W0_values[iter] = W0.x
-    W1_values[iter] = W1.x
-    W2_values[iter] = W2.x
+    W0_values.append(W0.x)
+    W1_values.append(W1.x)
+    W2_values.append(W2.x)
     theta_value = theta.x
     z = m.objVal    
     
@@ -205,18 +216,18 @@ while iter < iter_num:
             
             if t == 0:   
                 m_forward[t][n].addConstr(I_forward[t][n] - B_forward[t][n] == ini_I - demand)
-                m_forward[t][n].addConstr(cash_forward[t][n] + price*B_forward[t][n] == ini_cash - overhead_cost[t] - vari_cost*q_values[iter][t][n]\
-                                          -r1*W1_values[iter] + r0*W0_values[iter]\
-                                              -r2*W2_values[iter] + price*demand)
+                m_forward[t][n].addConstr(cash_forward[t][n] + price*B_forward[t][n] == ini_cash - overhead_cost[t] - vari_cost*q_values[-1][t][n]\
+                                          -r1*W1_values[-1] + r0*W0_values[-1]\
+                                              -r2*W2_values[-1] + price*demand)
             else:
-                m_forward[t][n].addConstr(I_forward[t][n] - B_forward[t][n] == I_forward_values[t-1][n] + qpre_values[iter][t-1][n] - demand)
+                m_forward[t][n].addConstr(I_forward[t][n] - B_forward[t][n] == I_forward_values[t-1][n] + qpre_values[-1][t-1][n] - demand)
                 m_forward[t][n].addConstr(cash_forward[t][n] + price*B_forward[t][n] == cash_forward_values[t-1][n] - overhead_cost[t] \
-                                                 - vari_cost*q_values[iter][t][n]\
+                                                 - vari_cost*q_values[-1][t][n]\
                                                      -r1*W1_forward_values[t-1][n] + r0*W0_forward_values[t-1][n]\
-                                                         -r2*W2_values[iter] + price*demand)
+                                                         -r2*W2_values[-1] + price*demand)
              
             if t < T - 1:
-                m_forward[t][n].addConstr(q_pre_forward[t][n] == q_values[iter][t][n]) 
+                m_forward[t][n].addConstr(q_pre_forward[t][n] == q_values[-1][t][n]) 
             # m_forward[t][n].addConstr(B_forward[t][n] <= demand)           
             if t == T - 1:                   
                 m_forward[t][n].setObjective(-price*(demand - B_forward[t][n]) - unit_salvage*I_forward[t][n], GRB.MINIMIZE)
@@ -246,10 +257,10 @@ while iter < iter_num:
             m_forward[t][n].optimize()
             I_forward_values[t][n] = I_forward[t][n].x 
             
-            if t < T - 1:
-                z_values[n][t] = -m_forward[t][n].objVal + theta_forward[t][n].x
-            else:
-                z_values[n][t] = -m_forward[t][n].objVal
+            # if t < T - 1: # for computing cnofidence interval
+            #     z_values[n][t] = -m_forward[t][n].objVal + theta_forward[t][n].x
+            # else:
+            #     z_values[n][t] = -m_forward[t][n].objVal
                            
             B_forward_values[t][n] = B_forward[t][n].x  
             cash_forward_values[t][n] = cash_forward[t][n].x 
@@ -258,8 +269,8 @@ while iter < iter_num:
             #     m_forward[t][n].write('iter' + str(iter+1) + '_sub_' + str(t+1) + '^' + str(n+1) + '.sol') 
             #     pass
             if t < T - 1:
-                q_values[iter][t+1][n] = q_forward[t][n].x
-                qpre_values[iter][t][n] = q_pre_forward[t][n].x
+                q_values[-1][t+1][n] = q_forward[t][n].x
+                qpre_values[-1][t][n] = q_pre_forward[t][n].x
                 W1_forward_values[t][n] = W1_forward[t][n].x
                 W0_forward_values[t][n] = W0_forward[t][n].x
                 W2_forward_values[t][n] = W2_forward[t][n].x
@@ -298,17 +309,17 @@ while iter < iter_num:
                                                      + r1*W1_backward[t][n][s] - r0*W0_backward[t][n][s] + theta_backward[t][n][s], GRB.MINIMIZE)  
                 if t == 0:   
                     m_backward[t][n][s].addConstr(I_backward[t][n][s] - B_backward[t][n][s] == ini_I - demand)
-                    m_backward[t][n][s].addConstr(cash_backward[t][n][s] == ini_cash - overhead_cost[t] - vari_cost*q_values[iter][t][n]\
-                                                  - r2*W2_values[iter] - r1*W1_values[iter] + r0*W0_values[iter] + price*(demand - B_backward[t][n][s]))
+                    m_backward[t][n][s].addConstr(cash_backward[t][n][s] == ini_cash - overhead_cost[t] - vari_cost*q_values[-1][t][n]\
+                                                  - r2*W2_values[-1] - r1*W1_values[-1] + r0*W0_values[-1] + price*(demand - B_backward[t][n][s]))
                 else:
-                    m_backward[t][n][s].addConstr(I_backward[t][n][s] - B_backward[t][n][s] == I_forward_values[t-1][n] + qpre_values[iter][t-1][n] - demand)
+                    m_backward[t][n][s].addConstr(I_backward[t][n][s] - B_backward[t][n][s] == I_forward_values[t-1][n] + qpre_values[-1][t-1][n] - demand)
                     m_backward[t][n][s].addConstr(cash_backward[t][n][s] + price*B_backward[t][n][s] == cash_forward_values[t-1][n]- overhead_cost[t]\
-                                                  - vari_cost*q_values[iter][t][n]\
+                                                  - vari_cost*q_values[-1][t][n]\
                                                  - r2*W2_forward_values[t-1][n]- r1*W1_forward_values[t-1][n]\
                                                   + r0*W0_forward_values[t-1][n] + price*demand)
             
                 if t < T - 1:
-                    m_backward[t][n][s].addConstr(q_pre_backward[t][n][s] == q_values[iter][t][n]) 
+                    m_backward[t][n][s].addConstr(q_pre_backward[t][n][s] == q_values[-1][t][n]) 
                 # m_backward[t][n][s].addConstr(B_backward[t][n][s] <= demand)
                 if t < T - 1:                   
                     m_backward[t][n][s].addConstr(W1_backward[t][n][s] <= U)
@@ -361,36 +372,27 @@ while iter < iter_num:
                 slope1_stage.append(temp)
                 intercept1_stage.append(avg_intercept)
             else:
-                slopes1[iter][t-1][n] = avg_slope1 
-                slopes2[iter][t-1][n] = avg_slope2  
-                slopes3[iter][t-1][n] = avg_slope3
-                intercepts[iter][t-1][n] = avg_intercept 
+                slopes1[-1][t-1][n] = avg_slope1 
+                slopes2[-1][t-1][n] = avg_slope2  
+                slopes3[-1][t-1][n] = avg_slope3
+                intercepts[-1][t-1][n] = avg_intercept 
              
                 
-    z_lb, z_ub = compute_ub(z_values)
+    # z_lb, z_ub = compute_ub(z_values) # for computing confidence interval
     # if -z <= z_ub and -z >= z_lb:
     #     print('********************************************')
     #     print('iteration ends in iter + 1 = %d' % iter)
     #     break
     iter += 1
+    end = time.process_time()
+    cpu_time = end - start
 
-end = time.process_time()
 print('********************************************')
 final_value = -z
 Q1 = q_values[iter-1][0][0]
 print('final expected total costs is %.2f' % final_value)
 print('ordering Q in the first peiod is %.2f' % Q1)
-cpu_time = end - start
-print('cpu time is %.3f s' % cpu_time)        
-               
-    
-headers = ['ini_cash', 'ini_inventory', 'price', 'unit_order_cost', 'unit_salvage_value', 'deposit_interest_rate', 'overdraft_interest_rate', 'penalty_interest_rate', 'overdraft_limit', 'overhead_costs', 'mean_demands',\
-           'sample_num', 'scenario_num', 'cut_select_number', 'iter_num', 'stop_condition', 'time', 'final_value', 'Q1']    
-file_address = ''
-file_name = os.path.basename(sys.argv[0])
-file_name = file_name[0:-3]
-file_address_name = file_address + 'tests_' + file_name + '.csv'
-content = [ini_cash, ini_I, price, vari_cost, unit_salvage, r0, r1, r2, U, overhead_cost, mean_demands,\
-           sample_nums, N, cut_select_num, iter_num, stop_condition, cpu_time, final_value, Q1]
-write_to_csv(file_address_name, headers, content, first_write)
-
+print('cpu time is %.3f s and iter number is %d' % (cpu_time, iter))        
+gap = (opt - final_value)/opt               
+print('optimaility gap is %.2f%% s' % (100*gap))  
+        
