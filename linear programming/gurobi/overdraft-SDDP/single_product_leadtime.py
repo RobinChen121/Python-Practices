@@ -75,7 +75,7 @@ import itertools
 import random
 import time
 import numpy as np
-
+import os
 import sys 
 sys.path.append("..") 
 from tree import generate_sample, generate_scenario_samples, compute_ub
@@ -83,7 +83,8 @@ from write_to_file import write_to_csv
 
 
 
-start = time.process_time()
+first_write = True # whether first output the result to a csv file
+stop_condition = 'iter_limit'
 ini_I = 0
 ini_cash = 0
 vari_cost = 1
@@ -91,7 +92,7 @@ price = 10
 unit_back_cost = 0
 unit_hold_cost = 0
 unit_salvage = 0.5
-mean_demands = [20, 10, 20, 10]
+mean_demands = [10, 20, 10, 20]
 T = len(mean_demands)
 sample_nums = [10 for t in range(T)]
 overhead_cost = [50 for t in range(T)]
@@ -100,8 +101,9 @@ r0 = 0
 r1 = 0.1
 r2 = 2 # penalty interest rate for overdraft exceeding the limit
 U = 500 # overdraft limit
-iter_num = 35
+iter_num = 15
 N = 10 # sampled number of scenarios for forward computing
+cut_select_num = N
 
 trunQuantile = 0.9999 # affective to the final ordering quantity
 scenario_numTotal = 1
@@ -144,6 +146,7 @@ qpre_values = [[[0 for n in range(N)] for t in range(T)] for iter in range(iter_
 W0_values = [0 for iter in range(iter_num)]
 W1_values = [0 for iter in range(iter_num)]
 W2_values = [0 for iter in range(iter_num)]
+
 
 start = time.process_time()
 while iter < iter_num:  
@@ -231,7 +234,7 @@ while iter < iter_num:
             # put those cuts in the back
             if iter > 0 and t < T - 1:
                 for i in range(iter):
-                    for nn in range(N): # N
+                    for nn in range(cut_select_num): # N
                         m_forward[t][n].addConstr(theta_forward[t][n] >= slopes1[i][t][nn]*(I_forward[t][n]+ q_pre_forward[t][n])\
                                                   + slopes3[i][t][nn]*q_forward[t][n]\
                                                   + slopes2[i][t][nn]*(cash_forward[t][n]- vari_cost*q_forward[t][n]-r2*W2_forward[t][n]\
@@ -316,7 +319,7 @@ while iter < iter_num:
                 # put those cuts in the back
                 if iter > 0 and t < T - 1:
                     for i in range(iter):
-                        for nn in range(N): # N
+                        for nn in range(cut_select_num): # N
                             m_backward[t][n][s].addConstr(theta_backward[t][n][s] >= slopes1[i][t][nn]*(I_backward[t][n][s]+ q_pre_backward[t][n][s])\
                                                       + slopes3[i][t][nn]*q_backward[t][n][s]\
                                                       + slopes2[i][t][nn]*(cash_backward[t][n][s]- vari_cost*q_backward[t][n][s] -r2*W2_backward[t][n][s]\
@@ -362,6 +365,7 @@ while iter < iter_num:
                 slopes2[iter][t-1][n] = avg_slope2  
                 slopes3[iter][t-1][n] = avg_slope3
                 intercepts[iter][t-1][n] = avg_intercept 
+             
                 
     z_lb, z_ub = compute_ub(z_values)
     # if -z <= z_ub and -z >= z_lb:
@@ -372,13 +376,21 @@ while iter < iter_num:
 
 end = time.process_time()
 print('********************************************')
-print('final expected total costs is %.2f' % -z)
-print('ordering Q in the first peiod is %.2f' % q_values[iter-1][0][0])
+final_value = -z
+Q1 = q_values[iter-1][0][0]
+print('final expected total costs is %.2f' % final_value)
+print('ordering Q in the first peiod is %.2f' % Q1)
 cpu_time = end - start
 print('cpu time is %.3f s' % cpu_time)        
                
     
-    
-headers = ['ini_cash', 'ini_inventory', 'price', 'unit_order_cost', 'unit_salvage_value', 'deposit_interest_rate', 'overdraft_interest_rate', 'penalty_interest_rate', 'overdraft_limit', 'mean_demands',\
-           'sample_num', 'scenario_num', 'cut_select_number', 'iter_num', 'stop_condition']    
+headers = ['ini_cash', 'ini_inventory', 'price', 'unit_order_cost', 'unit_salvage_value', 'deposit_interest_rate', 'overdraft_interest_rate', 'penalty_interest_rate', 'overdraft_limit', 'overhead_costs', 'mean_demands',\
+           'sample_num', 'scenario_num', 'cut_select_number', 'iter_num', 'stop_condition', 'time', 'final_value', 'Q1']    
+file_address = ''
+file_name = os.path.basename(sys.argv[0])
+file_name = file_name[0:-3]
+file_address_name = file_address + 'tests_' + file_name + '.csv'
+content = [ini_cash, ini_I, price, vari_cost, unit_salvage, r0, r1, r2, U, overhead_cost, mean_demands,\
+           sample_nums, N, cut_select_num, iter_num, stop_condition, cpu_time, final_value, Q1]
+write_to_csv(file_address_name, headers, content, first_write)
 
