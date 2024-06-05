@@ -27,7 +27,7 @@ sample_num = 10 # sample number in one stage when forming the scenario tree # ch
 scenario_numTotal = sample_num ** T
 
 iter_num = 21
-N = 10 # sampled number of scenarios in forward computing, change 3
+N = 10 # sampled number of scenarios in forward computing,
 SDDP result is 239.06, q1=20.35, q2=10.07, cpu time is 73.904;
 
 N = 15
@@ -39,6 +39,7 @@ T=3
 final expected total costs is 114.24
 ordering Q1 and Q2 in the first peiod is 36.13 and 11.59
 cpu time is 75.892 s
+(when T=2, SDP result is 27.1, SDDP is 25.38)
 
 when
 overhead_cost = [50 for t in range(T)]
@@ -105,12 +106,12 @@ import numpy as np
 
 import sys 
 sys.path.append("..") 
-from tree import generate_gamma_sample, generate_scenario_samples_gamma
+from tree import generate_gamma_sample, generate_scenario_samples_gamma, generate_sample, generate_scenario_samples_poisson
 
     
 
 
-T = 6
+T = 2
 ini_Is = [0, 0]
 ini_cash = 0
 vari_costs = [1, 2]
@@ -121,8 +122,8 @@ overhead_cost = [50 for t in range(T)]
 
 r0 = 0  # when it is 0.01, can largely slow the compuational speed
 r1 = 0.1
-r2 = 1 # penalty interest rate for overdraft exceeding the limit, does not affect computation time
-U = 2000 # overdraft limit
+r2 = 2 # penalty interest rate for overdraft exceeding the limit, does not affect computation time
+U = 500 # overdraft limit
 
 sample_num = 10 # sample number in one stage when forming the scenario tree # change 1
 scenario_numTotal = sample_num ** T
@@ -139,8 +140,10 @@ trunQuantile = 0.9999 # affective to the final ordering quantity
 sample_details1 = [[0 for i in range(sample_num)] for t in range(T)]
 sample_details2 = [[0 for i in range(sample_num)] for t in range(T)]
 for t in range(T):
-    sample_details1[t] = generate_gamma_sample(sample_num, trunQuantile, mean_demands[0], betas[0])
-    sample_details2[t] = generate_gamma_sample(sample_num, trunQuantile, mean_demands[1], betas[1])
+    # sample_details1[t] = generate_gamma_sample(sample_num, trunQuantile, mean_demands[0], betas[0])
+    # sample_details2[t] = generate_gamma_sample(sample_num, trunQuantile, mean_demands[1], betas[1])
+    sample_details1[t] = generate_sample(sample_num, trunQuantile, mean_demands[0])
+    sample_details2[t] = generate_sample(sample_num, trunQuantile, mean_demands[1])
 
 # sample_details1 = [[10, 30], [10, 30], [10, 30]] # change 2
 # sample_details2 = [[5, 15], [5, 15], [5, 15]]
@@ -161,8 +164,8 @@ m.addConstr(-vari_costs[0]*q1 - vari_costs[1]*q2- W0 + W1 + W2 == overhead_cost[
 m.addConstr(theta >= theta_iniValue*(T))
 
 # cuts recording arrays
-iter_num = 15
-N = 15 # sampled number of scenarios in forward computing, change 3
+iter_num = 25
+N = 20 # sampled number of scenarios in forward computing, change 3
 slope_stage1_1 = []
 slope_stage1_2 = []
 slope_stage1_3 = []
@@ -182,9 +185,12 @@ W2_values = [0 for iter in range(iter_num)]
 start = time.process_time()
 iter = 0
 while iter < iter_num:  
-    sample_scenarios1 = generate_scenario_samples_gamma(N, trunQuantile, mean_demands[0], betas[0], T)
-    sample_scenarios2 = generate_scenario_samples_gamma(N, trunQuantile, mean_demands[1], betas[1], T)
-       
+    # sample_scenarios1 = generate_scenario_samples_gamma(N, trunQuantile, mean_demands[0], betas[0], T)
+    # sample_scenarios2 = generate_scenario_samples_gamma(N, trunQuantile, mean_demands[1], betas[1], T)
+    
+    sample_scenarios1 = generate_scenario_samples_poisson(N, trunQuantile, mean_demands[0], T)
+    sample_scenarios2 = generate_scenario_samples_poisson(N, trunQuantile, mean_demands[1], T)
+     
     # sample_scenarios1 = [[10, 10, 10], [10,10, 30], [10, 30, 10], [10,30, 30],[30,10,10],[30,10,30],[30,30,10],[30,30,30]] # change 4
     # sample_scenarios2 = [[5, 5, 5], [5, 5, 15], [5, 15, 5], [5,15,15],[15,5,5], [15,5, 15], [15,15,5], [15,15,15]]
     
@@ -386,6 +392,16 @@ while iter < iter_num:
                 pi = m_backward[t][n][s].getAttr(GRB.Attr.Pi)
                 rhs = m_backward[t][n][s].getAttr(GRB.Attr.RHS)
                 
+                if iter == 8 and t == 1 and n == 0:
+                    m_backward[t][n][s].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(n+1) + '-' + str(s+1) + '-mback.lp') 
+                    m_backward[t][n][s].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(n+1) + '-' + str(s+1) + '-mabck.sol') 
+                    filename = 'iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(n+1) + '-' + str(s+1) + '-m.txt'
+                    with open(filename, 'w') as f:
+                        f.write('demand1=' +str(demand1)+'\n')
+                        f.write('demand2=' +str(demand2)+'\n')
+                        f.write(str(pi))     
+                    pass
+            
                 num_con = len(pi)
                 if t < T - 1:
                     # important

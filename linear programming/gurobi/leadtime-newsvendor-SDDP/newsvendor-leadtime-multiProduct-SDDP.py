@@ -21,6 +21,7 @@ iter_num = 15
 N = 15 # sampled number of scenarios in forward computing 2 # change 3
 
 SDDP result is 319.9, q1=35.76, q2=10.64, cpu time is 74s;
+(when T = 2, SDDP result is 50.18 while SDP result is 52.78)
 
 iter_num = 21
 N = 10 # sampled number of scenarios in forward computing 2 # change 3
@@ -80,14 +81,14 @@ from tree import generate_gamma_sample, generate_scenario_samples_gamma
     
 
 
-T = 6
+T = 2
 ini_Is = [0, 0]
 ini_cash = 0
 vari_costs = [1, 2]
 prices = [5, 10] # lower margin vs higher margin
 MM = len(prices)
 unit_salvages = [0.5* vari_costs[m] for m in range(MM)]
-overhead_cost = [0 for t in range(T)]
+overhead_cost = [50 for t in range(T)]
 
 sample_num = 10 # sample number in one stage when forming the scenario tree # change 1
 scenario_numTotal = sample_num ** T
@@ -117,7 +118,7 @@ q1 = m.addVar(vtype = GRB.CONTINUOUS, name = 'q_1')
 q2 = m.addVar(vtype = GRB.CONTINUOUS, name = 'q_2')
 theta = m.addVar(lb = -GRB.INFINITY, vtype = GRB.CONTINUOUS, name = 'theta_2')
 
-m.setObjective(vari_costs[0]*q1 + vari_costs[1]*q2 + theta, GRB.MINIMIZE)
+m.setObjective(overhead_cost[0] + vari_costs[0]*q1 + vari_costs[1]*q2 + theta, GRB.MINIMIZE)
 m.addConstr(theta >= theta_iniValue*(T))
 
 # cuts recording arrays
