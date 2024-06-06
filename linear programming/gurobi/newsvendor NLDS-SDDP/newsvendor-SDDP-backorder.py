@@ -46,8 +46,7 @@ import itertools
 import random
 
 import sys 
-sys.path.append("..") 
-from tree import generate_sample, get_tree_strcture, generate_scenario_samples
+from gurobi.tree import generate_sample, get_tree_strcture, generate_scenario_samples
 
 
 
@@ -74,7 +73,7 @@ for t in range(T):
 
 iter = 0
 iter_num = 21
-N = 20 # sampled number of scenarios for forward computing
+N = 10 # sampled number of scenarios for forward computing
 
 theta_iniValue = 0 # initial theta values (profit) in each period
 m = Model() # linear model in the first stage

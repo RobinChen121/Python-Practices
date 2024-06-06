@@ -35,10 +35,8 @@ import itertools
 import random
 import time
 import numpy as np
-
-import sys 
-sys.path.append("..") 
-from tree import generate_sample, generate_scenario_samples, compute_ub
+ 
+from gurobi.tree import generate_sample, generate_scenario_samples, compute_ub
 
 
 
@@ -108,8 +106,11 @@ while iter < iter_num:
     m.update()
     # m.Params.LogToConsole = 0
     m.optimize()
-    # m.write('iter' + str(iter+1) + '_main2.lp')    
-    # m.write('iter' + str(iter+1) + '_main2.sol')
+    if iter == 2:
+        m.write('iter' + str(iter+1) + '_main2.lp') 
+        m.write('iter' + str(iter+1) + '_main2.sol')        
+        pass
+
     
     q_values[iter] = q.x
     theta_value = theta.x
@@ -230,9 +231,10 @@ while iter < iter_num:
                 # m_backward[t][n][k].Params.LogToConsole = 0
                 m_backward[t][n][k].optimize()                
                 pi = m_backward[t][n][k].getAttr(GRB.Attr.Pi)
-                # if t == 0 and n == 0 and iter == 0:
-                #     m_backward[t][n][k].write('iter' + str(iter+1) + '_sub_' + str(t+1) + '^' + str(n+1) + '-' + str(k+1) +'back.lp')
-                #     pass
+                if t == 0 and n == 0 and iter == 1:
+                    m_backward[t][n][k].write('iter' + str(iter+1) + '_sub_' + str(t+1) + '^' + str(n+1) + '-' + str(k+1) +'back2.lp')
+                    pass
+
                 
                 
                 rhs = m_backward[t][n][k].getAttr(GRB.Attr.RHS)
@@ -255,15 +257,17 @@ while iter < iter_num:
             if t == 0 and n == 0:
                 slope1_stage.append(avg_pi[0])
                 intercept1_stage.append(avg_pi_rhs)
+                if iter == 1:
+                    pass
             elif t > 0:
                 slopes[t-1][n].append(avg_pi[0])
                 intercepts[t-1][n].append(avg_pi_rhs)   
     
-    z_lb, z_ub = compute_ub(z_values)
-    if -z <= z_ub and -z >= z_lb:
-        print('********************************************')
-        print('iteration ends in iter + 1 = %d' % iter)
-        break
+    # z_lb, z_ub = compute_ub(z_values)
+    # if -z <= z_ub and -z >= z_lb:
+    #     print('********************************************')
+    #     print('iteration ends in iter + 1 = %d' % iter)
+    #     break
     iter += 1
 
 end = time.process_time()

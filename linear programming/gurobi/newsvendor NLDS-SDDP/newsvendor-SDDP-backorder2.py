@@ -76,7 +76,7 @@ start = time.process_time()
 while iter < iter_num:  
     
     # sample a numer of scenarios from the full scenario tree
-    random.seed(10000)
+    # random.seed(10000)
     sample_scenarios= random.sample(scenarios_full, N) # sampling without replacement
     sample_scenarios.sort() # sort to make same numbers together
     
