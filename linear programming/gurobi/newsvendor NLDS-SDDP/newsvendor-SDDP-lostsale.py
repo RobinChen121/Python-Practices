@@ -35,8 +35,10 @@ import itertools
 import random
 import time
 import numpy as np
- 
-from gurobi.tree import generate_sample, generate_scenario_samples, compute_ub
+
+import sys
+sys.path.append("..") 
+from tree import generate_sample, generate_scenario_samples, compute_ub
 
 
 
@@ -104,7 +106,7 @@ while iter < iter_num:
     if iter > 0:
         m.addConstr(theta >= slope1_stage[-1][-2]*(ini_I+q) + slope1_stage[-1][-1]*(ini_cash-vari_cost*q) + intercept1_stage[-1])
     m.update()
-    # m.Params.LogToConsole = 0
+    m.Params.LogToConsole = 0
     m.optimize()
     if iter == 2:
         m.write('iter' + str(iter+1) + '_main2.lp') 
@@ -164,7 +166,7 @@ while iter < iter_num:
 
                 
             # optimize
-            # m_forward[t][n].Params.LogToConsole = 0
+            m_forward[t][n].Params.LogToConsole = 0
             m_forward[t][n].optimize()
             I_forward_values[t][n] = I_forward[t][n].x 
             
@@ -228,12 +230,13 @@ while iter < iter_num:
                     m_backward[t][n][k].addConstr(cash_backward[t][n][k] == cash_forward_values[t-1][n]- vari_cost*q_forward_values[t-1][n] + price*(demand - B_backward[t][n][k]))
                 
                 # optimize
-                # m_backward[t][n][k].Params.LogToConsole = 0
+                m_backward[t][n][k].Params.LogToConsole = 0
                 m_backward[t][n][k].optimize()                
                 pi = m_backward[t][n][k].getAttr(GRB.Attr.Pi)
-                if t == 0 and n == 0 and iter == 1:
-                    m_backward[t][n][k].write('iter' + str(iter+1) + '_sub_' + str(t+1) + '^' + str(n+1) + '-' + str(k+1) +'back2.lp')
-                    pass
+                # if t == 0 and n == 0 and iter == 3:
+                #     m_backward[t][n][k].write('iter' + str(iter+1) + '_sub_' + str(t+1) + '^' + str(n+1) + '-' + str(k+1) +'back2.lp')
+                #     m_backward[t][n][k].write('iter' + str(iter+1) + '_sub_' + str(t+1) + '^' + str(n+1) + '-' + str(k+1) +'back2.lol')               
+                #     pass
 
                 
                 

@@ -40,7 +40,8 @@ import random
 import time
 import numpy as np
 
-from gurobi.tree import generate_sample, generate_scenario_samples, compute_ub
+sys.path.append("..") 
+from tree import generate_sample, generate_scenario_samples, compute_ub
 
 
 
@@ -108,12 +109,12 @@ while iter < iter_num:
     if iter > 0:
         m.addConstr(theta >= slope1_stage[-1][-2]*(ini_I+q) + slope1_stage[-1][-1]*(ini_cash-vari_cost*q) + intercept1_stage[-1])
     m.update()
-    # m.Params.LogToConsole = 0
+    m.Params.LogToConsole = 0
     m.optimize()
-    if iter == 2:
-        m.write('iter' + str(iter+1) + '_main.lp') 
-        m.write('iter' + str(iter+1) + '_main.sol')        
-        pass
+    # if iter == 2:
+    #     m.write('iter' + str(iter+1) + '_main.lp') 
+    #     m.write('iter' + str(iter+1) + '_main.sol')        
+    #     pass
     
     q_values[iter] = q.x
     theta_value = theta.x
@@ -163,7 +164,7 @@ while iter < iter_num:
                 #     m_forward[t][n].addConstr(B_forward[t][n] >= demand - ini_I - q_values[iter])
                 # else:
                 #     m_forward[t][n].addConstr(B_forward[t][n] >= demand - I_forward_values[t-1][n] - q_forward_values[t-1][n])
-    
+        
                 if t == 0:   
                     m_forward[t][n].addConstr(I_forward[t][n] - B_forward[t][n] == ini_I + q_values[iter] - demand)
                     m_forward[t][n].addConstr(cash_forward[t][n] == ini_cash - vari_cost*q_values[iter] + price*(demand - B_forward[t][n]))
@@ -180,7 +181,7 @@ while iter < iter_num:
                         negative_computed_before = True
                     
                 # optimize
-                # m_forward[t][n].Params.LogToConsole = 0
+                m_forward[t][n].Params.LogToConsole = 0
                 m_forward[t][n].optimize()
                 I_forward_values[t][n] = I_forward[t][n].x 
                 
@@ -188,30 +189,24 @@ while iter < iter_num:
                     z_values[n][t] = -m_forward[t][n].objVal + theta_forward[t][n].x
                 else:
                     z_values[n][t] = -m_forward[t][n].objVal
-    
+        
                 B_forward_values[t][n] = B_forward[t][n].x  
                 cash_forward_values[t][n] = cash_forward[t][n].x 
                 if t < T - 1:
                     q_forward_values[t][n] = q_forward[t][n].x
                     theta_forward_values[t][n] = theta_forward[t][n].x
-                if positive_computed_before == True:
-                    try:
-                        if t < T - 1:
-                            positive_store_values = [I_forward_values[t][n], z_values[n][t], B_forward_values[t][n], cash_forward_values[t][n], q_forward_values[t][n], theta_forward_values[t][n]]
-                        else:
-                            positive_store_values = [I_forward_values[t][n], z_values[n][t], B_forward_values[t][n], cash_forward_values[t][n]]
-                        
-                    except:
-                        pass
-                elif negative_computed_before == True:
-                    try:
-                        if t < T - 1:
-                            negative_store_values = [I_forward_values[t][n], z_values[n][t], B_forward_values[t][n], cash_forward_values[t][n], q_forward_values[t][n], theta_forward_values[t][n]]
-                        else:
-                            negative_store_values = [I_forward_values[t][n], z_values[n][t], B_forward_values[t][n], cash_forward_values[t][n]]
-                        
-                    except:
-                        pass
+                if positive_computed_before == True:               
+                    if t < T - 1:
+                        positive_store_values = [I_forward_values[t][n], z_values[n][t], B_forward_values[t][n], cash_forward_values[t][n], q_forward_values[t][n], theta_forward_values[t][n]]
+                    else:
+                        positive_store_values = [I_forward_values[t][n], z_values[n][t], B_forward_values[t][n], cash_forward_values[t][n]]
+        
+                elif negative_computed_before == True:                
+                    if t < T - 1:
+                        negative_store_values = [I_forward_values[t][n], z_values[n][t], B_forward_values[t][n], cash_forward_values[t][n], q_forward_values[t][n], theta_forward_values[t][n]]
+                    else:
+                        negative_store_values = [I_forward_values[t][n], z_values[n][t], B_forward_values[t][n], cash_forward_values[t][n]]
+                
             elif positive_computed_before == True:
                 I_forward_values[t][n], z_values[n][t], B_forward_values[t][n], cash_forward_values[t][n], q_forward_values[t][n], theta_forward_values[t][n] = positive_store_values
             else:
@@ -283,12 +278,12 @@ while iter < iter_num:
                             negative_computed_before = True
                     
                     # optimize
-                    # m_backward[t][n][k].Params.LogToConsole = 0
+                    m_backward[t][n][k].Params.LogToConsole = 0
                     m_backward[t][n][k].optimize()                
                     pi = m_backward[t][n][k].getAttr(GRB.Attr.Pi)
-                    if t == 0 and n == 0 and iter == 1:
-                        m_backward[t][n][k].write('iter' + str(iter+1) + '_sub_' + str(t+1) + '^' + str(n+1) + '-' + str(k+1) +'back.lp')
-                        pass
+                    # if t == 0 and n == 0 and iter == 1:
+                    #     m_backward[t][n][k].write('iter' + str(iter+1) + '_sub_' + str(t+1) + '^' + str(n+1) + '-' + str(k+1) +'back.lp')
+                    #     pass
                     
                     
                     rhs = m_backward[t][n][k].getAttr(GRB.Attr.RHS)
@@ -312,22 +307,15 @@ while iter < iter_num:
                 # demand should put here, can not put in the above rhs, 
                 # rhs may be wrong because it have previous stage decision variable
                 pi_rhs_values[t][n][k] += -pi[-2] * demand + pi[-1] * price * demand - price*demand # put here is better because of demand
-            
-                if iter == 1 and t == 0 and n == 0:
-                    pass
-            
+                       
    
             avg_pi = sum(np.array(pi_values[t][n])) / K
             avg_pi_rhs = sum(pi_rhs_values[t][n]) / K
-            if iter > 0 and t == 0 and n == 0:
-                pass
                 
             # recording cuts
             if t == 0 and n == 0:
                 slope1_stage.append(avg_pi[0])
                 intercept1_stage.append(avg_pi_rhs)
-                if iter == 1:
-                    pass
             elif t > 0:
                 slopes[t-1][n].append(avg_pi[0])
                 intercepts[t-1][n].append(avg_pi_rhs)   
