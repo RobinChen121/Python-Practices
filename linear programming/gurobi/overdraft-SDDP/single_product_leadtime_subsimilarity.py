@@ -5,69 +5,9 @@ Created on Sat Mar  2 19:18:39 2024
 
 @author: zhenchen
 
-@disp:  business overdraft for lead time in single product problem;
-
-longer iterations seems more important than longer N;
-* should not have interest free amount since this would cause the solver obtain the wrong values for Ws when initial cash is larger than overhead cost;
-
-
-ini_I = 0
-ini_cash = 0
-vari_cost = 1
-price = 10
-unit_back_cost = 0
-unit_hold_cost = 0
-unit_salvage = 0
-mean_demands = [20, 35, 20]
-T = len(mean_demands)
-sample_nums = [10 for t in range(T)]
-overhead_cost = [100 for t in range(T)]
-
-r0 = 0.01
-r1 = 0.1
-r2 = 1 # penalty interest rate for overdraft exceeding the limit
-U = 1000 # overdraft limit
-iter_num = 15
-N = 15 # sampled number of scenarios for forward computing
-
-
-SDP optimal is 133, q=46;    
-SDDP optimal is 134, q=43, cpu time is 73s;
-
-******************************
-ini_I = 0
-ini_cash = 0
-vari_cost = 1
-price = 10
-unit_back_cost = 0
-unit_hold_cost = 0
-unit_salvage = 0.5
-mean_demands = [20, 10, 20, 10]
-T = len(mean_demands)
-sample_nums = [10 for t in range(T)]
-overhead_cost = [50 for t in range(T)]
-
-r0 = 0
-r1 = 0.1
-r2 = 2 # penalty interest rate for overdraft exceeding the limit
-U = 500 # overdraft limit
-iter_num = 15
-N = 10 # sampled number of scenarios for forward computing
-
-SDP optimal result is 118.77; 
-SDDP is 127.23, time 11.87s; (N=N, iter_num=15) # the first N is the number of cuts added in the LPs
-SDDP is 122.45, time 36.40s;(N=N, iter_num=27)
-SDDP is 122.47, time 36.40s;(N=N, iter_num=35)
-SDDP with confidence interval is 134.70, time 14.94s;
-SDDP is 121.15, time 20.55s; (N=N, iter_num=20)
-SDDP is 116.87, time 4.09s; (N=1, iter_num=20)
-SDDP is 137.89, time is 49.04s; (N=1, iter_num=15)    
-
-******************************
-mean_demands = [10, 10, 10, 10]
-SDP optimal result is 26.68;
-for 4 periods [10, 20, 10, 20], solution 215.48, python running more than 4 hours and can't get a solution, while java 31s; 
-
+@disp:  leverage subproblem similarity to speed up the computation;
+    
+    
 """
 
 from gurobipy import *
@@ -300,6 +240,12 @@ while iter < iter_limit:
             S = len(sample_detail[t])
             for s in range(S):
                 demand = sample_detail[t][s]
+                positive_computed_before = False
+                negative_computed_before = False
+                zero_computed_before = False
+                positive_store_values = []
+                negative_store_values = []
+                zero_store_values = []
                 
                 if t == T - 1:                   
                     m_backward[t][n][s].setObjective(-price*(demand - B_backward[t][n][s]) - unit_salvage*I_backward[t][n][s], GRB.MINIMIZE)
@@ -344,15 +290,14 @@ while iter < iter_limit:
                 pi = m_backward[t][n][s].getAttr(GRB.Attr.Pi)
                 rhs = m_backward[t][n][s].getAttr(GRB.Attr.RHS)
                 
-                if t == 1 and n == 1 and iter == 4:
-                    m_backward[t][n][s].write('iter' + str(iter+1) + '_sub_' + str(t+1) + '^' + str(n+1) + '-' + str(s+1) +'back.lp')
-                    m_backward[t][n][s].write('iter' + str(iter+1) + '_sub_' + str(t+1) + '^' + str(n+1) + '-' + str(s+1) +'back.sol')
-                    filename = 'iter' + str(iter+1) + '_sub_' + str(t+1) + '^' + str(n+1) + '-' + str(s+1) + '.txt'
-                    with open(filename, 'w') as f:
-                        f.write('demand=' +str(demand)+'\n')
-                        f.write(str(pi)+'\n')  
-                        f.write(str(rhs))
-                    pass
+                # if t == 1 and n == 1 and iter == 4:
+                #     m_backward[t][n][s].write('iter' + str(iter+1) + '_sub_' + str(t+1) + '^' + str(n+1) + '-' + str(s+1) +'back.lp')
+                #     m_backward[t][n][s].write('iter' + str(iter+1) + '_sub_' + str(t+1) + '^' + str(n+1) + '-' + str(s+1) +'back.sol')
+                #     filename = 'iter' + str(iter+1) + '_sub_' + str(t+1) + '^' + str(n+1) + '-' + str(s+1) + '.txt'
+                #     with open(filename, 'w') as f:
+                #         f.write('demand=' +str(demand)+'\n')
+                #         f.write(str(pi))     
+                #     pass
                                
                 num_con = len(pi)
                 if t < T - 1:

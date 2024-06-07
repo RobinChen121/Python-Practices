@@ -338,7 +338,7 @@ while iter < iter_num:
     
     for t in range(T-1, -1, -1):    
         for n in range(N):      
-            S = sample_num
+            S = sample_num # should revise, should be S^2
             for s in range(S):
                 demand1 = sample_details1[t][s]
                 demand2 = sample_details2[t][s]
