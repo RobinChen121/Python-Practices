@@ -295,12 +295,15 @@ while iter < iter_num:
                 elif positive_computed_before == True:
                     pi_values[t][n][k].append(positive_store_values[0])
                     pi = positive_store_values[0]
-                    rhs = positive_store_values[1]
+                    rhs = positive_store_values[1]                   
                 else:
-                    pi_values[t][n][k].append(negative_store_values[0]
-                                              )
+                    pi_values[t][n][k].append(negative_store_values[0])
                     pi = negative_store_values[0]
                     rhs = negative_store_values[1]
+                # not necessary
+                # rhs[-2] = ini_I + q_values[iter] - demand if t == 0 else I_forward_values[t-1][n] + q_forward_values[t-1][n] - demand
+                # rhs[-1] = ini_cash - vari_cost*q_values[iter] + price*demand if t == 0 else cash_forward_values[t-1][n]- vari_cost*q_forward_values[t-1][n] + price*demand
+               
                 num_con = len(pi)
                 for kk in range(num_con-2): # range(num_con-2):
                     pi_rhs_values[t][n][k] += pi[kk]*rhs[kk]
