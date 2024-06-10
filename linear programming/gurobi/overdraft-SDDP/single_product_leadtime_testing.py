@@ -408,7 +408,7 @@ for stationary, iter_limit, realization_num, N in grids:
         print('optimaility gap is %.2f%%' % (100*gap))  
             
         headers = ['ini_cash', 'ini_inventory', 'price', 'unit_order_cost', 'unit_salvage_value', 'deposit_interest_rate', 'overdraft_interest_rate', 'penalty_interest_rate', 'overdraft_limit', 'overhead_costs', 'mean_demands',\
-                   'stationary', 'realization_num', 'scenario_num', 'cut_select_number', 'iter_limit', 'time_limit',  'time', 'iter', 'stop_condition', 'final_value', 'Q1', 'opt', 'gap']    
+                   'stationary', 'realization_num', 'scenario_forward_num', 'cut_select_number', 'iter_limit', 'time_limit',  'time', 'iter', 'stop_condition', 'final_value', 'Q1', 'opt', 'gap']    
         file_address = ''
         file_name = os.path.basename(sys.argv[0])
         file_name = file_name[0:-3]
