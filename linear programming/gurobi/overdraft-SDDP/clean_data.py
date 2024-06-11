@@ -25,6 +25,6 @@ df_part2 = df1[['stationary', 'mean_demands', 'realization_num', 'scenario_forwa
 df_part2[['time', 'final_value', 'Q1', 'opt', 'gap']] = df_part2[['time', 'final_value', 'Q1', 'opt', 'gap']].astype(float)
 df_mean = df_part2.groupby(['stationary', 'mean_demands', 'realization_num', 'scenario_forward_num', 'iter_limit']).mean().reset_index()
 
-df_mean_part1 = df_mean.groupby(['stationary', 'iter_limit']).mean().reset_index()
+df_mean_part1 = df_mean.groupby(['stationary', 'realization_num']).mean().reset_index()
 df_mean_part2 = df_mean.groupby(['stationary', 'scenario_forward_num']).mean().reset_index()
 df_mean_part3 = df_mean.groupby(['stationary', 'realization_num']).mean().reset_index()
