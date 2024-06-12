@@ -15,21 +15,16 @@ import scipy.stats as st
 import itertools
 import random
 
+
+# generate poisson distribution
 def generate_sample(sample_num, trunQuantile, mu):
     samples = [0 for i in range(sample_num)]
     for i in range(sample_num):
-        # np.random.seed(10000)
+        np.random.seed(10000)
         rand_p = np.random.uniform(trunQuantile*i/sample_num, trunQuantile*(i+1)/sample_num)
         samples[i] = st.poisson.ppf(rand_p, mu)
     return samples
 
-def generate_poisson_sample(sample_num, trunQuantile, mu):
-    samples = [0 for i in range(sample_num)]
-    for i in range(sample_num):
-        # np.random.seed(10000)
-        rand_p = np.random.uniform(trunQuantile*i/sample_num, trunQuantile*(i+1)/sample_num)
-        samples[i] = st.poisson.ppf(rand_p, mu)
-    return samples
 
 # gamma distribution:mean demand is shape / beta and variance is shape / beta^2
 # beta = 1 / scale
@@ -64,11 +59,11 @@ def generate_scenario_samples(sample_num, trunQuantile, mus):
     T = len(mus)
     samples = [[0 for t in range(T)] for i in range(sample_num)]
     for i in range(sample_num):
-        # np.random.seed(10000)
+        np.random.seed(10000)
         for t in range(T):
             rand_p = np.random.uniform(trunQuantile*i/sample_num, trunQuantile*(i+1)/sample_num)
             samples[i][t] = st.poisson.ppf(rand_p, mus[t])
-            random.shuffle(samples[i])
+        # random.shuffle(samples[i])
             
     return samples
 

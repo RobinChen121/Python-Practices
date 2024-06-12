@@ -179,7 +179,7 @@ while iter < iter_limit:
     m.optimize()
     
     q_values[-1][0] = [q.x for n in range(N)]  
-    if iter == 3:
+    if iter == 7:
         m.write('iter' + str(iter+1) + '_main.lp')    
         m.write('iter' + str(iter+1) + '_main.sol')
         pass
@@ -301,7 +301,8 @@ while iter < iter_limit:
             S = len(sample_detail[t])
             for s in range(S):
                 demand = sample_detail[t][s]
-                
+                if iter == 4 and t == 0 and n == 0:
+                    demand = -1
                 if t == T - 1:                   
                     m_backward[t][n][s].setObjective(-price*(demand - B_backward[t][n][s]) - unit_salvage*I_backward[t][n][s], GRB.MINIMIZE)
                 else:
@@ -358,7 +359,7 @@ while iter < iter_limit:
                 slope2_values[t][n][s] = pi[1]
                 if t < T -1:
                     slope3_values[t][n][s] = pi[2]
-                if iter == 3 and t == 0 and n == 0 and s == 0:
+                if iter == 4 and t == 0 and n == 0:
                     a_test = intercept_values[t][n][s]
                     m_backward[t][n][s].write('iter' + str(iter+1) + '_sub_' + str(t+1) + '^' + str(n+1) + '-' + str(s+1) +'back.lp')
                     m_backward[t][n][s].write('iter' + str(iter+1) + '_sub_' + str(t+1) + '^' + str(n+1) + '-' + str(s+1) +'back.sol')
@@ -374,14 +375,19 @@ while iter < iter_limit:
             avg_slope2 = sum(slope2_values[t][n]) / S
             avg_slope3 = sum(slope3_values[t][n]) / S
             if t == 0:
-                temp = [avg_slope1, avg_slope2, avg_slope3]
-                slope1_stage.append(temp)
-                intercept1_stage.append(avg_intercept)
+                if n == 0:
+                    temp = [avg_slope1, avg_slope2, avg_slope3]
+                    slope1_stage.append(temp)
+                    intercept1_stage.append(avg_intercept)
+                    if iter == 3 and t == 2:
+                        pass
             else:
                 slopes1[-1][t-1][n] = avg_slope1 
                 slopes2[-1][t-1][n] = avg_slope2  
                 slopes3[-1][t-1][n] = avg_slope3
                 intercepts[-1][t-1][n] = avg_intercept 
+                if iter == 3 and t == 2:
+                    pass
              
              
                 

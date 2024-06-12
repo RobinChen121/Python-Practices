@@ -120,7 +120,7 @@ while iter < iter_limit:
     m.optimize()
     
     q_values[-1][0] = [q.x for n in range(N)]  
-    if iter == 3:
+    if iter == 7:
         m.write('iter' + str(iter+1) + '_main2.lp')    
         m.write('iter' + str(iter+1) + '_main2.sol')
         pass
@@ -301,19 +301,10 @@ while iter < iter_limit:
                                    
                     # optimize
                     m_backward[t][n][s].Params.LogToConsole = 0
-                    m_backward[t][n][s].optimize()
-                    
+                    m_backward[t][n][s].optimize()                   
                     pi = m_backward[t][n][s].getAttr(GRB.Attr.Pi)
                     rhs = m_backward[t][n][s].getAttr(GRB.Attr.RHS)
-                    
-                    # if t == 1 and n == 1 and iter == 4:
-                    #     m_backward[t][n][s].write('iter' + str(iter+1) + '_sub_' + str(t+1) + '^' + str(n+1) + '-' + str(s+1) +'back.lp')
-                    #     m_backward[t][n][s].write('iter' + str(iter+1) + '_sub_' + str(t+1) + '^' + str(n+1) + '-' + str(s+1) +'back.sol')
-                    #     filename = 'iter' + str(iter+1) + '_sub_' + str(t+1) + '^' + str(n+1) + '-' + str(s+1) + '.txt'
-                    #     with open(filename, 'w') as f:
-                    #         f.write('demand=' +str(demand)+'\n')
-                    #         f.write(str(pi))     
-                    #     pass                                                                      
+                                                                  
                     if positive_computed_before == True:
                         positive_store_values = [pi, rhs]
                     elif negative_computed_before == True:
@@ -343,7 +334,7 @@ while iter < iter_limit:
                     intercept_values[t][n][s] += -pi[0]*demand + pi[1]*price*demand - pi[1]*overhead_cost[t] - price*demand 
                 for sk in range(3, num_con):
                     intercept_values[t][n][s] += pi[sk]*rhs[sk]
-                if iter == 3 and t == 0 and n == 0 and s == 0:
+                if iter == 4 and t == 1 and n == 0:
                     a_test2 = intercept_values[t][n][s]
                     m_backward[t][n][s].write('iter' + str(iter+1) + '_sub_' + str(t+1) + '^' + str(n+1) + '-' + str(s+1) +'back2.lp')
                     m_backward[t][n][s].write('iter' + str(iter+1) + '_sub_' + str(t+1) + '^' + str(n+1) + '-' + str(s+1) +'back2.sol')
@@ -359,9 +350,12 @@ while iter < iter_limit:
             avg_slope2 = sum(slope2_values[t][n]) / S
             avg_slope3 = sum(slope3_values[t][n]) / S
             if t == 0:
-                temp = [avg_slope1, avg_slope2, avg_slope3]
-                slope1_stage.append(temp)
-                intercept1_stage.append(avg_intercept)
+                if n == 0:
+                    temp = [avg_slope1, avg_slope2, avg_slope3]
+                    slope1_stage.append(temp)
+                    intercept1_stage.append(avg_intercept)
+                    if iter == 6 and t == 0:
+                        pass
             else:
                 slopes1[-1][t-1][n] = avg_slope1 
                 slopes2[-1][t-1][n] = avg_slope2  
