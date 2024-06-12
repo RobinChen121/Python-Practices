@@ -99,7 +99,7 @@ while iter < iter_num:
     z_values = [[0 for t in range(T)] for n in range(N)]
     
     # sample a numer of scenarios from the full scenario tree
-    # random.seed(10000)
+    random.seed(10000)
     sample_scenarios = generate_scenario_samples(N, trunQuantile, mean_demands)
     # sample_scenarios = [[5, 5], [5, 15], [15, 5], [15, 15]]
     # sample_scenarios = [[5, 5, 5], [5, 5, 15], [5, 15, 5], [15,5,5], [15,15,5], [15,5, 15], [5,15,15],[15,15,15]]

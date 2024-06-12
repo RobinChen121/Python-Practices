@@ -16,8 +16,10 @@ import random
 import time
 import numpy as np
 import os
-import sys 
-sys.path.append("..") 
+import sys
+current_dir = os.getcwd()
+parent_dir = os.path.dirname(current_dir)
+sys.path.append(parent_dir)
 from tree import generate_sample, generate_scenario_samples, compute_ub
 from write_to_file import write_to_csv
 
@@ -118,10 +120,10 @@ while iter < iter_limit:
     m.optimize()
     
     q_values[-1][0] = [q.x for n in range(N)]  
-    # if iter == 4:
-    #     m.write('iter' + str(iter+1) + '_main.lp')    
-    #     m.write('iter' + str(iter+1) + '_main.sol')
-    #     pass
+    if iter == 3:
+        m.write('iter' + str(iter+1) + '_main2.lp')    
+        m.write('iter' + str(iter+1) + '_main2.sol')
+        pass
     
     W0_values.append(W0.x)
     W1_values.append(W1.x)
@@ -238,67 +240,101 @@ while iter < iter_limit:
     for t in range(T-1, -1, -1):    
         for n in range(N):      
             S = len(sample_detail[t])
-            for s in range(S):
-                demand = sample_detail[t][s]
-                positive_computed_before = False
-                negative_computed_before = False
-                zero_computed_before = False
-                positive_store_values = []
-                negative_store_values = []
-                zero_store_values = []
-                
-                if t == T - 1:                   
-                    m_backward[t][n][s].setObjective(-price*(demand - B_backward[t][n][s]) - unit_salvage*I_backward[t][n][s], GRB.MINIMIZE)
-                else:
-                    m_backward[t][n][s].setObjective(overhead_cost[t] + vari_cost*q_backward[t][n][s] - price*(demand - B_backward[t][n][s])\
-                                                     + r2*W2_backward[t][n][s]
-                                                     + r1*W1_backward[t][n][s] - r0*W0_backward[t][n][s] + theta_backward[t][n][s], GRB.MINIMIZE)  
-                if t == 0:   
-                    m_backward[t][n][s].addConstr(I_backward[t][n][s] - B_backward[t][n][s] == ini_I - demand)
-                    m_backward[t][n][s].addConstr(cash_backward[t][n][s] == ini_cash - overhead_cost[t] - vari_cost*q_values[-1][t][n]\
-                                                  - r2*W2_values[-1] - r1*W1_values[-1] + r0*W0_values[-1] + price*(demand - B_backward[t][n][s]))
-                else:
-                    m_backward[t][n][s].addConstr(I_backward[t][n][s] - B_backward[t][n][s] == I_forward_values[t-1][n] + qpre_values[-1][t-1][n] - demand)
-                    m_backward[t][n][s].addConstr(cash_backward[t][n][s] + price*B_backward[t][n][s] == cash_forward_values[t-1][n]- overhead_cost[t]\
-                                                  - vari_cost*q_values[-1][t][n]\
-                                                 - r2*W2_forward_values[t-1][n]- r1*W1_forward_values[t-1][n]\
-                                                  + r0*W0_forward_values[t-1][n] + price*demand)
+            positive_computed_before = False
+            negative_computed_before = False
+            zero_computed_before = False
+            positive_store_values = []
+            negative_store_values = []
+            zero_store_values = []
             
-                if t < T - 1:
-                    m_backward[t][n][s].addConstr(q_pre_backward[t][n][s] == q_values[-1][t][n]) 
-                # m_backward[t][n][s].addConstr(B_backward[t][n][s] <= demand)
-                if t < T - 1:                   
-                    m_backward[t][n][s].addConstr(W1_backward[t][n][s] <= U)
-                    m_backward[t][n][s].addConstr(cash_backward[t][n][s] - vari_cost*q_backward[t][n][s] - W0_backward[t][n][s]\
-                                                  + W1_backward[t][n][s] + W2_backward[t][n][s] == overhead_cost[t])
-                    m_backward[t][n][s].addConstr(theta_backward[t][n][s] >= theta_iniValue*(T-1-t))
-                            
-                # put those cuts in the back
-                if iter > 0 and t < T - 1:
-                    for i in range(iter):
-                        for nn in range(cut_select_num): # N
-                            m_backward[t][n][s].addConstr(theta_backward[t][n][s] >= slopes1[i][t][nn]*(I_backward[t][n][s]+ q_pre_backward[t][n][s])\
-                                                      + slopes3[i][t][nn]*q_backward[t][n][s]\
-                                                      + slopes2[i][t][nn]*(cash_backward[t][n][s]- vari_cost*q_backward[t][n][s] -r2*W2_backward[t][n][s]\
-                                                 - r1*W1_backward[t][n][s]+r0*W0_backward[t][n][s])\
-                                                    + intercepts[i][t][nn])
-                               
-                # optimize
-                m_backward[t][n][s].Params.LogToConsole = 0
-                m_backward[t][n][s].optimize()
-                
-                pi = m_backward[t][n][s].getAttr(GRB.Attr.Pi)
-                rhs = m_backward[t][n][s].getAttr(GRB.Attr.RHS)
-                
-                # if t == 1 and n == 1 and iter == 4:
-                #     m_backward[t][n][s].write('iter' + str(iter+1) + '_sub_' + str(t+1) + '^' + str(n+1) + '-' + str(s+1) +'back.lp')
-                #     m_backward[t][n][s].write('iter' + str(iter+1) + '_sub_' + str(t+1) + '^' + str(n+1) + '-' + str(s+1) +'back.sol')
-                #     filename = 'iter' + str(iter+1) + '_sub_' + str(t+1) + '^' + str(n+1) + '-' + str(s+1) + '.txt'
-                #     with open(filename, 'w') as f:
-                #         f.write('demand=' +str(demand)+'\n')
-                #         f.write(str(pi))     
-                #     pass
-                               
+            for s in range(S):
+                demand = sample_detail[t][s]                
+                if positive_computed_before == False and negative_computed_before == False and \
+                    zero_computed_before == False:
+                    if t == T - 1:                   
+                        m_backward[t][n][s].setObjective(-price*(demand - B_backward[t][n][s]) - unit_salvage*I_backward[t][n][s], GRB.MINIMIZE)
+                    else:
+                        m_backward[t][n][s].setObjective(overhead_cost[t] + vari_cost*q_backward[t][n][s] - price*(demand - B_backward[t][n][s])\
+                                                         + r2*W2_backward[t][n][s]
+                                                         + r1*W1_backward[t][n][s] - r0*W0_backward[t][n][s] + theta_backward[t][n][s], GRB.MINIMIZE)  
+                    if t == 0:   
+                        m_backward[t][n][s].addConstr(I_backward[t][n][s] - B_backward[t][n][s] == ini_I - demand)
+                        m_backward[t][n][s].addConstr(cash_backward[t][n][s] == ini_cash - overhead_cost[t] - vari_cost*q_values[-1][t][n]\
+                                                      - r2*W2_values[-1] - r1*W1_values[-1] + r0*W0_values[-1] + price*(demand - B_backward[t][n][s]))
+                        if ini_I - demand > 0:
+                            positive_computed_before = True
+                        elif ini_I - demand < 0:
+                            negative_computed_before = True
+                        else:
+                            zero_computed_before = True
+                    else:
+                        m_backward[t][n][s].addConstr(I_backward[t][n][s] - B_backward[t][n][s] == I_forward_values[t-1][n] + qpre_values[-1][t-1][n] - demand)
+                        m_backward[t][n][s].addConstr(cash_backward[t][n][s] + price*B_backward[t][n][s] == cash_forward_values[t-1][n]- overhead_cost[t]\
+                                                      - vari_cost*q_values[-1][t][n]\
+                                                     - r2*W2_forward_values[t-1][n]- r1*W1_forward_values[t-1][n]\
+                                                      + r0*W0_forward_values[t-1][n] + price*demand)
+                        if I_forward_values[t-1][n] + qpre_values[-1][t-1][n] - demand > 0:
+                            positive_computed_before = True
+                        elif I_forward_values[t-1][n] + qpre_values[-1][t-1][n] - demand < 0:
+                            negative_computed_before = True
+                        else:
+                            zero_computed_before = True
+                        
+                    if t < T - 1:
+                        m_backward[t][n][s].addConstr(q_pre_backward[t][n][s] == q_values[-1][t][n]) 
+                    # m_backward[t][n][s].addConstr(B_backward[t][n][s] <= demand)
+                    if t < T - 1:                   
+                        m_backward[t][n][s].addConstr(W1_backward[t][n][s] <= U)
+                        m_backward[t][n][s].addConstr(cash_backward[t][n][s] - vari_cost*q_backward[t][n][s] - W0_backward[t][n][s]\
+                                                      + W1_backward[t][n][s] + W2_backward[t][n][s] == overhead_cost[t])
+                        m_backward[t][n][s].addConstr(theta_backward[t][n][s] >= theta_iniValue*(T-1-t))
+                                
+                    # put those cuts in the back
+                    if iter > 0 and t < T - 1:
+                        for i in range(iter):
+                            for nn in range(cut_select_num): # N
+                                m_backward[t][n][s].addConstr(theta_backward[t][n][s] >= slopes1[i][t][nn]*(I_backward[t][n][s]+ q_pre_backward[t][n][s])\
+                                                          + slopes3[i][t][nn]*q_backward[t][n][s]\
+                                                          + slopes2[i][t][nn]*(cash_backward[t][n][s]- vari_cost*q_backward[t][n][s] -r2*W2_backward[t][n][s]\
+                                                     - r1*W1_backward[t][n][s]+r0*W0_backward[t][n][s])\
+                                                        + intercepts[i][t][nn])
+                                   
+                    # optimize
+                    m_backward[t][n][s].Params.LogToConsole = 0
+                    m_backward[t][n][s].optimize()
+                    
+                    pi = m_backward[t][n][s].getAttr(GRB.Attr.Pi)
+                    rhs = m_backward[t][n][s].getAttr(GRB.Attr.RHS)
+                    
+                    # if t == 1 and n == 1 and iter == 4:
+                    #     m_backward[t][n][s].write('iter' + str(iter+1) + '_sub_' + str(t+1) + '^' + str(n+1) + '-' + str(s+1) +'back.lp')
+                    #     m_backward[t][n][s].write('iter' + str(iter+1) + '_sub_' + str(t+1) + '^' + str(n+1) + '-' + str(s+1) +'back.sol')
+                    #     filename = 'iter' + str(iter+1) + '_sub_' + str(t+1) + '^' + str(n+1) + '-' + str(s+1) + '.txt'
+                    #     with open(filename, 'w') as f:
+                    #         f.write('demand=' +str(demand)+'\n')
+                    #         f.write(str(pi))     
+                    #     pass                                                                      
+                    if positive_computed_before == True:
+                        positive_store_values = [pi, rhs]
+                    elif negative_computed_before == True:
+                        negative_store_values = [pi, rhs]
+                    else:
+                        zero_store_values = [pi, rhs]
+                elif positive_computed_before == True:
+                    pi = positive_store_values[0]
+                    rhs = positive_store_values[1]                   
+                elif negative_computed_before == True:
+                    pi = negative_store_values[0]
+                    rhs = negative_store_values[1]
+                else:
+                    pi = zero_store_values[0]
+                    rhs = zero_store_values[1]
+                    
+                slope1_values[t][n][s] = pi[0]                                                         
+                slope2_values[t][n][s] = pi[1]
+                if t < T -1:
+                    slope3_values[t][n][s] = pi[2]
+                    
                 num_con = len(pi)
                 if t < T - 1:
                     # important
@@ -307,11 +343,16 @@ while iter < iter_limit:
                     intercept_values[t][n][s] += -pi[0]*demand + pi[1]*price*demand - pi[1]*overhead_cost[t] - price*demand 
                 for sk in range(3, num_con):
                     intercept_values[t][n][s] += pi[sk]*rhs[sk]
-                
-                slope1_values[t][n][s] = pi[0]                                                         
-                slope2_values[t][n][s] = pi[1]
-                if t < T -1:
-                    slope3_values[t][n][s] = pi[2]
+                if iter == 3 and t == 0 and n == 0 and s == 0:
+                    a_test2 = intercept_values[t][n][s]
+                    m_backward[t][n][s].write('iter' + str(iter+1) + '_sub_' + str(t+1) + '^' + str(n+1) + '-' + str(s+1) +'back2.lp')
+                    m_backward[t][n][s].write('iter' + str(iter+1) + '_sub_' + str(t+1) + '^' + str(n+1) + '-' + str(s+1) +'back2.sol')
+                    filename = 'iter' + str(iter+1) + '_sub_' + str(t+1) + '^' + str(n+1) + '-' + str(s+1) + '-2.txt'
+                    with open(filename, 'w') as f:
+                        f.write('demand=' +str(demand)+'\n')
+                        f.write(str(pi)+'\n')  
+                        f.write(str(rhs))
+                    pass
             
             avg_intercept = sum(intercept_values[t][n]) / S
             avg_slope1 = sum(slope1_values[t][n]) / S
@@ -343,6 +384,6 @@ Q1 = q_values[iter-1][0][0]
 print('final expected total costs is %.2f' % final_value)
 print('ordering Q in the first peiod is %.2f' % Q1)
 print('cpu time is %.3f s and iter number is %d' % (cpu_time, iter))        
-gap = (opt - final_value)/opt               
+gap = (-opt + final_value)/opt               
 print('optimaility gap is %.2f%% s' % (100*gap))  
         

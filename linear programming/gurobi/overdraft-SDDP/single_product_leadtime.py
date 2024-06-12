@@ -76,11 +76,12 @@ import random
 import time
 import numpy as np
 import os
-import sys 
-sys.path.append("..") 
+import sys
+current_dir = os.getcwd()
+parent_dir = os.path.dirname(current_dir)
+sys.path.append(parent_dir)
 from tree import generate_sample, generate_scenario_samples, compute_ub
 from write_to_file import write_to_csv
-
 
 
 
@@ -165,7 +166,7 @@ while iter < iter_limit:
     # z_values = [[0 for t in range(T)] for n in range(N)] # for compute confidence interval
     
     # sample a numer of scenarios from the full scenario tree
-    # random.seed(10000)
+    #  random.seed(10000)
     sample_scenarios = generate_scenario_samples(N, trunQuantile, mean_demands)
     # sample_scenarios = [[5, 5, 5], [5, 5, 15], [5, 15, 5], [15,5,5], [15,15,5], [15,5, 15], [5,15,15],[15,15,15]]
     sample_scenarios.sort() # sort to make same numbers together
@@ -178,10 +179,10 @@ while iter < iter_limit:
     m.optimize()
     
     q_values[-1][0] = [q.x for n in range(N)]  
-    # if iter == 4:
-    #     m.write('iter' + str(iter+1) + '_main.lp')    
-    #     m.write('iter' + str(iter+1) + '_main.sol')
-    #     pass
+    if iter == 3:
+        m.write('iter' + str(iter+1) + '_main.lp')    
+        m.write('iter' + str(iter+1) + '_main.sol')
+        pass
     
     W0_values.append(W0.x)
     W1_values.append(W1.x)
@@ -309,8 +310,8 @@ while iter < iter_limit:
                                                      + r1*W1_backward[t][n][s] - r0*W0_backward[t][n][s] + theta_backward[t][n][s], GRB.MINIMIZE)  
                 if t == 0:   
                     m_backward[t][n][s].addConstr(I_backward[t][n][s] - B_backward[t][n][s] == ini_I - demand)
-                    m_backward[t][n][s].addConstr(cash_backward[t][n][s] == ini_cash - overhead_cost[t] - vari_cost*q_values[-1][t][n]\
-                                                  - r2*W2_values[-1] - r1*W1_values[-1] + r0*W0_values[-1] + price*(demand - B_backward[t][n][s]))
+                    m_backward[t][n][s].addConstr(cash_backward[t][n][s]  + price*B_backward[t][n][s] == ini_cash - overhead_cost[t] - vari_cost*q_values[-1][t][n]\
+                                                  - r2*W2_values[-1] - r1*W1_values[-1] + r0*W0_values[-1] + price*demand)
                 else:
                     m_backward[t][n][s].addConstr(I_backward[t][n][s] - B_backward[t][n][s] == I_forward_values[t-1][n] + qpre_values[-1][t-1][n] - demand)
                     m_backward[t][n][s].addConstr(cash_backward[t][n][s] + price*B_backward[t][n][s] == cash_forward_values[t-1][n]- overhead_cost[t]\
@@ -342,17 +343,7 @@ while iter < iter_limit:
                 m_backward[t][n][s].optimize()
                 
                 pi = m_backward[t][n][s].getAttr(GRB.Attr.Pi)
-                rhs = m_backward[t][n][s].getAttr(GRB.Attr.RHS)
-                
-                if t == 1 and n == 1 and iter == 4:
-                    m_backward[t][n][s].write('iter' + str(iter+1) + '_sub_' + str(t+1) + '^' + str(n+1) + '-' + str(s+1) +'back.lp')
-                    m_backward[t][n][s].write('iter' + str(iter+1) + '_sub_' + str(t+1) + '^' + str(n+1) + '-' + str(s+1) +'back.sol')
-                    filename = 'iter' + str(iter+1) + '_sub_' + str(t+1) + '^' + str(n+1) + '-' + str(s+1) + '.txt'
-                    with open(filename, 'w') as f:
-                        f.write('demand=' +str(demand)+'\n')
-                        f.write(str(pi)+'\n')  
-                        f.write(str(rhs))
-                    pass
+                rhs = m_backward[t][n][s].getAttr(GRB.Attr.RHS)  
                                
                 num_con = len(pi)
                 if t < T - 1:
@@ -367,6 +358,16 @@ while iter < iter_limit:
                 slope2_values[t][n][s] = pi[1]
                 if t < T -1:
                     slope3_values[t][n][s] = pi[2]
+                if iter == 3 and t == 0 and n == 0 and s == 0:
+                    a_test = intercept_values[t][n][s]
+                    m_backward[t][n][s].write('iter' + str(iter+1) + '_sub_' + str(t+1) + '^' + str(n+1) + '-' + str(s+1) +'back.lp')
+                    m_backward[t][n][s].write('iter' + str(iter+1) + '_sub_' + str(t+1) + '^' + str(n+1) + '-' + str(s+1) +'back.sol')
+                    filename = 'iter' + str(iter+1) + '_sub_' + str(t+1) + '^' + str(n+1) + '-' + str(s+1) + '.txt'
+                    with open(filename, 'w') as f:
+                        f.write('demand=' +str(demand)+'\n')
+                        f.write(str(pi)+'\n')  
+                        f.write(str(rhs))
+                    pass
             
             avg_intercept = sum(intercept_values[t][n]) / S
             avg_slope1 = sum(slope1_values[t][n]) / S
@@ -381,6 +382,7 @@ while iter < iter_limit:
                 slopes2[-1][t-1][n] = avg_slope2  
                 slopes3[-1][t-1][n] = avg_slope3
                 intercepts[-1][t-1][n] = avg_intercept 
+             
              
                 
     # z_lb, z_ub = compute_ub(z_values) # for computing confidence interval
@@ -398,6 +400,6 @@ Q1 = q_values[iter-1][0][0]
 print('final expected total costs is %.2f' % final_value)
 print('ordering Q in the first peiod is %.2f' % Q1)
 print('cpu time is %.3f s and iter number is %d' % (cpu_time, iter))        
-gap = (opt - final_value)/opt               
+gap = (-opt + final_value)/opt               
 print('optimaility gap is %.2f%% s' % (100*gap))  
         
