@@ -261,12 +261,10 @@ while iter < iter_limit:
                         m_backward[t][n][s].addConstr(I_backward[t][n][s] - B_backward[t][n][s] == ini_I - demand)
                         m_backward[t][n][s].addConstr(cash_backward[t][n][s] == ini_cash - overhead_cost[t] - vari_cost*q_values[-1][t][n]\
                                                       - r2*W2_values[-1] - r1*W1_values[-1] + r0*W0_values[-1] + price*(demand - B_backward[t][n][s]))
-                        if ini_I - demand > 0:
+                        if ini_I - demand >= 0:
                             positive_computed_before = True
-                        elif ini_I - demand < 0:
-                            negative_computed_before = True
                         else:
-                            zero_computed_before = True
+                            negative_computed_before = True
                     else:
                         m_backward[t][n][s].addConstr(I_backward[t][n][s] - B_backward[t][n][s] == I_forward_values[t-1][n] + qpre_values[-1][t-1][n] - demand)
                         m_backward[t][n][s].addConstr(cash_backward[t][n][s] + price*B_backward[t][n][s] == cash_forward_values[t-1][n]- overhead_cost[t]\

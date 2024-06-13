@@ -179,10 +179,10 @@ while iter < iter_limit:
     m.optimize()
     
     q_values[-1][0] = [q.x for n in range(N)]  
-    if iter == 7:
-        m.write('iter' + str(iter+1) + '_main.lp')    
-        m.write('iter' + str(iter+1) + '_main.sol')
-        pass
+    # if iter == 7:
+    #     m.write('iter' + str(iter+1) + '_main.lp')    
+    #     m.write('iter' + str(iter+1) + '_main.sol')
+    #     pass
     
     W0_values.append(W0.x)
     W1_values.append(W1.x)
@@ -301,8 +301,7 @@ while iter < iter_limit:
             S = len(sample_detail[t])
             for s in range(S):
                 demand = sample_detail[t][s]
-                if iter == 4 and t == 0 and n == 0:
-                    demand = -1
+
                 if t == T - 1:                   
                     m_backward[t][n][s].setObjective(-price*(demand - B_backward[t][n][s]) - unit_salvage*I_backward[t][n][s], GRB.MINIMIZE)
                 else:
@@ -343,6 +342,12 @@ while iter < iter_limit:
                 m_backward[t][n][s].Params.LogToConsole = 0
                 m_backward[t][n][s].optimize()
                 
+                if t < T - 1:
+                    temp = W2_backward[t][n][s].X
+                    if temp > 0:
+                        pass
+                    
+                
                 pi = m_backward[t][n][s].getAttr(GRB.Attr.Pi)
                 rhs = m_backward[t][n][s].getAttr(GRB.Attr.RHS)  
                                
@@ -359,7 +364,7 @@ while iter < iter_limit:
                 slope2_values[t][n][s] = pi[1]
                 if t < T -1:
                     slope3_values[t][n][s] = pi[2]
-                if iter == 4 and t == 0 and n == 0:
+                if iter == 3 and t == 2 and n == 0:
                     a_test = intercept_values[t][n][s]
                     m_backward[t][n][s].write('iter' + str(iter+1) + '_sub_' + str(t+1) + '^' + str(n+1) + '-' + str(s+1) +'back.lp')
                     m_backward[t][n][s].write('iter' + str(iter+1) + '_sub_' + str(t+1) + '^' + str(n+1) + '-' + str(s+1) +'back.sol')
