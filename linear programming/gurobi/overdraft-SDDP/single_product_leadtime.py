@@ -92,10 +92,10 @@ price = 10
 unit_back_cost = 0
 unit_hold_cost = 0
 unit_salvage = 0.5
-mean_demands = [10, 20, 10, 20]
+mean_demands = [15, 15, 15, 15]
 T = len(mean_demands)
 if T == 4:
-    opt = 215.48
+    opt = 167.31 # 215.48
 elif T == 3:
     opt = 26.68
     
@@ -180,8 +180,8 @@ while iter < iter_limit:
     
     q_values[-1][0] = [q.x for n in range(N)]  
     # if iter == 7:
-    #     m.write('iter' + str(iter+1) + '_main.lp')    
-    #     m.write('iter' + str(iter+1) + '_main.sol')
+    # m.write('iter' + str(iter+1) + '_main.lp')    
+    # m.write('iter' + str(iter+1) + '_main.sol')
     #     pass
     
     W0_values.append(W0.x)
@@ -239,7 +239,7 @@ while iter < iter_limit:
                 
                 m_forward[t][n].addConstr(W1_forward[t][n] <= U) 
                 m_forward[t][n].addConstr(cash_forward[t][n] - vari_cost*q_forward[t][n] - W0_forward[t][n]\
-                                          + W1_forward[t][n] + W2_forward[t][n] == overhead_cost[t])
+                                          + W1_forward[t][n] + W2_forward[t][n] == overhead_cost[t+1])
                    
                 m_forward[t][n].addConstr(theta_forward[t][n] >= theta_iniValue*(T-1-t))                  
             
@@ -325,7 +325,7 @@ while iter < iter_limit:
                 if t < T - 1:                   
                     m_backward[t][n][s].addConstr(W1_backward[t][n][s] <= U)
                     m_backward[t][n][s].addConstr(cash_backward[t][n][s] - vari_cost*q_backward[t][n][s] - W0_backward[t][n][s]\
-                                                  + W1_backward[t][n][s] + W2_backward[t][n][s] == overhead_cost[t])
+                                                  + W1_backward[t][n][s] + W2_backward[t][n][s] == overhead_cost[t+1])
                     m_backward[t][n][s].addConstr(theta_backward[t][n][s] >= theta_iniValue*(T-1-t))
                             
                 # put those cuts in the back
@@ -364,16 +364,16 @@ while iter < iter_limit:
                 slope2_values[t][n][s] = pi[1]
                 if t < T -1:
                     slope3_values[t][n][s] = pi[2]
-                if iter == 3 and t == 2 and n == 0:
-                    a_test = intercept_values[t][n][s]
-                    m_backward[t][n][s].write('iter' + str(iter+1) + '_sub_' + str(t+1) + '^' + str(n+1) + '-' + str(s+1) +'back.lp')
-                    m_backward[t][n][s].write('iter' + str(iter+1) + '_sub_' + str(t+1) + '^' + str(n+1) + '-' + str(s+1) +'back.sol')
-                    filename = 'iter' + str(iter+1) + '_sub_' + str(t+1) + '^' + str(n+1) + '-' + str(s+1) + '.txt'
-                    with open(filename, 'w') as f:
-                        f.write('demand=' +str(demand)+'\n')
-                        f.write(str(pi)+'\n')  
-                        f.write(str(rhs))
-                    pass
+                # if iter == 3 and t == 2 and n == 0:
+                #     a_test = intercept_values[t][n][s]
+                #     m_backward[t][n][s].write('iter' + str(iter+1) + '_sub_' + str(t+1) + '^' + str(n+1) + '-' + str(s+1) +'back.lp')
+                #     m_backward[t][n][s].write('iter' + str(iter+1) + '_sub_' + str(t+1) + '^' + str(n+1) + '-' + str(s+1) +'back.sol')
+                #     filename = 'iter' + str(iter+1) + '_sub_' + str(t+1) + '^' + str(n+1) + '-' + str(s+1) + '.txt'
+                #     with open(filename, 'w') as f:
+                #         f.write('demand=' +str(demand)+'\n')
+                #         f.write(str(pi)+'\n')  
+                #         f.write(str(rhs))
+                #     pass
             
             avg_intercept = sum(intercept_values[t][n]) / S
             avg_slope1 = sum(slope1_values[t][n]) / S

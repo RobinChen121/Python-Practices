@@ -20,7 +20,7 @@ import random
 def generate_sample(sample_num, trunQuantile, mu):
     samples = [0 for i in range(sample_num)]
     for i in range(sample_num):
-        np.random.seed(10000)
+        # np.random.seed(10000)
         rand_p = np.random.uniform(trunQuantile*i/sample_num, trunQuantile*(i+1)/sample_num)
         samples[i] = st.poisson.ppf(rand_p, mu)
     return samples
@@ -59,7 +59,7 @@ def generate_scenario_samples(sample_num, trunQuantile, mus):
     T = len(mus)
     samples = [[0 for t in range(T)] for i in range(sample_num)]
     for i in range(sample_num):
-        np.random.seed(10000)
+        # np.random.seed(10000)
         for t in range(T):
             rand_p = np.random.uniform(trunQuantile*i/sample_num, trunQuantile*(i+1)/sample_num)
             samples[i][t] = st.poisson.ppf(rand_p, mus[t])

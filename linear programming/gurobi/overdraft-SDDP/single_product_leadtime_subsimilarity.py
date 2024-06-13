@@ -6,6 +6,9 @@ Created on Sat Mar  2 19:18:39 2024
 @author: zhenchen
 
 @disp:  leverage subproblem similarity to speed up the computation;
+
+mean_demands = [10, 20, 10, 20]
+without leveraing, cpu time is 11.67s; with leveraging, cpu time is 3.29s;
     
     
 """
@@ -33,10 +36,10 @@ price = 10
 unit_back_cost = 0
 unit_hold_cost = 0
 unit_salvage = 0.5
-mean_demands = [10, 20, 10, 20]
+mean_demands = [15, 15, 15, 15]
 T = len(mean_demands)
 if T == 4:
-    opt = 215.48
+    opt = 167.31 # 215.48 for non stationary
 elif T == 3:
     opt = 26.68
     
@@ -120,10 +123,10 @@ while iter < iter_limit:
     m.optimize()
     
     q_values[-1][0] = [q.x for n in range(N)]  
-    if iter == 7:
-        m.write('iter' + str(iter+1) + '_main2.lp')    
-        m.write('iter' + str(iter+1) + '_main2.sol')
-        pass
+
+    # m.write('iter' + str(iter+1) + '_main2.lp')    
+    # m.write('iter' + str(iter+1) + '_main2.sol')
+
     
     W0_values.append(W0.x)
     W1_values.append(W1.x)
@@ -240,17 +243,67 @@ while iter < iter_limit:
     for t in range(T-1, -1, -1):    
         for n in range(N):      
             S = len(sample_detail[t])
-            positive_computed_before = False
-            negative_computed_before = False
-            zero_computed_before = False
-            positive_store_values = []
-            negative_store_values = []
-            zero_store_values = []
-            
+            IpW0 = False
+            IpW1 = False
+            IpW2 = False
+            InW0 = False
+            InW1 = False
+            InW2 = False
+            IpW0_values = []
+            IpW1_values = []
+            IpW2_values = []
+            InW0_values = []
+            InW1_values = []
+            InW2_values = []
+            StateChange = False
             for s in range(S):
-                demand = sample_detail[t][s]                
-                if positive_computed_before == False and negative_computed_before == False and \
-                    zero_computed_before == False:
+                demand = sample_detail[t][s]    
+                if s == 0:
+                    thisEndCash = 0.0
+                if s > 0:
+                    if t == 0:
+                        thisEndI = ini_I - demand
+                        thisB = -min(ini_I - demand, 0)
+                        if t < T - 1:
+                            thisEndCash = ini_cash - overhead_cost[t] - vari_cost*q_values[-1][t][n]\
+                                                      - r2*W2_values[-1] - r1*W1_values[-1] + r0*W0_values[-1] + price*(demand - thisB) - vari_cost*lastq
+                    else:
+                        thisEndI = I_forward_values[t-1][n] + qpre_values[-1][t-1][n] - demand
+                        thisB = -min(I_forward_values[t-1][n] + qpre_values[-1][t-1][n] - demand, 0)
+                        if t < T - 1:
+                            thisEndCash = cash_forward_values[t-1][n] - overhead_cost[t-1] - vari_cost*q_values[-1][t][n]\
+                                                      - r2*W2_forward_values[t-1][n]- r1*W1_forward_values[t-1][n] + r0*W0_forward_values[t-1][n] + price*(demand - thisB) - vari_cost*lastq - overhead_cost[t+1]
+                    if thisEndI >= 0 and thisEndCash >= 0:
+                        if len(IpW0_values ) > 0:
+                            pi, rhs = IpW0_values 
+                        else:
+                            StateChange = True
+                    elif thisEndI >= 0 and 0 > thisEndCash >= -U :
+                        if len(IpW1_values ) > 0:
+                            pi, rhs = IpW1_values 
+                        else:
+                            StateChange = True
+                    elif thisEndI >= 0 and thisEndCash < -U :
+                        if len(IpW2_values ) > 0:
+                            pi, rhs = IpW2_values 
+                        else:
+                            StateChange = True                   
+                    elif thisEndI < 0 and thisEndCash >= 0:
+                        if len(InW0_values ) > 0:
+                            pi, rhs = InW0_values 
+                        else:
+                            StateChange = True
+                    elif thisEndI < 0 and 0 > thisEndCash >= -U:
+                        if len(InW1_values ) > 0:
+                            pi, rhs = InW1_values 
+                        else:
+                            StateChange = True
+                    elif thisEndI < 0 and thisEndCash < -U:
+                        if len(InW2_values ) > 0:
+                            pi, rhs = InW2_values 
+                        else:
+                            StateChange = True
+                if s == 0 or StateChange == True:
                     if t == T - 1:                   
                         m_backward[t][n][s].setObjective(-price*(demand - B_backward[t][n][s]) - unit_salvage*I_backward[t][n][s], GRB.MINIMIZE)
                     else:
@@ -261,10 +314,6 @@ while iter < iter_limit:
                         m_backward[t][n][s].addConstr(I_backward[t][n][s] - B_backward[t][n][s] == ini_I - demand)
                         m_backward[t][n][s].addConstr(cash_backward[t][n][s] == ini_cash - overhead_cost[t] - vari_cost*q_values[-1][t][n]\
                                                       - r2*W2_values[-1] - r1*W1_values[-1] + r0*W0_values[-1] + price*(demand - B_backward[t][n][s]))
-                        if ini_I - demand >= 0:
-                            positive_computed_before = True
-                        else:
-                            negative_computed_before = True
                     else:
                         m_backward[t][n][s].addConstr(I_backward[t][n][s] - B_backward[t][n][s] == I_forward_values[t-1][n] + qpre_values[-1][t-1][n] - demand)
                         m_backward[t][n][s].addConstr(cash_backward[t][n][s] + price*B_backward[t][n][s] == cash_forward_values[t-1][n]- overhead_cost[t]\
@@ -273,10 +322,7 @@ while iter < iter_limit:
                                                       + r0*W0_forward_values[t-1][n] + price*demand)
                         if I_forward_values[t-1][n] + qpre_values[-1][t-1][n] - demand > 0:
                             positive_computed_before = True
-                        elif I_forward_values[t-1][n] + qpre_values[-1][t-1][n] - demand < 0:
-                            negative_computed_before = True
-                        else:
-                            zero_computed_before = True
+     
                         
                     if t < T - 1:
                         m_backward[t][n][s].addConstr(q_pre_backward[t][n][s] == q_values[-1][t][n]) 
@@ -284,7 +330,7 @@ while iter < iter_limit:
                     if t < T - 1:                   
                         m_backward[t][n][s].addConstr(W1_backward[t][n][s] <= U)
                         m_backward[t][n][s].addConstr(cash_backward[t][n][s] - vari_cost*q_backward[t][n][s] - W0_backward[t][n][s]\
-                                                      + W1_backward[t][n][s] + W2_backward[t][n][s] == overhead_cost[t])
+                                                      + W1_backward[t][n][s] + W2_backward[t][n][s] == overhead_cost[t+1])
                         m_backward[t][n][s].addConstr(theta_backward[t][n][s] >= theta_iniValue*(T-1-t))
                                 
                     # put those cuts in the back
@@ -302,23 +348,27 @@ while iter < iter_limit:
                     m_backward[t][n][s].optimize()                   
                     pi = m_backward[t][n][s].getAttr(GRB.Attr.Pi)
                     rhs = m_backward[t][n][s].getAttr(GRB.Attr.RHS)
-                                                                  
-                    if positive_computed_before == True:
-                        positive_store_values = [pi, rhs]
-                    elif negative_computed_before == True:
-                        negative_store_values = [pi, rhs]
-                    else:
-                        zero_store_values = [pi, rhs]
-                elif positive_computed_before == True:
-                    pi = positive_store_values[0]
-                    rhs = positive_store_values[1]                   
-                elif negative_computed_before == True:
-                    pi = negative_store_values[0]
-                    rhs = negative_store_values[1]
-                else:
-                    pi = zero_store_values[0]
-                    rhs = zero_store_values[1]
-                    
+                    if t < T - 1:
+                        lastq = q_backward[t][n][s].X
+                        thisEndCash = cash_backward[t][n][s].X - vari_cost*lastq - overhead_cost[t+1] 
+                    if I_backward[t][n][s].X > 0:
+                        thisEndI = I_backward[t][n][s].X
+                    if B_backward[t][n][s].X > 0:
+                        thisEndI = -B_backward[t][n][s].X                                    
+                    if thisEndI >= 0 and thisEndCash >= 0:
+                        IpW0_values = [pi, rhs]
+                    elif thisEndI >= 0 and 0 > thisEndCash >= -U :
+                        IpW1_values = [pi, rhs]
+                    elif thisEndI >= 0 and thisEndCash < -U :
+                        IpW2_values = [pi, rhs]                      
+                    elif thisEndI < 0 and thisEndCash >= 0:
+                        InW0_values = [pi, rhs]
+                    elif thisEndI < 0 and 0 > thisEndCash >= -U:
+                        InW1_values = [pi, rhs]
+                    elif thisEndI < 0 and thisEndCash < -U:
+                        InW2_values = [pi, rhs]
+                    StateChange = False
+
                 slope1_values[t][n][s] = pi[0]                                                         
                 slope2_values[t][n][s] = pi[1]
                 if t < T -1:
@@ -332,16 +382,16 @@ while iter < iter_limit:
                     intercept_values[t][n][s] += -pi[0]*demand + pi[1]*price*demand - pi[1]*overhead_cost[t] - price*demand 
                 for sk in range(3, num_con):
                     intercept_values[t][n][s] += pi[sk]*rhs[sk]
-                if iter == 4 and t == 1 and n == 0:
-                    a_test2 = intercept_values[t][n][s]
-                    m_backward[t][n][s].write('iter' + str(iter+1) + '_sub_' + str(t+1) + '^' + str(n+1) + '-' + str(s+1) +'back2.lp')
-                    m_backward[t][n][s].write('iter' + str(iter+1) + '_sub_' + str(t+1) + '^' + str(n+1) + '-' + str(s+1) +'back2.sol')
-                    filename = 'iter' + str(iter+1) + '_sub_' + str(t+1) + '^' + str(n+1) + '-' + str(s+1) + '-2.txt'
-                    with open(filename, 'w') as f:
-                        f.write('demand=' +str(demand)+'\n')
-                        f.write(str(pi)+'\n')  
-                        f.write(str(rhs))
-                    pass
+                # if iter == 3 and t == 2 and n == 0 and s == 0:
+                #     a_test2 = intercept_values[t][n][s]
+                #     m_backward[t][n][s].write('iter' + str(iter+1) + '_sub_' + str(t+1) + '^' + str(n+1) + '-' + str(s+1) +'back2.lp')
+                #     m_backward[t][n][s].write('iter' + str(iter+1) + '_sub_' + str(t+1) + '^' + str(n+1) + '-' + str(s+1) +'back2.sol')
+                #     filename = 'iter' + str(iter+1) + '_sub_' + str(t+1) + '^' + str(n+1) + '-' + str(s+1) + '-2.txt'
+                #     with open(filename, 'w') as f:
+                #         f.write('demand=' +str(demand)+'\n')
+                #         f.write(str(pi)+'\n')  
+                #         f.write(str(rhs))
+                #     pass
             
             avg_intercept = sum(intercept_values[t][n]) / S
             avg_slope1 = sum(slope1_values[t][n]) / S
