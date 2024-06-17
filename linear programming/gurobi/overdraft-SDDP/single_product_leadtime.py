@@ -92,14 +92,14 @@ price = 10
 unit_back_cost = 0
 unit_hold_cost = 0
 unit_salvage = 0.5
-mean_demands = [15, 15, 15, 15]
+mean_demands = [10, 10, 10]
 T = len(mean_demands)
 if T == 4:
     opt = 167.31 # 215.48
-elif T == 3:
+else:
     opt = 26.68
     
-sample_nums = [10 for t in range(T)]
+sample_nums = [2 for t in range(T)]
 overhead_cost = [50 for t in range(T)]
 
 r0 = 0
@@ -108,7 +108,7 @@ r2 = 2 # penalty interest rate for overdraft exceeding the limit
 U = 500 # overdraft limit
 iter_limit = 15
 time_limit = 120 # time limit
-N = 10 # sampled number of scenarios for forward computing
+N = 8 # sampled number of scenarios for forward computing
 cut_select_num = N
 
 trunQuantile = 0.9999 # affective to the final ordering quantity
@@ -121,7 +121,7 @@ for i in sample_nums:
 sample_detail = [[0 for i in range(sample_nums[t])] for t in range(T)] 
 for t in range(T):
     sample_detail[t] = generate_sample(sample_nums[t], trunQuantile, mean_demands[t])
-# sample_detail = [[5, 15], [5, 15], [5, 15]]
+sample_detail = [[5, 15], [5, 15], [5, 15]]
 scenarios_full = list(itertools.product(*sample_detail)) 
 
 iter = 0
@@ -168,7 +168,7 @@ while iter < iter_limit:
     # sample a numer of scenarios from the full scenario tree
     #  random.seed(10000)
     sample_scenarios = generate_scenario_samples(N, trunQuantile, mean_demands)
-    # sample_scenarios = [[5, 5, 5], [5, 5, 15], [5, 15, 5], [15,5,5], [15,15,5], [15,5, 15], [5,15,15],[15,15,15]]
+    sample_scenarios = [[5, 5, 5], [5, 5, 15], [5, 15, 5], [15,5,5], [15,15,5], [15,5, 15], [5,15,15],[15,15,15]]
     sample_scenarios.sort() # sort to make same numbers together
     
     # forward
@@ -179,10 +179,10 @@ while iter < iter_limit:
     m.optimize()
     
     q_values[-1][0] = [q.x for n in range(N)]  
-    # if iter == 7:
-    # m.write('iter' + str(iter+1) + '_main.lp')    
-    # m.write('iter' + str(iter+1) + '_main.sol')
-    #     pass
+    if iter == 14:
+        m.write('iter' + str(iter+1) + '_main.lp')    
+        m.write('iter' + str(iter+1) + '_main.sol')
+        pass
     
     W0_values.append(W0.x)
     W1_values.append(W1.x)
