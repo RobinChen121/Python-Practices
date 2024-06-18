@@ -277,13 +277,14 @@ while iter < iter_num:
     slope2_values = [[[0 for s in range(sample_num)] for n in range(N)] for t in range(T)] 
     slope3_values = [[[[0 for m in range(MM)] for s in range(sample_num)] for n in range(N)] for t in range(T)]
     
-    for t in range(T-1, -1, -1):    
+    for t in range(T-1, -1, -1):  
+        demand_temp = [sample_details1[t], sample_details2[t]]
+        demand_all = list(itertools.product(*demand_temp))
         for n in range(N):      
             S = sample_num # should revise, should be S^2
             for s in range(S):
-                
-                demand1 = sample_details1[t][s]
-                demand2 = sample_details2[t][s]
+                demand1 = demand_all[s][0]
+                demand2 = demand_all[s][1]
                 
                 if t == T - 1:                   
                     m_backward[t][n][s].setObjective(-prices[0]*(demand1 - B1_backward[t][n][s])-prices[1]*(demand2 - B2_backward[t][n][s])\
