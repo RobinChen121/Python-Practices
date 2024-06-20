@@ -258,8 +258,7 @@ while iter < iter_limit:
             StateChange = False
             for s in range(S):
                 demand = sample_detail[t][s]    
-                if s == 0:
-                    thisEndCash = 0.0
+                thisEndCash = 0.0
                 if s > 0:
                     if t == 0:
                         thisEndI = ini_I - demand
