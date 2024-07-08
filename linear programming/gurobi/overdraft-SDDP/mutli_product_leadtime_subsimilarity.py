@@ -8,6 +8,37 @@ Created on Thu Jun 20 12:44:26 2024
 @disp:  leverage sub problems similarity to speed up the compuatation.
     
     
+    
+T=3   
+final expected total profits after 25 iteration is 151.49
+ordering Q1 and Q2 in the first peiod is 46.99 and 15.60
+cpu time is 154.248 s;
+
+T=4
+(N = 5, demand realization number = 5)
+final expected total profits after 110 iteration is 282.25
+ordering Q1 and Q2 in the first peiod is 28.32 and 14.05
+cpu time is 60.591 s
+
+T=5
+final expected total profits after 263 iteration is 471.20
+ordering Q1 and Q2 in the first peiod is 30.88 and 20.32
+cpu time is 400.828 s
+
+T=6
+(N = 5, demand realization number = 5)
+final expected total profits after 236 iteration is 606.21
+ordering Q1 and Q2 in the first peiod is 24.73 and 15.78
+cpu time is 1204.530 s;
+
+final expected total profits after 409 iteration is 610.13
+ordering Q1 and Q2 in the first peiod is 30.94 and 17.62
+cpu time is 1201.105 s
+
+(N = 10, demand realization number = 10)
+final expected total profits after 219 iteration is 612.62
+ordering Q1 and Q2 in the first peiod is 29.56 and 15.18
+cpu time is 1800.206 s
 """
 
 from gurobipy import *
@@ -23,7 +54,7 @@ from tree import generate_gamma_sample, generate_scenario_samples_gamma, generat
     
 
 
-T = 6
+T = 5
 ini_Is = [0, 0]
 ini_cash = 0
 vari_costs = [1, 2]
@@ -37,7 +68,7 @@ r1 = 0.1
 r2 = 2 # penalty interest rate for overdraft exceeding the limit, does not affect computation time
 U = 500 # overdraft limit
 
-sample_num_1product = 5 # change 1
+sample_num_1product = 10 # change 1
 sample_num = sample_num_1product **2 # sample number for one product in one stage when forming the scenario tree # change 1
 scenario_numTotal = sample_num ** T
 
@@ -78,9 +109,9 @@ m.addConstr(-vari_costs[0]*q1 - vari_costs[1]*q2- W0 + W1 + W2 == overhead_cost[
 
 
 # cuts recording arrays
-iter_num = 45
-time_limit = 3600
-N = 5 # sampled number of scenarios in forward computing, change 3
+iter_num = 35
+time_limit = 1800
+N = 10 # sampled number of scenarios in forward computing, change 3
 slope_stage1_1 = []
 slope_stage1_2 = []
 slope_stage1_3 = []
@@ -101,7 +132,7 @@ iter = 0
 time_pass = 0
 start = time.process_time()
 # while iter < iter_num:  
-while time_pass < time_limit: 
+while time_pass < time_limit and iter < iter_num: 
     slopes1.append([[[0 for m in range(MM)] for n in range(N)] for t in range(T)])
     slopes2.append([[0 for n in range(N)] for t in range(T)])
     slopes3.append([[[0 for m in range(MM)] for n in range(N)] for t in range(T)])
@@ -294,8 +325,7 @@ while time_pass < time_limit:
             In1In2W1_values = []
             In1In2W2_values = []
             StateChange = False
-                     
-            
+                              
             for s in range(S):
                 demand1 = demand_all[s][0] # sample_details1[t][s]  # 
                 demand2 = demand_all[s][1] # sample_details2[t][s]  # 
@@ -312,7 +342,7 @@ while time_pass < time_limit:
                         if t < T - 1:
                             thisEndCash = ini_cash - overhead_cost[t] - vari_costs[0]*q1_values[-1][t][n]-vari_costs[1]*q2_values[-1][t][n]\
                                                           - r2*W2_values[-1] - r1*W1_values[-1] + r0*W0_values[-1]\
-                                                          + prices[0]*(demand1 - B1_backward[t][n][s])+ prices[1]*(demand2 - B2_backward[t][n][s])
+                                                          + prices[0]*(demand1 - thisB1)+ prices[1]*(demand2 - thisB2) - vari_costs[0]*lastq1
                     else:
                         thisEndI1 = I1_forward_values[t-1][n] + qpre1_values[-1][t-1][n] - demand1
                         thisB1 = -min(I1_forward_values[t-1][n] + qpre1_values[-1][t-1][n] - demand1, 0)
@@ -322,35 +352,66 @@ while time_pass < time_limit:
                             thisEndCash = cash_forward_values[t-1][n]- overhead_cost[t]\
                                                           - vari_costs[0]*q1_values[-1][t][n]- vari_costs[1]*q2_values[-1][t][n]\
                                                          - r2*W2_forward_values[t-1][n]- r1*W1_forward_values[t-1][n]\
-                                                          + r0*W0_forward_values[t-1][n] + prices[0]*demand1+ prices[1]*demand2
+                                                          + r0*W0_forward_values[t-1][n] + prices[0]*(demand1 - thisB1) - vari_costs[0]*lastq1 - overhead_cost[t+1]\
+                                                              + prices[1]*(demand2 - thisB2) - vari_costs[1]*lastq2
                     if thisEndI1 >= 0 and thisEndI2 >= 0 and thisEndCash >= 0:
-                        if len(Ip1Ip2W0_values ) > 0:
+                        if len(Ip1Ip2W0_values) > 0:
                             pi, rhs = Ip1Ip2W0_values 
                         else:
                             StateChange = True
                     elif thisEndI1 >= 0 and thisEndI2 >= 0 and 0 > thisEndCash >= -U :
-                        if len(Ip1Ip2W1_values ) > 0:
+                        if len(Ip1Ip2W1_values) > 0:
                             pi, rhs = Ip1Ip2W1_values 
                         else:
                             StateChange = True
-                    elif thisEndI1 >= 0 and thisEndi2 >= 0 and thisEndCash < -U :
-                        if len(Ip1Ip2W2_values ) > 0:
+                    elif thisEndI1 >= 0 and thisEndI2 >= 0 and thisEndCash < -U :
+                        if len(Ip1Ip2W2_values) > 0:
                             pi, rhs = Ip1Ip2W2_values 
                         else:
                             StateChange = True                   
-                    elif thisEndI < 0 and thisEndCash >= 0:
-                        if len(InW0_values ) > 0:
-                            pi, rhs = InW0_values 
+                    elif thisEndI1 >= 0 and thisEndI2 < 0 and thisEndCash >= 0:
+                        if len(Ip1In2W0_values) > 0:
+                            pi, rhs = Ip1In2W0_values 
                         else:
                             StateChange = True
-                    elif thisEndI < 0 and 0 > thisEndCash >= -U:
-                        if len(InW1_values ) > 0:
-                            pi, rhs = InW1_values 
+                    elif thisEndI1 >= 0 and thisEndI2 < 0 and 0 > thisEndCash >= -U:
+                        if len(Ip1In2W1_values) > 0:
+                            pi, rhs = Ip1In2W1_values 
                         else:
                             StateChange = True
-                    elif thisEndI < 0 and thisEndCash < -U:
-                        if len(InW2_values ) > 0:
-                            pi, rhs = InW2_values 
+                    elif thisEndI1 >= 0 and thisEndI2 < 0 and thisEndCash < -U:
+                        if len(Ip1In2W2_values) > 0:
+                            pi, rhs = Ip1In2W2_values 
+                        else:
+                            StateChange = True
+                    elif thisEndI1 < 0 and thisEndI2 >= 0 and thisEndCash >= 0:
+                        if len(In1Ip2W0_values) > 0:
+                            pi, rhs = In1Ip2W0_values 
+                        else:
+                            StateChange = True
+                    elif thisEndI1 < 0 and thisEndI2 >= 0 and 0 > thisEndCash >= -U:
+                        if len(In1Ip2W1_values) > 0:
+                            pi, rhs = In1Ip2W1_values 
+                        else:
+                            StateChange = True
+                    elif thisEndI1 < 0 and thisEndI2 >= 0 and thisEndCash < -U:
+                        if len(In1Ip2W2_values ) > 0:
+                            pi, rhs = In1Ip2W2_values 
+                        else:
+                            StateChange = True
+                    elif thisEndI1 < 0 and thisEndI2 < 0 and thisEndCash > 0:
+                        if len(In1In2W0_values ) > 0:
+                            pi, rhs = In1In2W0_values 
+                        else:
+                            StateChange = True
+                    elif thisEndI1 < 0 and thisEndI2 < 0 and 0 > thisEndCash > -U:
+                        if len(In1In2W1_values ) > 0:
+                            pi, rhs = In1In2W1_values 
+                        else:
+                            StateChange = True
+                    elif thisEndI1 < 0 and thisEndI2 < 0 and thisEndCash < -U:
+                        if len(In1In2W2_values ) > 0:
+                            pi, rhs = In1In2W2_values 
                         else:
                             StateChange = True
                 if s == 0 or StateChange == True:
@@ -402,6 +463,39 @@ while time_pass < time_limit:
                     
                     pi = m_backward[t][n][s].getAttr(GRB.Attr.Pi)
                     rhs = m_backward[t][n][s].getAttr(GRB.Attr.RHS)
+                    
+                    if t < T - 1:
+                        lastq1 = q1_backward[t][n][s].X
+                        lastq2 = q2_backward[t][n][s].X
+                        thisEndCash = cash_backward[t][n][s].X - vari_costs[0]*lastq1  - vari_costs[0]*lastq2 - overhead_cost[t+1] 
+                    thisEndI1 = I1_backward[t][n][s].X if I1_backward[t][n][s].X > 0 else  -B1_backward[t][n][s].X
+                    thisEndI2 = I2_backward[t][n][s].X if I2_backward[t][n][s].X > 0 else  -B2_backward[t][n][s].X               
+                    if thisEndI1 >= 0 and thisEndI2 >= 0 and thisEndCash >= 0:
+                        Ip1Ip2W0_values = [pi, rhs]
+                    elif thisEndI1 >= 0 and thisEndI2 >= 0  and 0 > thisEndCash >= -U :
+                        Ip1Ip2W1_values = [pi, rhs]
+                    elif thisEndI1 >= 0 and thisEndI2 >= 0  and thisEndCash < -U :
+                        Ip1Ip2W2_values = [pi, rhs]                      
+                    elif thisEndI1 >= 0 and thisEndI2 < 0 and thisEndCash >= 0:
+                        Ip1In2W0_values = [pi, rhs]
+                    elif thisEndI1 >= 0 and thisEndI2 < 0 and 0 > thisEndCash >= -U:
+                        Ip1In2W1_values = [pi, rhs]
+                    elif thisEndI1 >= 0 and thisEndI2 < 0 and thisEndCash < -U:
+                        Ip1In2W2_values = [pi, rhs]
+                    elif thisEndI1 < 0 and thisEndI2 >= 0 and thisEndCash >= 0:
+                        In1Ip2W0_values = [pi, rhs]
+                    elif thisEndI1 < 0 and thisEndI2 >= 0 and 0 > thisEndCash >= -U:
+                        In1Ip2W1_values = [pi, rhs]
+                    elif thisEndI1 < 0 and thisEndI2 >= 0 and thisEndCash < -U:
+                        In1Ip2W2_values = [pi, rhs]
+                    elif thisEndI1 < 0 and thisEndI2 < 0 and thisEndCash >= 0:
+                        In1In2W0_values = [pi, rhs]
+                    elif thisEndI1 < 0 and thisEndI2 < 0 and 0 > thisEndCash >= -U:
+                        In1In2W1_values = [pi, rhs]
+                    elif thisEndI1 < 0 and thisEndI2 < 0 and thisEndCash < -U:
+                        In1In2W2_values = [pi, rhs]
+                    StateChange = False
+
                     
                     # if iter == 8 and t == 1 and n == 0:
                     #     m_backward[t][n][s].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(n+1) + '-' + str(s+1) + '-mback.lp') 
