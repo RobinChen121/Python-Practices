@@ -66,6 +66,8 @@ SDDP is 137.89, time is 49.04s; (N=1, iter_num=15)
 ******************************
 mean_demands = [10, 10, 10, 10]
 SDP optimal result is 26.68;
+mean_demands = [15, 15, 15, 15]
+SDP optimal result is 167.31, java running time is 39s;
 for 4 periods [10, 20, 10, 20], solution 215.48, python running more than 4 hours and can't get a solution, while java 31s; 
 
 """
@@ -80,7 +82,7 @@ import sys
 current_dir = os.getcwd()
 parent_dir = os.path.dirname(current_dir)
 sys.path.append(parent_dir)
-from tree import generate_sample, generate_scenario_samples, compute_ub
+from tree import *
 from write_to_file import write_to_csv
 
 
@@ -92,21 +94,22 @@ price = 10
 unit_back_cost = 0
 unit_hold_cost = 0
 unit_salvage = 0.5
-mean_demands = [10, 10, 10]
+mean_demands = [15, 15, 15, 15] # [10, 20, 10, 20]
 T = len(mean_demands)
 if T == 4:
-    opt = 167.31 # 215.48
+    opt = 167.31 # 215.48 # 
 else:
     opt = 26.68
-    
-sample_nums = [10 for t in range(T)] # change 1
-overhead_cost = [50 for t in range(T)]
+ 
+sample_num = 10 # change 1
+sample_nums = [sample_num for t in range(T)] 
+overhead_cost = [100 for t in range(T)]
 
 r0 = 0
 r1 = 0.1
 r2 = 2 # penalty interest rate for overdraft exceeding the limit
 U = 500 # overdraft limit
-iter_limit = 15
+iter_limit = 20
 time_limit = 120 # time limit
 N = 10 # sampled number of scenarios for forward computing    # change 2
 cut_select_num = N
@@ -118,11 +121,11 @@ for i in sample_nums:
 
     
 # detailed samples in each period
-sample_detail = [[0 for i in range(sample_nums[t])] for t in range(T)] 
+sample_details = [[0 for i in range(sample_nums[t])] for t in range(T)] 
 for t in range(T):
-    sample_detail[t] = generate_sample(sample_nums[t], trunQuantile, mean_demands[t])
-# sample_detail = [[5, 15], [5, 15], [5, 15]]  # change 3
-scenarios_full = list(itertools.product(*sample_detail)) 
+    sample_details[t] = generate_samples(sample_nums[t], trunQuantile, mean_demands[t])
+# sample_details = [[5, 15], [5, 15], [5, 15]]  # change 3
+scenarios_full = list(itertools.product(*sample_details)) 
 
 iter = 0
 theta_iniValue = -500 # initial theta values (profit) in each period
@@ -167,7 +170,8 @@ while iter < iter_limit:
     
     # sample a numer of scenarios from the full scenario tree
     #  random.seed(10000)
-    sample_scenarios = generate_scenario_samples(N, trunQuantile, mean_demands)
+    sample_scenarios = generate_scenarios(N, sample_num, sample_details)
+    # sample_scenarios = generate_scenarios2(N, trunQuantile, mean_demands)
     # sample_scenarios = [[5, 5, 5], [5, 5, 15], [5, 15, 5], [15,5,5], [15,15,5], [15,5, 15], [5,15,15],[15,15,15]] # change 4
     sample_scenarios.sort() # sort to make same numbers together
     
@@ -298,9 +302,9 @@ while iter < iter_limit:
     
     for t in range(T-1, -1, -1):    
         for n in range(N):      
-            S = len(sample_detail[t])
+            S = len(sample_details[t])
             for s in range(S):
-                demand = sample_detail[t][s]
+                demand = sample_details[t][s]
 
                 if t == T - 1:                   
                     m_backward[t][n][s].setObjective(-price*(demand - B_backward[t][n][s]) - unit_salvage*I_backward[t][n][s], GRB.MINIMIZE)

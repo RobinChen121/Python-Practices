@@ -49,7 +49,7 @@ import numpy as np
 
 import sys 
 sys.path.append("..") 
-from tree import generate_gamma_sample, generate_scenario_samples_gamma, generate_sample, generate_scenario_samples_poisson
+from tree import generate_samples_gamma, generate_scenario_samples_gamma, generate_samples_poisson, generate_scenario_samples_poisson
 
     
 
@@ -68,9 +68,7 @@ r1 = 0.1
 r2 = 2 # penalty interest rate for overdraft exceeding the limit, does not affect computation time
 U = 500 # overdraft limit
 
-sample_num_1product = 10 # change 1
-sample_num = sample_num_1product **2 # sample number for one product in one stage when forming the scenario tree # change 1
-scenario_numTotal = sample_num ** T
+sample_num = 5 # change 1
 
 # gamma distribution:mean demand is shape / beta and variance is shape / beta^2
 # beta = 1 / scale
@@ -81,13 +79,13 @@ betas = [10, 1] # lower variance vs higher variance
 
 # detailed samples in each period
 trunQuantile = 0.9999 # affective to the final ordering quantity
-sample_details1 = [[0 for i in range(sample_num_1product)] for t in range(T)]
-sample_details2 = [[0 for i in range(sample_num_1product)] for t in range(T)]
+sample_details1 = [[0 for i in range(sample_num)] for t in range(T)]
+sample_details2 = [[0 for i in range(sample_num)] for t in range(T)]
 for t in range(T):
-    # sample_details1[t] = generate_gamma_sample(sample_num, trunQuantile, mean_demands[0], betas[0])
-    # sample_details2[t] = generate_gamma_sample(sample_num, trunQuantile, mean_demands[1], betas[1])
-    sample_details1[t] = generate_sample(sample_num_1product, trunQuantile, mean_demands[0])
-    sample_details2[t] = generate_sample(sample_num_1product, trunQuantile, mean_demands[1])
+    # sample_details1[t] = generate_samples_gamma(sample_num, trunQuantile, mean_demands[0], betas[0])
+    # sample_details2[t] = generate_samples_gamma(sample_num, trunQuantile, mean_demands[1], betas[1])
+    sample_details1[t] = generate_samples(sample_num, trunQuantile, mean_demands[0])
+    sample_details2[t] = generate_samples(sample_num, trunQuantile, mean_demands[1])
 
 # sample_details1 = [[10, 30], [10, 30], [10, 30]] # change 2
 # sample_details2 = [[5, 15], [5, 15], [5, 15]]
@@ -111,7 +109,7 @@ m.addConstr(-vari_costs[0]*q1 - vari_costs[1]*q2- W0 + W1 + W2 == overhead_cost[
 # cuts recording arrays
 iter_num = 35
 time_limit = 1800
-N = 10 # sampled number of scenarios in forward computing, change 3
+N = 5 # sampled number of scenarios in forward computing, change 3
 slope_stage1_1 = []
 slope_stage1_2 = []
 slope_stage1_3 = []
@@ -145,8 +143,8 @@ while time_pass < time_limit and iter < iter_num:
     # sample_scenarios1 = generate_scenario_samples_gamma(N, trunQuantile, mean_demands[0], betas[0], T)
     # sample_scenarios2 = generate_scenario_samples_gamma(N, trunQuantile, mean_demands[1], betas[1], T)
     
-    sample_scenarios1 = generate_scenario_samples_poisson(N, trunQuantile, mean_demands[0], T)
-    sample_scenarios2 = generate_scenario_samples_poisson(N, trunQuantile, mean_demands[1], T)
+    sample_scenarios1 = generate_scenarios(N, sample_num, sample_details1)
+    sample_scenarios2 = generate_scenarios(N, sample_num, sample_details2)
      
     # sample_scenarios1 = [[10, 10, 10], [10,10, 30], [10, 30, 10], [10,30, 30],[30,10,10],[30,10,30],[30,30,10],[30,30,30]] # change 4
     # sample_scenarios2 = [[5, 5, 5], [5, 5, 15], [5, 15, 5], [5,15,15],[15,5,5], [15,5, 15], [15,15,5], [15,15,15]]
@@ -300,18 +298,6 @@ while time_pass < time_limit and iter < iter_num:
         # demand_all2 = [[demand_all[s][0], demand_all[s][1]] for s in range(sample_num)]
         for n in range(N):      
             S = sample_num # should revise, should be S^2
-            Ip1Ip2W0 = False
-            Ip1Ip2W1 = False
-            Ip1Ip2W2 = False
-            Ip1In2W0 = False
-            Ip1In2W1 = False
-            Ip1In2W2 = False
-            In1Ip2W0 = False
-            In1Ip2W1 = False
-            In1Ip2W2 = False
-            In1In2W0 = False
-            In1In2W1 = False
-            In1In2W2 = False
             Ip1Ip2W0_values = []
             Ip1Ip2W1_values = []
             Ip1Ip2W2_values = []

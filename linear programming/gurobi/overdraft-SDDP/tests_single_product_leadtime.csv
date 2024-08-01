@@ -1,2 +1,0 @@
-ini_cash,ini_inventory,price,unit_order_cost,unit_salvage_value,deposit_interest_rate,overdraft_interest_rate,penalty_interest_rate,overdraft_limit,overhead_costs,mean_demands,sample_num,scenario_num,cut_select_number,iter_num,stop_condition,time,final_value,Q1
-0,0,10,1,0.5,0,0.1,2,500,"[50, 50, 50, 50]","[10, 20, 10, 20]","[10, 10, 10, 10]",10,10,15,iter_limit,28.765625,230.6661281600813,30.870375218517232

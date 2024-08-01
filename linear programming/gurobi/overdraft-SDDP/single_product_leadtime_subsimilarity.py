@@ -23,7 +23,7 @@ import sys
 current_dir = os.getcwd()
 parent_dir = os.path.dirname(current_dir)
 sys.path.append(parent_dir)
-from tree import generate_sample, generate_scenario_samples, compute_ub
+from tree import *
 from write_to_file import write_to_csv
 
 
@@ -36,23 +36,24 @@ price = 10
 unit_back_cost = 0
 unit_hold_cost = 0
 unit_salvage = 0.5
-mean_demands = [15, 15, 15, 15]
+mean_demands = [15, 15, 15, 15] # [10, 20, 10, 20] # 
 T = len(mean_demands)
 if T == 4:
     opt = 167.31 # 215.48 for non stationary
 elif T == 3:
     opt = 26.68
-    
-sample_nums = [10 for t in range(T)]
+
+sample_num = 5    
+sample_nums = [sample_num for t in range(T)]
 overhead_cost = [50 for t in range(T)]
 
 r0 = 0
 r1 = 0.1
 r2 = 2 # penalty interest rate for overdraft exceeding the limit
 U = 500 # overdraft limit
-iter_limit = 15
+iter_limit = 30
 time_limit = 120 # time limit
-N = 10 # sampled number of scenarios for forward computing
+N = 5 # sampled number of scenarios for forward computing
 cut_select_num = N
 
 trunQuantile = 0.9999 # affective to the final ordering quantity
@@ -64,7 +65,7 @@ for i in sample_nums:
 # detailed samples in each period
 sample_detail = [[0 for i in range(sample_nums[t])] for t in range(T)] 
 for t in range(T):
-    sample_detail[t] = generate_sample(sample_nums[t], trunQuantile, mean_demands[t])
+    sample_detail[t] = generate_samples(sample_nums[t], trunQuantile, mean_demands[t])
 # sample_detail = [[5, 15], [5, 15], [5, 15]]
 scenarios_full = list(itertools.product(*sample_detail)) 
 
@@ -111,7 +112,7 @@ while iter < iter_limit:
     
     # sample a numer of scenarios from the full scenario tree
     # random.seed(10000)
-    sample_scenarios = generate_scenario_samples(N, trunQuantile, mean_demands)
+    sample_scenarios = generate_scenarios(N, sample_num, sample_detail)
     # sample_scenarios = [[5, 5, 5], [5, 5, 15], [5, 15, 5], [15,5,5], [15,15,5], [15,5, 15], [5,15,15],[15,15,15]]
     sample_scenarios.sort() # sort to make same numbers together
     

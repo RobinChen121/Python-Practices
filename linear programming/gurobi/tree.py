@@ -17,7 +17,7 @@ import random
 
 
 # generate poisson distribution
-def generate_sample(sample_num, trunQuantile, mu):
+def generate_samples(sample_num, trunQuantile, mu):
     samples = [0 for i in range(sample_num)]
     for i in range(sample_num):
         # np.random.seed(10000)
@@ -30,7 +30,7 @@ def generate_sample(sample_num, trunQuantile, mu):
 # beta = 1 / scale
 # shape = demand * beta
 # variance = demand / beta
-def generate_gamma_sample(sample_num, trunQuantile, mean, beta):
+def generate_samples_gamma(sample_num, trunQuantile, mean, beta):
     samples = [0 for i in range(sample_num)]
     for i in range(sample_num):
         # np.random.seed(10000)
@@ -39,7 +39,14 @@ def generate_gamma_sample(sample_num, trunQuantile, mean, beta):
     random.shuffle(samples)
     return samples
 
-
+def generate_samples_normal(sample_num, trunQuantile, mean, sigma):
+    samples = [0 for i in range(sample_num)]
+    for i in range(sample_num):
+        # np.random.seed(10000)
+        rand_p = np.random.uniform(trunQuantile*i/sample_num, trunQuantile*(i+1)/sample_num)
+        samples[i] = round(st.norm.ppf(rand_p, loc = mean, scale = sigma))
+    random.shuffle(samples)
+    return samples
 
 # get the number of elements in a list of lists
 def getSizeOfNestedList(listOfElem):
@@ -55,19 +62,33 @@ def getSizeOfNestedList(listOfElem):
             count += 1    
     return count
 
-def generate_scenario_samples(sample_num, trunQuantile, mus):
-    T = len(mus)
-    samples = [[0 for t in range(T)] for i in range(sample_num)]
-    for i in range(sample_num):
+
+# generate for possion distribution
+def generate_scenarios(scenario_num, sample_num, sample_details):
+    T = len(sample_details)
+    scenarios = [[0 for t in range(T)] for i in range(scenario_num)]
+    for i in range(scenario_num):
         # np.random.seed(10000)
         for t in range(T):
-            rand_p = np.random.uniform(trunQuantile*i/sample_num, trunQuantile*(i+1)/sample_num)
+            rand_index = np.random.randint(0, sample_num)
+            scenarios[i][t] = sample_details[t][rand_index]
+        # random.shuffle(samples[i])
+            
+    return scenarios
+
+def generate_scenarios2(scenario_num, trunQuantile, mus):
+    T = len(mus)
+    samples = [[0 for t in range(T)] for i in range(scenario_num)]
+    for i in range(scenario_num):
+        # np.random.seed(10000)
+        for t in range(T):
+            rand_p = np.random.uniform(trunQuantile*i/scenario_num, trunQuantile*(i+1)/scenario_num)
             samples[i][t] = st.poisson.ppf(rand_p, mus[t])
         # random.shuffle(samples[i])
             
     return samples
 
-def generate_scenario_samples_gamma(sample_num, trunQuantile, mean, beta, T):
+def generate_scenarios_gamma(sample_num, trunQuantile, mean, beta, T):
     samples = [[0 for t in range(T)] for i in range(sample_num)]
     for i in range(sample_num):
         # np.random.seed(10000)
@@ -77,7 +98,17 @@ def generate_scenario_samples_gamma(sample_num, trunQuantile, mean, beta, T):
         random.shuffle(samples[i])
     return samples
 
-def generate_scenario_samples_poisson(sample_num, trunQuantile, mean, T):
+def generate_scenarios_normal(sample_num, trunQuantile, means, sigmas, T):
+    samples = [[0 for t in range(T)] for i in range(sample_num)]
+    for i in range(sample_num):
+        # np.random.seed(10000)
+        for t in range(T):
+            rand_p = np.random.uniform(trunQuantile*i/sample_num, trunQuantile*(i+1)/sample_num)
+            samples[i][t] = round(st.norm.ppf(rand_p, loc=means[t], scale=sigmas[t]))
+        random.shuffle(samples[i])
+    return samples
+
+def generate_scenarios_poisson(sample_num, trunQuantile, mean, T):
     samples = [[0 for t in range(T)] for i in range(sample_num)]
     for i in range(sample_num):
         # np.random.seed(10000)
@@ -134,7 +165,7 @@ trunQuantile = 0.9999
 
 # samples_detail is the detailed samples in each period
 sample_detail = [0 for i in range(N)] 
-sample_detail = generate_gamma_sample(N, trunQuantile, mean_demand, beta)
+sample_detail = generate_samples_gamma(N, trunQuantile, mean_demand, beta)
 
 # scenarios_full = list(itertools.product(*samples_detail)) 
 # sample_num = 30

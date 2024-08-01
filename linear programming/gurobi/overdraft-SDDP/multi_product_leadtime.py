@@ -65,6 +65,24 @@ cpu time is 3655.652 s
 final expected total profits after 234 iteration is 623.78
 ordering Q1 and Q2 in the first peiod is 30.00 and 14.00
 cpu time is 3619.901 s
+
+mean_demands1 =[30, 30, 30, 30, 30, 30] # higher average demand vs lower average demand
+mean_demands2 = [i*0.5 for i in mean_demands1] # higher average demand vs lower average demand
+cov1 = 0.25 # lower variance vs higher variance
+cov2 = 0.5
+ini_Is = [0, 0]
+ini_cash = 0
+vari_costs = [1, 2]
+prices = [5, 10] # lower margin vs higher margin
+MM = len(prices)
+unit_salvages = [0.5* vari_costs[m] for m in range(MM)]
+overhead_cost = [100 for t in range(T)]
+
+(N = 5, demand realization number = 5)
+final expected total profits after 501 iteration is 517.61
+ordering Q1 and Q2 in the first peiod is 29.01 and 34.01
+cpu time is 3601.459 s;
+
 """
 
 from gurobipy import *
@@ -75,16 +93,25 @@ import numpy as np
 
 import sys 
 sys.path.append("..") 
-from tree import generate_gamma_sample, generate_scenario_samples_gamma, generate_sample, generate_scenario_samples_poisson
+from tree import *
 
     
 
 
-T = 6
+
+mean_demands1 =[20, 20, 20] # higher average demand vs lower average demand
+mean_demands2 = [i*0.5 for i in mean_demands1] # higher average demand vs lower average demand
+cov1 = 0.25 # lower variance vs higher variance
+cov2 = 0.5
+sigmas1 = [cov1*i for i in mean_demands1]
+sigmas2 = [cov2*i for i in mean_demands2]
+T = len(mean_demands1)
+
+
 ini_Is = [0, 0]
 ini_cash = 0
 vari_costs = [1, 2]
-prices = [10, 10] # lower margin vs higher margin
+prices = [5, 10] # lower margin vs higher margin
 MM = len(prices)
 unit_salvages = [0.5* vari_costs[m] for m in range(MM)]
 overhead_cost = [100 for t in range(T)]
@@ -94,29 +121,31 @@ r1 = 0.1
 r2 = 2 # penalty interest rate for overdraft exceeding the limit, does not affect computation time
 U = 500 # overdraft limit
 
-sample_num_1product = 5 # change 1
-sample_num = sample_num_1product **2 # sample number for one product in one stage when forming the scenario tree # change 1
-scenario_numTotal = sample_num ** T
+sample_num = 5 # change 1
 
 # gamma distribution:mean demand is shape / beta and variance is shape / beta^2
 # beta = 1 / scale
 # shape = demand * beta
 # variance = demand / beta
-mean_demands =[20, 10] # higher average demand vs lower average demand
-betas = [10, 1] # lower variance vs higher variance
+# mean_demands =[20, 10] # higher average demand vs lower average demand
+# betas = [10, 1] # lower variance vs higher variance
+
 
 # detailed samples in each period
 trunQuantile = 0.9999 # affective to the final ordering quantity
-sample_details1 = [[0 for i in range(sample_num_1product)] for t in range(T)]
-sample_details2 = [[0 for i in range(sample_num_1product)] for t in range(T)]
+sample_details1 = [[0 for i in range(sample_num)] for t in range(T)]
+sample_details2 = [[0 for i in range(sample_num)] for t in range(T)]
 for t in range(T):
-    # sample_details1[t] = generate_gamma_sample(sample_num, trunQuantile, mean_demands[0], betas[0])
-    # sample_details2[t] = generate_gamma_sample(sample_num, trunQuantile, mean_demands[1], betas[1])
-    sample_details1[t] = generate_sample(sample_num_1product, trunQuantile, mean_demands[0])
-    sample_details2[t] = generate_sample(sample_num_1product, trunQuantile, mean_demands[1])
+    # sample_details1[t] = generate_sample_gamma(sample_num, trunQuantile, mean_demands[0], betas[0])
+    # sample_details2[t] = generate_sample_gamma(sample_num, trunQuantile, mean_demands[1], betas[1])
+    # sample_details1[t] = generate_samples(sample_num, trunQuantile, mean_demands[0])
+    # sample_details2[t] = generate_samples(sample_num, trunQuantile, mean_demands[1])
+    sample_details1[t] = generate_samples_normal(sample_num, trunQuantile, mean_demands1[t], sigmas1[t])
+    sample_details2[t] = generate_samples_normal(sample_num, trunQuantile, mean_demands2[t], sigmas2[t])
 
 # sample_details1 = [[10, 30], [10, 30], [10, 30]] # change 2
 # sample_details2 = [[5, 15], [5, 15], [5, 15]]
+
 
 theta_iniValue = -1000 # initial theta values (profit) in each period
 m = Model() # linear model in the first stage
@@ -135,8 +164,8 @@ m.addConstr(-vari_costs[0]*q1 - vari_costs[1]*q2- W0 + W1 + W2 == overhead_cost[
 
 
 # cuts recording arrays
-iter_num = 45
-time_limit = 3600
+iter_limit = 15
+time_limit = 360
 N = 5 # sampled number of scenarios in forward computing, change 3
 slope_stage1_1 = []
 slope_stage1_2 = []
@@ -158,7 +187,7 @@ iter = 0
 time_pass = 0
 start = time.process_time()
 # while iter < iter_num:  
-while time_pass < time_limit: 
+while iter < iter_limit: # time_pass < time_limit:   # or
     slopes1.append([[[0 for m in range(MM)] for n in range(N)] for t in range(T)])
     slopes2.append([[0 for n in range(N)] for t in range(T)])
     slopes3.append([[[0 for m in range(MM)] for n in range(N)] for t in range(T)])
@@ -167,12 +196,12 @@ while time_pass < time_limit:
     qpre1_values.append([[0 for n in range(N)] for t in range(T)]) 
     q2_values.append([[0 for n in range(N)] for t in range(T)]) 
     qpre2_values.append([[0 for n in range(N)] for t in range(T)]) 
-    
+     
     # sample_scenarios1 = generate_scenario_samples_gamma(N, trunQuantile, mean_demands[0], betas[0], T)
     # sample_scenarios2 = generate_scenario_samples_gamma(N, trunQuantile, mean_demands[1], betas[1], T)
     
-    sample_scenarios1 = generate_scenario_samples_poisson(N, trunQuantile, mean_demands[0], T)
-    sample_scenarios2 = generate_scenario_samples_poisson(N, trunQuantile, mean_demands[1], T)
+    sample_scenarios1 = generate_scenarios(N, sample_num, sample_details1)
+    sample_scenarios2 = generate_scenarios(N, sample_num, sample_details2)
      
     # sample_scenarios1 = [[10, 10, 10], [10,10, 30], [10, 30, 10], [10,30, 30],[30,10,10],[30,10,30],[30,30,10],[30,30,30]] # change 4
     # sample_scenarios2 = [[5, 5, 5], [5, 5, 15], [5, 15, 5], [5,15,15],[15,5,5], [15,5, 15], [15,15,5], [15,15,15]]
@@ -198,6 +227,12 @@ while time_pass < time_limit:
     W1_values.append(W1.x)
     W2_values.append(W2.x)
     z = m.objVal
+    z_values = [[ 0 for t in range(T+1)] for n in range(N)] # for computing the feasible cost
+    for n in range(N):
+        z_values[n][0] = m.objVal - theta.x
+    
+    if iter == 14 and t == 0:
+        pass
     
     m_forward = [[Model() for n in range(N)] for t in range(T)]
     q1_forward = [[m_forward[t][n].addVar(vtype = GRB.CONTINUOUS, name = 'q1_' + str(t+2) + '^' + str(n+1)) for n in range(N)]  for t in range(T - 1)]
@@ -286,6 +321,15 @@ while time_pass < time_limit:
             B2_forward_values[t][n] = B2_forward[t][n].x 
             cash_forward_values[t][n] = cash_forward[t][n].x 
         
+            if t < T - 1: # for computing confidence interval
+                z_values[n][t+1] = -m_forward[t][n].objVal + theta_forward[t][n].x
+            else:
+                z_values[n][t+1] = -m_forward[t][n].objVal
+                
+                
+            if iter == 14 and t == 0:
+                pass
+            
             if t < T - 1:
                 q1_values[iter][t+1][n] = q1_forward[t][n].x
                 q2_values[iter][t+1][n] = q2_forward[t][n].x
@@ -432,3 +476,7 @@ print('final expected total profits after %d iteration is %.2f' % (iter, -z))
 print('ordering Q1 and Q2 in the first peiod is %.2f and %.2f' % (q1_values[iter-1][0][0], q2_values[iter-1][0][0]))
 cpu_time = end - start
 print('cpu time is %.3f s' % cpu_time) 
+lb = np.mean(z_values)
+print('expected lower bound is %.2f' % lb)
+gap = 100*abs((-lb+z)/lb)
+print('gap is %.2f%% s' % (100*gap))  

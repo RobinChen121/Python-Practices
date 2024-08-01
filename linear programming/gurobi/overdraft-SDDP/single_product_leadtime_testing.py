@@ -80,7 +80,7 @@ import numpy as np
 import os
 import sys 
 sys.path.append("..") 
-from tree import generate_sample, generate_scenario_samples, compute_ub
+from tree import *
 from write_to_file import write_to_csv
 
 
@@ -130,7 +130,7 @@ for stationary, iter_limit, realization_num, N in grids:
         # detailed samples in each period
         sample_detail = [[0 for i in range(sample_nums[t])] for t in range(T)] 
         for t in range(T):
-            sample_detail[t] = generate_sample(sample_nums[t], trunQuantile, mean_demands[t])
+            sample_detail[t] = generate_samples(sample_nums[t], trunQuantile, mean_demands[t])
         # sample_detail = [[5, 15], [5, 15], [5, 15]]
         scenarios_full = list(itertools.product(*sample_detail)) 
         
@@ -177,7 +177,8 @@ for stationary, iter_limit, realization_num, N in grids:
             
             # sample a numer of scenarios from the full scenario tree
             # random.seed(10000)
-            sample_scenarios = generate_scenario_samples(N, trunQuantile, mean_demands)
+            # sample_scenarios = generate_scenario2(N, trunQuantile, mean_demands)
+            sample_scenarios = generate_scenarios(N, realization_num, sample_detail)
             # sample_scenarios = [[5, 5, 5], [5, 5, 15], [5, 15, 5], [15,5,5], [15,15,5], [15,5, 15], [5,15,15],[15,15,15]]
             sample_scenarios.sort() # sort to make same numbers together
             
