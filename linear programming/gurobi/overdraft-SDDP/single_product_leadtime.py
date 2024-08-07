@@ -70,6 +70,8 @@ mean_demands = [15, 15, 15, 15]
 SDP optimal result is 167.31, java running time is 39s;
 for 4 periods [10, 20, 10, 20], solution 215.48, python running more than 4 hours and can't get a solution, while java 31s; 
 
+the lower and upper bound seems to be affected by the iter limit or scenario number much;
+
 """
 
 from gurobipy import *
@@ -103,13 +105,13 @@ else:
  
 sample_num = 10 # change 1
 sample_nums = [sample_num for t in range(T)] 
-overhead_cost = [100 for t in range(T)]
+overhead_cost = [50 for t in range(T)]
 
 r0 = 0
 r1 = 0.1
 r2 = 2 # penalty interest rate for overdraft exceeding the limit
 U = 500 # overdraft limit
-iter_limit = 20
+iter_limit = 30
 time_limit = 120 # time limit
 N = 10 # sampled number of scenarios for forward computing    # change 2
 cut_select_num = N
@@ -164,9 +166,7 @@ while iter < iter_limit:
     slopes3.append([[0 for n in range(N)] for t in range(T)])
     intercepts.append([[0 for n in range(N)] for t in range(T-1)])
     q_values.append([[0 for n in range(N)] for t in range(T)])
-    qpre_values.append([[0 for n in range(N)] for t in range(T)])
-    
-    # z_values = [[0 for t in range(T)] for n in range(N)] # for compute confidence interval
+    qpre_values.append([[0 for n in range(N)] for t in range(T)])   
     
     # sample a numer of scenarios from the full scenario tree
     #  random.seed(10000)
@@ -193,6 +193,9 @@ while iter < iter_limit:
     W2_values.append(W2.x)
     theta_value = theta.x
     z = m.objVal    
+    z_values = [[0 for t in range(T+1)] for n in range(N)] # for computing confidence interval
+    for n in range(N):
+        z_values[n][0] = m.objVal - theta.x
     
     m_forward = [[Model() for n in range(N)] for t in range(T)]
     q_forward = [[m_forward[t][n].addVar(vtype = GRB.CONTINUOUS, name = 'q_' + str(t+2) + '^' + str(n+1)) for n in range(N)]  for t in range(T - 1)]
@@ -262,10 +265,10 @@ while iter < iter_limit:
             m_forward[t][n].optimize()
             I_forward_values[t][n] = I_forward[t][n].x 
             
-            # if t < T - 1: # for computing cnofidence interval
-            #     z_values[n][t] = -m_forward[t][n].objVal + theta_forward[t][n].x
-            # else:
-            #     z_values[n][t] = -m_forward[t][n].objVal
+            if t < T - 1: # for computing cnofidence interval
+                z_values[n][t+1] = m_forward[t][n].objVal - theta_forward[t][n].x
+            else:
+                z_values[n][t+1] = m_forward[t][n].objVal
                            
             B_forward_values[t][n] = B_forward[t][n].x  
             cash_forward_values[t][n] = cash_forward[t][n].x 
@@ -400,7 +403,7 @@ while iter < iter_limit:
              
              
                 
-    # z_lb, z_ub = compute_ub(z_values) # for computing confidence interval
+    z_lb, z_ub, z_mean = compute_ub(z_values) # for computing confidence interval
     # if -z <= z_ub and -z >= z_lb:
     #     print('********************************************')
     #     print('iteration ends in iter + 1 = %d' % iter)
@@ -412,9 +415,16 @@ while iter < iter_limit:
 print('********************************************')
 final_value = -z
 Q1 = q_values[iter-1][0][0]
+print('after %d iteration: ' % iter)
 print('final expected total costs is %.2f' % final_value)
 print('ordering Q in the first peiod is %.2f' % Q1)
-print('cpu time is %.3f s and iter number is %d' % (cpu_time, iter))        
+print('cpu time is %.3f s' % cpu_time)        
 gap = (-opt + final_value)/opt               
 print('optimaility gap is %.2f%% s' % (100*gap))  
+z_lb, z_ub, z_mean = compute_ub(z_values) # for computing confidence interval
+lb = -np.mean(np.sum(z_values, axis=1))
+print('expected lower bound gap is %.2f' % lb)  
+gap2 = abs((z+lb)/z)
+print('lower bound and upper bound gap is %.2f%%' % (100*gap2))  
+print('confidence interval for expected objective is [%.2f,  %.2f]' % (-z_ub, -z_lb))  
         

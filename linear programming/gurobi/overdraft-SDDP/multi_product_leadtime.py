@@ -39,7 +39,7 @@ cpu time is 25.773 s;
 T=2
 final expected total costs is 13.70
 ordering Q1 and Q2 in the first peiod is 26.00 and 13.00
-cpu time is 128.765 s
+cpu time is 128.765 s;
 
 T=3
 final expected total costs is 158.19
@@ -83,6 +83,139 @@ final expected total profits after 501 iteration is 517.61
 ordering Q1 and Q2 in the first peiod is 29.01 and 34.01
 cpu time is 3601.459 s;
 
+the lower and upper bound seems to be affected by the iter limit or scenario number much;
+
+when overhead is 0, T=2;
+SDP is 142.6, Q1=21, Q2=13;
+final expected total profits after 50 iteration is 143.99
+ordering Q1 and Q2 in the first peiod is 19.78 and 12.78
+cpu time is 213.701 s;
+
+when overhead is 50, T=2;
+SDP is 27.10, Q1=21, Q2=13;
+
+********************
+gamma demands:
+mean_demands1 =[30, 30, 30, 30, 30, 30] # higher average demand vs lower average demand
+mean_demands2 = [i*0.5 for i in mean_demands1] # higher average demand vs lower average demand
+betas = [2, 0.25] # lower variance vs higher variance
+
+sample numer is 5 and scenario number is 5 
+planning horizon length is 6 
+final expected total profits after 50 iteration is 474.60
+ordering Q1 and Q2 in the first peiod is 33.01 and 33.05
+cpu time is 40.683 s;
+
+sample numer is 10 and scenario number is 10 
+planning horizon length is 6 
+final expected total profits after 50 iteration is 513.44
+ordering Q1 and Q2 in the first peiod is 30.23 and 21.28
+cpu time is 276.867 s
+expected lower bound gap is 1207.21
+lower bound and upper bound gap is 135.12%
+confidence interval for expected objective is [1129.20,  1285.21];
+
+sample numer is 10 and scenario number is 10 
+planning horizon length is 5 
+final expected total profits after 50 iteration is 333.62
+ordering Q1 and Q2 in the first peiod is 30.37 and 38.48
+cpu time is 219.795 s;
+
+********************************************
+normal demand:
+sample numer is 10 and scenario number is 10 
+planning horizon length is T=5 
+final expected total profits after 50 iteration is 366.94
+ordering Q1 and Q2 in the first peiod is 31.95 and 26.77
+cpu time is 219.402 s;
+
+
+sample numer is 10 and scenario number is 10 
+planning horizon length is T = 3 
+final expected total profits after 50 iteration is 32.06
+ordering Q1 and Q2 in the first peiod is 27.39 and 28.85
+cpu time is 110.085 s;
+sample numer is 10 and scenario number is 10 
+planning horizon length is T = 3 
+final expected total profits after 50 iteration is 73.02
+ordering Q1 and Q2 in the first peiod is 25.20 and 25.47
+cpu time is 108.626 s;
+sample numer is 10 and scenario number is 10 
+planning horizon length is T = 3 
+final expected total profits after 50 iteration is 37.19
+ordering Q1 and Q2 in the first peiod is 29.38 and 24.93
+cpu time is 110.422 s;
+
+sample numer is 5 and scenario number is 5 
+planning horizon length is T = 3 
+final expected total profits after 50 iteration is 49.98
+ordering Q1 and Q2 in the first peiod is 27.49 and 22.97
+cpu time is 15.882 s;
+sample numer is 5 and scenario number is 5 
+planning horizon length is T = 3 
+final expected total profits after 500 iteration is 74.65
+ordering Q1 and Q2 in the first peiod is 27.79 and 27.81
+cpu time is 1445.968 s
+********************************************
+Poisson demand: may be fluctuation too large
+sample numer is 5 and scenario number is 5 
+planning horizon length is T = 3 
+final expected total profits after 50 iteration is 45.38
+ordering Q1 and Q2 in the first peiod is 25.00 and 19.00
+cpu time is 15.544 s;
+sample numer is 5 and scenario number is 5 
+planning horizon length is T = 3 
+final expected total profits after 100 iteration is 51.49
+ordering Q1 and Q2 in the first peiod is 25.00 and 21.00
+cpu time is 59.661 s;
+sample numer is 5 and scenario number is 5 
+planning horizon length is T = 3 
+final expected total profits after 150 iteration is 60.19
+ordering Q1 and Q2 in the first peiod is 25.00 and 19.00
+cpu time is 131.791 s;
+
+sample numer is 10 and scenario number is 10 
+planning horizon length is T = 3 
+final expected total profits after 50 iteration is 50.55
+ordering Q1 and Q2 in the first peiod is 23.00 and 26.00
+cpu time is 107.576 s;
+sample numer is 10 and scenario number is 10 
+planning horizon length is T = 3 
+final expected total profits after 50 iteration is 33.62
+ordering Q1 and Q2 in the first peiod is 21.00 and 23.00
+cpu time is 109.493 s;
+sample numer is 10 and scenario number is 10 
+planning horizon length is T = 3 
+final expected total profits after 50 iteration is 37.12
+ordering Q1 and Q2 in the first peiod is 22.00 and 21.00
+cpu time is 107.519 s;
+sample numer is 10 and scenario number is 10 
+planning horizon length is T = 3 
+final expected total profits after 50 iteration is 10.76
+ordering Q1 and Q2 in the first peiod is 18.00 and 24.00
+cpu time is 110.511 s;
+
+
+********************
+self defined discrete distribution:
+
+mean_demands1 =[30, 30, 30] # higher average demand vs lower average demand
+mean_demands2 = [i*0.5 for i in mean_demands1] # higher average demand vs lower average demand
+pk1 = [0.25, 0.5, 0.25]
+pk2= pk1
+xk1 = [mean_demands1[0]-10, mean_demands1[0], mean_demands1[0]+10]
+xk2 = [mean_demands2[0]-5, mean_demands2[0], mean_demands2[0]+5]
+ini_Is = [0, 0]
+ini_cash = 0
+vari_costs = [1, 2]
+prices = [5, 10] # lower margin vs higher margin
+MM = len(prices)
+unit_salvages = [0.5* vari_costs[m] for m in range(MM)]
+overhead_cost = [100 for t in range(T)]
+
+SDP: final optimal cash  is 91.26875
+optimal order quantity in the first priod is :  Q1 = 40, Q2 = 20
+
 """
 
 from gurobipy import *
@@ -98,15 +231,26 @@ from tree import *
     
 
 
-
-mean_demands1 =[20, 20, 20] # higher average demand vs lower average demand
+# for gamma demand
+# gamma distribution:mean demand is shape / beta and variance is shape / beta^2
+# beta = 1 / scale
+# shape = demand * beta
+# variance = demand / beta
+mean_demands1 =[30, 30, 30] # higher average demand vs lower average demand
 mean_demands2 = [i*0.5 for i in mean_demands1] # higher average demand vs lower average demand
+# betas = [2, 0.25] # lower variance vs higher variance
+# T = len(mean_demands1)
+
+pk1 = [0.25, 0.5, 0.25]
+pk2= pk1
+xk1 = [mean_demands1[0]-10, mean_demands1[0], mean_demands1[0]+10]
+xk2 = [mean_demands2[0]-5, mean_demands2[0], mean_demands2[0]+5]
+
 cov1 = 0.25 # lower variance vs higher variance
 cov2 = 0.5
 sigmas1 = [cov1*i for i in mean_demands1]
 sigmas2 = [cov2*i for i in mean_demands2]
 T = len(mean_demands1)
-
 
 ini_Is = [0, 0]
 ini_cash = 0
@@ -114,7 +258,7 @@ vari_costs = [1, 2]
 prices = [5, 10] # lower margin vs higher margin
 MM = len(prices)
 unit_salvages = [0.5* vari_costs[m] for m in range(MM)]
-overhead_cost = [100 for t in range(T)]
+overhead_cost = [0 for t in range(T)]
 
 r0 = 0  # when it is 0.01, can largely slow the compuational speed
 r1 = 0.1
@@ -123,12 +267,14 @@ U = 500 # overdraft limit
 
 sample_num = 5 # change 1
 
+
+# for gamma demand
 # gamma distribution:mean demand is shape / beta and variance is shape / beta^2
 # beta = 1 / scale
 # shape = demand * beta
 # variance = demand / beta
-# mean_demands =[20, 10] # higher average demand vs lower average demand
-# betas = [10, 1] # lower variance vs higher variance
+# mean_demands =[30, 15] # higher average demand vs lower average demand
+# betas = [2, 0.25] # lower variance vs higher variance
 
 
 # detailed samples in each period
@@ -136,12 +282,14 @@ trunQuantile = 0.9999 # affective to the final ordering quantity
 sample_details1 = [[0 for i in range(sample_num)] for t in range(T)]
 sample_details2 = [[0 for i in range(sample_num)] for t in range(T)]
 for t in range(T):
-    # sample_details1[t] = generate_sample_gamma(sample_num, trunQuantile, mean_demands[0], betas[0])
-    # sample_details2[t] = generate_sample_gamma(sample_num, trunQuantile, mean_demands[1], betas[1])
-    # sample_details1[t] = generate_samples(sample_num, trunQuantile, mean_demands[0])
-    # sample_details2[t] = generate_samples(sample_num, trunQuantile, mean_demands[1])
-    sample_details1[t] = generate_samples_normal(sample_num, trunQuantile, mean_demands1[t], sigmas1[t])
-    sample_details2[t] = generate_samples_normal(sample_num, trunQuantile, mean_demands2[t], sigmas2[t])
+    # sample_details1[t] = generate_samples_gamma(sample_num, trunQuantile, mean_demands1[t], betas[0])
+    # sample_details2[t] = generate_samples_gamma(sample_num, trunQuantile, mean_demands2[t], betas[1])
+    # sample_details1[t] = generate_samples(sample_num, trunQuantile, mean_demands1[t])
+    # sample_details2[t] = generate_samples(sample_num, trunQuantile, mean_demands2[t])
+    # sample_details1[t] = generate_samples_normal(sample_num, trunQuantile, mean_demands1[t], sigmas1[t])
+    # sample_details2[t] = generate_samples_normal(sample_num, trunQuantile, mean_demands2[t], sigmas2[t])
+    sample_details1[t] = generate_samples_discrete(sample_num, xk1, pk1)
+    sample_details2[t] = generate_samples_discrete(sample_num, xk2, pk2)
 
 # sample_details1 = [[10, 30], [10, 30], [10, 30]] # change 2
 # sample_details2 = [[5, 15], [5, 15], [5, 15]]
@@ -164,7 +312,7 @@ m.addConstr(-vari_costs[0]*q1 - vari_costs[1]*q2- W0 + W1 + W2 == overhead_cost[
 
 
 # cuts recording arrays
-iter_limit = 15
+iter_limit = 50
 time_limit = 360
 N = 5 # sampled number of scenarios in forward computing, change 3
 slope_stage1_1 = []
@@ -200,8 +348,11 @@ while iter < iter_limit: # time_pass < time_limit:   # or
     # sample_scenarios1 = generate_scenario_samples_gamma(N, trunQuantile, mean_demands[0], betas[0], T)
     # sample_scenarios2 = generate_scenario_samples_gamma(N, trunQuantile, mean_demands[1], betas[1], T)
     
-    sample_scenarios1 = generate_scenarios(N, sample_num, sample_details1)
-    sample_scenarios2 = generate_scenarios(N, sample_num, sample_details2)
+    # sample_scenarios1 = generate_scenarios(N, sample_num, sample_details1)
+    # sample_scenarios2 = generate_scenarios(N, sample_num, sample_details2)
+    
+    sample_scenarios1 = generate_scenarios3(N, xk1, pk1, T)
+    sample_scenarios2 = generate_scenarios3(N, xk2, pk2, T)
      
     # sample_scenarios1 = [[10, 10, 10], [10,10, 30], [10, 30, 10], [10,30, 30],[30,10,10],[30,10,30],[30,30,10],[30,30,30]] # change 4
     # sample_scenarios2 = [[5, 5, 5], [5, 5, 15], [5, 15, 5], [5,15,15],[15,5,5], [15,5, 15], [15,15,5], [15,15,15]]
@@ -231,8 +382,6 @@ while iter < iter_limit: # time_pass < time_limit:   # or
     for n in range(N):
         z_values[n][0] = m.objVal - theta.x
     
-    if iter == 14 and t == 0:
-        pass
     
     m_forward = [[Model() for n in range(N)] for t in range(T)]
     q1_forward = [[m_forward[t][n].addVar(vtype = GRB.CONTINUOUS, name = 'q1_' + str(t+2) + '^' + str(n+1)) for n in range(N)]  for t in range(T - 1)]
@@ -285,7 +434,7 @@ while iter < iter_limit: # time_pass < time_limit:   # or
                 m_forward[t][n].setObjective(-prices[0]*(demand1 - B1_forward[t][n])-prices[1]*(demand2 - B2_forward[t][n])\
                                              - unit_salvages[0]*I1_forward[t][n]- unit_salvages[1]*I2_forward[t][n], GRB.MINIMIZE)
             else:
-                m_forward[t][n].setObjective( - overhead_cost[t] + vari_costs[0]*q1_forward[t][n] + vari_costs[1]*q2_forward[t][n]\
+                m_forward[t][n].setObjective(overhead_cost[t] + vari_costs[0]*q1_forward[t][n] + vari_costs[1]*q2_forward[t][n]\
                                              - prices[0]*(demand1 - B1_forward[t][n]) - prices[1]*(demand2 - B2_forward[t][n])\
                                              + r2*W2_forward[t][n]\
                                              + r1*W1_forward[t][n] - r0*W0_forward[t][n] + theta_forward[t][n], GRB.MINIMIZE)  
@@ -322,13 +471,11 @@ while iter < iter_limit: # time_pass < time_limit:   # or
             cash_forward_values[t][n] = cash_forward[t][n].x 
         
             if t < T - 1: # for computing confidence interval
-                z_values[n][t+1] = -m_forward[t][n].objVal + theta_forward[t][n].x
+                z_values[n][t+1] = m_forward[t][n].objVal - theta_forward[t][n].x
             else:
-                z_values[n][t+1] = -m_forward[t][n].objVal
+                z_values[n][t+1] = m_forward[t][n].objVal
                 
                 
-            if iter == 14 and t == 0:
-                pass
             
             if t < T - 1:
                 q1_values[iter][t+1][n] = q1_forward[t][n].x
@@ -472,11 +619,16 @@ while iter < iter_limit: # time_pass < time_limit:   # or
 
 end = time.process_time()
 print('********************************************')
+print('no enhancement')
+print('sample numer is %d and scenario number is %d ' % (sample_num, N))
+print('planning horizon length is T = %d ' % T)
 print('final expected total profits after %d iteration is %.2f' % (iter, -z))
 print('ordering Q1 and Q2 in the first peiod is %.2f and %.2f' % (q1_values[iter-1][0][0], q2_values[iter-1][0][0]))
 cpu_time = end - start
 print('cpu time is %.3f s' % cpu_time) 
-lb = np.mean(z_values)
-print('expected lower bound is %.2f' % lb)
-gap = 100*abs((-lb+z)/lb)
-print('gap is %.2f%% s' % (100*gap))  
+z_lb, z_ub, z_mean = compute_ub(z_values) # for computing confidence interval
+lb = -np.mean(np.sum(z_values, axis=1))
+print('expected lower bound gap is %.2f' % lb)  
+gap2 = abs((z+lb)/z)
+print('lower bound and upper bound gap is %.2f%%' % (100*gap2))  
+print('confidence interval for expected objective is [%.2f,  %.2f]' % (-z_ub, -z_lb))  

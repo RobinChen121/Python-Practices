@@ -44,9 +44,20 @@ def generate_samples_normal(sample_num, trunQuantile, mean, sigma):
     for i in range(sample_num):
         # np.random.seed(10000)
         rand_p = np.random.uniform(trunQuantile*i/sample_num, trunQuantile*(i+1)/sample_num)
-        samples[i] = round(st.norm.ppf(rand_p, loc = mean, scale = sigma))
+        samples[i] = st.norm.ppf(rand_p, loc = mean, scale = sigma)
     random.shuffle(samples)
     return samples
+
+def generate_samples_discrete(sample_num, xk, pk):
+    samples = [0 for i in range(sample_num)]
+    for i in range(sample_num):
+        # np.random.seed(10000)
+        rand_p = np.random.uniform(i/sample_num, (i+1)/sample_num)
+        dist = st.rv_discrete(values=(xk, pk))
+        samples[i] = dist.ppf(rand_p)
+    random.shuffle(samples)
+    return samples
+
 
 # get the number of elements in a list of lists
 def getSizeOfNestedList(listOfElem):
@@ -76,6 +87,7 @@ def generate_scenarios(scenario_num, sample_num, sample_details):
             
     return scenarios
 
+
 def generate_scenarios2(scenario_num, trunQuantile, mus):
     T = len(mus)
     samples = [[0 for t in range(T)] for i in range(scenario_num)]
@@ -86,6 +98,17 @@ def generate_scenarios2(scenario_num, trunQuantile, mus):
             samples[i][t] = st.poisson.ppf(rand_p, mus[t])
         # random.shuffle(samples[i])
             
+    return samples
+
+def generate_scenarios3(sample_num, xk, pk, T):
+    samples = [[0 for t in range(T)] for i in range(sample_num)]
+    for i in range(sample_num):
+        # np.random.seed(10000)
+        for t in range(T):
+            rand_p = np.random.uniform(i/sample_num, (i+1)/sample_num)
+            dist = st.rv_discrete(values=(xk, pk))
+            samples[i][t] = dist.ppf(rand_p)
+        random.shuffle(samples[i])
     return samples
 
 def generate_scenarios_gamma(sample_num, trunQuantile, mean, beta, T):
@@ -156,7 +179,7 @@ def compute_ub(twoDArray):
     z_std = np.std(z_sub_values, ddof = 1)
     z_ub = z_mean + 1.96*z_std/np.sqrt(N)
     z_lb = z_mean - 1.96*z_std/np.sqrt(N)
-    return [z_lb, z_ub]
+    return [z_lb, z_ub, z_mean]
 
 mean_demand = 10
 beta = 1
