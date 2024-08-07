@@ -171,7 +171,7 @@ m.addConstr(-vari_costs[0]*q1 - vari_costs[1]*q2- W0 + W1 + W2 == overhead_cost[
 
 
 # cuts recording arrays
-iter_num = 100
+iter_num = 500
 time_limit = 1800
 N = 5 # sampled number of scenarios in forward computing, change 3
 slope_stage1_1 = []
