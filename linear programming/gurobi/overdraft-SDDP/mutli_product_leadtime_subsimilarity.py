@@ -6,100 +6,8 @@ Created on Thu Jun 20 12:44:26 2024
 @author: zhenchen
 
 @disp:  leverage sub problems similarity to speed up the compuatation.
-    
-    
-    
-T=3   
-final expected total profits after 25 iteration is 151.49
-ordering Q1 and Q2 in the first peiod is 46.99 and 15.60
-cpu time is 154.248 s;
 
-T=4
-(N = 5, demand realization number = 5)
-final expected total profits after 110 iteration is 282.25
-ordering Q1 and Q2 in the first peiod is 28.32 and 14.05
-cpu time is 60.591 s
-
-T=5
-final expected total profits after 263 iteration is 471.20
-ordering Q1 and Q2 in the first peiod is 30.88 and 20.32
-cpu time is 400.828 s
-
-T=6
-(N = 5, demand realization number = 5)
-final expected total profits after 236 iteration is 606.21
-ordering Q1 and Q2 in the first peiod is 24.73 and 15.78
-cpu time is 1204.530 s;
-
-final expected total profits after 409 iteration is 610.13
-ordering Q1 and Q2 in the first peiod is 30.94 and 17.62
-cpu time is 1201.105 s
-
-(N = 10, demand realization number = 10)
-final expected total profits after 219 iteration is 612.62
-ordering Q1 and Q2 in the first peiod is 29.56 and 15.18
-cpu time is 1800.206 s
-
-
-
-
-********************
-gamma demands: for 6 periods, some times may need long time limit to get a good solution;
-mean_demands1 =[30, 30, 30, 30, 30, 30] # higher average demand vs lower average demand
-mean_demands2 = [i*0.5 for i in mean_demands1] # higher average demand vs lower average demand
-betas = [2, 0.25] # lower variance vs higher variance
-
-sample numer is 10 and scenario number is 10 
-planning horizon length is 5 
-final expected total profits after 50 iteration is 307.00
-ordering Q1 and Q2 in the first peiod is 27.96 and 40.12
-cpu time is 61.573 s;
-
-********************************************
-normal demand:
-leverage similarity enhancement
-sample numer is 10 and scenario number is 10 
-planning horizon length is 3 
-final expected total profits after 50 iteration is 53.42
-ordering Q1 and Q2 in the first peiod is 21.13 and 26.70
-cpu time is 22.820 s;
-
-leverage similarity enhancement
-sample numer is 5 and scenario number is 5 
-planning horizon length is 3 
-final expected total profits after 500 iteration is 126.69
-ordering Q1 and Q2 in the first peiod is 42.51 and 25.03
-cpu time is 492.213 s;
-leverage similarity enhancement
-sample numer is 5 and scenario number is 5 
-planning horizon length is 3 
-final expected total profits after 500 iteration is 78.66
-ordering Q1 and Q2 in the first peiod is 23.82 and 36.57
-cpu time is 496.426 s;
-    
-"""
-
-from gurobipy import *
-import itertools
-import random
-import time
-import numpy as np
-
-import sys 
-sys.path.append("..") 
-from tree import *
-
-    
-# for gamma demand
-# gamma distribution:mean demand is shape / beta and variance is shape / beta^2
-# beta = 1 / scale
-# shape = demand * beta
-# variance = demand / beta
-mean_demands1 =[30, 30, 30] # higher average demand vs lower average demand
-mean_demands2 = [i*0.5 for i in mean_demands1] # higher average demand vs lower average demand
-# betas = [2, 0.25] # lower variance vs higher variance
-# T = len(mean_demands1)
-
+6 periods requier long time to converge;
 
 pk1 = [0.25, 0.5, 0.25]
 pk2= pk1
@@ -119,14 +27,118 @@ vari_costs = [1, 2]
 prices = [5, 10] # lower margin vs higher margin
 MM = len(prices)
 unit_salvages = [0.5* vari_costs[m] for m in range(MM)]
-overhead_cost = [50 for t in range(T)]
+overhead_cost = [100 for t in range(T)]
+
+
+    
+leverage similarity enhancement
+sample numer is 5 and scenario number is 5 
+planning horizon length is 3 
+final expected total profits after 500 iteration is 118.21
+ordering Q1 and Q2 in the first peiod is 33.81 and 32.60
+cpu time is 531.655 s
+expected lower bound gap is 74.55
+lower bound and upper bound gap is 36.93%
+confidence interval for expected objective is [-3.75,  152.85];    
+
+*******************************************
+demand_pattern = 2
+leverage similarity enhancement
+sample numer is 10 and scenario number is 5 
+planning horizon length is 3 
+final expected total profits after 120 iteration is 377.61
+ordering Q1 and Q2 in the first peiod is 78.04 and 43.36
+cpu time is 44.833 s
+expected lower bound gap is 280.72
+lower bound and upper bound gap is 25.66%
+confidence interval for expected objective is [66.14,  495.30];
+
+leverage similarity enhancement
+sample numer is 10 and scenario number is 5 
+planning horizon length is 4 
+final expected total profits after 120 iteration is 541.83
+ordering Q1 and Q2 in the first peiod is 53.48 and 44.48
+cpu time is 58.867 s
+expected lower bound gap is 328.72
+lower bound and upper bound gap is 39.33%
+confidence interval for expected objective is [3.66,  653.77];
+
+leverage similarity enhancement
+sample numer is 10 and scenario number is 5 
+planning horizon length is 5 
+final expected total profits after 200 iteration is 511.56
+ordering Q1 and Q2 in the first peiod is 47.62 and 41.38
+cpu time is 229.958 s
+expected lower bound gap is 345.20
+lower bound and upper bound gap is 32.52%
+confidence interval for expected objective is [22.09,  668.32];
+
+
+    
+"""
+
+from gurobipy import *
+import itertools
+import random
+import time
+import numpy as np
+
+import sys 
+sys.path.append("..") 
+from tree import *
+
+    
+# for gamma demand
+# gamma distribution:mean demand is shape / beta and variance is shape / beta^2
+# beta = 1 / scale
+# shape = demand * beta
+# variance = demand / beta
+
+demands = [[30,	30,	30,	30,	30,	30],
+[50,46,	38,	28,	23,	18],
+[14,18,	23,	33,	42,	49],
+[47,30,	13,	30,	47,	54],
+[21,24,	39,	30,	24,	18],
+[63,10,	4,	33,	67,	14],					
+[15,140,147,74,	109,88],
+[14,71,	49,	152,78,	33],
+[13,35,	79,	43,	44,	59],
+[15,56,	19,	84,	136,67]]
+
+demand_pattern = 2
+
+mean_demands1 = demands[demand_pattern - 1][0:6] # higher average demand vs lower average demand
+mean_demands2 = [i*0.5 for i in mean_demands1] # higher average demand vs lower average demand
+# betas = [2, 0.25] # lower variance vs higher variance
+# T = len(mean_demands1)
+
+
+# pk1 = [0.25, 0.5, 0.25]
+# pk2= pk1
+# xk1 = [mean_demands1[0]-10, mean_demands1[0], mean_demands1[0]+10]
+# xk2 = [mean_demands2[0]-5, mean_demands2[0], mean_demands2[0]+5]
+
+
+cov1 = 0.25 # lower variance vs higher variance
+cov2 = 0.5
+sigmas1 = [cov1*i for i in mean_demands1]
+sigmas2 = [cov2*i for i in mean_demands2]
+T = len(mean_demands1)
+
+ini_Is = [0, 0]
+ini_cash = 0
+vari_costs = [1, 2]
+prices = [5, 10] # lower margin vs higher margin
+MM = len(prices)
+unit_salvages = [0.5* vari_costs[m] for m in range(MM)]
+overhead_cost = [100 for t in range(T)]
 
 r0 = 0  # when it is 0.01, can largely slow the compuational speed
 r1 = 0.1
 r2 = 2 # penalty interest rate for overdraft exceeding the limit, does not affect computation time
 U = 500 # overdraft limit
 
-sample_num = 5 # change 1
+sample_num = 10 # change 1
 
 # gamma distribution:mean demand is shape / beta and variance is shape / beta^2
 # beta = 1 / scale
@@ -144,10 +156,10 @@ for t in range(T):
     # sample_details2[t] = generate_samples_gamma(sample_num, trunQuantile, mean_demands2[t], betas[1])
     # sample_details1[t] = generate_samples(sample_num, trunQuantile, mean_demands[0])
     # sample_details2[t] = generate_samples(sample_num, trunQuantile, mean_demands[1])
-    # sample_details1[t] = generate_samples_normal(sample_num, trunQuantile, mean_demands1[t], sigmas1[t])
-    # sample_details2[t] = generate_samples_normal(sample_num, trunQuantile, mean_demands2[t], sigmas2[t])
-    sample_details1[t] = generate_samples_discrete(sample_num, xk1, pk1)
-    sample_details2[t] = generate_samples_discrete(sample_num, xk2, pk2)
+    sample_details1[t] = generate_samples_normal(sample_num, trunQuantile, mean_demands1[t], sigmas1[t])
+    sample_details2[t] = generate_samples_normal(sample_num, trunQuantile, mean_demands2[t], sigmas2[t])
+    # sample_details1[t] = generate_samples_discrete(sample_num, xk1, pk1)
+    # sample_details2[t] = generate_samples_discrete(sample_num, xk2, pk2)
 
 # sample_details1 = [[10, 30], [10, 30], [10, 30]] # change 2
 # sample_details2 = [[5, 15], [5, 15], [5, 15]]
@@ -168,11 +180,11 @@ m.addConstr(W1 <= U)
 # m.addConstr(q1 == 40)
 # m.addConstr(q2 == 20)
 m.addConstr(-vari_costs[0]*q1 - vari_costs[1]*q2- W0 + W1 + W2 == overhead_cost[0] - ini_cash)
-
+m.addConstr(q1 <= 100)
 
 # cuts recording arrays
-iter_num = 500
-time_limit = 1800
+iter_limit = 200
+time_limit = 3600
 N = 5 # sampled number of scenarios in forward computing, change 3
 slope_stage1_1 = []
 slope_stage1_2 = []
@@ -193,8 +205,8 @@ W2_values = []
 iter = 0
 time_pass = 0
 start = time.process_time()
-while iter < iter_num:  
-# while iter < iter_num or time_pass < time_limit:
+# while iter < iter_limit:  
+while iter < iter_limit and time_pass < time_limit:
     slopes1.append([[[0 for m in range(MM)] for n in range(N)] for t in range(T)])
     slopes2.append([[0 for n in range(N)] for t in range(T)])
     slopes3.append([[[0 for m in range(MM)] for n in range(N)] for t in range(T)])
@@ -204,14 +216,17 @@ while iter < iter_num:
     q2_values.append([[0 for n in range(N)] for t in range(T)]) 
     qpre2_values.append([[0 for n in range(N)] for t in range(T)]) 
     
-    # sample_scenarios1 = generate_scenario_samples_gamma(N, trunQuantile, mean_demands[0], betas[0], T)
-    # sample_scenarios2 = generate_scenario_samples_gamma(N, trunQuantile, mean_demands[1], betas[1], T)
+    # sample_scenarios1 = generate_scenarios_gamma(N, trunQuantile, mean_demands[0], betas[0], T)
+    # sample_scenarios2 = generate_scenarios_gamma(N, trunQuantile, mean_demands[1], betas[1], T)
     
     # sample_scenarios1 = generate_scenarios(N, sample_num, sample_details1)
     # sample_scenarios2 = generate_scenarios(N, sample_num, sample_details2)
     
-    sample_scenarios1 = generate_scenarios3(N, xk1, pk1, T)
-    sample_scenarios2 = generate_scenarios3(N, xk2, pk2, T)
+    # sample_scenarios1 = generate_scenarios_discrete(N, xk1, pk1, T)
+    # sample_scenarios2 = generate_scenarios_discrete(N, xk2, pk2, T)
+    
+    sample_scenarios1 = generate_scenarios_normal(N, trunQuantile, mean_demands1, sigmas1)
+    sample_scenarios2 = generate_scenarios_normal(N, trunQuantile, mean_demands2, sigmas2)
      
     # sample_scenarios1 = [[10, 10, 10], [10,10, 30], [10, 30, 10], [10,30, 30],[30,10,10],[30,10,30],[30,30,10],[30,30,30]] # change 4
     # sample_scenarios2 = [[5, 5, 5], [5, 5, 15], [5, 15, 5], [5,15,15],[15,5,5], [15,5, 15], [15,15,5], [15,15,15]]
@@ -619,3 +634,16 @@ print('expected lower bound gap is %.2f' % lb)
 gap2 = abs((z+lb)/z)
 print('lower bound and upper bound gap is %.2f%%' % (100*gap2))  
 print('confidence interval for expected objective is [%.2f,  %.2f]' % (-z_ub, -z_lb))  
+
+ci = (-z_ub, -z_lb)
+
+# headers = ['demand_pattern,', 'ini_cash', 'ini_inventorys', 'prices', 'unit_order_cost', 'unit_salvage_value', 'deposit_interest_rate', 'overdraft_interest_rate', 'penalty_interest_rate', 'overdraft_limit', 'overhead_costs', 'mean_demands1',\
+#            'mean_demands2', 'realization_num', 'scenario_forward_num', 'iter_limit', 'time_limit',  'time', 'iter', 'stop_condition', 'final_value', 'Q1', 'Q2', 'lower bound', 'confidence interval', 'gap']    
+# file_address = '/Users/zhenchen/Documents/Numerical-tests/overdraft/'
+# file_name = 'multiproduct_similarity_enhance_tests'
+# file_address_name = file_address + file_name + '.csv'
+# content = [demand_pattern, ini_cash, ini_Is, prices, vari_costs, unit_salvages, r0, r1, r2, U, overhead_cost, mean_demands1, mean_demands2,\
+#            sample_num, N, iter_limit, time_limit, cpu_time, iter, stop_condition, -z, Q1, Q2, lb, ci, gap2]
+# run = 0
+# first_write =  False if run > 0 else True
+# write_to_csv(file_address_name, headers, content, first_write)

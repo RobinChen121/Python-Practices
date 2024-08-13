@@ -88,7 +88,7 @@ def generate_scenarios(scenario_num, sample_num, sample_details):
     return scenarios
 
 
-def generate_scenarios2(scenario_num, trunQuantile, mus):
+def generate_scenarios_poisson(scenario_num, trunQuantile, mus):
     T = len(mus)
     samples = [[0 for t in range(T)] for i in range(scenario_num)]
     for i in range(scenario_num):
@@ -100,7 +100,8 @@ def generate_scenarios2(scenario_num, trunQuantile, mus):
             
     return samples
 
-def generate_scenarios3(sample_num, xk, pk, T):
+# for self defined discrete distribution
+def generate_scenarios_discrete(sample_num, xk, pk, T):
     samples = [[0 for t in range(T)] for i in range(sample_num)]
     for i in range(sample_num):
         # np.random.seed(10000)
@@ -121,7 +122,8 @@ def generate_scenarios_gamma(sample_num, trunQuantile, mean, beta, T):
         random.shuffle(samples[i])
     return samples
 
-def generate_scenarios_normal(sample_num, trunQuantile, means, sigmas, T):
+def generate_scenarios_normal(sample_num, trunQuantile, means, sigmas):
+    T = len(means)
     samples = [[0 for t in range(T)] for i in range(sample_num)]
     for i in range(sample_num):
         # np.random.seed(10000)
