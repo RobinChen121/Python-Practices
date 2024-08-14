@@ -74,7 +74,7 @@ demands = [[30,	30,	30,	30,	30,	30],
 [13,35,	79,	43,	44,	59],
 [15,56,	19,	84,	136,67]]
 
-demand_pattern = 3
+demand_pattern = 7
 
 mean_demands1 = demands[demand_pattern - 1] # higher average demand vs lower average demand
 mean_demands2 = [i*0.5 for i in mean_demands1] # higher average demand vs lower average demand
@@ -464,6 +464,7 @@ while iter < iter_limit or time_pass < time_limit:   # and
 end = time.process_time()
 print('********************************************')
 print('no enhancement')
+print('demand pattern is %d' % demand_pattern)
 print('sample numer is %d and scenario number is %d ' % (sample_num, N))
 print('planning horizon length is T = %d ' % T)
 print('final expected total profits after %d iteration is %.2f' % (iter, -z))
