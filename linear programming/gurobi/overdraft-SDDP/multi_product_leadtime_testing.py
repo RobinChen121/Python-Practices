@@ -74,7 +74,7 @@ demands = [[30,	30,	30,	30,	30,	30],
 [13,35,	79,	43,	44,	59],
 [15,56,	19,	84,	136,67]]
 
-demand_pattern = 7
+demand_pattern = 8
 
 mean_demands1 = demands[demand_pattern - 1] # higher average demand vs lower average demand
 mean_demands2 = [i*0.5 for i in mean_demands1] # higher average demand vs lower average demand
