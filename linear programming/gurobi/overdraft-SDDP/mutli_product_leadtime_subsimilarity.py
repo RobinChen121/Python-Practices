@@ -106,7 +106,7 @@ demands = [[30,	30,	30,	30,	30,	30],
 [15,140,147,74,	109,88],
 [14,71,	49,	152,78,	33],
 [13,35,	79,	43,	44,	59],
-[15,56,	19,	34,	36, 37]]
+[15,56,	19,	84,	36,67]]
 
 demand_pattern = 10
 
@@ -183,8 +183,8 @@ m.addConstr(W1 <= U)
 # m.addConstr(q1 == 40)
 # m.addConstr(q2 == 20)
 m.addConstr(-vari_costs[0]*q1 - vari_costs[1]*q2- W0 + W1 + W2 == overhead_cost[0] - ini_cash)
-m.addConstr(q1 <= 100)
-m.addConstr(q2 <= 100)
+# m.addConstr(q1 <= 100)
+# m.addConstr(q2 <= 100)
 
 # cuts recording arrays
 iter_limit = 50
