@@ -84,7 +84,10 @@ import time
 import numpy as np
 
 import sys 
-sys.path.append("..") 
+import os
+parent_directory = os.path.abspath('..')
+sys.path.append(parent_directory) 
+# sys.path.append("..") # for mac
 from tree import *
 
     
@@ -103,9 +106,9 @@ demands = [[30,	30,	30,	30,	30,	30],
 [15,140,147,74,	109,88],
 [14,71,	49,	152,78,	33],
 [13,35,	79,	43,	44,	59],
-[15,56,	19,	84,	136,67]]
+[15,56,	19,	34,	36, 37]]
 
-demand_pattern = 2
+demand_pattern = 10
 
 mean_demands1 = demands[demand_pattern - 1][0:6] # higher average demand vs lower average demand
 mean_demands2 = [i*0.5 for i in mean_demands1] # higher average demand vs lower average demand
@@ -138,7 +141,7 @@ r1 = 0.1
 r2 = 2 # penalty interest rate for overdraft exceeding the limit, does not affect computation time
 U = 500 # overdraft limit
 
-sample_num = 10 # change 1
+sample_num = 5 # change 1
 
 # gamma distribution:mean demand is shape / beta and variance is shape / beta^2
 # beta = 1 / scale
@@ -181,9 +184,10 @@ m.addConstr(W1 <= U)
 # m.addConstr(q2 == 20)
 m.addConstr(-vari_costs[0]*q1 - vari_costs[1]*q2- W0 + W1 + W2 == overhead_cost[0] - ini_cash)
 m.addConstr(q1 <= 100)
+m.addConstr(q2 <= 100)
 
 # cuts recording arrays
-iter_limit = 200
+iter_limit = 50
 time_limit = 3600
 N = 5 # sampled number of scenarios in forward computing, change 3
 slope_stage1_1 = []
