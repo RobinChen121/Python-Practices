@@ -7,13 +7,6 @@ Created on Thu Jun 20 12:44:26 2024
 
 @disp:  leverage sub problems similarity to speed up the compuatation.
 
-6 periods requier long time to converge;
-
-pk1 = [0.25, 0.5, 0.25]
-pk2= pk1
-xk1 = [mean_demands1[0]-10, mean_demands1[0], mean_demands1[0]+10]
-xk2 = [mean_demands2[0]-5, mean_demands2[0], mean_demands2[0]+5]
-
 
 cov1 = 0.25 # lower variance vs higher variance
 cov2 = 0.5
@@ -30,48 +23,16 @@ unit_salvages = [0.5* vari_costs[m] for m in range(MM)]
 overhead_cost = [100 for t in range(T)]
 
 
-    
-leverage similarity enhancement
+demand_pattern = 1
 sample numer is 5 and scenario number is 5 
-planning horizon length is 3 
-final expected total profits after 500 iteration is 118.21
-ordering Q1 and Q2 in the first peiod is 33.81 and 32.60
-cpu time is 531.655 s
-expected lower bound gap is 74.55
-lower bound and upper bound gap is 36.93%
-confidence interval for expected objective is [-3.75,  152.85];    
+planning horizon length is 6 
+final expected total profits after 300 iteration is 513.68
+ordering Q1 and Q2 in the first peiod is 26.52 and 25.09
+cpu time is 551.683 s
+expected lower bound gap is 340.29
+lower bound and upper bound gap is 33.75%
+confidence interval for expected objective is [-86.20,  766.78]
 
-*******************************************
-demand_pattern = 2
-leverage similarity enhancement
-sample numer is 10 and scenario number is 5 
-planning horizon length is 3 
-final expected total profits after 120 iteration is 377.61
-ordering Q1 and Q2 in the first peiod is 78.04 and 43.36
-cpu time is 44.833 s
-expected lower bound gap is 280.72
-lower bound and upper bound gap is 25.66%
-confidence interval for expected objective is [66.14,  495.30];
-
-leverage similarity enhancement
-sample numer is 10 and scenario number is 5 
-planning horizon length is 4 
-final expected total profits after 120 iteration is 541.83
-ordering Q1 and Q2 in the first peiod is 53.48 and 44.48
-cpu time is 58.867 s
-expected lower bound gap is 328.72
-lower bound and upper bound gap is 39.33%
-confidence interval for expected objective is [3.66,  653.77];
-
-leverage similarity enhancement
-sample numer is 10 and scenario number is 5 
-planning horizon length is 5 
-final expected total profits after 200 iteration is 511.56
-ordering Q1 and Q2 in the first peiod is 47.62 and 41.38
-cpu time is 229.958 s
-expected lower bound gap is 345.20
-lower bound and upper bound gap is 32.52%
-confidence interval for expected objective is [22.09,  668.32];
 
 
     
@@ -109,7 +70,7 @@ from tree import *
 # [15,56,	19,	84,	36,67]]
 
 
-demands = [[30,30,30,30,30],
+demands = [[30,30,30,30,30, 30],
 [50, 46, 38, 28, 14],
 [14,23,33,46,50],
 [47,30,6,30,54],
@@ -120,7 +81,7 @@ demands = [[30,30,30,30,30],
 [13,35,79,43,44],
 [15,56,19,84,136]]
                 
-demand_pattern = 8
+demand_pattern = 1
 
 mean_demands1 = demands[demand_pattern - 1][0:6] # higher average demand vs lower average demand
 mean_demands2 = [i*0.5 for i in mean_demands1] # higher average demand vs lower average demand
@@ -199,7 +160,7 @@ m.addConstr(-vari_costs[0]*q1 - vari_costs[1]*q2- W0 + W1 + W2 == overhead_cost[
 # m.addConstr(q2 <= 100)
 
 # cuts recording arrays
-iter_limit = 50
+iter_limit = 300
 time_limit = 3600
 N = 5 # sampled number of scenarios in forward computing, change 3
 slope_stage1_1 = []
@@ -222,7 +183,7 @@ iter = 0
 time_pass = 0
 start = time.process_time()
 # while iter < iter_limit:  
-while iter < iter_limit and time_pass < time_limit:
+while iter < iter_limit and time_pass < time_limit: # and means satifying either one will exist the loop
     slopes1.append([[[0 for m in range(MM)] for n in range(N)] for t in range(T)])
     slopes2.append([[0 for n in range(N)] for t in range(T)])
     slopes3.append([[[0 for m in range(MM)] for n in range(N)] for t in range(T)])
@@ -250,7 +211,7 @@ while iter < iter_limit and time_pass < time_limit:
     # forward
     if iter > 0:        
         m.addConstr(theta >= slope_stage1_1[-1][0]*(ini_Is[0]) + slope_stage1_1[-1][1]*(ini_Is[1])\
-                            + slope_stage1_2[-1]*(ini_cash-vari_costs[0]*q1-vari_costs[1]*q2)\
+                            + slope_stage1_2[-1]*(ini_cash-vari_costs[0]*q1-vari_costs[1]*q2-r1*W1+r0*W0-r2*W2)\
                             + slope_stage1_3[-1][0]*q1+slope_stage1_3[-1][1]*q2 + intercept_stage1[-1])        
     m.update()
     m.Params.LogToConsole = 0

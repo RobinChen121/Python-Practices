@@ -177,16 +177,16 @@ while iter < iter_limit:
     
     # forward
     if iter > 0:        
-        m.addConstr(theta >= slope1_stage[-1][0]*(ini_I) + slope1_stage[-1][1]*(ini_cash-vari_cost*q) + slope1_stage[-1][2]*q + intercept1_stage[-1])        
+        m.addConstr(theta >= slope1_stage[-1][0]*(ini_I) + slope1_stage[-1][1]*(ini_cash-vari_cost*q-r1*W1+r0*W0-r2*W2) + slope1_stage[-1][2]*q + intercept1_stage[-1])        
         m.update()
     m.Params.LogToConsole = 0
     m.optimize()
     
     q_values[-1][0] = [q.x for n in range(N)]  
-    if iter == 14:
-        m.write('iter' + str(iter+1) + '_main.lp')    
-        m.write('iter' + str(iter+1) + '_main.sol')
-        pass
+    # if iter == 14:
+    #     m.write('iter' + str(iter+1) + '_main.lp')    
+    #     m.write('iter' + str(iter+1) + '_main.sol')
+    #     pass
     
     W0_values.append(W0.x)
     W1_values.append(W1.x)

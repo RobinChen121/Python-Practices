@@ -53,7 +53,7 @@ r2 = 2 # penalty interest rate for overdraft exceeding the limit
 U = 500 # overdraft limit
 iter_limit = 30
 time_limit = 120 # time limit
-N = 20 # sampled number of scenarios for forward computing
+N = 10 # sampled number of scenarios for forward computing
 cut_select_num = N
 
 trunQuantile = 0.9999 # affective to the final ordering quantity
@@ -116,7 +116,7 @@ while iter < iter_limit:
     
     # forward
     if iter > 0:        
-        m.addConstr(theta >= slope1_stage[-1][0]*(ini_I) + slope1_stage[-1][1]*(ini_cash-vari_cost*q) + slope1_stage[-1][2]*q + intercept1_stage[-1])        
+        m.addConstr(theta >= slope1_stage[-1][0]*(ini_I) + slope1_stage[-1][1]*(ini_cash-vari_cost*q-r1*W1+r0*W0-r2*W2) + slope1_stage[-1][2]*q + intercept1_stage[-1])        
         m.update()
     m.Params.LogToConsole = 0
     m.optimize()

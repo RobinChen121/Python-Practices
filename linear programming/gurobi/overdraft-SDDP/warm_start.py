@@ -176,12 +176,49 @@ while iter < iter_limit and time_pass < time_limit: # and means satifying either
         for t in range(T):
             demands1[t] = sample_scenarios1[n][t]
             demands2[t] = sample_scenarios2[n][t]
-            
-        m_forward[n].addConstr(I1_forward[t][n] - B1_forward[t][n] == ini_Is[0] - demand1[0])
-        m_forward[n].addConstr(I2_forward[t][n] - B2_forward[t][n] == ini_Is[1] - demand2[0
-                                                                                          ])
-           
         
-        pass
+        if t == T - 1:                   
+            m_backward[t][n][s].setObjective(-prices[0]*(demand1 - B1_backward[t][n][s])-prices[1]*(demand2 - B2_backward[t][n][s])\
+                                             - unit_salvages[0]*I1_backward[t][n][s]- unit_salvages[1]*I2_backward[t][n][s], GRB.MINIMIZE)
+        else:
+            m_backward[t][n][s].setObjective(overhead_cost[t] + vari_costs[0]*q1_backward[t][n][s] + vari_costs[1]*q2_backward[t][n][s]\
+                                             - prices[0]*(demand1 - B1_backward[t][n][s])- prices[1]*(demand2 - B2_backward[t][n][s])\
+                                             + r2*W2_backward[t][n][s]
+                                             + r1*W1_backward[t][n][s] - r0*W0_backward[t][n][s] + theta_backward[t][n][s], GRB.MINIMIZE) 
+        revenue_total = LinExpr()      
+        for t in range(T):
+            revenue_total += -prices[0]*(demand1[t] - B1_forward[t][n]) - prices[1]*(demand2[t] - B2_forward[t][n])
+        m_forward[n].setObjective(cash_forward[T-1][n], GRB.MAXIMIZE)
+        
+            
+        for t in range(T):
+            if t == 0:
+                m_forward[n].addConstr(I1_forward[t][n] - B1_forward[t][n] == ini_Is[0] - demand1[0])
+                m_forward[n].addConstr(I2_forward[t][n] - B2_forward[t][n] == ini_Is[1] - demand2[0])
+            else:
+                if t == 1:
+                    m_forward[n].addConstr(I1_forward[t][n] - B1_forward[t][n] == I1_forward[t-1][n] + q1.x - demand1[t])
+                    m_forward[n].addConstr(I2_forward[t][n] - B2_forward[t][n] == I2_forward[t-1][n] + q2.x - demand2[t])
+                else:
+                    m_forward[n].addConstr(I1_forward[t][n] - B1_forward[t][n] == I1_forward[t-1][n] + q1_forward[t-2][n]- demand1[t])
+                    m_forward[n].addConstr(I2_forward[t][n] - B2_forward[t][n] == I2_forward[t-1][n] + q2_forward[t-2][n]- demand2[t])
+        
+        for t in range(T):
+            if t == 0:   
+                m_forward[n].addConstr(cash_forward[t][n] + prices[0]*B1_forward[t][n] + + prices[1]*B2_forward[t][n] == ini_cash - overhead_cost[t]\
+                                          - vari_costs[0]*q1.x -vari_costs[1]*q2.x -r1*W1.x + r0*W0.x\
+                                              -r2*W2.x + prices[0]*demand1[t] + prices[1]*demand2[t])
+            else:
+                m_forward[n].addConstr(cash_forward[t][n] + prices[0]*B1_forward[t][n] + + prices[1]*B2_forward[t][n] == cash_forward[t-1][n] - overhead_cost[t]\
+                                          - vari_costs[0]*q1_forward[t][n] - vari_costs[1]*q2_forward[t][n] -r1*W1_forward[t-1] + r0*W0_forward[t-1]\
+                                              -r2*W2_forward[t-1] + prices[0]*demand1[t] + prices[1]*demand2[t])
+        for t in range(T-1):
+            m_forward[n].addConstr(W1_forward[t][n] <= U) 
+            m_forward[n].addConstr(cash_forward[t][n] - vari_costs[0]*q1_forward[t][n] - vari_costs[1]*q2_forward[t][n] - W0_forward[t][n]\
+                                  + W1_forward[t][n] + W2_forward[t][n] == overhead_cost[t+1])         
+        
+        # optimize
+        m_forward[n].Params.LogToConsole = 0
+        m_forward[n].optimize()
     
     pass

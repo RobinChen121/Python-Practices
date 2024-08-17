@@ -196,7 +196,7 @@ while iter < iter_limit: # time_pass < time_limit:   # or
     # forward
     if iter > 0:        
         m.addConstr(theta >= slope_stage1_1[-1][0]*(ini_Is[0]) + slope_stage1_1[-1][1]*(ini_Is[1])\
-                            + slope_stage1_2[-1]*(ini_cash-vari_costs[0]*q1-vari_costs[1]*q2)\
+                            + slope_stage1_2[-1]*(ini_cash-vari_costs[0]*q1-vari_costs[1]*q2-r1*W1+r0*W0-r2*W2)\
                             + slope_stage1_3[-1][0]*q1+slope_stage1_3[-1][1]*q2 + intercept_stage1[-1])        
     m.update()
     m.Params.LogToConsole = 0
