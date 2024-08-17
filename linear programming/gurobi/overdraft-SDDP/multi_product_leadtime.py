@@ -208,8 +208,7 @@ while iter < iter_limit: # time_pass < time_limit:   # or
     #     pass
 
     q1_values[iter][0] = [q1.x for n in range(N)]  
-    q2_values[iter][0] = [q2.x for n in range(N)] 
-    
+    q2_values[iter][0] = [q2.x for n in range(N)]    
     W0_values.append(W0.x)
     W1_values.append(W1.x)
     W2_values.append(W2.x)

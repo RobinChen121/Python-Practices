@@ -124,7 +124,64 @@ time_pass = 0
 stop_condition = 'iter_limit'
 start = time.process_time()
 
-while iter < iter_limit and time_pass < time_limit: # and means satify either one will exist the loop
+while iter < iter_limit and time_pass < time_limit: # and means satifying either one will exist the loop
     
+    sample_scenarios1 = generate_scenarios_normal(N, trunQuantile, mean_demands1, sigmas1)
+    sample_scenarios2 = generate_scenarios_normal(N, trunQuantile, mean_demands2, sigmas2)
+    
+    m.update()
+    m.Params.LogToConsole = 0
+    m.optimize()
+    
+    q1_values[iter][0] = [q1.x for n in range(N)]  
+    q2_values[iter][0] = [q2.x for n in range(N)] 
+    
+    W0_values.append(W0.x)
+    W1_values.append(W1.x)
+    W2_values.append(W2.x)
+    z = m.objVal
+    z_values = [[ 0 for t in range(T+1)] for n in range(N)] # for computing the feasible cost
+    for n in range(N):
+        z_values[n][0] = m.objVal - theta.x
+    
+    
+    m_forward = [Model() for n in range(N)]
+    q1_forward = [[m_forward[n].addVar(vtype = GRB.CONTINUOUS, name = 'q1_' + str(t+2) + '^' + str(n+1)) for n in range(N)]  for t in range(T - 1)]
+    q2_forward = [[m_forward[n].addVar(vtype = GRB.CONTINUOUS, name = 'q2_' + str(t+2) + '^' + str(n+1)) for n in range(N)]  for t in range(T - 1)]
+    qpre1_forward = [[m_forward[n].addVar(vtype = GRB.CONTINUOUS, name = 'qpre1_' + str(t+2) + '^' + str(n+1)) for n in range(N)]  for t in range(T-1)]
+    qpre2_forward = [[m_forward[n].addVar(vtype = GRB.CONTINUOUS, name = 'qpre2_' + str(t+2) + '^' + str(n+1)) for n in range(N)]  for t in range(T-1)]
+    I1_forward = [[m_forward[n].addVar(vtype = GRB.CONTINUOUS, name = 'I1_' + str(t+1) + '^' + str(n+1)) for n in range(N)]  for t in range(T)]
+    I2_forward = [[m_forward[n].addVar(vtype = GRB.CONTINUOUS, name = 'I2_' + str(t+1) + '^' + str(n+1)) for n in range(N)]  for t in range(T)]
+    cash_forward = [[m_forward[n].addVar(lb = -GRB.INFINITY, vtype = GRB.CONTINUOUS, name = 'C_' + str(t+1)+ '^' + str(n+1)) for n in range(N)] for t in range(T)]
+    W0_forward = [[m_forward[n].addVar(vtype = GRB.CONTINUOUS, name = 'W0_' + str(t+2) + '^' + str(n+1)) for n in range(N)]  for t in range(T - 1)]
+    W1_forward = [[m_forward[n].addVar(vtype = GRB.CONTINUOUS, name = 'W1_' + str(t+2) + '^' + str(n+1)) for n in range(N)]  for t in range(T - 1)]
+    W2_forward = [[m_forward[n].addVar(vtype = GRB.CONTINUOUS, name = 'W2_' + str(t+2) + '^' + str(n+1)) for n in range(N)]  for t in range(T - 1)]
+    # B is the quantity of lost sale
+    B1_forward = [[m_forward[n].addVar(vtype = GRB.CONTINUOUS, name = 'B1_' + str(t+1) + '^' + str(n+1)) for n in range(N)]  for t in range(T)]
+    B2_forward = [[m_forward[n].addVar(vtype = GRB.CONTINUOUS, name = 'B2_' + str(t+1) + '^' + str(n+1)) for n in range(N)]  for t in range(T)]
+    theta_forward = [[m_forward[n].addVar(lb = -GRB.INFINITY, vtype = GRB.CONTINUOUS, name = 'theta_' + str(t+3) + '^' + str(n+1)) for n in range(N)]  for t in range(T - 1)]
+ 
+    I1_forward_values = [[0 for n in range(N)] for t in range(T)]
+    B1_forward_values = [[0 for n in range(N)] for t in range(T)]
+    I2_forward_values = [[0 for n in range(N)] for t in range(T)]
+    B2_forward_values = [[0 for n in range(N)] for t in range(T)]
+    cash_forward_values = [[0 for n in range(N)] for t in range(T)]
+    W0_forward_values = [[0 for n in range(N)] for t in range(T-1)] 
+    W1_forward_values = [[0 for n in range(N)] for t in range(T-1)]
+    W2_forward_values = [[0 for n in range(N)] for t in range(T-1)]
+    
+    for n in range(N):
+        demands1 = [0 for t in range(T)]
+        demands2 = [0 for t in range(T)]
+        for t in range(T):
+            demands1[t] = sample_scenarios1[n][t]
+            demands2[t] = sample_scenarios2[n][t]
+            
+        m_forward[n].addConstr(I1_forward[t][n] - B1_forward[t][n] == ini_Is[0] - demand1[0])
+        m_forward[n].addConstr(I2_forward[t][n] - B2_forward[t][n] == ini_Is[1] - demand2[0
+                                                                                          ])
+           
+        
+        pass
     
     pass
