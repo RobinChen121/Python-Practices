@@ -185,10 +185,17 @@ while iter < iter_limit and time_pass < time_limit: # and means satifying either
                                              - prices[0]*(demand1 - B1_backward[t][n][s])- prices[1]*(demand2 - B2_backward[t][n][s])\
                                              + r2*W2_backward[t][n][s]
                                              + r1*W1_backward[t][n][s] - r0*W0_backward[t][n][s] + theta_backward[t][n][s], GRB.MINIMIZE) 
-        revenue_total = LinExpr()      
+        neg_revenue_total = LinExpr()      
         for t in range(T):
-            revenue_total += -prices[0]*(demand1[t] - B1_forward[t][n]) - prices[1]*(demand2[t] - B2_forward[t][n])
-        m_forward[n].setObjective(cash_forward[T-1][n], GRB.MAXIMIZE)
+            neg_revenue_total += -prices[0]*(demand1[t] - B1_forward[t][n]) - prices[1]*(demand2[t] - B2_forward[t][n])
+        overhead_total = sum(overhead_cost[1:])
+        interest_total = LinExpr()
+        for t in range(T-1):
+            interest_total += r2*W2_backward[t][n][s] + r1*W1_backward[t][n][s] - r0*W0_backward[t][n][s]
+        variCosts_total = LinExpr()
+        for t in range(T-1):
+            variCosts_total += vari_costs[0]*q1_backward[t][n][s] + vari_costs[1]*q2_backward[t][n][s]
+        m_forward[n].setObjective(neg_revenue_total+overhead_total+interest_total+variCosts_total, GRB.MINIMIZE)
         
             
         for t in range(T):

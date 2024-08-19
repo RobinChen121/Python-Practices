@@ -31,10 +31,28 @@ ordering Q1 and Q2 in the first peiod is 26.52 and 25.09
 cpu time is 551.683 s
 expected lower bound gap is 340.29
 lower bound and upper bound gap is 33.75%
-confidence interval for expected objective is [-86.20,  766.78]
+confidence interval for expected objective is [-86.20,  766.78];
 
+demand pattern = 1
+leverage similarity enhancement
+sample numer is 10 and scenario number is 10 
+planning horizon length is 5 
+final expected total profits after 300 iteration is 295.73
+ordering Q1 and Q2 in the first peiod is 23.20 and 27.08
+cpu time is 1675.241 s
+expected lower bound gap is 214.62
+lower bound and upper bound gap is 27.43%
+confidence interval for expected objective is [17.20,  412.03]
 
-
+everage similarity enhancement
+sample numer is 15 and scenario number is 15 
+planning horizon length is 5 
+final expected total profits after 278 iteration is 572.02
+ordering Q1 and Q2 in the first peiod is 37.36 and 36.92
+cpu time is 3624.099 s
+expected lower bound gap is 195.67
+lower bound and upper bound gap is 65.79%
+confidence interval for expected objective is [-113.99,  505.34];
     
 """
 
@@ -50,7 +68,7 @@ parent_directory = os.path.abspath('..')
 sys.path.append(parent_directory) 
 # sys.path.append("..") # for mac
 from tree import *
-
+from write_to_file import write_to_csv
     
 # for gamma demand
 # gamma distribution:mean demand is shape / beta and variance is shape / beta^2
@@ -70,7 +88,7 @@ from tree import *
 # [15,56,	19,	84,	36,67]]
 
 
-demands = [[30,30,30,30,30, 30],
+demands = [[30,30,30,30,30],
 [50, 46, 38, 28, 14],
 [14,23,33,46,50],
 [47,30,6,30,54],
@@ -114,7 +132,7 @@ r1 = 0.1
 r2 = 2 # penalty interest rate for overdraft exceeding the limit, does not affect computation time
 U = 500 # overdraft limit
 
-sample_num = 5 # change 1
+sample_num = 15 # change 1
 
 # gamma distribution:mean demand is shape / beta and variance is shape / beta^2
 # beta = 1 / scale
@@ -162,7 +180,7 @@ m.addConstr(-vari_costs[0]*q1 - vari_costs[1]*q2- W0 + W1 + W2 == overhead_cost[
 # cuts recording arrays
 iter_limit = 300
 time_limit = 3600
-N = 5 # sampled number of scenarios in forward computing, change 3
+N = 15 # sampled number of scenarios in forward computing, change 3
 slope_stage1_1 = []
 slope_stage1_2 = []
 slope_stage1_3 = []
@@ -603,6 +621,8 @@ print('sample numer is %d and scenario number is %d ' % (sample_num, N))
 print('planning horizon length is %d ' % T)
 print('final expected total profits after %d iteration is %.2f' % (iter, -z))
 print('ordering Q1 and Q2 in the first peiod is %.2f and %.2f' % (q1_values[iter-1][0][0], q2_values[iter-1][0][0]))
+Q1 = q1_values[iter-1][0][0]
+Q2 = q2_values[iter-1][0][0]
 cpu_time = end - start
 print('cpu time is %.3f s' % cpu_time) 
 z_lb, z_ub, z_mean = compute_ub(z_values) # for computing confidence interval
@@ -614,13 +634,13 @@ print('confidence interval for expected objective is [%.2f,  %.2f]' % (-z_ub, -z
 
 ci = (-z_ub, -z_lb)
 
-# headers = ['demand_pattern,', 'ini_cash', 'ini_inventorys', 'prices', 'unit_order_cost', 'unit_salvage_value', 'deposit_interest_rate', 'overdraft_interest_rate', 'penalty_interest_rate', 'overdraft_limit', 'overhead_costs', 'mean_demands1',\
-#            'mean_demands2', 'realization_num', 'scenario_forward_num', 'iter_limit', 'time_limit',  'time', 'iter', 'stop_condition', 'final_value', 'Q1', 'Q2', 'lower bound', 'confidence interval', 'gap']    
-# file_address = '/Users/zhenchen/Documents/Numerical-tests/overdraft/'
-# file_name = 'multiproduct_similarity_enhance_tests'
-# file_address_name = file_address + file_name + '.csv'
-# content = [demand_pattern, ini_cash, ini_Is, prices, vari_costs, unit_salvages, r0, r1, r2, U, overhead_cost, mean_demands1, mean_demands2,\
-#            sample_num, N, iter_limit, time_limit, cpu_time, iter, stop_condition, -z, Q1, Q2, lb, ci, gap2]
-# run = 0
-# first_write =  False if run > 0 else True
-# write_to_csv(file_address_name, headers, content, first_write)
+headers = ['demand_pattern', 'ini_cash', 'ini_inventorys', 'prices', 'unit_order_cost', 'unit_salvage_value', 'deposit_interest_rate', 'overdraft_interest_rate', 'penalty_interest_rate', 'overdraft_limit', 'overhead_costs', 'mean_demands1',\
+           'mean_demands2', 'realization_num', 'scenario_forward_num', 'iter_limit', 'time_limit',  'time', 'iter', 'final_value', 'Q1', 'Q2', 'lower bound', 'confidence interval', 'gap']    
+file_address = '/Users/zhenchen/Documents/Numerical-tests/overdraft/'
+file_name = 'multiproduct_similarity_tests'
+file_address_name = file_address + file_name + '.csv'
+content = [demand_pattern, ini_cash, ini_Is, prices, vari_costs, unit_salvages, r0, r1, r2, U, overhead_cost, mean_demands1, mean_demands2,\
+           sample_num, N, iter_limit, time_limit, cpu_time, iter,  -z, Q1, Q2, lb, ci, gap2]
+run = 0
+first_write =  False if run > 0 else True
+write_to_csv(file_address_name, headers, content, first_write)
