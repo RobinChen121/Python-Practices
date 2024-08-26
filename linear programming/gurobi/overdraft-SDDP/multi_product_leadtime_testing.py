@@ -116,10 +116,10 @@ for d_pattern in range(10):
     # betas = [2, 0.25] # lower variance vs higher variance
     # T = len(mean_demands1)
     
-    pk1 = [0.25, 0.5, 0.25]
-    pk2= pk1
-    xk1 = [mean_demands1[0]-10, mean_demands1[0], mean_demands1[0]+10]
-    xk2 = [mean_demands2[0]-5, mean_demands2[0], mean_demands2[0]+5]
+    # pk1 = [0.25, 0.5, 0.25]
+    # pk2= pk1
+    # xk1 = [mean_demands1[0]-10, mean_demands1[0], mean_demands1[0]+10]
+    # xk2 = [mean_demands2[0]-5, mean_demands2[0], mean_demands2[0]+5]
     
     cov1 = 0.25 # lower variance vs higher variance
     cov2 = 0.5
@@ -140,7 +140,7 @@ for d_pattern in range(10):
     r2 = 2 # penalty interest rate for overdraft exceeding the limit, does not affect computation time
     U = 500 # overdraft limit
     
-    sample_num = 5 # change 1
+    sample_num = 10 # change 1
     
     
     # for gamma demand
@@ -189,7 +189,7 @@ for d_pattern in range(10):
     # cuts recording arrays
     iter_limit = 300
     time_limit = 7200
-    N = 5 # sampled number of scenarios in forward computing, change 3
+    N = 10 # sampled number of scenarios in forward computing, change 3
     slope_stage1_1 = []
     slope_stage1_2 = []
     slope_stage1_3 = []
@@ -211,7 +211,7 @@ for d_pattern in range(10):
     stop_condition = 'iter_limit'
     start = time.process_time()
     # while iter < iter_num:  
-    while iter < iter_limit and time_pass < time_limit:   # and means satifying either one will exist the loop
+    while iter < iter_limit or time_pass < time_limit:   # and means satifying either one will exist the loop
         slopes1.append([[[0 for m in range(MM)] for n in range(N)] for t in range(T)])
         slopes2.append([[0 for n in range(N)] for t in range(T)])
         slopes3.append([[[0 for m in range(MM)] for n in range(N)] for t in range(T)])
