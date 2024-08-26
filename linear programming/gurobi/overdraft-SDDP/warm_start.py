@@ -129,12 +129,11 @@ while iter < iter_limit and time_pass < time_limit: # and means satifying either
     sample_scenarios1 = generate_scenarios_normal(N, trunQuantile, mean_demands1, sigmas1)
     sample_scenarios2 = generate_scenarios_normal(N, trunQuantile, mean_demands2, sigmas2)
     
+    if iter > 0:        
+        m.addConstr(theta >= slope[0]*q1 + slope[1]*q2 + slope[2]*W0 + slope[3]*W1 + slope[4]*W2 + intercept)        
     m.update()
     m.Params.LogToConsole = 0
     m.optimize()
-    
-    q1_values[iter][0] = [q1.x for n in range(N)]  
-    q2_values[iter][0] = [q2.x for n in range(N)] 
     
     W0_values.append(W0.x)
     W1_values.append(W1.x)
@@ -170,31 +169,25 @@ while iter < iter_limit and time_pass < time_limit: # and means satifying either
     W1_forward_values = [[0 for n in range(N)] for t in range(T-1)]
     W2_forward_values = [[0 for n in range(N)] for t in range(T-1)]
     
+    intercepts = [0 for n in range(N)]
+    slopes = [[0 for i in range(5)] for n in range(N)]
     for n in range(N):
-        demands1 = [0 for t in range(T)]
-        demands2 = [0 for t in range(T)]
+        demand1 = [0 for t in range(T)]
+        demand2 = [0 for t in range(T)]
         for t in range(T):
-            demands1[t] = sample_scenarios1[n][t]
-            demands2[t] = sample_scenarios2[n][t]
+            demand1[t] = sample_scenarios1[n][t]
+            demands[t] = sample_scenarios2[n][t]
         
-        if t == T - 1:                   
-            m_backward[t][n][s].setObjective(-prices[0]*(demand1 - B1_backward[t][n][s])-prices[1]*(demand2 - B2_backward[t][n][s])\
-                                             - unit_salvages[0]*I1_backward[t][n][s]- unit_salvages[1]*I2_backward[t][n][s], GRB.MINIMIZE)
-        else:
-            m_backward[t][n][s].setObjective(overhead_cost[t] + vari_costs[0]*q1_backward[t][n][s] + vari_costs[1]*q2_backward[t][n][s]\
-                                             - prices[0]*(demand1 - B1_backward[t][n][s])- prices[1]*(demand2 - B2_backward[t][n][s])\
-                                             + r2*W2_backward[t][n][s]
-                                             + r1*W1_backward[t][n][s] - r0*W0_backward[t][n][s] + theta_backward[t][n][s], GRB.MINIMIZE) 
         neg_revenue_total = LinExpr()      
         for t in range(T):
             neg_revenue_total += -prices[0]*(demand1[t] - B1_forward[t][n]) - prices[1]*(demand2[t] - B2_forward[t][n])
         overhead_total = sum(overhead_cost[1:])
         interest_total = LinExpr()
         for t in range(T-1):
-            interest_total += r2*W2_backward[t][n][s] + r1*W1_backward[t][n][s] - r0*W0_backward[t][n][s]
+            interest_total += r2*W2_forward[t][n] + r1*W1_forward[t][n] - r0*W0_forward[t][n]
         variCosts_total = LinExpr()
         for t in range(T-1):
-            variCosts_total += vari_costs[0]*q1_backward[t][n][s] + vari_costs[1]*q2_backward[t][n][s]
+            variCosts_total += vari_costs[0]*q1_forward[t][n] + vari_costs[1]*q2_forward[t][n]
         m_forward[n].setObjective(neg_revenue_total+overhead_total+interest_total+variCosts_total, GRB.MINIMIZE)
         
             
@@ -217,8 +210,8 @@ while iter < iter_limit and time_pass < time_limit: # and means satifying either
                                               -r2*W2.x + prices[0]*demand1[t] + prices[1]*demand2[t])
             else:
                 m_forward[n].addConstr(cash_forward[t][n] + prices[0]*B1_forward[t][n] + + prices[1]*B2_forward[t][n] == cash_forward[t-1][n] - overhead_cost[t]\
-                                          - vari_costs[0]*q1_forward[t][n] - vari_costs[1]*q2_forward[t][n] -r1*W1_forward[t-1] + r0*W0_forward[t-1]\
-                                              -r2*W2_forward[t-1] + prices[0]*demand1[t] + prices[1]*demand2[t])
+                                          - vari_costs[0]*q1_forward[t-1][n] - vari_costs[1]*q2_forward[t-1][n] -r1*W1_forward[t-1][n] + r0*W0_forward[t-1][n]\
+                                              -r2*W2_forward[t-1][n] + prices[0]*demand1[t] + prices[1]*demand2[t])
         for t in range(T-1):
             m_forward[n].addConstr(W1_forward[t][n] <= U) 
             m_forward[n].addConstr(cash_forward[t][n] - vari_costs[0]*q1_forward[t][n] - vari_costs[1]*q2_forward[t][n] - W0_forward[t][n]\
@@ -227,5 +220,28 @@ while iter < iter_limit and time_pass < time_limit: # and means satifying either
         # optimize
         m_forward[n].Params.LogToConsole = 0
         m_forward[n].optimize()
+        
+        pi = m_forward[n].getAttr(GRB.Attr.Pi)
+        rhs = m_forward[n].getAttr(GRB.Attr.RHS)
+        
+        num_con = len(pi)
+        for i in range(num_con):
+            if i not in [2, 3, 2*T]: 
+                intercepts[n] += pi[i]*rhs[i]
+        intercepts[n] += -pi[2]*demand1[1] - pi[3]*demand2[1] + pi[2*T]*(ini_cash - overhead_cost[t] + prices[0]*demand1[0] + prices[1]*demand2[0])
+        slopes[n] = [pi[1]- vari_costs[0]*pi[2*T], pi[2]- vari_costs[1]*pi[2*T], r0*pi[2*T], -r1*pi[2*T], -r2*pi[2*T]]
     
-    pass
+        intercept = np.mean(intercepts)
+        slope = np.mean(slopes, axis = 1)
+    iter += 1
+    time_pass = time.process_time() - start
+
+end = time.process_time()
+print('********************************************')
+print('warm start')
+print('sample numer is %d and scenario number is %d ' % (sample_num, N))
+print('planning horizon length is T = %d ' % T)
+print('final expected total profits after %d iteration is %.2f' % (iter, -z))
+print('ordering Q1 and Q2 in the first peiod is %.2f and %.2f' % (q1.x, q2.x))
+cpu_time = end - start
+print('cpu time is %.3f s' % cpu_time) 

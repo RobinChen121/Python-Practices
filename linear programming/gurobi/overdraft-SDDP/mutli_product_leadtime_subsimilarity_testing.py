@@ -405,7 +405,7 @@ for d_pattern in range(10):
                             if t < T - 1:
                                 thisEndCash = ini_cash - overhead_cost[t] - vari_costs[0]*q1_values[-1][t][n]-vari_costs[1]*q2_values[-1][t][n]\
                                                               - r2*W2_values[-1] - r1*W1_values[-1] + r0*W0_values[-1]\
-                                                              + prices[0]*(demand1 - thisB1)+ prices[1]*(demand2 - thisB2) - vari_costs[0]*lastq1
+                                                              + prices[0]*(demand1 - thisB1)+ prices[1]*(demand2 - thisB2) - vari_costs[0]*lastq1- overhead_cost[t+1]- vari_costs[1]*lastq2
                         else:
                             thisEndI1 = I1_forward_values[t-1][n] + qpre1_values[-1][t-1][n] - demand1
                             thisB1 = -min(I1_forward_values[t-1][n] + qpre1_values[-1][t-1][n] - demand1, 0)
@@ -608,6 +608,7 @@ for d_pattern in range(10):
     end = time.process_time()
     print('********************************************')
     print('leverage similarity enhancement')
+    print('demand pattern is %d' % demand_pattern)
     print('sample numer is %d and scenario number is %d ' % (sample_num, N))
     print('planning horizon length is %d ' % T)
     print('final expected total profits after %d iteration is %.2f' % (iter, -z))

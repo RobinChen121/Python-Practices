@@ -267,7 +267,7 @@ while iter < iter_limit:
                         thisB = -min(ini_I - demand, 0)
                         if t < T - 1:
                             thisEndCash = ini_cash - overhead_cost[t] - vari_cost*q_values[-1][t][n]\
-                                                      - r2*W2_values[-1] - r1*W1_values[-1] + r0*W0_values[-1] + price*(demand - thisB) - vari_cost*lastq
+                                                      - r2*W2_values[-1] - r1*W1_values[-1] + r0*W0_values[-1] + price*(demand - thisB) - vari_cost*lastq - overhead_cost[t+1]
                     else:
                         thisEndI = I_forward_values[t-1][n] + qpre_values[-1][t-1][n] - demand
                         thisB = -min(I_forward_values[t-1][n] + qpre_values[-1][t-1][n] - demand, 0)

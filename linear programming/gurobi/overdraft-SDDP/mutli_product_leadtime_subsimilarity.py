@@ -8,6 +8,37 @@ Created on Thu Jun 20 12:44:26 2024
 @disp:  leverage sub problems similarity to speed up the compuatation.
 
 
+
+self defined discrete distribution:
+
+mean_demands1 =[30, 30, 30] # higher average demand vs lower average demand
+mean_demands2 = [i*0.5 for i in mean_demands1] # higher average demand vs lower average demand
+pk1 = [0.25, 0.5, 0.25]
+pk2= pk1
+xk1 = [mean_demands1[0]-10, mean_demands1[0], mean_demands1[0]+10]
+xk2 = [mean_demands2[0]-5, mean_demands2[0], mean_demands2[0]+5]
+ini_Is = [0, 0]
+ini_cash = 0
+vari_costs = [1, 2]
+prices = [5, 10] # lower margin vs higher margin
+MM = len(prices)
+unit_salvages = [0.5* vari_costs[m] for m in range(MM)]
+overhead_cost = [100 for t in range(T)]
+
+SDP: final optimal cash  is 91.26875 (441.57 for 0 overhead cost, 464 for 0 overdraft interest rate)
+optimal order quantity in the first priod is :  Q1 = 40, Q2 = 20;
+
+leverage similarity enhancement
+sample numer is 5 and scenario number is 5 
+planning horizon length is 3 
+final expected total profits after 100 iteration is 86.66/25.38/114.13/25.73/63.4/146.44/117.16/104.71/133.96/80.63
+ordering Q1 and Q2 in the first peiod is 31.12 and 23.13
+cpu time is 23.339 s
+expected lower bound gap is 68.65
+lower bound and upper bound gap is 20.78%
+confidence interval for expected objective is [-10.20,  147.50]
+
+***********************************
 cov1 = 0.25 # lower variance vs higher variance
 cov2 = 0.5
 sigmas1 = [cov1*i for i in mean_demands1]
@@ -88,7 +119,7 @@ from write_to_file import write_to_csv
 # [15,56,	19,	84,	36,67]]
 
 
-demands = [[30,30,30,30,30],
+demands = [[30,30,30],
 [50, 46, 38, 28, 14],
 [14,23,33,46,50],
 [47,30,6,30,54],
@@ -107,10 +138,10 @@ mean_demands2 = [i*0.5 for i in mean_demands1] # higher average demand vs lower 
 # T = len(mean_demands1)
 
 
-# pk1 = [0.25, 0.5, 0.25]
-# pk2= pk1
-# xk1 = [mean_demands1[0]-10, mean_demands1[0], mean_demands1[0]+10]
-# xk2 = [mean_demands2[0]-5, mean_demands2[0], mean_demands2[0]+5]
+pk1 = [0.25, 0.5, 0.25]
+pk2= pk1
+xk1 = [mean_demands1[0]-10, mean_demands1[0], mean_demands1[0]+10]
+xk2 = [mean_demands2[0]-5, mean_demands2[0], mean_demands2[0]+5]
 
 
 cov1 = 0.25 # lower variance vs higher variance
@@ -132,7 +163,7 @@ r1 = 0.1
 r2 = 2 # penalty interest rate for overdraft exceeding the limit, does not affect computation time
 U = 500 # overdraft limit
 
-sample_num = 15 # change 1
+sample_num = 5 # change 1
 
 # gamma distribution:mean demand is shape / beta and variance is shape / beta^2
 # beta = 1 / scale
@@ -150,10 +181,10 @@ for t in range(T):
     # sample_details2[t] = generate_samples_gamma(sample_num, trunQuantile, mean_demands2[t], betas[1])
     # sample_details1[t] = generate_samples(sample_num, trunQuantile, mean_demands[0])
     # sample_details2[t] = generate_samples(sample_num, trunQuantile, mean_demands[1])
-    sample_details1[t] = generate_samples_normal(sample_num, trunQuantile, mean_demands1[t], sigmas1[t])
-    sample_details2[t] = generate_samples_normal(sample_num, trunQuantile, mean_demands2[t], sigmas2[t])
-    # sample_details1[t] = generate_samples_discrete(sample_num, xk1, pk1)
-    # sample_details2[t] = generate_samples_discrete(sample_num, xk2, pk2)
+    # sample_details1[t] = generate_samples_normal(sample_num, trunQuantile, mean_demands1[t], sigmas1[t])
+    # sample_details2[t] = generate_samples_normal(sample_num, trunQuantile, mean_demands2[t], sigmas2[t])
+    sample_details1[t] = generate_samples_discrete(sample_num, xk1, pk1)
+    sample_details2[t] = generate_samples_discrete(sample_num, xk2, pk2)
 
 # sample_details1 = [[10, 30], [10, 30], [10, 30]] # change 2
 # sample_details2 = [[5, 15], [5, 15], [5, 15]]
@@ -178,9 +209,9 @@ m.addConstr(-vari_costs[0]*q1 - vari_costs[1]*q2- W0 + W1 + W2 == overhead_cost[
 # m.addConstr(q2 <= 100)
 
 # cuts recording arrays
-iter_limit = 300
+iter_limit = 500
 time_limit = 3600
-N = 15 # sampled number of scenarios in forward computing, change 3
+N = 5 # sampled number of scenarios in forward computing, change 3
 slope_stage1_1 = []
 slope_stage1_2 = []
 slope_stage1_3 = []
@@ -217,11 +248,11 @@ while iter < iter_limit and time_pass < time_limit: # and means satifying either
     # sample_scenarios1 = generate_scenarios(N, sample_num, sample_details1)
     # sample_scenarios2 = generate_scenarios(N, sample_num, sample_details2)
     
-    # sample_scenarios1 = generate_scenarios_discrete(N, xk1, pk1, T)
-    # sample_scenarios2 = generate_scenarios_discrete(N, xk2, pk2, T)
+    sample_scenarios1 = generate_scenarios_discrete(N, xk1, pk1, T)
+    sample_scenarios2 = generate_scenarios_discrete(N, xk2, pk2, T)
     
-    sample_scenarios1 = generate_scenarios_normal(N, trunQuantile, mean_demands1, sigmas1)
-    sample_scenarios2 = generate_scenarios_normal(N, trunQuantile, mean_demands2, sigmas2)
+    # sample_scenarios1 = generate_scenarios_normal(N, trunQuantile, mean_demands1, sigmas1)
+    # sample_scenarios2 = generate_scenarios_normal(N, trunQuantile, mean_demands2, sigmas2)
      
     # sample_scenarios1 = [[10, 10, 10], [10,10, 30], [10, 30, 10], [10,30, 30],[30,10,10],[30,10,30],[30,30,10],[30,30,30]] # change 4
     # sample_scenarios2 = [[5, 5, 5], [5, 5, 15], [5, 15, 5], [5,15,15],[15,5,5], [15,5, 15], [15,15,5], [15,15,15]]
@@ -414,7 +445,7 @@ while iter < iter_limit and time_pass < time_limit: # and means satifying either
                         if t < T - 1:
                             thisEndCash = ini_cash - overhead_cost[t] - vari_costs[0]*q1_values[-1][t][n]-vari_costs[1]*q2_values[-1][t][n]\
                                                           - r2*W2_values[-1] - r1*W1_values[-1] + r0*W0_values[-1]\
-                                                          + prices[0]*(demand1 - thisB1)+ prices[1]*(demand2 - thisB2) - vari_costs[0]*lastq1
+                                                          + prices[0]*(demand1 - thisB1)+ prices[1]*(demand2 - thisB2) - vari_costs[0]*lastq1 - vari_costs[1]*lastq2 - overhead_cost[t+1]
                     else:
                         thisEndI1 = I1_forward_values[t-1][n] + qpre1_values[-1][t-1][n] - demand1
                         thisB1 = -min(I1_forward_values[t-1][n] + qpre1_values[-1][t-1][n] - demand1, 0)

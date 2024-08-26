@@ -27,10 +27,39 @@ MM = len(prices)
 unit_salvages = [0.5* vari_costs[m] for m in range(MM)]
 overhead_cost = [100 for t in range(T)]
 
-SDP: final optimal cash  is 91.26875
+SDP: final optimal cash  is 91.26875 (441.57 for 0 overhead cost, 464 for 0 overdraft interest rate)
 optimal order quantity in the first priod is :  Q1 = 40, Q2 = 20;
 
+no enhancement
+sample numer is 5 and scenario number is 5 
+planning horizon length is T = 3 
+final expected total profits after 100 iteration is 98.12/141.23/23.74/97/139/153/94/43/120/181/61/145 (regenerate sample)
+ordering Q1 and Q2 in the first peiod is 40.00 and 20.00
+cpu time is 62.115 s
+expected lower bound gap is 78.60
+lower bound and upper bound gap is 19.89%
+confidence interval for expected objective is [-3.95,  161.15];
 
+no enhancement
+sample numer is 5 and scenario number is 5 
+planning horizon length is T = 3 
+final expected total profits after 100 iteration is 69.84/99.54/141.23 (sampling with replacement)
+ordering Q1 and Q2 in the first peiod is 20.00 and 20.00
+cpu time is 60.263 s
+expected lower bound gap is 66.20
+lower bound and upper bound gap is 5.21%
+confidence interval for expected objective is [23.44,  108.96];
+
+no enhancement
+sample numer is 5 and scenario number is 5 
+planning horizon length is T = 3 
+final expected total profits after 100 iteration is 69.84
+ordering Q1 and Q2 in the first peiod is 20.00 and 20.00
+cpu time is 60.263 s
+expected lower bound gap is 66.20
+lower bound and upper bound gap is 5.21%
+confidence interval for expected objective is [23.44,  108.96]
+*************************************************
 
 no enhancement
 sample numer is 10 and scenario number is 5 
@@ -148,7 +177,7 @@ m.addConstr(-vari_costs[0]*q1 - vari_costs[1]*q2- W0 + W1 + W2 == overhead_cost[
 
 
 # cuts recording arrays
-iter_limit = 400
+iter_limit = 100
 time_limit = 360
 N = 5 # sampled number of scenarios in forward computing, change 3
 slope_stage1_1 = []
