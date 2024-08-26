@@ -64,7 +64,7 @@ r1 = 0.1
 r2 = 2 # penalty interest rate for overdraft exceeding the limit, does not affect computation time
 U = 500 # overdraft limit
 
-sample_num = 5 # change 1
+sample_num = 2 # change 1
 
 # detailed samples in each period
 trunQuantile = 0.9999 # affective to the final ordering quantity
@@ -80,8 +80,8 @@ for t in range(T):
     # sample_details1[t] = generate_samples_discrete(sample_num, xk1, pk1)
     # sample_details2[t] = generate_samples_discrete(sample_num, xk2, pk2)
 
-# sample_details1 = [[10, 30], [10, 30], [10, 30]] # change 2
-# sample_details2 = [[5, 15], [5, 15], [5, 15]]
+sample_details1 = [[10, 30], [10, 30], [10, 30]] # change 2
+sample_details2 = [[5, 15], [5, 15], [5, 15]]
 
 theta_iniValue = -1000 # initial theta values (profit) in each period
 m = Model() # linear model in the first stage
@@ -102,7 +102,7 @@ m.addConstr(-vari_costs[0]*q1 - vari_costs[1]*q2- W0 + W1 + W2 == overhead_cost[
 # cuts recording arrays
 iter_limit = 500
 time_limit = 3600
-N = 5 # sampled number of scenarios in forward computing, change 3
+N = 8 # sampled number of scenarios in forward computing, change 3
 slope_stage1_1 = []
 slope_stage1_2 = []
 slope_stage1_3 = []
@@ -128,6 +128,9 @@ while iter < iter_limit and time_pass < time_limit: # and means satifying either
     
     sample_scenarios1 = generate_scenarios_normal(N, trunQuantile, mean_demands1, sigmas1)
     sample_scenarios2 = generate_scenarios_normal(N, trunQuantile, mean_demands2, sigmas2)
+    
+    sample_scenarios1 = [[10, 10, 10], [10,10, 30], [10, 30, 10], [10,30, 30],[30,10,10],[30,10,30],[30,30,10],[30,30,30]] # change 4
+    sample_scenarios2 = [[5, 5, 5], [5, 5, 15], [5, 15, 5], [5,15,15],[15,5,5], [15,5, 15], [15,15,5], [15,15,15]]
     
     if iter > 0:        
         m.addConstr(theta >= slope[0]*q1 + slope[1]*q2 + slope[2]*W0 + slope[3]*W1 + slope[4]*W2 + intercept)        
