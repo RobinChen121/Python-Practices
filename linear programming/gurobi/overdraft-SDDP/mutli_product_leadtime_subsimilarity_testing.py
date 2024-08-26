@@ -192,7 +192,7 @@ for d_pattern in range(10):
     time_pass = 0
     start = time.process_time()
     # while iter < iter_limit:  
-    while iter < iter_limit and time_pass < time_limit: # and means satifying either one will exist the loop
+    while iter < iter_limit or time_pass < time_limit: # and means satifying either one will exist the loop
         slopes1.append([[[0 for m in range(MM)] for n in range(N)] for t in range(T)])
         slopes2.append([[0 for n in range(N)] for t in range(T)])
         slopes3.append([[[0 for m in range(MM)] for n in range(N)] for t in range(T)])

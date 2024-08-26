@@ -208,11 +208,11 @@ while iter < iter_limit and time_pass < time_limit: # and means satifying either
         
         for t in range(T):
             if t == 0:   
-                m_forward[n].addConstr(cash_forward[t][n] + prices[0]*B1_forward[t][n] + + prices[1]*B2_forward[t][n] == ini_cash - overhead_cost[t]\
+                m_forward[n].addConstr(cash_forward[t][n] + prices[0]*B1_forward[t][n] + prices[1]*B2_forward[t][n] == ini_cash - overhead_cost[t]\
                                           - vari_costs[0]*q1.x -vari_costs[1]*q2.x -r1*W1.x + r0*W0.x\
                                               -r2*W2.x + prices[0]*demand1[t] + prices[1]*demand2[t])
             else:
-                m_forward[n].addConstr(cash_forward[t][n] + prices[0]*B1_forward[t][n] + + prices[1]*B2_forward[t][n] == cash_forward[t-1][n] - overhead_cost[t]\
+                m_forward[n].addConstr(cash_forward[t][n] + prices[0]*B1_forward[t][n] + prices[1]*B2_forward[t][n] == cash_forward[t-1][n] - overhead_cost[t]\
                                           - vari_costs[0]*q1_forward[t-1][n] - vari_costs[1]*q2_forward[t-1][n] -r1*W1_forward[t-1][n] + r0*W0_forward[t-1][n]\
                                               -r2*W2_forward[t-1][n] + prices[0]*demand1[t] + prices[1]*demand2[t])
         for t in range(T-1):
