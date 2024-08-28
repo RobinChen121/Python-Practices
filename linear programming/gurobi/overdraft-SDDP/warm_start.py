@@ -49,7 +49,7 @@ cov1 = 0.25 # lower variance vs higher variance
 cov2 = 0.5
 sigmas1 = [cov1*i for i in mean_demands1]
 sigmas2 = [cov2*i for i in mean_demands2]
-T = len(mean_demands1)
+T = 3 #len(mean_demands1)
 
 ini_Is = [0, 0]
 ini_cash = 0
@@ -97,10 +97,11 @@ m.setObjective(overhead_cost[0] + vari_costs[0]*q1 + vari_costs[1]*q2 + r2*W2 + 
 m.addConstr(theta >= theta_iniValue*(T))
 m.addConstr(W1 <= U)
 m.addConstr(-vari_costs[0]*q1 - vari_costs[1]*q2- W0 + W1 + W2 == overhead_cost[0] - ini_cash)
-
+# m.addConstr(q1 == 20)
+# m.addConstr(q2 == 20)
 
 # cuts recording arrays
-iter_limit = 500
+iter_limit = 5
 time_limit = 3600
 N = 8 # sampled number of scenarios in forward computing, change 3
 slope_stage1_1 = []
@@ -138,6 +139,11 @@ while iter < iter_limit and time_pass < time_limit: # and means satifying either
     m.Params.LogToConsole = 0
     m.optimize()
     
+    if iter == 0:
+        m.write('iter' + str(iter+1) + '_main.lp')    
+        m.write('iter' + str(iter+1) + '_main.sol')
+        pass
+    
     W0_values.append(W0.x)
     W1_values.append(W1.x)
     W2_values.append(W2.x)
@@ -150,8 +156,6 @@ while iter < iter_limit and time_pass < time_limit: # and means satifying either
     m_forward = [Model() for n in range(N)]
     q1_forward = [[m_forward[n].addVar(vtype = GRB.CONTINUOUS, name = 'q1_' + str(t+2) + '^' + str(n+1)) for n in range(N)]  for t in range(T - 1)]
     q2_forward = [[m_forward[n].addVar(vtype = GRB.CONTINUOUS, name = 'q2_' + str(t+2) + '^' + str(n+1)) for n in range(N)]  for t in range(T - 1)]
-    qpre1_forward = [[m_forward[n].addVar(vtype = GRB.CONTINUOUS, name = 'qpre1_' + str(t+2) + '^' + str(n+1)) for n in range(N)]  for t in range(T-1)]
-    qpre2_forward = [[m_forward[n].addVar(vtype = GRB.CONTINUOUS, name = 'qpre2_' + str(t+2) + '^' + str(n+1)) for n in range(N)]  for t in range(T-1)]
     I1_forward = [[m_forward[n].addVar(vtype = GRB.CONTINUOUS, name = 'I1_' + str(t+1) + '^' + str(n+1)) for n in range(N)]  for t in range(T)]
     I2_forward = [[m_forward[n].addVar(vtype = GRB.CONTINUOUS, name = 'I2_' + str(t+1) + '^' + str(n+1)) for n in range(N)]  for t in range(T)]
     cash_forward = [[m_forward[n].addVar(lb = -GRB.INFINITY, vtype = GRB.CONTINUOUS, name = 'C_' + str(t+1)+ '^' + str(n+1)) for n in range(N)] for t in range(T)]
@@ -175,11 +179,8 @@ while iter < iter_limit and time_pass < time_limit: # and means satifying either
     intercepts = [0 for n in range(N)]
     slopes = [[0 for i in range(5)] for n in range(N)]
     for n in range(N):
-        demand1 = [0 for t in range(T)]
-        demand2 = [0 for t in range(T)]
-        for t in range(T):
-            demand1[t] = sample_scenarios1[n][t]
-            demands[t] = sample_scenarios2[n][t]
+        demand1 = sample_scenarios1[n]
+        demand2 = sample_scenarios2[n]
         
         neg_revenue_total = LinExpr()      
         for t in range(T):
@@ -223,6 +224,10 @@ while iter < iter_limit and time_pass < time_limit: # and means satifying either
         # optimize
         m_forward[n].Params.LogToConsole = 0
         m_forward[n].optimize()
+        if iter == 0 and n == 0:
+            m_forward[n].write('iter'+ str(iter+1) + '_sub_' + str(n+1) + '_main.lp')    
+            m_forward[n].write('iter' + str(iter+1) + '_sub_' + str(n+1) + '_main.sol')
+            pass
         
         pi = m_forward[n].getAttr(GRB.Attr.Pi)
         rhs = m_forward[n].getAttr(GRB.Attr.RHS)
