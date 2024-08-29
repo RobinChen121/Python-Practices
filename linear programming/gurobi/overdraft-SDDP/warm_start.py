@@ -7,6 +7,8 @@ Created on Wed Aug 14 13:51:37 2024
 
 @disp:  transfer the multi stage model to a two stage model.
     
+warm start seems not perform well to provide better cuts;
+
     
 """
 
@@ -88,20 +90,23 @@ m = Model() # linear model in the first stage
 # decision variable in the first stage model
 q1 = m.addVar(vtype = GRB.CONTINUOUS, name = 'q_1')
 q2 = m.addVar(vtype = GRB.CONTINUOUS, name = 'q_2')
-W0 = m.addVar(vtype = GRB.CONTINUOUS, name = 'w_1^0')
-W1 = m.addVar(vtype = GRB.CONTINUOUS, name = 'w_1^1')
-W2 = m.addVar(vtype = GRB.CONTINUOUS, name = 'w_1^2')
+W0 = m.addVar(vtype = GRB.CONTINUOUS, name = 'w0^0')
+W1 = m.addVar(vtype = GRB.CONTINUOUS, name = 'w1^1')
+W2 = m.addVar(vtype = GRB.CONTINUOUS, name = 'w2^2')
 theta = m.addVar(lb = -GRB.INFINITY, vtype = GRB.CONTINUOUS, name = 'theta_2')
 
 m.setObjective(overhead_cost[0] + vari_costs[0]*q1 + vari_costs[1]*q2 + r2*W2 + r1*W1 - r0*W0 + theta, GRB.MINIMIZE)
 m.addConstr(theta >= theta_iniValue*(T))
 m.addConstr(W1 <= U)
 m.addConstr(-vari_costs[0]*q1 - vari_costs[1]*q2- W0 + W1 + W2 == overhead_cost[0] - ini_cash)
+m.addConstr(W0 <= overhead_cost[0] - ini_cash)
+m.addConstr(W1 + W2 <= overhead_cost[0] - ini_cash)
+
 # m.addConstr(q1 == 20)
 # m.addConstr(q2 == 20)
 
 # cuts recording arrays
-iter_limit = 5
+iter_limit = 15
 time_limit = 3600
 N = 8 # sampled number of scenarios in forward computing, change 3
 slope_stage1_1 = []
@@ -139,7 +144,7 @@ while iter < iter_limit and time_pass < time_limit: # and means satifying either
     m.Params.LogToConsole = 0
     m.optimize()
     
-    if iter == 0:
+    if iter == 10:
         m.write('iter' + str(iter+1) + '_main.lp')    
         m.write('iter' + str(iter+1) + '_main.sol')
         pass
@@ -233,10 +238,10 @@ while iter < iter_limit and time_pass < time_limit: # and means satifying either
         
         num_con = len(pi)
         for i in range(num_con):
-            if i not in [2, 3, 2*T]: 
+            if i not in [2, 3, 2*T]:
                 intercepts[n] += pi[i]*rhs[i]
         intercepts[n] += -pi[2]*demand1[1] - pi[3]*demand2[1] + pi[2*T]*(ini_cash - overhead_cost[t] + prices[0]*demand1[0] + prices[1]*demand2[0])
-        slopes[n] = [pi[1]- vari_costs[0]*pi[2*T], pi[2]- vari_costs[1]*pi[2*T], r0*pi[2*T], -r1*pi[2*T], -r2*pi[2*T]]
+        slopes[n] = [pi[2]- vari_costs[0]*pi[2*T], pi[3]- vari_costs[1]*pi[2*T], r0*pi[2*T], -r1*pi[2*T], -r2*pi[2*T]]
     
         intercept = np.mean(intercepts)
         slope = np.mean(slopes, axis = 1)
