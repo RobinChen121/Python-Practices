@@ -165,7 +165,6 @@ while iter < iter_limit and time_pass < time_limit: # and means satifying either
     # B is the quantity of lost sale
     B1_forward = [[m_forward[n].addVar(vtype = GRB.CONTINUOUS, name = 'B1_' + str(t+1) + '^' + str(n+1)) for n in range(N)]  for t in range(T)]
     B2_forward = [[m_forward[n].addVar(vtype = GRB.CONTINUOUS, name = 'B2_' + str(t+1) + '^' + str(n+1)) for n in range(N)]  for t in range(T)]
-    theta_forward = [[m_forward[n].addVar(lb = -GRB.INFINITY, vtype = GRB.CONTINUOUS, name = 'theta_' + str(t+3) + '^' + str(n+1)) for n in range(N)]  for t in range(T - 1)]
  
     I1_forward_values = [[0 for n in range(N)] for t in range(T)]
     B1_forward_values = [[0 for n in range(N)] for t in range(T)]
