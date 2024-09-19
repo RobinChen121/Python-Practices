@@ -170,7 +170,7 @@ for d_pattern in range(10):
     
     # cuts recording arrays
     iter_limit = 300
-    time_limit = 3600
+    time_limit = 7200
     N = 10 # sampled number of scenarios in forward computing, change 3
     slope_stage1_1 = []
     slope_stage1_2 = []
@@ -192,7 +192,7 @@ for d_pattern in range(10):
     time_pass = 0
     start = time.process_time()
     # while iter < iter_limit:  
-    while iter < iter_limit or time_pass < time_limit: # and means satifying either one will exist the loop
+    while iter < iter_limit: # and time_pass < time_limit: # and means not satifying either one will exist the loop
         slopes1.append([[[0 for m in range(MM)] for n in range(N)] for t in range(T)])
         slopes2.append([[0 for n in range(N)] for t in range(T)])
         slopes3.append([[[0 for m in range(MM)] for n in range(N)] for t in range(T)])

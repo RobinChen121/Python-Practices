@@ -50,7 +50,7 @@ planning horizon length is T = 6
 final expected total profits after 300 iteration is 535.09
 ordering Q1 and Q2 in the first peiod is 44.14 and 22.39
 cpu time is 1324.591 s
-expected lower bound gap is 387.43
+expected lower bound gap is 387.43 
 lower bound and upper bound gap is 27.59%
 confidence interval for expected objective is [8.68,  766.18];
 
@@ -211,7 +211,7 @@ for d_pattern in range(10):
     stop_condition = 'iter_limit'
     start = time.process_time()
     # while iter < iter_num:  
-    while iter < iter_limit or time_pass < time_limit:   # and means satifying either one will exist the loop
+    while iter < iter_limit: # or time_pass < time_limit:   # and means not satifying either one will exist the loop
         slopes1.append([[[0 for m in range(MM)] for n in range(N)] for t in range(T)])
         slopes2.append([[0 for n in range(N)] for t in range(T)])
         slopes3.append([[[0 for m in range(MM)] for n in range(N)] for t in range(T)])
