@@ -81,7 +81,7 @@ slope1_stage = []
 intercept1_stage = []
 q_values = [0 for iter in range(iter_num)]
 
-kk = [1, 2, 3]
+kk = [1, 2, 5, 10]
 # kk = [NN for i in range(4)]
 slopes = [[] for i in range(iter_num)]
 intercepts = [[] for i in range(iter_num)]
@@ -144,15 +144,14 @@ while iter < iter_num:
 
 
             # put those cuts in the back
-            # if iter > 0 and t < T - 1:
-            #     # cuts selected in previous iterations
-            #     for i in range(iter-1):               
-            #         nn = cut_index[i][t] # i is the iter index
-            #         m_forward[t][n].addConstr(theta_forward[t][n] >= slopes[i][t][nn]*(I_forward[t][n]- B_forward[t][n] + q_forward[t][n]) + intercepts[i][t][nn])
+            if iter > 0 and t < T - 1:
+                # cuts selected in previous iterations
+                for i in range(iter-1):               
+                    nn = cut_index[i][t] # i is the iter index
+                    m_forward[t][n].addConstr(theta_forward[t][n] >= slopes[i][t][nn]*(I_forward[t][n]- B_forward[t][n] + q_forward[t][n]) + intercepts[i][t][nn])
             
             NewJustAdd = True
-            max_value = float('-inf')
-            loop_no = 0 # not necessary
+            loop_no = 0 # necessary
             while NewJustAdd:      
                 NewJustAdd = False
                 if iter > 0 and t < T - 1:                      
@@ -171,7 +170,7 @@ while iter < iter_num:
                 if iter > 0 and t < T - 1:                    
                     N2 = kk[iter-1] if iter <= len(kk) else kk[-1]
                     values = [slopes[iter-1][t][k]*(I_forward_values[t][n]- B_forward_values[t][n] + q_forward_values[t][n]) + intercepts[iter-1][t][k] for k in range(N2)]               
-                    if np.argmax(values) != nn:                       
+                    if np.argmax(values) != cut_index[iter - 1][t]:                       
                         NewJustAdd = True
                         loop_no += 1
                         if loop_no > 3:
@@ -211,13 +210,12 @@ while iter < iter_num:
                 
 
                  # put those cuts in the back
-                # if iter > 0 and t < T - 1:
-                #     for i in range(iter - 1):
-                #         nn = cut_index_back[i][t]
-                #         m_backward[t][n][s].addConstr(theta_backward[t][n][s] >= slopes[i][t][nn]*(I_backward[t][n][s]- B_backward[t][n][s] + q_backward[t][n][s]) + intercepts[i][t][nn])
+                if iter > 0 and t < T - 1:
+                    for i in range(iter - 1):
+                        nn = cut_index_back[i][t]
+                        m_backward[t][n][s].addConstr(theta_backward[t][n][s] >= slopes[i][t][nn]*(I_backward[t][n][s]- B_backward[t][n][s] + q_backward[t][n][s]) + intercepts[i][t][nn])
 
                 NewJustAdd = True
-                max_value = float('-inf')
                 loop_no = 0
                 while NewJustAdd:
                     NewJustAdd = False
@@ -236,7 +234,7 @@ while iter < iter_num:
                     if iter > 0 and t < T - 1:
                         N2 = kk[iter-1] if iter <= len(kk) else kk[-1]
                         values = [slopes[iter-1][t][k]*(I_backward_values[t][n][s]- B_backward_values[t][n][s] + q_backward_values[t][n][s]) + intercepts[iter-1][t][k] for k in range(N2)]
-                        if np.argmax(values) != nn:                          
+                        if np.argmax(values) != cut_index_back[iter - 1][t]:                          
                             NewJustAdd = True
                             loop_no += 1
                             if loop_no > 3:

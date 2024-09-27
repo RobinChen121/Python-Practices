@@ -30,19 +30,28 @@ overhead_cost = [100 for t in range(T)]
 SDP: final optimal cash  is 91.26875 (441.57 for 0 overhead cost, 464 for 0 overdraft interest rate)
 optimal order quantity in the first priod is :  Q1 = 40, Q2 = 20;
 
-cut selection
-sample numer is 5 and scenario number is 10 
+no enhancement
+sample numer is 5 and scenario number is 5 
 planning horizon length is T = 3 
-final expected total profits after 100 iteration is 98.12
+final expected total profits after 100 iteration is 98.12/141.23/23.74/97/139/153/94/43/120/181/61/145 (regenerate sample)
 ordering Q1 and Q2 in the first peiod is 40.00 and 20.00
-cpu time is 34.023 s
-expected lower bound gap is 70.10
-lower bound and upper bound gap is 28.56%
-confidence interval for expected objective is [8.72,  131.48]
+cpu time is 62.115 s
+expected lower bound gap is 78.60
+lower bound and upper bound gap is 19.89%
+confidence interval for expected objective is [-3.95,  161.15];
 
+no enhancement
+sample numer is 5 and scenario number is 5 
+planning horizon length is T = 3 
+final expected total profits after 100 iteration is 69.84/99.54/141.23 (sampling with replacement)
+ordering Q1 and Q2 in the first peiod is 20.00 and 20.00
+cpu time is 60.263 s
+expected lower bound gap is 66.20
+lower bound and upper bound gap is 5.21%
+confidence interval for expected objective is [23.44,  108.96];
 
-
-
+SDDP with abridge:
+for abridge, B=2, F=5 (take average for the 5 out of the 10 solutions of forward computing), so compute 10 sub problems in forward;
 
 """
 
@@ -64,7 +73,7 @@ from tree import *
 # beta = 1 / scale
 # shape = demand * beta
 # variance = demand / beta
-mean_demands1 =[30, 30, 30, 30, 30] # higher average demand vs lower average demand
+mean_demands1 =[30, 30, 30] # higher average demand vs lower average demand
 mean_demands2 = [i*0.5 for i in mean_demands1] # higher average demand vs lower average demand
 # betas = [2, 0.25] # lower variance vs higher variance
 # T = len(mean_demands1)
@@ -114,10 +123,10 @@ for t in range(T):
     # sample_details2[t] = generate_samples_gamma(sample_num, trunQuantile, mean_demands2[t], betas[1])
     # sample_details1[t] = generate_samples(sample_num, trunQuantile, mean_demands1[t])
     # sample_details2[t] = generate_samples(sample_num, trunQuantile, mean_demands2[t])
-    sample_details1[t] = generate_samples_normal(sample_num, trunQuantile, mean_demands1[t], sigmas1[t])
-    sample_details2[t] = generate_samples_normal(sample_num, trunQuantile, mean_demands2[t], sigmas2[t])
-    # sample_details1[t] = generate_samples_discrete(sample_num, xk1, pk1)
-    # sample_details2[t] = generate_samples_discrete(sample_num, xk2, pk2)
+    # sample_details1[t] = generate_samples_normal(sample_num, trunQuantile, mean_demands1[t], sigmas1[t])
+    # sample_details2[t] = generate_samples_normal(sample_num, trunQuantile, mean_demands2[t], sigmas2[t])
+    sample_details1[t] = generate_samples_discrete(sample_num, xk1, pk1)
+    sample_details2[t] = generate_samples_discrete(sample_num, xk2, pk2)
 
 # sample_details1 = [[10, 30], [10, 30], [10, 30]] # change 2
 # sample_details2 = [[5, 15], [5, 15], [5, 15]]
@@ -140,7 +149,7 @@ m.addConstr(-vari_costs[0]*q1 - vari_costs[1]*q2- W0 + W1 + W2 == overhead_cost[
 
 
 # cuts recording arrays
-iter_limit = 100
+iter_limit = 300
 time_limit = 360
 N = 10 # sampled number of scenarios in forward computing, change 3
 slope_stage1_1 = []
@@ -155,19 +164,20 @@ q1_values = []
 qpre1_values = [] 
 q2_values = [] 
 qpre2_values = [] 
+q1_values_bridge = [] 
+qpre1_values_bridge  = [] 
+q2_values_bridge  = [] 
+qpre2_values_bridge  = [] 
 W0_values = []
 W1_values = []
 W2_values = []
 
-kk = [1, 2, 5, 10]
-cut_index = [[]for i in range(iter_limit)]
-cut_index_back = [[]for i in range(iter_limit)]
 iter = 0
 time_pass = 0
+B = 2 # number of sampled nodes in forwad subproblems for abridge
 start = time.process_time()
 # while iter < iter_num:  
 while iter < iter_limit: # time_pass < time_limit:   # or
-    N = kk[iter] if iter < len(kk) else kk[-1] # this N is the k in the JCAM 2015 paper
     slopes1.append([[[0 for m in range(MM)] for n in range(N)] for t in range(T)])
     slopes2.append([[0 for n in range(N)] for t in range(T)])
     slopes3.append([[[0 for m in range(MM)] for n in range(N)] for t in range(T)])
@@ -177,8 +187,10 @@ while iter < iter_limit: # time_pass < time_limit:   # or
     q2_values.append([[0 for n in range(N)] for t in range(T)]) 
     qpre2_values.append([[0 for n in range(N)] for t in range(T)]) 
     
-    cut_index[iter] = [0 for t in range(T-1)]
-    cut_index_back[iter] = [0 for t in range(T-1)]
+    q1_values_bridge.append([[0 for n in range(B)] for t in range(T)]) 
+    qpre1_values_bridge.append([[0 for n in range(B)] for t in range(T)]) 
+    q2_values_bridge.append([[0 for n in range(B)] for t in range(T)]) 
+    qpre2_values_bridge.append([[0 for n in range(B)] for t in range(T)]) 
      
     # sample_scenarios1 = generate_scenario_samples_gamma(N, trunQuantile, mean_demands[0], betas[0], T)
     # sample_scenarios2 = generate_scenario_samples_gamma(N, trunQuantile, mean_demands[1], betas[1], T)
@@ -186,11 +198,8 @@ while iter < iter_limit: # time_pass < time_limit:   # or
     # sample_scenarios1 = generate_scenarios(N, sample_num, sample_details1)
     # sample_scenarios2 = generate_scenarios(N, sample_num, sample_details2)
     
-    # sample_scenarios1 = generate_scenarios_discrete(N, xk1, pk1, T)
-    # sample_scenarios2 = generate_scenarios_discrete(N, xk2, pk2, T)
-    
-    sample_scenarios1 = generate_scenarios_normal(N, trunQuantile, mean_demands1, sigmas1)
-    sample_scenarios2 = generate_scenarios_normal(N, trunQuantile, mean_demands2, sigmas2)
+    sample_scenarios1 = generate_scenarios_discrete(N, xk1, pk1, T)
+    sample_scenarios2 = generate_scenarios_discrete(N, xk2, pk2, T)
      
     # sample_scenarios1 = [[10, 10, 10], [10,10, 30], [10, 30, 10], [10,30, 30],[30,10,10],[30,10,30],[30,30,10],[30,30,30]] # change 4
     # sample_scenarios2 = [[5, 5, 5], [5, 5, 15], [5, 15, 5], [5,15,15],[15,5,5], [15,5, 15], [15,15,5], [15,15,15]]
@@ -245,11 +254,21 @@ while iter < iter_limit: # time_pass < time_limit:   # or
     W1_forward_values = [[0 for n in range(N)] for t in range(T-1)]
     W2_forward_values = [[0 for n in range(N)] for t in range(T-1)] 
     
+    I1_forward_values_bridge = [[0 for n in range(B)] for t in range(T)]
+    B1_forward_values_bridge = [[0 for n in range(B)] for t in range(T)]
+    I2_forward_values_bridge = [[0 for n in range(B)] for t in range(T)]
+    B2_forward_values_bridge = [[0 for n in range(B)] for t in range(T)]
+    cash_forward_values_bridge = [[0 for n in range(B)] for t in range(T)]
+    W0_forward_values_bridge = [[0 for n in range(B)] for t in range(T-1)] 
+    W1_forward_values_bridge = [[0 for n in range(B)] for t in range(T-1)]
+    W2_forward_values_bridge = [[0 for n in range(B)] for t in range(T-1)]
+    
     
     for t in range(T):
         for n in range(N):
             demand1 = sample_scenarios1[n][t]
             demand2 = sample_scenarios2[n][t]
+            bn = int(n /(N/B))
             
             if t == 0:   
                 m_forward[t][n].addConstr(I1_forward[t][n] - B1_forward[t][n] == ini_Is[0] - demand1)
@@ -258,11 +277,11 @@ while iter < iter_limit: # time_pass < time_limit:   # or
                                           - vari_costs[0]*q1_values[-1][t][n] -vari_costs[1]*q2_values[-1][t][n] -r1*W1_values[-1] + r0*W0_values[-1]\
                                               -r2*W2_values[-1] + prices[0]*demand1 + prices[1]*demand2)
             else:
-                m_forward[t][n].addConstr(I1_forward[t][n] - B1_forward[t][n] == I1_forward_values[t-1][n] + qpre1_values[-1][t-1][n] - demand1)
-                m_forward[t][n].addConstr(I2_forward[t][n] - B2_forward[t][n] == I2_forward_values[t-1][n] + qpre2_values[-1][t-1][n] - demand2)
-                m_forward[t][n].addConstr(cash_forward[t][n] + prices[0]*B1_forward[t][n] + + prices[1]*B2_forward[t][n] == cash_forward_values[t-1][n] - overhead_cost[t]\
-                                          - vari_costs[0]*q1_values[-1][t][n] - vari_costs[1]*q2_values[-1][t][n] -r1*W1_values[-1] + r0*W0_values[-1]\
-                                              -r2*W2_values[-1] + prices[0]*demand1 + prices[1]*demand2)
+                m_forward[t][n].addConstr(I1_forward[t][n] - B1_forward[t][n] == I1_forward_values_bridge[t-1][n] + qpre1_values_bridge[-1][t-1][n] - demand1)
+                m_forward[t][n].addConstr(I2_forward[t][n] - B2_forward[t][n] == I2_forward_values_bridge[t-1][n] + qpre2_values_bridge[-1][t-1][n] - demand2)
+                m_forward[t][n].addConstr(cash_forward[t][n] + prices[0]*B1_forward[t][n] + + prices[1]*B2_forward[t][n] == cash_forward_values_bridge[t-1][n] - overhead_cost[t]\
+                                          - vari_costs[0]*q1_values_bridge[-1][t][n] - vari_costs[1]*q2_values_bridge[-1][t][n] -r1*W1_values_bridge[-1] + r0*W0_values_bridge[-1]\
+                                              -r2*W2_values_bridge[-1] + prices[0]*demand1 + prices[1]*demand2)
              
             if t < T - 1:
                 m_forward[t][n].addConstr(qpre1_forward[t][n] == q1_values[-1][t][n]) 
@@ -283,73 +302,45 @@ while iter < iter_limit: # time_pass < time_limit:   # or
             
             # put those cuts in the back
             if iter > 0 and t < T - 1:
-                for i in range(iter-1):
-                    nn = cut_index[i][t] # i is the iter index
-                    m_forward[t][n].addConstr(theta_forward[t][n] >= slopes1[i][t][nn][0]*(I1_forward[t][n]+ qpre1_forward[t][n])\
+                for i in range(iter):
+                    for nn in range(B): # N
+                        m_forward[t][n].addConstr(theta_forward[t][n] >= slopes1[i][t][nn][0]*(I1_forward[t][n]+ qpre1_forward[t][n])\
                                                   + slopes1[i][t][nn][1]*(I2_forward[t][n]+ qpre2_forward[t][n])\
                                                       + slopes3[i][t][nn][0]*q1_forward[t][n] + slopes3[i][t][nn][1]*q2_forward[t][n]\
                                                   + slopes2[i][t][nn]*(cash_forward[t][n]- vari_costs[0]*q1_forward[t][n]- vari_costs[1]*q2_forward[t][n]-r2*W2_forward[t][n]\
                                              - r1*W1_forward[t][n]+r0*W0_forward[t][n])\
                                                 + intercepts[i][t][nn])
-            NewJustAdd = True
-            loop_no = 0 # necessary
-            while NewJustAdd:      
-                NewJustAdd = False            
-                if iter > 0 and t < T - 1: 
-                    nn = cut_index[iter-1][t] # default initiallly select the first cut
-                    m_forward[t][n].addConstr(theta_forward[t][n] >= slopes1[iter-1][t][nn][0]*(I1_forward[t][n]+ qpre1_forward[t][n])\
-                                              + slopes1[iter-1][t][nn][1]*(I2_forward[t][n]+ qpre2_forward[t][n])\
-                                                  + slopes3[iter-1][t][nn][0]*q1_forward[t][n] + slopes3[iter-1][t][nn][1]*q2_forward[t][n]\
-                                              + slopes2[iter-1][t][nn]*(cash_forward[t][n]- vari_costs[0]*q1_forward[t][n]- vari_costs[1]*q2_forward[t][n]-r2*W2_forward[t][n]\
-                                         - r1*W1_forward[t][n]+r0*W0_forward[t][n])\
-                                            + intercepts[iter-1][t][nn])
-                    
-                # optimize
-                m_forward[t][n].Params.LogToConsole = 0
-                m_forward[t][n].optimize()
-                # if iter == 1 and t == 0:
-                #     m_forward[t][n].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(n+1) + '.lp') 
-                #     m_forward[t][n].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(n+1) + '.sol') 
-                #     pass
             
-                I1_forward_values[t][n] = I1_forward[t][n].x 
-                I2_forward_values[t][n] = I2_forward[t][n].x 
-                               
-                B1_forward_values[t][n] = B1_forward[t][n].x  
-                B2_forward_values[t][n] = B2_forward[t][n].x 
-                cash_forward_values[t][n] = cash_forward[t][n].x 
+            # optimize
+            m_forward[t][n].Params.LogToConsole = 0
+            m_forward[t][n].optimize()
+            # if iter == 1 and t == 0:
+            #     m_forward[t][n].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(n+1) + '.lp') 
+            #     m_forward[t][n].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(n+1) + '.sol') 
+            #     pass
         
-                if t < T - 1: # for computing confidence interval
-                    z_values[n][t+1] = m_forward[t][n].objVal - theta_forward[t][n].x
-                else:
-                    z_values[n][t+1] = m_forward[t][n].objVal
-                                        
-                if t < T - 1:
-                    q1_values[iter][t+1][n] = q1_forward[t][n].x
-                    q2_values[iter][t+1][n] = q2_forward[t][n].x
-                    qpre1_values[iter][t][n] = qpre1_forward[t][n].x
-                    qpre2_values[iter][t][n] = qpre2_forward[t][n].x
-                    W1_forward_values[t][n] = W1_forward[t][n].x
-                    W0_forward_values[t][n] = W0_forward[t][n].x
-                    W2_forward_values[t][n] = W2_forward[t][n].x
+            I1_forward_values[t][n] = I1_forward[t][n].x 
+            I2_forward_values[t][n] = I2_forward[t][n].x 
+                           
+            B1_forward_values[t][n] = B1_forward[t][n].x  
+            B2_forward_values[t][n] = B2_forward[t][n].x 
+            cash_forward_values[t][n] = cash_forward[t][n].x 
+        
+            if t < T - 1: # for computing confidence interval
+                z_values[n][t+1] = m_forward[t][n].objVal - theta_forward[t][n].x
+            else:
+                z_values[n][t+1] = m_forward[t][n].objVal
                 
-                if iter > 0 and t < T - 1:                    
-                    N2 = kk[iter-1] if iter <= len(kk) else kk[-1]
-                    values = [0 for k in range(N2)]     
-                    for k in range(N2):
-                        values[k] = slopes1[iter-1][t][k][0]*(I1_forward[t][n].x + qpre1_forward[t][n].x)\
-                                                  + slopes1[iter-1][t][k][1]*(I2_forward[t][n].x+ qpre2_forward[t][n].x)\
-                                                      + slopes3[iter-1][t][k][0]*q1_forward[t][n].x + slopes3[iter-1][t][k][1]*q2_forward[t][n].x\
-                                                  + slopes2[iter-1][t][k]*(cash_forward[t][n].x- vari_costs[0]*q1_forward[t][n].x- vari_costs[1]*q2_forward[t][n].x-r2*W2_forward[t][n].x\
-                                             - r1*W1_forward[t][n].x+r0*W0_forward[t][n].x)\
-                                                + intercepts[iter-1][t][k]
-                    if np.argmax(values) != nn:                       
-                        NewJustAdd = True
-                        loop_no += 1
-                        if loop_no > 3:
-                            break
-                        cut_index[iter - 1][t] = np.argmax(values)
-                        m_forward[t][n].remove(m_forward[t][n].getConstrs()[-1])
+                
+            
+            if t < T - 1:
+                q1_values[iter][t+1][n] = q1_forward[t][n].x
+                q2_values[iter][t+1][n] = q2_forward[t][n].x
+                qpre1_values[iter][t][n] = qpre1_forward[t][n].x
+                qpre2_values[iter][t][n] = qpre2_forward[t][n].x
+                W1_forward_values[t][n] = W1_forward[t][n].x
+                W0_forward_values[t][n] = W0_forward[t][n].x
+                W2_forward_values[t][n] = W2_forward[t][n].x
                 
     # backward
     m_backward = [[[Model() for s in range(sample_num)] for n in range(N)] for t in range(T)]
@@ -421,48 +412,18 @@ while iter < iter_limit: # time_pass < time_limit:   # or
                     
                 # put those cuts in the back
                 if iter > 0 and t < T - 1:
-                    for i in range(iter - 1):
-                        nn = cut_index_back[i][t]
-                        m_backward[t][n][s].addConstr(theta_backward[t][n][s] >= slopes1[i][t][nn][0]*(I1_backward[t][n][s]+ qpre1_backward[t][n][s])\
+                    for i in range(iter):
+                        for nn in range(N): # N
+                            m_backward[t][n][s].addConstr(theta_backward[t][n][s] >= slopes1[i][t][nn][0]*(I1_backward[t][n][s]+ qpre1_backward[t][n][s])\
                                                           + slopes1[i][t][nn][1]*(I2_backward[t][n][s]+ qpre2_backward[t][n][s])\
                                                       + slopes3[i][t][nn][0]*q1_backward[t][n][s]+ slopes3[i][t][nn][1]*q2_backward[t][n][s]\
                                                       + slopes2[i][t][nn]*(cash_backward[t][n][s]- vari_costs[0]*q1_backward[t][n][s]- vari_costs[1]*q2_backward[t][n][s]\
                                                                            -r2*W2_backward[t][n][s]- r1*W1_backward[t][n][s]+r0*W0_backward[t][n][s])\
                                                     + intercepts[i][t][nn])
-                
-                NewJustAdd = True
-                loop_no = 0
-                while NewJustAdd:
-                    NewJustAdd = False
-                    if iter > 0 and t < T - 1:
-                        nn = cut_index_back[iter - 1][t]
-                        m_backward[t][n][s].addConstr(theta_backward[t][n][s] >= slopes1[iter - 1][t][nn][0]*(I1_backward[t][n][s]+ qpre1_backward[t][n][s])\
-                                                          + slopes1[iter - 1][t][nn][1]*(I2_backward[t][n][s]+ qpre2_backward[t][n][s])\
-                                                      + slopes3[iter - 1][t][nn][0]*q1_backward[t][n][s]+ slopes3[iter - 1][t][nn][1]*q2_backward[t][n][s]\
-                                                      + slopes2[iter - 1][t][nn]*(cash_backward[t][n][s]- vari_costs[0]*q1_backward[t][n][s]- vari_costs[1]*q2_backward[t][n][s]\
-                                                                           -r2*W2_backward[t][n][s]- r1*W1_backward[t][n][s]+r0*W0_backward[t][n][s])\
-                                                    + intercepts[iter - 1][t][nn])
-                    # optimize
-                    m_backward[t][n][s].Params.LogToConsole = 0
-                    m_backward[t][n][s].optimize()                  
-                    
-                    if iter > 0 and t < T - 1:                    
-                        N2 = kk[iter-1] if iter <= len(kk) else kk[-1]
-                        values = [0 for k in range(N2)]     
-                        for k in range(N2):
-                            values[k] = slopes1[iter-1][t][k][0]*(I1_backward[t][n][s].x + qpre1_backward[t][n][s].x)\
-                                                      + slopes1[iter-1][t][k][1]*(I2_backward[t][n][s].x + qpre2_backward[t][n][s].x)\
-                                                          + slopes3[iter-1][t][k][0]*q1_backward[t][n][s].x + slopes3[iter-1][t][k][1]*q2_backward[t][n][s].x\
-                                                      + slopes2[iter-1][t][k]*(cash_backward[t][n][s].x - vari_costs[0]*q1_backward[t][n][s].x- vari_costs[1]*q2_backward[t][n][s].x - r2*W2_backward[t][n][s].x\
-                                                 - r1*W1_backward[t][n][s].x + r0*W0_backward[t][n][s].x)\
-                                                    + intercepts[iter-1][t][k]
-                        if np.argmax(values) != nn:                       
-                            NewJustAdd = True
-                            loop_no += 1
-                            if loop_no > 3:
-                                break
-                            cut_index[iter - 1][t] = np.argmax(values)
-                            m_backward[t][n][s].remove(m_backward[t][n][s].getConstrs()[-1])
+                               
+                # optimize
+                m_backward[t][n][s].Params.LogToConsole = 0
+                m_backward[t][n][s].optimize()
                 
                 pi = m_backward[t][n][s].getAttr(GRB.Attr.Pi)
                 rhs = m_backward[t][n][s].getAttr(GRB.Attr.RHS)
