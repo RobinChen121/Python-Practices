@@ -219,7 +219,9 @@ while iter < iter_limit: # time_pass < time_limit:   # or
     #     pass
 
     q1_values[iter][0] = [q1.x for n in range(N)]  
-    q2_values[iter][0] = [q2.x for n in range(N)]    
+    q2_values[iter][0] = [q2.x for n in range(N)]   
+    q1_values_bridge[iter][0] = [q1.x for n in range(B)]  
+    q2_values_bridge[iter][0] = [q2.x for n in range(B)] 
     W0_values.append(W0.x)
     W1_values.append(W1.x)
     W2_values.append(W2.x)
@@ -277,15 +279,15 @@ while iter < iter_limit: # time_pass < time_limit:   # or
                                           - vari_costs[0]*q1_values[-1][t][n] -vari_costs[1]*q2_values[-1][t][n] -r1*W1_values[-1] + r0*W0_values[-1]\
                                               -r2*W2_values[-1] + prices[0]*demand1 + prices[1]*demand2)
             else:
-                m_forward[t][n].addConstr(I1_forward[t][n] - B1_forward[t][n] == I1_forward_values_bridge[t-1][n] + qpre1_values_bridge[-1][t-1][n] - demand1)
-                m_forward[t][n].addConstr(I2_forward[t][n] - B2_forward[t][n] == I2_forward_values_bridge[t-1][n] + qpre2_values_bridge[-1][t-1][n] - demand2)
-                m_forward[t][n].addConstr(cash_forward[t][n] + prices[0]*B1_forward[t][n] + + prices[1]*B2_forward[t][n] == cash_forward_values_bridge[t-1][n] - overhead_cost[t]\
-                                          - vari_costs[0]*q1_values_bridge[-1][t][n] - vari_costs[1]*q2_values_bridge[-1][t][n] -r1*W1_values_bridge[-1] + r0*W0_values_bridge[-1]\
+                m_forward[t][n].addConstr(I1_forward[t][n] - B1_forward[t][n] == I1_forward_values_bridge[t-1][bn] + qpre1_values_bridge[-1][t-1][bn] - demand1)
+                m_forward[t][n].addConstr(I2_forward[t][n] - B2_forward[t][n] == I2_forward_values_bridge[t-1][bn] + qpre2_values_bridge[-1][t-1][bn] - demand2)
+                m_forward[t][n].addConstr(cash_forward[t][n] + prices[0]*B1_forward[t][n] + + prices[1]*B2_forward[t][n] == cash_forward_values_bridge[t-1][bn] - overhead_cost[t]\
+                                          - vari_costs[0]*q1_values_bridge[-1][t][bn] - vari_costs[1]*q2_values_bridge[-1][t][bn] -r1*W1_values_bridge[-1] + r0*W0_values_bridge[-1]\
                                               -r2*W2_values_bridge[-1] + prices[0]*demand1 + prices[1]*demand2)
              
             if t < T - 1:
-                m_forward[t][n].addConstr(qpre1_forward[t][n] == q1_values[-1][t][n]) 
-                m_forward[t][n].addConstr(qpre2_forward[t][n] == q2_values[-1][t][n]) 
+                m_forward[t][n].addConstr(qpre1_forward[t][n] == q1_values_bridge[-1][t][bn]) 
+                m_forward[t][n].addConstr(qpre2_forward[t][n] == q2_values_bridge[-1][t][bn]) 
             if t == T - 1:                   
                 m_forward[t][n].setObjective(-prices[0]*(demand1 - B1_forward[t][n])-prices[1]*(demand2 - B2_forward[t][n])\
                                              - unit_salvages[0]*I1_forward[t][n]- unit_salvages[1]*I2_forward[t][n], GRB.MINIMIZE)
