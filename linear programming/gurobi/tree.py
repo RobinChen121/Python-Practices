@@ -74,7 +74,7 @@ def getSizeOfNestedList(listOfElem):
     return count
 
 
-# generate for possion distribution
+# generate for any distribution from sample details
 def generate_scenarios2(scenario_num, sample_num, sample_details):
     T = len(sample_details)
     scenarios = [[0 for t in range(T)] for i in range(scenario_num)]
@@ -87,7 +87,7 @@ def generate_scenarios2(scenario_num, sample_num, sample_details):
             
     return scenarios
 
-
+# generate for possion distribution
 def generate_scenarios(scenario_num, trunQuantile, mus):
     T = len(mus)
     samples = [[0 for t in range(T)] for i in range(scenario_num)]

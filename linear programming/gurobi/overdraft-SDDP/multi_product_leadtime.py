@@ -43,8 +43,8 @@ confidence interval for expected objective is [-3.95,  161.15];
 no enhancement
 sample numer is 5 and scenario number is 5 
 planning horizon length is T = 3 
-final expected total profits after 100 iteration is 69.84/99.54/141.23 (sampling with replacement)
-ordering Q1 and Q2 in the first peiod is 20.00 and 20.00
+final expected total profits after 100 iteration is 69.84/99.54/141.23/93.33/103.33/99.54/79.13 (sampling with replacement)
+ordering Q1 and Q2 in the first peiod is 30.00 and 20.00
 cpu time is 60.263 s
 expected lower bound gap is 66.20
 lower bound and upper bound gap is 5.21%
@@ -213,8 +213,8 @@ while iter < iter_limit: # time_pass < time_limit:   # or
     # sample_scenarios1 = generate_scenario_samples_gamma(N, trunQuantile, mean_demands[0], betas[0], T)
     # sample_scenarios2 = generate_scenario_samples_gamma(N, trunQuantile, mean_demands[1], betas[1], T)
     
-    # sample_scenarios1 = generate_scenarios(N, sample_num, sample_details1)
-    # sample_scenarios2 = generate_scenarios(N, sample_num, sample_details2)
+    # sample_scenarios1 = generate_scenarios2(N, sample_num, sample_details1)
+    # sample_scenarios2 = generate_scenarios2(N, sample_num, sample_details2)
     
     sample_scenarios1 = generate_scenarios_discrete(N, xk1, pk1, T)
     sample_scenarios2 = generate_scenarios_discrete(N, xk2, pk2, T)
@@ -288,8 +288,8 @@ while iter < iter_limit: # time_pass < time_limit:   # or
                 m_forward[t][n].addConstr(I1_forward[t][n] - B1_forward[t][n] == I1_forward_values[t-1][n] + qpre1_values[-1][t-1][n] - demand1)
                 m_forward[t][n].addConstr(I2_forward[t][n] - B2_forward[t][n] == I2_forward_values[t-1][n] + qpre2_values[-1][t-1][n] - demand2)
                 m_forward[t][n].addConstr(cash_forward[t][n] + prices[0]*B1_forward[t][n] + + prices[1]*B2_forward[t][n] == cash_forward_values[t-1][n] - overhead_cost[t]\
-                                          - vari_costs[0]*q1_values[-1][t][n] - vari_costs[1]*q2_values[-1][t][n] -r1*W1_values[-1] + r0*W0_values[-1]\
-                                              -r2*W2_values[-1] + prices[0]*demand1 + prices[1]*demand2)
+                                          - vari_costs[0]*q1_values[-1][t][n] - vari_costs[1]*q2_values[-1][t][n] -r1*W1_forward_values[t-1][n] + r0*W0_forward_values[t-1][n]\
+                                              -r2*W2_forward_values[t-1][n] + prices[0]*demand1 + prices[1]*demand2)
              
             if t < T - 1:
                 m_forward[t][n].addConstr(qpre1_forward[t][n] == q1_values[-1][t][n]) 

@@ -132,7 +132,7 @@ demands = [[30,30,30],
                 
 demand_pattern = 1
 
-mean_demands1 = demands[demand_pattern - 1][0:6] # higher average demand vs lower average demand
+mean_demands1 = demands[demand_pattern - 1][0:3] # higher average demand vs lower average demand
 mean_demands2 = [i*0.5 for i in mean_demands1] # higher average demand vs lower average demand
 # betas = [2, 0.25] # lower variance vs higher variance
 # T = len(mean_demands1)
@@ -245,11 +245,11 @@ while iter < iter_limit and time_pass < time_limit: # and means satifying either
     # sample_scenarios1 = generate_scenarios_gamma(N, trunQuantile, mean_demands[0], betas[0], T)
     # sample_scenarios2 = generate_scenarios_gamma(N, trunQuantile, mean_demands[1], betas[1], T)
     
-    # sample_scenarios1 = generate_scenarios(N, sample_num, sample_details1)
-    # sample_scenarios2 = generate_scenarios(N, sample_num, sample_details2)
+    sample_scenarios1 = generate_scenarios2(N, sample_num, sample_details1)
+    sample_scenarios2 = generate_scenarios2(N, sample_num, sample_details2)
     
-    sample_scenarios1 = generate_scenarios_discrete(N, xk1, pk1, T)
-    sample_scenarios2 = generate_scenarios_discrete(N, xk2, pk2, T)
+    # sample_scenarios1 = generate_scenarios_discrete(N, xk1, pk1, T)
+    # sample_scenarios2 = generate_scenarios_discrete(N, xk2, pk2, T)
     
     # sample_scenarios1 = generate_scenarios_normal(N, trunQuantile, mean_demands1, sigmas1)
     # sample_scenarios2 = generate_scenarios_normal(N, trunQuantile, mean_demands2, sigmas2)

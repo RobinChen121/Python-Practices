@@ -110,9 +110,9 @@ while iter < iter_limit:
     
     # sample a numer of scenarios from the full scenario tree
     # random.seed(10000)
-    sample_scenarios = generate_scenarios(N, sample_num, sample_detail)
+    sample_scenarios = generate_scenarios2(N, sample_num, sample_detail)
     # sample_scenarios = [[5, 5, 5], [5, 5, 15], [5, 15, 5], [15,5,5], [15,15,5], [15,5, 15], [5,15,15],[15,15,15]]
-    sample_scenarios.sort() # sort to make same numbers together
+    # sample_scenarios.sort() # sort to make same numbers together
     
     # forward
     if iter > 0:        
@@ -171,7 +171,7 @@ while iter < iter_limit:
                 m_forward[t][n].addConstr(cash_forward[t][n] + price*B_forward[t][n] == cash_forward_values[t-1][n] - overhead_cost[t] \
                                                  - vari_cost*q_values[-1][t][n]\
                                                      -r1*W1_forward_values[t-1][n] + r0*W0_forward_values[t-1][n]\
-                                                         -r2*W2_values[-1] + price*demand)
+                                                         -r2*W2_forward_values[t-1][n] + price*demand)
              
             if t < T - 1:
                 m_forward[t][n].addConstr(q_pre_forward[t][n] == q_values[-1][t][n]) 

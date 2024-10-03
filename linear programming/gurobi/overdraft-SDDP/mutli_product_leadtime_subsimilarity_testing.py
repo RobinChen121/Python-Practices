@@ -205,14 +205,14 @@ for d_pattern in range(10):
         # sample_scenarios1 = generate_scenarios_gamma(N, trunQuantile, mean_demands[0], betas[0], T)
         # sample_scenarios2 = generate_scenarios_gamma(N, trunQuantile, mean_demands[1], betas[1], T)
         
-        # sample_scenarios1 = generate_scenarios(N, sample_num, sample_details1)
-        # sample_scenarios2 = generate_scenarios(N, sample_num, sample_details2)
+        sample_scenarios1 = generate_scenarios2(N, sample_num, sample_details1)
+        sample_scenarios2 = generate_scenarios2(N, sample_num, sample_details2)
         
         # sample_scenarios1 = generate_scenarios_discrete(N, xk1, pk1, T)
         # sample_scenarios2 = generate_scenarios_discrete(N, xk2, pk2, T)
         
-        sample_scenarios1 = generate_scenarios_normal(N, trunQuantile, mean_demands1, sigmas1)
-        sample_scenarios2 = generate_scenarios_normal(N, trunQuantile, mean_demands2, sigmas2)
+        # sample_scenarios1 = generate_scenarios_normal(N, trunQuantile, mean_demands1, sigmas1)
+        # sample_scenarios2 = generate_scenarios_normal(N, trunQuantile, mean_demands2, sigmas2)
          
         # sample_scenarios1 = [[10, 10, 10], [10,10, 30], [10, 30, 10], [10,30, 30],[30,10,10],[30,10,30],[30,30,10],[30,30,30]] # change 4
         # sample_scenarios2 = [[5, 5, 5], [5, 5, 15], [5, 15, 5], [5,15,15],[15,5,5], [15,5, 15], [15,15,5], [15,15,15]]
@@ -284,8 +284,8 @@ for d_pattern in range(10):
                     m_forward[t][n].addConstr(I1_forward[t][n] - B1_forward[t][n] == I1_forward_values[t-1][n] + qpre1_values[-1][t-1][n] - demand1)
                     m_forward[t][n].addConstr(I2_forward[t][n] - B2_forward[t][n] == I2_forward_values[t-1][n] + qpre2_values[-1][t-1][n] - demand2)
                     m_forward[t][n].addConstr(cash_forward[t][n] + prices[0]*B1_forward[t][n] + + prices[1]*B2_forward[t][n] == cash_forward_values[t-1][n] - overhead_cost[t]\
-                                              - vari_costs[0]*q1_values[-1][t][n] - vari_costs[1]*q2_values[-1][t][n] -r1*W1_values[-1] + r0*W0_values[-1]\
-                                                  -r2*W2_values[-1] + prices[0]*demand1 + prices[1]*demand2)
+                                              - vari_costs[0]*q1_values[-1][t][n] - vari_costs[1]*q2_values[-1][t][n] -r1*W1_forward_values[t-1][n] + r0*W0_forward_values[t-1][n]\
+                                                  -r2*W2_forward_values[t-1][n] + prices[0]*demand1 + prices[1]*demand2)
                  
                 if t < T - 1:
                     m_forward[t][n].addConstr(qpre1_forward[t][n] == q1_values[-1][t][n]) 

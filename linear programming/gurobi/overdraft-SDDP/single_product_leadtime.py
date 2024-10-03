@@ -170,10 +170,10 @@ while iter < iter_limit:
     
     # sample a numer of scenarios from the full scenario tree
     #  random.seed(10000)
-    sample_scenarios = generate_scenarios(N, sample_num, sample_details)
-    # sample_scenarios = generate_scenarios2(N, trunQuantile, mean_demands)
+    # sample_scenarios = generate_scenarios2(N, sample_num, sample_details) # random choose already generated samples
+    sample_scenarios = generate_scenarios(N, trunQuantile, mean_demands) # actually regenerate some samples in the forward computing
     # sample_scenarios = [[5, 5, 5], [5, 5, 15], [5, 15, 5], [15,5,5], [15,15,5], [15,5, 15], [5,15,15],[15,15,15]] # change 4
-    sample_scenarios.sort() # sort to make same numbers together
+    # sample_scenarios.sort() # sort to make same numbers together
     
     # forward
     if iter > 0:        
@@ -232,7 +232,7 @@ while iter < iter_limit:
                 m_forward[t][n].addConstr(cash_forward[t][n] + price*B_forward[t][n] == cash_forward_values[t-1][n] - overhead_cost[t] \
                                                  - vari_cost*q_values[-1][t][n]\
                                                      -r1*W1_forward_values[t-1][n] + r0*W0_forward_values[t-1][n]\
-                                                         -r2*W2_values[-1] + price*demand)
+                                                         -r2*W2_forward_values[t-1][n] + price*demand)
              
             if t < T - 1:
                 m_forward[t][n].addConstr(q_pre_forward[t][n] == q_values[-1][t][n]) 
@@ -420,7 +420,7 @@ print('final expected total costs is %.2f' % final_value)
 print('ordering Q in the first peiod is %.2f' % Q1)
 print('cpu time is %.3f s' % cpu_time)        
 gap = (-opt + final_value)/opt               
-print('optimaility gap is %.2f%% s' % (100*gap))  
+print('optimaility gap is %.2f%%' % (100*gap))  
 z_lb, z_ub, z_mean = compute_ub(z_values) # for computing confidence interval
 lb = -np.mean(np.sum(z_values, axis=1))
 print('expected lower bound gap is %.2f' % lb)  

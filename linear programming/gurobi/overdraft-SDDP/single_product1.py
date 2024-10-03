@@ -197,7 +197,7 @@ while iter < iter_num:
                 m_forward[t][n].addConstr(cash_forward[t][n] == cash_forward_values[t-1][n] - overhead_cost[t] \
                                                  - vari_cost*q_forward_values[t-1][n]\
                                                      -r1*W1_forward_values[t-1][n] + r0*W0_forward_values[t-1][n]\
-                                                         -r2*W2_values[iter]-r3*W3_values[iter] + price*(demand - B_forward[t][n]))
+                                                         -r2*W2_forward_values[t-1][n]-r3*W3_forward_values[t-1][n] + price*(demand - B_forward[t][n]))
                       
             if t == T - 1:                   
                 m_forward[t][n].setObjective(-price*(demand - B_forward[t][n]) - unit_salvage*I_forward[t][n], GRB.MINIMIZE)

@@ -209,7 +209,7 @@ while iter < iter_num:
                 m_forward[t][n].addConstr(cash_forward[t][n] == cash_forward_values[t-1][n] - overhead_cost[t] \
                                                  - vari_cost*q_forward_values[t-1][n]\
                                                      -r1*W1_forward_values[t-1][n] + r0*W0_forward_values[t-1][n]\
-                                                         -r2*W2_values[iter]-r3*W3_values[iter] + price*(demand - B_forward[t][n]))
+                                                         -r2*W2_forward_values[t-1][n]-r3*W3_forward_values[t-1][n] + price*(demand - B_forward[t][n]))
             # put those cuts in the back, it does not matter whether in back or front
             if iter > 0 and t < T - 1:
                 for i in range(iter):
