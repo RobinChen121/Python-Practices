@@ -100,9 +100,9 @@ intercepts = [[ [] for n in range(N)] for t in range(T-1)]
 q_values = [0 for iter in range(iter_num)]
 q_sub_values = [[[0 for n in range(N)] for t in range(T-1)] for iter in range(iter_num)]
 
-B = 2 # number of sampled nodes in forwad subproblems for abridge
+B = 10 # number of sampled nodes in forwad subproblems for abridge
 
-start = time.process_time()
+time_start = time.process_time()
 while iter < iter_num:  
     z_values = [[0 for t in range(T)] for n in range(N)]
     
@@ -297,12 +297,12 @@ while iter < iter_num:
     #     break
     iter += 1
 
-end = time.process_time()
+time_end = time.process_time()
 print('********************************************')
 final_cash = -z
 print('final expected cash increment is %.2f' % final_cash)
 print('ordering Q in the first peiod is %.2f' % q.x)
-cpu_time = end - start
+cpu_time = time_end - time_start
 print('cpu time is %.3f s' % cpu_time)
 
 

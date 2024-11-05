@@ -254,13 +254,13 @@ while iter < iter_limit: # time_pass < time_limit:   # or
             if t == 0:   
                 m_forward[t][n].addConstr(I1_forward[t][n] - B1_forward[t][n] == ini_Is[0] - demand1)
                 m_forward[t][n].addConstr(I2_forward[t][n] - B2_forward[t][n] == ini_Is[1] - demand2)
-                m_forward[t][n].addConstr(cash_forward[t][n] + prices[0]*B1_forward[t][n] + + prices[1]*B2_forward[t][n] == ini_cash - overhead_cost[t]\
+                m_forward[t][n].addConstr(cash_forward[t][n] + prices[0]*B1_forward[t][n] + prices[1]*B2_forward[t][n] == ini_cash - overhead_cost[t]\
                                           - vari_costs[0]*q1_values[-1][t][n] -vari_costs[1]*q2_values[-1][t][n] -r1*W1_values[-1] + r0*W0_values[-1]\
                                               -r2*W2_values[-1] + prices[0]*demand1 + prices[1]*demand2)
             else:
                 m_forward[t][n].addConstr(I1_forward[t][n] - B1_forward[t][n] == I1_forward_values[t-1][n] + qpre1_values[-1][t-1][n] - demand1)
                 m_forward[t][n].addConstr(I2_forward[t][n] - B2_forward[t][n] == I2_forward_values[t-1][n] + qpre2_values[-1][t-1][n] - demand2)
-                m_forward[t][n].addConstr(cash_forward[t][n] + prices[0]*B1_forward[t][n] + + prices[1]*B2_forward[t][n] == cash_forward_values[t-1][n] - overhead_cost[t]\
+                m_forward[t][n].addConstr(cash_forward[t][n] + prices[0]*B1_forward[t][n] + prices[1]*B2_forward[t][n] == cash_forward_values[t-1][n] - overhead_cost[t]\
                                           - vari_costs[0]*q1_values[-1][t][n] - vari_costs[1]*q2_values[-1][t][n] -r1*W1_forward_values[t-1][n] + r0*W0_forward_values[t-1][n]\
                                               -r2*W2_forward_values[t-1][n] + prices[0]*demand1 + prices[1]*demand2)
              

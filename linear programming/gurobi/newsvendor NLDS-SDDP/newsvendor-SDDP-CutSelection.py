@@ -29,6 +29,8 @@ cut selection(select cut for every iteration):
 219.08 for sddp dynamic cut selection with tree traverse(N=1), 12.92s on a mac for iter no. 21, sample no. 20;
 216.22 for sddp dynamic cut selection with tree traverse(N=1,2,4,5), 62.77s on a mac for iter no. 21, sample no. 20;
 
+230.02 for sddp dynamic cut selection with tree traverse(N=1,2,5,10), 5.9s on a mac for iter no. 21, sample no. 20;
+
 """
 
 from gurobipy import *
@@ -64,7 +66,7 @@ for t in range(T):
 # scenarios_full = list(itertools.product(*sample_detail)) 
 
 
-iter_num = 21
+iter_num = 30
 NN = 20 # sampled number of scenarios for forward computing
 
 theta_iniValue = 0 # initial theta values (profit) in each period
@@ -81,7 +83,7 @@ slope1_stage = []
 intercept1_stage = []
 q_values = [0 for iter in range(iter_num)]
 
-kk = [1, 2, 5, 10]
+kk = [10, 10, 10, 10]
 # kk = [NN for i in range(4)]
 slopes = [[] for i in range(iter_num)]
 intercepts = [[] for i in range(iter_num)]
@@ -176,6 +178,7 @@ while iter < iter_num:
                         if loop_no > 3:
                             break
                         cut_index[iter - 1][t] = np.argmax(values)
+                        print('iter %d, t %d, n %d, index %d' % (iter, t, n, np.argmax(values)))
                         m_forward[t][n].remove(m_forward[t][n].getConstrs()[-1])
                     
     

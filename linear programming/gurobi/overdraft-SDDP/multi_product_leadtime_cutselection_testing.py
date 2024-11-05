@@ -269,7 +269,7 @@ for run_time in range(10):
                     if t == 0:   
                         m_forward[t][n].addConstr(I1_forward[t][n] - B1_forward[t][n] == ini_Is[0] - demand1)
                         m_forward[t][n].addConstr(I2_forward[t][n] - B2_forward[t][n] == ini_Is[1] - demand2)
-                        m_forward[t][n].addConstr(cash_forward[t][n] + prices[0]*B1_forward[t][n] + + prices[1]*B2_forward[t][n] == ini_cash - overhead_cost[t]\
+                        m_forward[t][n].addConstr(cash_forward[t][n] + prices[0]*B1_forward[t][n] + prices[1]*B2_forward[t][n] == ini_cash - overhead_cost[t]\
                                                   - vari_costs[0]*q1_values[-1][t][n] -vari_costs[1]*q2_values[-1][t][n] -r1*W1_values[-1] + r0*W0_values[-1]\
                                                       -r2*W2_values[-1] + prices[0]*demand1 + prices[1]*demand2)
                     else:

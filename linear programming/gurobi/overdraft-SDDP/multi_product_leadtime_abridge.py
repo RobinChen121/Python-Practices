@@ -151,7 +151,7 @@ m.addConstr(-vari_costs[0]*q1 - vari_costs[1]*q2- W0 + W1 + W2 == overhead_cost[
 
 
 # cuts recording arrays
-iter_limit = 300
+iter_limit = 60
 time_limit = 360
 N = 10 # sampled number of scenarios in forward computing, change 3
 slope_stage1_1 = []
@@ -176,8 +176,8 @@ W2_values = []
 
 iter = 0
 time_pass = 0
-B = 2 # number of sampled nodes in forwad subproblems for abridge
-start = time.process_time()
+B = 5 # number of sampled nodes in forwad subproblems for abridge
+time_start = time.process_time()
 # while iter < iter_num:  
 while iter < iter_limit: # time_pass < time_limit:   # or
     slopes1.append([[[0 for m in range(MM)] for n in range(N)] for t in range(T)])
@@ -190,8 +190,8 @@ while iter < iter_limit: # time_pass < time_limit:   # or
     qpre2_values.append([[0 for n in range(N)] for t in range(T)]) 
     
     q1_values_bridge.append([[0 for n in range(B)] for t in range(T)]) 
-    qpre1_values_bridge.append([[0 for n in range(B)] for t in range(T)]) 
     q2_values_bridge.append([[0 for n in range(B)] for t in range(T)]) 
+    qpre1_values_bridge.append([[0 for n in range(B)] for t in range(T)])     
     qpre2_values_bridge.append([[0 for n in range(B)] for t in range(T)]) 
      
     # sample_scenarios1 = generate_scenario_samples_gamma(N, trunQuantile, mean_demands[0], betas[0], T)
@@ -272,7 +272,8 @@ while iter < iter_limit: # time_pass < time_limit:   # or
         for n in range(N):
             demand1 = sample_scenarios1[n][t]
             demand2 = sample_scenarios2[n][t]
-            bn = int(n /(N/B))
+            bn = int(n /(N/B)) # affect the initial inventory, cash in this stage
+            pass
             
             if t == 0:   
                 m_forward[t][n].addConstr(I1_forward[t][n] - B1_forward[t][n] == ini_Is[0] - demand1)
@@ -281,8 +282,8 @@ while iter < iter_limit: # time_pass < time_limit:   # or
                                           - vari_costs[0]*q1_values[-1][t][n] -vari_costs[1]*q2_values[-1][t][n] -r1*W1_values[-1] + r0*W0_values[-1]\
                                               -r2*W2_values[-1] + prices[0]*demand1 + prices[1]*demand2)
             else:
-                m_forward[t][n].addConstr(I1_forward[t][n] - B1_forward[t][n] == I1_forward_values_bridge[t-1][bn] + qpre1_values_bridge[-1][t-1][bn] - demand1)
-                m_forward[t][n].addConstr(I2_forward[t][n] - B2_forward[t][n] == I2_forward_values_bridge[t-1][bn] + qpre2_values_bridge[-1][t-1][bn] - demand2)
+                m_forward[t][n].addConstr(I1_forward[t][n] - B1_forward[t][n] == I1_forward_values_bridge[t-1][bn] + qpre1_values[-1][t-1][bn] - demand1)
+                m_forward[t][n].addConstr(I2_forward[t][n] - B2_forward[t][n] == I2_forward_values_bridge[t-1][bn] + qpre2_values[-1][t-1][bn] - demand2)
                 m_forward[t][n].addConstr(cash_forward[t][n] + prices[0]*B1_forward[t][n] + + prices[1]*B2_forward[t][n] == cash_forward_values_bridge[t-1][bn] - overhead_cost[t]\
                                           - vari_costs[0]*q1_values_bridge[-1][t][bn] - vari_costs[1]*q2_values_bridge[-1][t][bn] -r1*W1_forward_values_bridge[t-1][bn] + r0*W0_forward_values_bridge[t-1][bn]\
                                               -r2*W2_forward_values_bridge[t-1][bn] + prices[0]*demand1 + prices[1]*demand2)
@@ -344,22 +345,25 @@ while iter < iter_limit: # time_pass < time_limit:   # or
                 W0_forward_values[t][n] = W0_forward[t][n].x
                 W2_forward_values[t][n] = W2_forward[t][n].x
                 
-            for bb in range(B):
-                start = int(bb*N/B)
-                end = int((bb+1)*N/B)
-                I1_forward_values_bridge[t][bb] = np.mean(I1_forward_values[t][start : end])
-                I2_forward_values_bridge[t][bb] = np.mean(I2_forward_values[t][start : end])
-                B1_forward_values_bridge[t][bb] = np.mean(B1_forward_values[t][start : end])
-                B2_forward_values_bridge[t][bb] = np.mean(B2_forward_values[t][start : end])
-                cash_forward_values_bridge[t][bb] = np.mean(cash_forward_values[t][start : end])
-                if t < T - 1:
-                    q1_values_bridge[iter][t+1][bb] = np.mean(q1_values[iter][t+1][start : end])
-                    q2_values_bridge[iter][t+1][bb] = np.mean(q2_values[iter][t+1][start : end])
-                    qpre1_values_bridge[iter][t+1][bb] = np.mean(qpre1_values[iter][t+1][start : end])
-                    qpre2_values_bridge[iter][t+1][bb] = np.mean(qpre2_values[iter][t+1][start : end])
-                    W1_forward_values_bridge[t][bb] = np.mean(W1_forward_values[t][start : end])
-                    W2_forward_values_bridge[t][bb] = np.mean(W2_forward_values[t][start : end])
-                    W0_forward_values_bridge[t][bb] = np.mean(W0_forward_values[t][start : end])
+        for bb in range(B):
+            start = int(bb*N/B)
+            end = int((bb+1)*N/B)
+            I1_forward_values_bridge[t][bb] = np.mean(I1_forward_values[t][start : end])
+            # if abs(I1_forward_values_bridge[t][bb] - I1_forward_values[t][start : end]) > 1:
+            #     pass
+                
+            I2_forward_values_bridge[t][bb] = np.mean(I2_forward_values[t][start : end])
+            B1_forward_values_bridge[t][bb] = np.mean(B1_forward_values[t][start : end])
+            B2_forward_values_bridge[t][bb] = np.mean(B2_forward_values[t][start : end])
+            cash_forward_values_bridge[t][bb] = np.mean(cash_forward_values[t][start : end])
+            if t < T - 1:
+                q1_values_bridge[iter][t+1][bb] = np.mean(q1_values[iter][t+1][start : end])
+                q2_values_bridge[iter][t+1][bb] = np.mean(q2_values[iter][t+1][start : end])
+                qpre1_values_bridge[iter][t][bb] = np.mean(qpre1_values[iter][t][start : end])
+                qpre2_values_bridge[iter][t][bb] = np.mean(qpre2_values[iter][t][start : end])
+                W1_forward_values_bridge[t][bb] = np.mean(W1_forward_values[t][start : end])
+                W2_forward_values_bridge[t][bb] = np.mean(W2_forward_values[t][start : end])
+                W0_forward_values_bridge[t][bb] = np.mean(W0_forward_values[t][start : end])
                 
     # backward
     m_backward = [[[Model() for s in range(sample_num)] for n in range(N)] for t in range(T)]
@@ -390,7 +394,7 @@ while iter < iter_limit: # time_pass < time_limit:   # or
         demand_temp = [sample_details1[t], sample_details2[t]]
         demand_all = list(itertools.product(*demand_temp))
         # demand_all2 = [[demand_all[s][0], demand_all[s][1]] for s in range(sample_num)]
-        for n in range(B):      
+        for bn in range(B):      
             S = sample_num # should revise, should be S^2
             for s in range(S):
                 demand1 = demand_all[s][0] # sample_details1[t][s]  # 
@@ -399,84 +403,84 @@ while iter < iter_limit: # time_pass < time_limit:   # or
                 # demand2 = sample_details2[t][s]  
                 
                 if t == T - 1:                   
-                    m_backward[t][n][s].setObjective(-prices[0]*(demand1 - B1_backward[t][n][s])-prices[1]*(demand2 - B2_backward[t][n][s])\
-                                                     - unit_salvages[0]*I1_backward[t][n][s]- unit_salvages[1]*I2_backward[t][n][s], GRB.MINIMIZE)
+                    m_backward[t][bn][s].setObjective(-prices[0]*(demand1 - B1_backward[t][bn][s])-prices[1]*(demand2 - B2_backward[t][bn][s])\
+                                                     - unit_salvages[0]*I1_backward[t][bn][s]- unit_salvages[1]*I2_backward[t][bn][s], GRB.MINIMIZE)
                 else:
-                    m_backward[t][n][s].setObjective(overhead_cost[t] + vari_costs[0]*q1_backward[t][n][s] + vari_costs[1]*q2_backward[t][n][s]\
-                                                     - prices[0]*(demand1 - B1_backward[t][n][s])- prices[1]*(demand2 - B2_backward[t][n][s])\
-                                                     + r2*W2_backward[t][n][s]
-                                                     + r1*W1_backward[t][n][s] - r0*W0_backward[t][n][s] + theta_backward[t][n][s], GRB.MINIMIZE)  
+                    m_backward[t][bn][s].setObjective(overhead_cost[t] + vari_costs[0]*q1_backward[t][bn][s] + vari_costs[1]*q2_backward[t][bn][s]\
+                                                     - prices[0]*(demand1 - B1_backward[t][bn][s])- prices[1]*(demand2 - B2_backward[t][bn][s])\
+                                                     + r2*W2_backward[t][bn][s]
+                                                     + r1*W1_backward[t][bn][s] - r0*W0_backward[t][bn][s] + theta_backward[t][bn][s], GRB.MINIMIZE)  
                 if t == 0:   
-                    m_backward[t][n][s].addConstr(I1_backward[t][n][s] - B1_backward[t][n][s] == ini_Is[0] - demand1)
-                    m_backward[t][n][s].addConstr(I2_backward[t][n][s] - B2_backward[t][n][s] == ini_Is[1] - demand2)
-                    m_backward[t][n][s].addConstr(cash_backward[t][n][s] == ini_cash - overhead_cost[t] - vari_costs[0]*q1_values_bridge[-1][t][n]-vari_costs[1]*q2_values_bridge[-1][t][n]\
+                    m_backward[t][bn][s].addConstr(I1_backward[t][bn][s] - B1_backward[t][bn][s] == ini_Is[0] - demand1)
+                    m_backward[t][bn][s].addConstr(I2_backward[t][bn][s] - B2_backward[t][bn][s] == ini_Is[1] - demand2)
+                    m_backward[t][bn][s].addConstr(cash_backward[t][bn][s] == ini_cash - overhead_cost[t] - vari_costs[0]*q1_values[-1][t][bn]-vari_costs[1]*q2_values[-1][t][bn]\
                                                   - r2*W2_values[-1] - r1*W1_values[-1] + r0*W0_values[-1]\
-                                                  + prices[0]*(demand1 - B1_backward[t][n][s])+ prices[1]*(demand2 - B2_backward[t][n][s]))
+                                                  + prices[0]*(demand1 - B1_backward[t][bn][s])+ prices[1]*(demand2 - B2_backward[t][bn][s]))
                 else:
-                    m_backward[t][n][s].addConstr(I1_backward[t][n][s] - B1_backward[t][n][s] == I1_forward_values_bridge[t-1][n] + qpre1_values_bridge[-1][t-1][n] - demand1)
-                    m_backward[t][n][s].addConstr(I2_backward[t][n][s] - B2_backward[t][n][s] == I2_forward_values_bridge[t-1][n] + qpre2_values_bridge[-1][t-1][n] - demand2)
-                    m_backward[t][n][s].addConstr(cash_backward[t][n][s] + prices[0]*B1_backward[t][n][s]+ prices[1]*B2_backward[t][n][s] == cash_forward_values_bridge[t-1][n]- overhead_cost[t]\
-                                                  - vari_costs[0]*q1_values_bridge[-1][t][n]- vari_costs[1]*q2_values_bridge[-1][t][n]\
-                                                 - r2*W2_forward_values_bridge[t-1][n]- r1*W1_forward_values[t-1][n]\
-                                                  + r0*W0_forward_values_bridge[t-1][n] + prices[0]*demand1+ prices[1]*demand2)
+                    m_backward[t][bn][s].addConstr(I1_backward[t][bn][s] - B1_backward[t][bn][s] == I1_forward_values_bridge[t-1][bn] + qpre1_values_bridge[-1][t-1][bn] - demand1)
+                    m_backward[t][bn][s].addConstr(I2_backward[t][bn][s] - B2_backward[t][bn][s] == I2_forward_values_bridge[t-1][bn] + qpre2_values_bridge[-1][t-1][bn] - demand2)
+                    m_backward[t][bn][s].addConstr(cash_backward[t][bn][s] + prices[0]*B1_backward[t][bn][s]+ prices[1]*B2_backward[t][bn][s] == cash_forward_values[t-1][bn]- overhead_cost[t]\
+                                                  - vari_costs[0]*q1_values[-1][t][bn]- vari_costs[1]*q2_values[-1][t][bn]\
+                                                 - r2*W2_forward_values[t-1][bn]- r1*W1_forward_values[t-1][bn]\
+                                                  + r0*W0_forward_values[t-1][bn] + prices[0]*demand1+ prices[1]*demand2)
             
                 if t < T - 1:
-                    m_backward[t][n][s].addConstr(qpre1_backward[t][n][s] == q1_values_bridge[-1][t][n]) 
-                    m_backward[t][n][s].addConstr(qpre2_backward[t][n][s] == q2_values_bridge[-1][t][n]) 
+                    m_backward[t][bn][s].addConstr(qpre1_backward[t][bn][s] == q1_values[-1][t][bn]) 
+                    m_backward[t][bn][s].addConstr(qpre2_backward[t][bn][s] == q2_values[-1][t][bn]) 
                 if t < T - 1:                   
-                    m_backward[t][n][s].addConstr(W1_backward[t][n][s] <= U)
-                    m_backward[t][n][s].addConstr(cash_backward[t][n][s] -vari_costs[0]*q1_backward[t][n][s]- vari_costs[1]*q2_backward[t][n][s] - W0_backward[t][n][s]\
-                                                  + W1_backward[t][n][s] + W2_backward[t][n][s] == overhead_cost[t+1])
-                    m_backward[t][n][s].addConstr(theta_backward[t][n][s] >= theta_iniValue*(T-1-t))
+                    m_backward[t][bn][s].addConstr(W1_backward[t][bn][s] <= U)
+                    m_backward[t][bn][s].addConstr(cash_backward[t][bn][s] -vari_costs[0]*q1_backward[t][bn][s]- vari_costs[1]*q2_backward[t][bn][s] - W0_backward[t][bn][s]\
+                                                  + W1_backward[t][bn][s] + W2_backward[t][bn][s] == overhead_cost[t+1])
+                    m_backward[t][bn][s].addConstr(theta_backward[t][bn][s] >= theta_iniValue*(T-1-t))
                     
                 # put those cuts in the back
                 if iter > 0 and t < T - 1:
                     for i in range(iter):
                         for nn in range(N): # N
-                            m_backward[t][n][s].addConstr(theta_backward[t][n][s] >= slopes1[i][t][nn][0]*(I1_backward[t][n][s]+ qpre1_backward[t][n][s])\
-                                                          + slopes1[i][t][nn][1]*(I2_backward[t][n][s]+ qpre2_backward[t][n][s])\
-                                                      + slopes3[i][t][nn][0]*q1_backward[t][n][s]+ slopes3[i][t][nn][1]*q2_backward[t][n][s]\
-                                                      + slopes2[i][t][nn]*(cash_backward[t][n][s]- vari_costs[0]*q1_backward[t][n][s]- vari_costs[1]*q2_backward[t][n][s]\
-                                                                           -r2*W2_backward[t][n][s]- r1*W1_backward[t][n][s]+r0*W0_backward[t][n][s])\
+                            m_backward[t][bn][s].addConstr(theta_backward[t][bn][s] >= slopes1[i][t][nn][0]*(I1_backward[t][bn][s]+ qpre1_backward[t][bn][s])\
+                                                          + slopes1[i][t][nn][1]*(I2_backward[t][bn][s]+ qpre2_backward[t][bn][s])\
+                                                      + slopes3[i][t][nn][0]*q1_backward[t][bn][s]+ slopes3[i][t][nn][1]*q2_backward[t][bn][s]\
+                                                      + slopes2[i][t][nn]*(cash_backward[t][bn][s]- vari_costs[0]*q1_backward[t][bn][s]- vari_costs[1]*q2_backward[t][bn][s]\
+                                                                           -r2*W2_backward[t][bn][s]- r1*W1_backward[t][bn][s]+r0*W0_backward[t][bn][s])\
                                                     + intercepts[i][t][nn])
                                
                 # optimize
-                m_backward[t][n][s].Params.LogToConsole = 0
-                m_backward[t][n][s].optimize()
+                m_backward[t][bn][s].Params.LogToConsole = 0
+                m_backward[t][bn][s].optimize()
                 
-                pi = m_backward[t][n][s].getAttr(GRB.Attr.Pi)
-                rhs = m_backward[t][n][s].getAttr(GRB.Attr.RHS)
+                pi = m_backward[t][bn][s].getAttr(GRB.Attr.Pi)
+                rhs = m_backward[t][bn][s].getAttr(GRB.Attr.RHS)
                 
-                # if iter == 8 and t == 1 and n == 0:
-                #     m_backward[t][n][s].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(n+1) + '-' + str(s+1) + '-mback.lp') 
-                #     m_backward[t][n][s].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(n+1) + '-' + str(s+1) + '-mabck.sol') 
-                #     filename = 'iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(n+1) + '-' + str(s+1) + '-m.txt'
+                # if iter == 8 and t == 1 and bn == 0:
+                #     m_backward[t][bn][s].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(bn+1) + '-' + str(s+1) + '-mback.lp') 
+                #     m_backward[t][bn][s].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(bn+1) + '-' + str(s+1) + '-mabck.sol') 
+                #     filename = 'iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(bn+1) + '-' + str(s+1) + '-m.txt'
                 #     with open(filename, 'w') as f:
-                #         f.write('demand1=' +str(demand1)+'\n')
-                #         f.write('demand2=' +str(demand2)+'\n')
+                #         f.write('demand1=' +str(demand1)+'\bn')
+                #         f.write('demand2=' +str(demand2)+'\bn')
                 #         f.write(str(pi))     
                 #     pass
             
                 num_con = len(pi)
                 if t < T - 1:
                     # important
-                    intercept_values[t][n][s] += -pi[0]*demand1 -pi[1]*demand2 + pi[2]*prices[0]*demand1+pi[2]*prices[1]*demand2\
+                    intercept_values[t][bn][s] += -pi[0]*demand1 -pi[1]*demand2 + pi[2]*prices[0]*demand1+pi[2]*prices[1]*demand2\
                                                  - pi[2]*overhead_cost[t]- prices[0]*demand1 - prices[1]*demand2+ overhead_cost[t+1] # + pi[3]*U + pi[4]*overhead_cost[t+1]-pi[5]*theta_iniValue*(T-1-t) 
                 else:
-                    intercept_values[t][n][s] += -pi[0]*demand1 -pi[1]*demand2 + pi[2]*prices[0]*demand1+pi[2]*prices[1]*demand2\
+                    intercept_values[t][bn][s] += -pi[0]*demand1 -pi[1]*demand2 + pi[2]*prices[0]*demand1+pi[2]*prices[1]*demand2\
                                                  - pi[2]*overhead_cost[t] - prices[0]*demand1 - prices[1]*demand2
                 for sk in range(5, num_con):
-                    intercept_values[t][n][s] += pi[sk]*rhs[sk]
+                    intercept_values[t][bn][s] += pi[sk]*rhs[sk]
                 
-                slope1_values[t][n][s] = [pi[0], pi[1]]                                                         
-                slope2_values[t][n][s] = pi[2]
+                slope1_values[t][bn][s] = [pi[0], pi[1]]                                                         
+                slope2_values[t][bn][s] = pi[2]
                 if t < T -1:
-                    slope3_values[t][n][s] = [pi[3], pi[4]]
+                    slope3_values[t][bn][s] = [pi[3], pi[4]]
                 
-            avg_intercept = sum(intercept_values[t][n]) / S
-            avg_slope1 = np.mean(np.array(slope1_values[t][n]), axis=0).tolist()
-            avg_slope2 = sum(slope2_values[t][n]) / S
-            avg_slope3 = np.mean(np.array(slope3_values[t][n]), axis=0).tolist()
+            avg_intercept = sum(intercept_values[t][bn]) / S
+            avg_slope1 = np.mean(np.array(slope1_values[t][bn]), axis=0).tolist()
+            avg_slope2 = sum(slope2_values[t][bn]) / S
+            avg_slope3 = np.mean(np.array(slope3_values[t][bn]), axis=0).tolist()
             if t == 0:
                 slope_stage1_1.append(avg_slope1)
                 slope_stage1_2.append(avg_slope2)
@@ -484,22 +488,22 @@ while iter < iter_limit: # time_pass < time_limit:   # or
                 intercept_stage1.append(avg_intercept)
                 pass
             else:
-                slopes1[-1][t-1][n] = avg_slope1 
-                slopes2[-1][t-1][n] = avg_slope2  
-                slopes3[-1][t-1][n] = avg_slope3
-                intercepts[-1][t-1][n] = avg_intercept  
+                slopes1[-1][t-1][bn] = avg_slope1 
+                slopes2[-1][t-1][bn] = avg_slope2  
+                slopes3[-1][t-1][bn] = avg_slope3
+                intercepts[-1][t-1][bn] = avg_intercept  
 
     iter += 1
     time_pass = time.process_time() - start
 
-end = time.process_time()
+time_end = time.process_time()
 print('********************************************')
 print('no enhancement')
 print('sample numer is %d and scenario number is %d ' % (sample_num, N))
 print('planning horizon length is T = %d ' % T)
 print('final expected total profits after %d iteration is %.2f' % (iter, -z))
 print('ordering Q1 and Q2 in the first peiod is %.2f and %.2f' % (q1_values[iter-1][0][0], q2_values[iter-1][0][0]))
-cpu_time = end - start
+cpu_time = time_end - time_start
 print('cpu time is %.3f s' % cpu_time) 
 z_lb, z_ub, z_mean = compute_ub(z_values) # for computing confidence interval
 lb = -np.mean(np.sum(z_values, axis=1))
