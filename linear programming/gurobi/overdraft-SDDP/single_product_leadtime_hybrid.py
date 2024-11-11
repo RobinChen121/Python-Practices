@@ -1,32 +1,14 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Tue Nov  5 12:04:47 2024
+Created on Mon Nov 11 11:59:57 2024
 
 @author: zhenchen
 
-@disp:  
-    
-    SDDP: final expected total profits after 50 iteration is 168.41 for stationary;
-    ordering Q in the first peiod is 20.00
-    cpu time is 22.648 s;
-    final expected total profits after 100 iteration is 169.75
-    ordering Q in the first peiod is 20.00;
-    final expected total profits after 30 iteration is 169.93
-    ordering Q in the first peiod is 23.02
-    cpu time is 10.325 s
-    
-    final expected total profits after 100 iteration is 208.90 for non-stationary;
-    ordering Q in the first peiod is 29.00
-    cpu time is 73.577 s;
-    final expected total profits after 30 iteration is 215.45
-    ordering Q in the first peiod is 30.09
-    cpu time is 10.701 s
-    
+@disp:  SDDP result is 167.02 for stationary, 3.29s; 214.87 for non-stationary, 3.29s 
     
     
 """
-
 
 
 from gurobipy import *
@@ -57,10 +39,10 @@ xk = [mean_demands[0]-10, mean_demands[0], mean_demands[0]+10]
 cov = 0.25 # lower variance vs higher variance
 sigmas = [cov*i for i in mean_demands]
 
-mean_demands =  [15, 15, 15, 15] # [10, 20, 10, 20] # 
+mean_demands =  [10, 20, 10, 20] # [15, 15, 15, 15]
 T = len(mean_demands)
 if T == 4:
-    opt = 167.31 # 215.48 for non stationary
+    opt = 215.48 #167.31 # 215.48 for non stationary
 elif T == 3:
     opt = 26.68
 
@@ -330,81 +312,160 @@ while iter < iter_limit: # time_pass < time_limit:   # or
     for t in range(T-1, -1, -1):  
         for n in range(N):      
             S = sample_num # should revise, should be S^2
+            IpW0 = False
+            IpW1 = False
+            IpW2 = False
+            InW0 = False
+            InW1 = False
+            InW2 = False
+            IpW0_values = []
+            IpW1_values = []
+            IpW2_values = []
+            InW0_values = []
+            InW1_values = []
+            InW2_values = []
+            StateChange = False
             for s in range(S):
                 demand = sample_details[t][s]  
+                thisEndCash = 0.0
+                if s > 0:
+                    if t == 0:
+                        thisEndI = ini_I - demand
+                        thisB = -min(ini_I - demand, 0)
+                        if t < T - 1:
+                            thisEndCash = ini_cash - overhead_cost[t] - vari_cost*q_values[-1][t][n]\
+                                                      - r2*W2_values[-1] - r1*W1_values[-1] + r0*W0_values[-1] + price*(demand - thisB) - vari_cost*lastq - overhead_cost[t+1]
+                    else:
+                        thisEndI = I_forward_values[t-1][n] + qpre_values[-1][t-1][n] - demand
+                        thisB = -min(I_forward_values[t-1][n] + qpre_values[-1][t-1][n] - demand, 0)
+                        if t < T - 1:
+                            thisEndCash = cash_forward_values[t-1][n] - overhead_cost[t-1] - vari_cost*q_values[-1][t][n]\
+                                                      - r2*W2_forward_values[t-1][n]- r1*W1_forward_values[t-1][n] + r0*W0_forward_values[t-1][n] + price*(demand - thisB) - vari_cost*lastq - overhead_cost[t+1]
+                    if thisEndI >= 0 and thisEndCash >= 0:
+                        if len(IpW0_values ) > 0:
+                            pi, rhs = IpW0_values 
+                        else:
+                            StateChange = True
+                    elif thisEndI >= 0 and 0 > thisEndCash >= -U :
+                        if len(IpW1_values ) > 0:
+                            pi, rhs = IpW1_values 
+                        else:
+                            StateChange = True
+                    elif thisEndI >= 0 and thisEndCash < -U :
+                        if len(IpW2_values ) > 0:
+                            pi, rhs = IpW2_values 
+                        else:
+                            StateChange = True                   
+                    elif thisEndI < 0 and thisEndCash >= 0:
+                        if len(InW0_values ) > 0:
+                            pi, rhs = InW0_values 
+                        else:
+                            StateChange = True
+                    elif thisEndI < 0 and 0 > thisEndCash >= -U:
+                        if len(InW1_values ) > 0:
+                            pi, rhs = InW1_values 
+                        else:
+                            StateChange = True
+                    elif thisEndI < 0 and thisEndCash < -U:
+                        if len(InW2_values ) > 0:
+                            pi, rhs = InW2_values 
+                        else:
+                            StateChange = True
+                if s == 0 or StateChange == True:
+                    if t == T - 1:                   
+                        m_backward[t][n][s].setObjective(-price*(demand - B_backward[t][n][s])\
+                                                         - unit_salvage*I_backward[t][n][s], GRB.MINIMIZE)
+                    else:
+                        m_backward[t][n][s].setObjective(overhead_cost[t] + vari_cost*q_backward[t][n][s] \
+                                                         - price*(demand - B_backward[t][n][s])\
+                                                         + r2*W2_backward[t][n][s]
+                                                         + r1*W1_backward[t][n][s] - r0*W0_backward[t][n][s] + theta_backward[t][n][s], GRB.MINIMIZE)  
+                    if t == 0:   
+                        m_backward[t][n][s].addConstr(I_backward[t][n][s] - B_backward[t][n][s] == ini_I - demand)
+                        m_backward[t][n][s].addConstr(cash_backward[t][n][s] == ini_cash - overhead_cost[t] - vari_cost*q_values[-1][t][n]\
+                                                      - r2*W2_values[-1] - r1*W1_values[-1] + r0*W0_values[-1]\
+                                                      + price*(demand - B_backward[t][n][s]))
+                    else:
+                        m_backward[t][n][s].addConstr(I_backward[t][n][s] - B_backward[t][n][s] == I_forward_values[t-1][n] + qpre_values[-1][t-1][n] - demand)
+                        m_backward[t][n][s].addConstr(cash_backward[t][n][s] + price*B_backward[t][n][s] == cash_forward_values[t-1][n]- overhead_cost[t]\
+                                                      - vari_cost*q_values[-1][t][n]\
+                                                     - r2*W2_forward_values[t-1][n]- r1*W1_forward_values[t-1][n]\
+                                                      + r0*W0_forward_values[t-1][n] + price*demand)
                 
-                if t == T - 1:                   
-                    m_backward[t][n][s].setObjective(-price*(demand - B_backward[t][n][s])\
-                                                     - unit_salvage*I_backward[t][n][s], GRB.MINIMIZE)
-                else:
-                    m_backward[t][n][s].setObjective(overhead_cost[t] + vari_cost*q_backward[t][n][s] \
-                                                     - price*(demand - B_backward[t][n][s])\
-                                                     + r2*W2_backward[t][n][s]
-                                                     + r1*W1_backward[t][n][s] - r0*W0_backward[t][n][s] + theta_backward[t][n][s], GRB.MINIMIZE)  
-                if t == 0:   
-                    m_backward[t][n][s].addConstr(I_backward[t][n][s] - B_backward[t][n][s] == ini_I - demand)
-                    m_backward[t][n][s].addConstr(cash_backward[t][n][s] == ini_cash - overhead_cost[t] - vari_cost*q_values[-1][t][n]\
-                                                  - r2*W2_values[-1] - r1*W1_values[-1] + r0*W0_values[-1]\
-                                                  + price*(demand - B_backward[t][n][s]))
-                else:
-                    m_backward[t][n][s].addConstr(I_backward[t][n][s] - B_backward[t][n][s] == I_forward_values[t-1][n] + qpre_values[-1][t-1][n] - demand)
-                    m_backward[t][n][s].addConstr(cash_backward[t][n][s] + price*B_backward[t][n][s] == cash_forward_values[t-1][n]- overhead_cost[t]\
-                                                  - vari_cost*q_values[-1][t][n]\
-                                                 - r2*W2_forward_values[t-1][n]- r1*W1_forward_values[t-1][n]\
-                                                  + r0*W0_forward_values[t-1][n] + price*demand)
-            
-                if t < T - 1:
-                    m_backward[t][n][s].addConstr(qpre_backward[t][n][s] == q_values[-1][t][n]) 
-                if t < T - 1:                   
-                    m_backward[t][n][s].addConstr(W1_backward[t][n][s] <= U)
-                    m_backward[t][n][s].addConstr(cash_backward[t][n][s] -vari_cost*q_backward[t][n][s] - W0_backward[t][n][s]\
-                                                  + W1_backward[t][n][s] + W2_backward[t][n][s] == overhead_cost[t+1])
-                    m_backward[t][n][s].addConstr(theta_backward[t][n][s] >= theta_iniValue*(T-1-t))
-                    
-                # put those cuts in the back
-                if iter > 0 and t < T - 1:
-                    for i in range(iter - 1):
-                        nn = cut_index_back[i][t]
-                        m_backward[t][n][s].addConstr(theta_backward[t][n][s] >= slopes1[i][t][nn]*(I_backward[t][n][s]+ qpre_backward[t][n][s])\
-                                                      + slopes3[i][t][nn]*q_backward[t][n][s]+\
-                                                      + slopes2[i][t][nn]*(cash_backward[t][n][s]- vari_cost*q_backward[t][n][s]\
-                                                                           -r2*W2_backward[t][n][s]- r1*W1_backward[t][n][s]+r0*W0_backward[t][n][s])\
-                                                    + intercepts[i][t][nn])
-                
-                NewJustAdd = True
-                loop_no = 0
-                while NewJustAdd:
-                    NewJustAdd = False
+                    if t < T - 1:
+                        m_backward[t][n][s].addConstr(qpre_backward[t][n][s] == q_values[-1][t][n]) 
+                    if t < T - 1:                   
+                        m_backward[t][n][s].addConstr(W1_backward[t][n][s] <= U)
+                        m_backward[t][n][s].addConstr(cash_backward[t][n][s] -vari_cost*q_backward[t][n][s] - W0_backward[t][n][s]\
+                                                      + W1_backward[t][n][s] + W2_backward[t][n][s] == overhead_cost[t+1])
+                        m_backward[t][n][s].addConstr(theta_backward[t][n][s] >= theta_iniValue*(T-1-t))
+                        
+                    # put those cuts in the back
                     if iter > 0 and t < T - 1:
-                        nn = cut_index_back[iter - 1][t]
-                        m_backward[t][n][s].addConstr(theta_backward[t][n][s] >= slopes1[iter - 1][t][nn]*(I_backward[t][n][s]+ qpre_backward[t][n][s])\
-                                                      + slopes3[iter - 1][t][nn]*q_backward[t][n][s]\
-                                                      + slopes2[iter - 1][t][nn]*(cash_backward[t][n][s]- vari_cost*q_backward[t][n][s]\
-                                                                           -r2*W2_backward[t][n][s]- r1*W1_backward[t][n][s]+r0*W0_backward[t][n][s])\
-                                                    + intercepts[iter - 1][t][nn])
-                    # optimize
-                    m_backward[t][n][s].Params.LogToConsole = 0
-                    m_backward[t][n][s].optimize()                  
+                        for i in range(iter - 1):
+                            nn = cut_index_back[i][t]
+                            m_backward[t][n][s].addConstr(theta_backward[t][n][s] >= slopes1[i][t][nn]*(I_backward[t][n][s]+ qpre_backward[t][n][s])\
+                                                          + slopes3[i][t][nn]*q_backward[t][n][s]+\
+                                                          + slopes2[i][t][nn]*(cash_backward[t][n][s]- vari_cost*q_backward[t][n][s]\
+                                                                               -r2*W2_backward[t][n][s]- r1*W1_backward[t][n][s]+r0*W0_backward[t][n][s])\
+                                                        + intercepts[i][t][nn])
                     
-                    if iter > 0 and t < T - 1:                    
-                        N2 = kk[iter-1] if iter <= len(kk) else kk[-1]
-                        values = [0 for k in range(N2)]     
-                        for k in range(N2):
-                            values[k] = slopes1[iter-1][t][k]*(I_backward[t][n][s].x + qpre_backward[t][n][s].x)\
-                                                          + slopes3[iter-1][t][k]*q_backward[t][n][s].x +\
-                                                      + slopes2[iter-1][t][k]*(cash_backward[t][n][s].x - vari_cost*q_backward[t][n][s].x - r2*W2_backward[t][n][s].x\
-                                                 - r1*W1_backward[t][n][s].x + r0*W0_backward[t][n][s].x)\
-                                                    + intercepts[iter-1][t][k]
-                        if np.argmax(values) != nn:                       
-                            NewJustAdd = True
-                            loop_no += 1
-                            if loop_no > 3:
-                                break
-                            cut_index[iter - 1][t] = np.argmax(values)
-                            m_backward[t][n][s].remove(m_backward[t][n][s].getConstrs()[-1])
+                    NewJustAdd = True
+                    loop_no = 0
+                    while NewJustAdd:
+                        NewJustAdd = False
+                        if iter > 0 and t < T - 1:
+                            nn = cut_index_back[iter - 1][t]
+                            m_backward[t][n][s].addConstr(theta_backward[t][n][s] >= slopes1[iter - 1][t][nn]*(I_backward[t][n][s]+ qpre_backward[t][n][s])\
+                                                          + slopes3[iter - 1][t][nn]*q_backward[t][n][s]\
+                                                          + slopes2[iter - 1][t][nn]*(cash_backward[t][n][s]- vari_cost*q_backward[t][n][s]\
+                                                                               -r2*W2_backward[t][n][s]- r1*W1_backward[t][n][s]+r0*W0_backward[t][n][s])\
+                                                        + intercepts[iter - 1][t][nn])
+                        # optimize
+                        m_backward[t][n][s].Params.LogToConsole = 0
+                        m_backward[t][n][s].optimize()                  
+                        pi = m_backward[t][n][s].getAttr(GRB.Attr.Pi)
+                        rhs = m_backward[t][n][s].getAttr(GRB.Attr.RHS)
+                        
+                        if iter > 0 and t < T - 1:                    
+                            N2 = kk[iter-1] if iter <= len(kk) else kk[-1]
+                            values = [0 for k in range(N2)]     
+                            for k in range(N2):
+                                values[k] = slopes1[iter-1][t][k]*(I_backward[t][n][s].x + qpre_backward[t][n][s].x)\
+                                                              + slopes3[iter-1][t][k]*q_backward[t][n][s].x +\
+                                                          + slopes2[iter-1][t][k]*(cash_backward[t][n][s].x - vari_cost*q_backward[t][n][s].x - r2*W2_backward[t][n][s].x\
+                                                     - r1*W1_backward[t][n][s].x + r0*W0_backward[t][n][s].x)\
+                                                        + intercepts[iter-1][t][k]
+                            if np.argmax(values) != nn:                       
+                                NewJustAdd = True
+                                loop_no += 1
+                                if loop_no > 3:
+                                    break
+                                cut_index[iter - 1][t] = np.argmax(values)
+                                m_backward[t][n][s].remove(m_backward[t][n][s].getConstrs()[-1])
                 
-                pi = m_backward[t][n][s].getAttr(GRB.Attr.Pi)
-                rhs = m_backward[t][n][s].getAttr(GRB.Attr.RHS)
+                        if t < T - 1:
+                            lastq = q_backward[t][n][s].X
+                            thisEndCash = cash_backward[t][n][s].X - vari_cost*lastq - overhead_cost[t+1] 
+                        if I_backward[t][n][s].X > 0:
+                            thisEndI = I_backward[t][n][s].X
+                        if B_backward[t][n][s].X > 0:
+                            thisEndI = -B_backward[t][n][s].X                                    
+                        if thisEndI >= 0 and thisEndCash >= 0:
+                            IpW0_values = [pi, rhs]
+                        elif thisEndI >= 0 and 0 > thisEndCash >= -U :
+                            IpW1_values = [pi, rhs]
+                        elif thisEndI >= 0 and thisEndCash < -U :
+                            IpW2_values = [pi, rhs]                      
+                        elif thisEndI < 0 and thisEndCash >= 0:
+                            InW0_values = [pi, rhs]
+                        elif thisEndI < 0 and 0 > thisEndCash >= -U:
+                            InW1_values = [pi, rhs]
+                        elif thisEndI < 0 and thisEndCash < -U:
+                            InW2_values = [pi, rhs]
+                        StateChange = False
+                
+                    
                 
                 # if iter == 8 and t == 1 and n == 0:
                 #     m_backward[t][n][s].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(n+1) + '-' + str(s+1) + '-mback.lp') 
@@ -454,10 +515,13 @@ while iter < iter_limit: # time_pass < time_limit:   # or
 end = time.process_time()
 print('********************************************')
 print('cut selection')
+final_value = -z
 print('sample numer is %d and scenario number is %d ' % (sample_num, N))
 print('planning horizon length is T = %d ' % T)
 print('final expected total profits after %d iteration is %.2f' % (iter, -z))
 print('ordering Q in the first peiod is %.2f' % (q_values[iter-1][0][0]))
+gap = (-opt + final_value)/opt               
+print('optimaility gap is %.2f%%' % (100*gap))  
 cpu_time = end - start
 print('cpu time is %.3f s' % cpu_time) 
 z_lb, z_ub, z_mean = compute_ub(z_values) # for computing confidence interval

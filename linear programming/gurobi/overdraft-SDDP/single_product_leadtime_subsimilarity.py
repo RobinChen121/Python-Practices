@@ -403,8 +403,6 @@ while iter < iter_limit:
                     temp = [avg_slope1, avg_slope2, avg_slope3]
                     slope1_stage.append(temp)
                     intercept1_stage.append(avg_intercept)
-                    if iter == 6 and t == 0:
-                        pass
             else:
                 slopes1[-1][t-1][n] = avg_slope1 
                 slopes2[-1][t-1][n] = avg_slope2  
