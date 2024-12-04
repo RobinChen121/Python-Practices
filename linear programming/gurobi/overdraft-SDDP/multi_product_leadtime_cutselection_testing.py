@@ -66,7 +66,7 @@ demands = [[30,30,30,30,30],
 [13,35,79,43,44],
 [15,56,19,84,136]]
 
-for run_time in range(10):
+for run_time in range(5):
     for d_pattern in range(10):
         demand_pattern = d_pattern + 1
     
@@ -106,7 +106,7 @@ for run_time in range(10):
         r0 = 0  # when it is 0.01, can largely slow the compuational speed
         r1 = 0.1
         r2 = 2 # penalty interest rate for overdraft exceeding the limit, does not affect computation time
-        U = 500 # overdraft limit
+        U = 700 # overdraft limit
         
         sample_num = 10 # change 1
         
@@ -550,7 +550,7 @@ for run_time in range(10):
         
         headers = ['demand_pattern', 'ini_cash', 'ini_inventorys', 'prices', 'unit_order_cost', 'unit_salvage_value', 'deposit_interest_rate', 'overdraft_interest_rate', 'penalty_interest_rate', 'overdraft_limit', 'overhead_costs', 'mean_demands1',\
                    'mean_demands2', 'realization_num', 'scenario_forward_num', 'iter_limit', 'time_limit',  'time', 'iter', 'final_value', 'Q1', 'Q2', 'lower bound', 'confidence interval', 'gap']    
-        file_address = '/Users/zhenchen/Documents/Numerical-tests/overdraft/'
+        file_address = '/Users/zhenchen/Library/CloudStorage/OneDrive-BrunelUniversityLondon/Numerical-tests/overdraft/'
         file_name = 'multiproduct_cutselection_tests'
         file_address_name = file_address + file_name + '.csv'
         content = [demand_pattern, ini_cash, ini_Is, prices, vari_costs, unit_salvages, r0, r1, r2, U, overhead_cost, mean_demands1, mean_demands2,\

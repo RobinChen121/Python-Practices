@@ -9,6 +9,8 @@ Created on Mon Jul 19 16:52:47 2023
 decision variables of the last stage can not obtained automatically. So, it is better to get cuts
 by the dual objective. 
 
+sample scenario from the scenario tree; (no difference with generate sampled scenarios in each forward pass)
+
 this file is actually same with newsvendor-SDDP.py
     
 """
@@ -21,7 +23,7 @@ import numpy as np
 
 import sys 
 sys.path.append("..") 
-from tree import generate_sample, get_tree_strcture
+from tree import generate_samples
 
 
 
@@ -31,7 +33,8 @@ unit_back_cost = 10
 unit_hold_cost = 2
 mean_demands = [10, 10]
 T = len(mean_demands)
-sample_nums = [10 for t in range(T)]
+sample_num = 10
+sample_nums = [sample_num for t in range(T)]
 
 trunQuantile = 0.9999 # affective to the final ordering quantity
 scenario_numTotal = 1
@@ -41,14 +44,14 @@ for i in sample_nums:
 # detailed samples in each period
 sample_detail = [[0 for i in range(sample_nums[t])] for t in range(T)] 
 for t in range(T):
-    sample_detail[t] = generate_sample(sample_nums[t], trunQuantile, mean_demands[t])
+    sample_detail[t] = generate_samples(sample_nums[t], trunQuantile, mean_demands[t])
 # samples_detail = [[5, 15], [5, 15]]
 scenarios_full = list(itertools.product(*sample_detail)) 
 
 
 iter = 0
-iter_num = 4
-N = 4 # sampled number of scenarios for forward computing
+iter_num = 15
+N = 10 # sampled number of scenarios for forward computing
 
 theta_iniValue = 0 # initial theta values (profit) in each period
 m = Model() # linear model in the first stage
@@ -84,6 +87,7 @@ while iter < iter_num:
     if iter > 0:
         m.addConstr(theta >= slope1_stage[-1]*q + intercept1_stage[-1])
     m.update()
+    m.Params.LogToConsole = 0
     m.optimize()
     # m.write('iter' + str(iter) + '_main2.lp')    
     # m.write('iter' + str(iter) + '_main2.sol')
@@ -124,6 +128,7 @@ while iter < iter_num:
                 m_forward[t][n].addConstr(I_forward[t][n] - B_forward[t][n] == I_forward_values[t-1][n] - B_forward_values[t-1][n] + q_forward_values[t][n] - demand)
             
             # optimize
+            m_forward[t][n].Params.LogToConsole = 0
             m_forward[t][n].optimize()
             # m_forward[t][n].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(n+1) + '-2.lp')
             
@@ -178,6 +183,7 @@ while iter < iter_num:
                     m_backward[t][n][k].addConstr(I_backward[t][n][k] - B_backward[t][n][k] == I_forward_values[t-1][n] - B_forward_values[t-1][n] + q_forward_values[t-1][n] - demand)
                     
                 # optimize
+                m_backward[t][n][k].Params.LogToConsole = 0
                 m_backward[t][n][k].optimize()                
                 # if t == 0 and n == 0 and iter > 0:
                 #     m_backward[t][n][k].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(n+1) + '_' + str(k+1) +'-2back.lp')
@@ -200,11 +206,8 @@ while iter < iter_num:
                 col_num = len(m_backward[t][n][k].getConstrs())
                 coe = [m_backward[t][n][k].getCoeff(m_backward[t][n][k].getConstrs()[cc], m_backward[t][n][k].getVars()[vv]) for vv in range(var_num) for cc in range(col_num)]
                 coes_sub[t][n][k] = coe
-                print()
                 # m_backward[t][n][k].dispose()
             
-            if iter > 0 and t == 1:
-                print()
             avg_pi = sum(pi_values[t][n]) / K
             avg_pi_rhs = sum(pi_rhs_values[t][n]) / K
             sum_coe = np.array(coes_sub[t][n][0])
@@ -224,7 +227,6 @@ while iter < iter_num:
                 intercepts[t-1][n].append(avg_pi_rhs)   
                 coes[t-1][n].append(avg_coe)
                 objs[t-1][n].append(avg_obj) 
-                print()
             
     iter += 1
 

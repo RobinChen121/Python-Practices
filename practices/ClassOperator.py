@@ -31,6 +31,9 @@ class Vector:
     def __mod__(self, other):
         return Vector(self.a % other.a, self.b % other.b)
     
+    def setvalue(self):
+        self.values = [11, 12]
+    
 
 
 
@@ -40,3 +43,5 @@ print(v1 + v2)
 print(v1 * v2)
 print(v1 / v2)
 print(v1 % v2)
+
+print(v2.values)
