@@ -1,0 +1,47 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Created on Mon Jan  6 17:33:30 2025
+
+@author: zhenchen
+
+@Python version: 3.10
+
+@disp:  
+    
+    the air conditioner problem;
+
+The data process is stage-wise independent and on the RHS.
+It was originally from http://www.optimization-online.org/DB_FILE/2017/12/6388.pdf.
+Verified optimal value by extensive solver is 68200.
+SDDP solver also obtains the same optimal value.
+d = (
+    100 w.p. 0.4,
+    300 w.p. 0.6
+)
+The first stage:
+min x + 3w + 0.5y
+     x <= 2
+     x + w - y = 1
+
+The second stage:
+min x + 3w + 0.5y
+     x <= 2
+     x + y_past + w - y_now = d
+
+The third stage:
+
+min x + 3w + 0.5y
+     x <= 2
+     x + y_past + w - y_now = d
+     
+"""
+
+from msm import MSLP
+import gurobipy
+
+
+T = 3
+D = [100, 300]
+airConditioner = MSLP(T, bound =0)
+
