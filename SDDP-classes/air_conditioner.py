@@ -44,4 +44,5 @@ import gurobipy
 T = 3
 D = [100, 300]
 airConditioner = MSLP(T, bound = 0)
-
+for t in range(T):
+    m = airConditioner[t]
