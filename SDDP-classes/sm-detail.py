@@ -7,19 +7,21 @@ Created on Mon Jan  6 20:48:12 2025
 
 @Python version: 3.10
 
-@disp:  detailed stochastic model solvable by gurobi;
+@disp:  detailed stochastic model at a stage solvable by gurobi;
     
     
 """
 
 from gurobipy import *
 from numpy.typing import ArrayLike
-from collections.abc import Callable
+from collections.abc import Callable, Mapping, Sequence
+import numpy as np
+from exception import SampleSizeError
 
 
 class StochasticModel():
     """
-    the detailed programming model solvable by gurobi;
+    the detailed programming model for a stage solvable by gurobi;
     
     """
     
@@ -44,13 +46,114 @@ class StochasticModel():
         self._model = gurobipy.Model(name = name, env = env)
         self.states = [] # states varaibles in the model
         self.local_copies = [] # local copies for state varaibles in the model
-        self.num_states = 0 # number of state variables in the model
-        self.num_samples = 0 # number of discrete uncertainties
-        self._type = None # type of the true problem: continuous/discrete
         
-    def _check_uncertainty(self):
-        if isinstance(uncertainty, abc.Mapping):
-            pass
+        self.num_states = 0 # number of state variables in the model
+        self.num_samples = 1 # number of discrete uncertainties
+        self._type = None # type of the true problem: continuous/discrete       
+        self.probability = None # probabilities for the discrete uncertainties
+        
+        # (discretized) uncertainties
+        # stage-wise independent discrete uncertainties
+        self.uncertainty_rhs = {} # {} is dic format, uncertainty is in the right hand side of the constraints
+        self.uncertainty_coef = {} # uncertainty is in the constraint coefficients
+        self.uncertainty_obj = {} # uncertainty is in the objecgtive coefficients
+        
+        # true uncertainties
+        # stage-wise independent true continuous uncertainties
+        self.uncertainty_rhs_continuous = {}
+        self.uncertainty_coef_continuous = {}
+        self.uncertainty_obj_continuous = {}
+        self.uncertainty_mix_continuous = {}
+        # stage-wise independent true discrete uncertainties
+        self.uncertainty_rhs_discrete = {}
+        self.uncertainty_coef_discrete = {}
+        self.uncertainty_obj_discrete = {}
+        
+        # indices of stage-dependent uncertainties
+        self.uncertainty_rhs_dependent = {}
+        self.uncertainty_coef_dependent = {}
+        self.uncertainty_obj_dependent = {}
+        
+       
+    def _check_uncertainty(self, uncertainty: ArrayLike | Callable, flag_dict: bool, dimension: int):
+        """
+        Check whether the input unertainty is in correct format. 
+
+        Args:
+            uncertainty (ArrayLike | Callable): The uncertainty.
+            flag_dict (bool): Whether the uncertainty is in a dictionary data structure.
+            dimension (int): The dimension of the uncertainty.
+        
+        ------
+        for discrete uncertainty:
+            
+        Uncertainty added by addVar must be a array-like (flag_dict = 0, dimension = 1).
+        
+        
+        for continuous uncertainty:
+            
+        Uncertainty added by addVar must be a callable that generates a single
+        number (flag_dict = 0, dimensino = 1).
+
+        Returns:
+            Return the uncertainty in correct format.
+
+        """       
+        if isinstance(uncertainty, (Sequence, np.ndarray)): # whether it is a list or sequence, for discrete uncertainty          
+            if dimension == 1:
+                if uncertainty.ndim != 1:
+                    raise ValueError("dimension of the scenarios is {} while  dimension of the added object is 1!"
+                        .format(uncertainty.ndim))
+                try:
+                    uncertainty = [float(item) for item in uncertainty]
+                except ValueError:
+                    raise ValueError("Scenarios must only contains numbers!")
+                uncertainty = list(uncertainty)
+            else: # dimension more than 1
+                if uncertainty.shape[1] != dimension:
+                    raise ValueError("dimension of the scenarios should be {} while \
+                                     dimension of the added object is {}!"
+                        .format(dimension, uncertainty.ndim))
+                try:
+                    uncertainty = np.array(uncertainty, dtype='float64')
+                except ValueError:
+                    raise ValueError("Scenarios must only contains numbers!")
+                uncertainty = [list(item) for item in uncertainty]
+                
+                if self._type is None: # if it is None
+                    self._type = "discrete"
+                    self.n_samples = len(uncertainty)
+                else:
+                    if self._type != "discrete": # meaning it is continous uncertainty
+                        raise SampleSizeError(
+                            self._model.modelName,
+                            "infinite",
+                            uncertainty,
+                            len(uncertainty)
+                        )
+                    if self.n_samples != len(uncertainty):
+                        raise SampleSizeError(
+                            self._model.modelName,
+                            self.n_samples,
+                            uncertainty,
+                            len(uncertainty)
+                        )
+            
+        elif isinstance(uncertainty, Mapping): # whether it is an instance of dict type or similar type
+            uncertainty = dict(uncertainty)
+            
+        return uncertainty
+        
+        
+    def _check_uncertainty_dependent(self):
+        """
+        
+
+        Returns:
+            None.
+
+        """
+        pass
     
     def addStateVar(self,
                     lb: float = 0.0,
@@ -115,6 +218,18 @@ class StochasticModel():
         self.local_copies += [local_copy] 
         self.num_states += 1
         
+        if uncertainty is not None:
+            uncertainty  = self._check_uncertainty(uncertainty, 0, 1) 
+            # uncertainty in the state is reflected in the objective coefficient of this state variable
+            if callable(uncertainty): # if uncertainty is generated by a callable function
+                self.uncertainty_obj_continuous[state] = uncertainty # add this uncertainty to the dicts
+            else:
+                self.uncertainty_obj[state] = uncertainty # add this uncertainty to the dicts
+        
+        if uncertainty_dependent is not None: # for Markov uncertainty in the objective coefficients
+            uncertainty_dependent = self._check_uncertainty_dependent(uncertainty_dependent, 0, 1)
+            self.uncertainty_obj_dependent[state] = uncertainty_dependent
+                    
         return state, local_copy
         
         
