@@ -13,6 +13,8 @@ Created on Mon Jan  6 20:48:12 2025
 """
 
 from gurobipy import *
+from numpy.typing import ArrayLike
+from collections.abc import Callable
 
 
 class StochasticModel():
@@ -54,11 +56,11 @@ class StochasticModel():
                     lb: float = 0.0,
                     ub: float = float('inf'), 
                     obj: float = 0.0,
-                    vtype = GRB.CONTINUOUS, 
-                    name = '',
-                    column = None,
-                    uncertainty = None,
-                    uncertainty_dependent = None
+                    vtype: str = GRB.CONTINUOUS, 
+                    name: str = '',
+                    column: gurobipy.Columm = None,
+                    uncertainty: ArrayLike | Callable = None,
+                    uncertainty_dependent: ArrayLike = None
                     ):
         """
         Generalize Gurobi's addVar() function.
@@ -68,13 +70,32 @@ class StochasticModel():
             lb (float, optional): Lower bound for the variable. Defaults to 0.0.
             ub (float, optional): Upper bound for the variable. Defaults to float('inf').
             obj (float, optional): Objective coefficient for the variable. Defaults to 0.0.
-            vtype (TYPE, optional): Variable type for new variable (GRB.CONTINUOUS, GRB.BINARY, GRB.INTEGER, GRB.SEMICONT, or GRB.SEMIINT
+            vtype (str, ptional): Variable type for new variable (GRB.CONTINUOUS, GRB.BINARY, GRB.INTEGER, GRB.SEMICONT, or GRB.SEMIINT
                                     or 'C' for continuous, 'B' for binary, 'I' for integer, 'S' for semi-continuous, or 'N' for semi-integer)).
                                     Defaults to GRB.CONTINUOUS.
-            name (TYPE, optional): Name for the variable. Defaults to ''.
-            column (TYPE, optional): Column object that indicates the set of constraints in which the new variable participates, and the associated coefficients. 
+            name (str, optional): Name for the variable. Defaults to ''.
+            column (gurobi.Column, optional): gurobi Column object that indicates the set of constraints in which the new variable participates, and the associated coefficients. 
                                      Defaults to None.
+            uncertainty (ArrayLike | Callable, optional): Default to None.
+                If it is ArrayLike, it is for discrete uncertainty and it is the scenarios (uncertainty realizatoins) of stage-wise independent uncertain objective
+                coefficients.
+                If it is a Callable function, it is for continous uncertainty and it is a multivariate random variable generator of stage-wise
+                independent uncertain objective coefficients. It must take numpy RandomState as its only argument.
+            uncertainty_dependent (ArrayLike): Default to None.
+                The location index in the stochastic process generator of stage-wise dependent uncertain objective coefficients.
+                For Markov uncertainty.
+                
+            Examples
+            --------
+            >>> now,past = model.addStateVar(ub=2.0, uncertainty=[1,2,3])
 
+            >>> def f(random_state):
+            ...     return random_state.normal(0, 1)
+            >>> now,past = model.addStateVar(ub=2.0, uncertainty=f)
+
+            Markovian objective coefficient:
+            >>> now,past = model.addStateVar(ub=2.0, uncertainty_dependent=[1,2])
+            
         Returns:
             the created stata varaible and the corresponding local copy variable.
 
@@ -93,6 +114,8 @@ class StochasticModel():
         self.states += [state] # append the state to the model
         self.local_copies += [local_copy] 
         self.num_states += 1
+        
+        return state, local_copy
         
         
         
