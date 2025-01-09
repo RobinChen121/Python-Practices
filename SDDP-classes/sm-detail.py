@@ -12,11 +12,11 @@ Created on Mon Jan  6 20:48:12 2025
     
 """
 
-from gurobipy import *
+import gurobipy
 from numpy.typing import ArrayLike
 from collections.abc import Callable, Mapping, Sequence
-import numpy as np
-from exception import SampleSizeError
+import numpy
+from exception import SampleSizeError, DistributionError
 
 
 class StochasticModel():
@@ -75,31 +75,57 @@ class StochasticModel():
         self.uncertainty_obj_dependent = {}
         
        
-    def _check_uncertainty(self, uncertainty: ArrayLike | Callable, flag_dict: bool, dimension: int):
+    def _check_uncertainty(self, 
+                           uncertainty: ArrayLike | Mapping | Callable, 
+                           flag_dict: bool, 
+                           dimension: int):
         """
         Check whether the input unertainty is in correct format. 
 
         Args:
-            uncertainty (ArrayLike | Callable): The uncertainty.
+            uncertainty (ArrayLike | Mapping | Callable): The uncertainty.
             flag_dict (bool): Whether the uncertainty is in a dictionary data structure.
             dimension (int): The dimension of the uncertainty.
         
         ------
-        for discrete uncertainty:
-            
-        Uncertainty added by addVar must be a array-like (flag_dict = 0, dimension = 1).
+        for discrete uncertainty: (array-like or array-like in the dict)         
+        Uncertainty added by addVar must be an array-like (flag_dict = 0, dimension = 1);
         
+        Uncertainty added by addConstrs and addVars must be a multidimensional
+        array-like (flag_dict = 0, dimension > 1),
+        The multidimensional array-like has the shape (a,b), where a should be
+        the dimension of the object added indicated by dimension (>1) and b
+        should be the number of samples;
         
-        for continuous uncertainty:
-            
+        Uncertainty added by addConstr must be a dictionary. Value of the
+        dictionary must be a callable that generates a single number
+        (flag_dict=1, list_dim=1).
+
+        for continuous uncertainty: (callable or callable in the dict)           
         Uncertainty added by addVar must be a callable that generates a single
-        number (flag_dict = 0, dimensino = 1).
+        number (flag_dict = 0, dimension = 1).
+        
+        Uncertainty added by addConstr must be a dictionary. Value of the
+        dictionary must be a callable that generates a single number
+        (flag_dict = 1, dimension = 1).
+
+        Uncertainty added by addConstrs and addVars must be a callable that
+        generates an array-like (flag_dict = 0, dimension > 1)
+        The generated array-like has the shape (a,b), where a should the
+        dimension of the object added indicated by list_dim (>1) and b should be
+        the number of samples.
+        
+        -------------------------
+        All callable should take numpy RandomState as its only argument;
+        The true problem must be either continuous or discrete. Hence, once a
+        continuous uncertainty has been added, discrete uncertainty is no longer
+        accepted, vice versa.
 
         Returns:
             Return the uncertainty in correct format.
 
         """       
-        if isinstance(uncertainty, (Sequence, np.ndarray)): # whether it is a list or sequence, for discrete uncertainty          
+        if isinstance(uncertainty, (Sequence, numpy.ndarray)): # whether it is a list or sequence, for discrete uncertainty          
             if dimension == 1:
                 if uncertainty.ndim != 1:
                     raise ValueError("dimension of the scenarios is {} while  dimension of the added object is 1!"
@@ -110,12 +136,12 @@ class StochasticModel():
                     raise ValueError("Scenarios must only contains numbers!")
                 uncertainty = list(uncertainty)
             else: # dimension more than 1
-                if uncertainty.shape[1] != dimension:
+                if uncertainty.shape[0] != dimension:
                     raise ValueError("dimension of the scenarios should be {} while \
                                      dimension of the added object is {}!"
                         .format(dimension, uncertainty.ndim))
                 try:
-                    uncertainty = np.array(uncertainty, dtype='float64')
+                    uncertainty = numpy.array(uncertainty, dtype='float64')
                 except ValueError:
                     raise ValueError("Scenarios must only contains numbers!")
                 uncertainty = [list(item) for item in uncertainty]
@@ -137,21 +163,132 @@ class StochasticModel():
                             self.n_samples,
                             uncertainty,
                             len(uncertainty)
-                        )
-            
-        elif isinstance(uncertainty, Mapping): # whether it is an instance of dict type or similar type
+                        )           
+        elif isinstance(uncertainty, Mapping): # whether it is an instance of dict type or similar dict type
+            if flag_dict == 0:
+                raise TypeError("wrong uncertainty format!")
             uncertainty = dict(uncertainty)
-            
+            for key, value in uncertainty.items():
+                if callable(value): # dict with callable function
+                    if self._type is None:
+                        self._type = "continuous"
+                    else:
+                        # already added uncertainty
+                        if self._type != "continuous":
+                            raise SampleSizeError(
+                                self._model.modelName,
+                                self.n_samples,
+                                uncertainty,
+                                "infinite"
+                            )
+                    try:
+                        value(numpy.random)
+                    except TypeError:
+                        raise DistributionError(arg = False)
+                    try:
+                        numpy.array(value(numpy.random), dtype = 'float64')
+                    except (ValueError,TypeError):
+                        raise DistributionError(return_data = False)
+                else: # dict but not callable
+                    try:
+                        value = numpy.array(value, dtype = 'float64')
+                    except ValueError:
+                        raise ValueError("Scenarios must only contains numbers!")
+                    if value.ndim != 1:
+                        raise ValueError(
+                            "dimension of the distribution is {} while \
+                            dimension of the added object should be {}!"
+                            .format(value.ndim, 1)
+                        )
+                    uncertainty[key] = list(value)
+
+                    if self._type is None:
+                        # add uncertainty for the first time
+                        self._type = "discrete"
+                        self.n_samples = len(value)
+                    else:
+                        # already added uncertainty
+                        if self._type != "discrete":
+                            raise SampleSizeError(
+                                self._model.modelName,
+                                "infinite",
+                                {key:value},
+                                len(value)
+                            )
+                        if self.n_samples != len(value):
+                            raise SampleSizeError(
+                                self._model.modelName,
+                                self.n_samples,
+                                {key: value},
+                                len(value)
+                            )
+        elif isinstance(uncertainty, Callable): # whether it is a callable function
+            try:
+                sample = uncertainty(numpy.random)
+            except TypeError:
+                raise DistributionError(arg = False)
+            if dimension == 1:
+                try:
+                    float(sample)
+                except (ValueError,TypeError):
+                    raise DistributionError(return_data = False)
+            else:
+                try:
+                    sample = [float(item) for item in sample]
+                except (ValueError, TypeError):
+                    raise DistributionError(return_data = False)
+                if dimension != len(uncertainty(numpy.random)):
+                    raise ValueError(
+                        "dimension of the distribution is {} while \
+                        dimension of the added object is {}!"
+                        .format(len(uncertainty(numpy.random)), dimension)
+                    )
+            if self._type is None:
+                # add uncertainty for the first time
+                self._type = "continuous"
+            else:
+                # already added uncertainty
+                if self._type != "continuous":
+                    raise SampleSizeError(
+                        self._model.modelName,
+                        self.n_samples,
+                        uncertainty,
+                        "infinite"
+                    )
+        else:
+            raise TypeError("wrong uncertainty format!")
         return uncertainty
         
         
-    def _check_uncertainty_dependent(self):
+    def _check_uncertainty_dependent(self,
+                                     uncertainty_dependent: ArrayLike | Mapping,
+                                     flag_dict: bool,
+                                     dimension: int):
         """
+        Make sure the input uncertainty location index is in the correct form.
+
+        Args:
+            uncertainty_dependent (ArrayLike | Mapping | Callable): The dependent uncertainty.
+            flag_dict (bool): Whether the dependent uncertainty is in a dictionary data structure.
+            dimension (int): The dimension of the dependent uncertainty.
         
-
         Returns:
-            None.
+            A copied uncertainty to avoid making changes to mutable object
+            given by the users.
 
+        
+        Check data structure
+        --------------------
+
+        Uncertainty added by addConstr must be a dictionary. Value of the
+        dictionary must be an int (flag_dict = 1, dimension = 1).
+
+        Uncertainty added by addVar must be an int (flag_dict = 0, dimension = 1).
+
+        Uncertainty added by addConstrs and addVars must be a array-like of int
+        array-like (flag_dict = 0, dimension > 1). The length of the array-like
+        should equal dimension.
+        
         """
         pass
     
@@ -159,7 +296,7 @@ class StochasticModel():
                     lb: float = 0.0,
                     ub: float = float('inf'), 
                     obj: float = 0.0,
-                    vtype: str = GRB.CONTINUOUS, 
+                    vtype: str = gurobipy.GRB.CONTINUOUS, 
                     name: str = '',
                     column: gurobipy.Columm = None,
                     uncertainty: ArrayLike | Callable = None,
@@ -168,6 +305,7 @@ class StochasticModel():
         """
         Generalize Gurobi's addVar() function.
         Speciallyfor adding the state varaibles in the multi-stage stochastic models.
+        if having uncertainty, uncertainty happens in the objective coefficient of this varaible.
 
         Args:
             lb (float, optional): Lower bound for the variable. Defaults to 0.0.
