@@ -19,6 +19,7 @@ d = (
     100 w.p. 0.4,
     300 w.p. 0.6
 )
+x is production quantity, y is inventory and w is overtime production quantity
 The first stage:
 min x + 3w + 0.5y
      x <= 2
@@ -38,7 +39,6 @@ min x + 3w + 0.5y
 """
 
 from msm import MSLP
-import gurobipy
 
 
 T = 3
@@ -46,3 +46,5 @@ D = [100, 300]
 airConditioner = MSLP(T, bound = 0)
 for t in range(T):
     m = airConditioner[t]
+    y_now, y_past = m.addStateVar(obj = 50, vtype =  'I')
+    x = m.addVar(obj = 300, vtype = 'I')
