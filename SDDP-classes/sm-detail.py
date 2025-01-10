@@ -419,7 +419,91 @@ class StochasticModel:
             self.uncertainty_obj_dependent[state] = uncertainty_dependent
 
         return state, local_copy
+    
+    def addStateVars(self,
+                     *indices: list,
+                     lb: float = 0.0,
+                     ub: float = float('inf'),
+                     obj: float = 0.0,
+                     vtype: str = 'C',
+                     name: str = "",
+                     uncertainty: Callable | ArrayLike | Mapping = None,
+                     uncertainty_dependent: int | ArrayLike | Mapping = None
+                     ) -> tuple[gurobipy.tupledict, gurobipy.tupledict]:
+        """
+        Add multi state variables in the model. Generalize gurobipy.addVars() to
+        incorporate uncertainty in the objective function. The corresponding
+        local copy variables will also be added in the model.
 
+        Args:
+            *indices: Indices for accessing the new variables.
+            lb: (optional) Lower bound(s) for new variables.
+            ub: (optional) Upper bound(s) for new variables.
+            obj: (optional) Objective coefficient(s) for new variables.
+            vtype:  (optional) Variable type(s) for new variables.
+            name:  (optional) Names for new variables. The given name will be subscribed by the index of the generator expression.
+            uncertainty: (optional) If it is ArrayLike, it is for discrete uncertainty, and it is the scenarios (uncertainty realizations) of stage-wise independent uncertain objective
+                   coefficients.
+                   If it is Mapping, it can be discrete or continuous uncertainty depending on whether the value in the Mapping item can be callable.
+                   If it is a Callable function, it is for continous uncertainty, and it is a multivariate random variable generator of stage-wise
+                   independent uncertain objective coefficients. It must take numpy RandomState as its only argument.
+            uncertainty_dependent: (optional) The location index in the stochastic process generator of stage-wise dependent uncertain objective coefficients.
+                For Markov uncertainty.
+        Returns:
+            state (gurobipy.tupledict): state varaibles.
+            local_copy (gurobipy.tupledict): corresponding local copy variables.
+
+
+        Examples:
+        --------
+        stage-wise independent discrete uncertain objective coefficients:
+        >>> now,past = model.addStateVars(
+        ...     2,
+        ...     ub = 2.0,
+        ...     uncertainty = [[2,4],[3,5]]
+        ... )
+        >>> now,past = model.addStateVars(
+        ...     [(1,2),(2,1)],
+        ...     ub = 2.0,
+        ...     uncertainty = [[2,4],[3,5]]
+        ... )
+
+        stage-wise independent continuous uncertain objective coefficients:
+        >>> def f(random_state):
+        ...     return random_state.multivariate_normal(
+        ...         mean = [0,0],
+        ...         cov = [[1,0],[0,1]]
+        ...     )
+        >>> now,past = model.addStateVars(2, ub = 2.0, uncertainty = f)
+
+        Markovian objective coefficients
+        >>> now,past = model.addStateVars(2, ub = 2.0, uncertainty_dependent = [1,2])
+        """
+        state = self._model.addVars(
+            *indices, lb = lb, ub = ub, obj = obj, vtype = vtype, name = name
+        )
+        local_copy = self._model.addVars(
+            *indices, lb = lb, ub = ub, name = name + "_local_copy"
+        )
+        self._model.update()
+        self.states += state.values()
+        self.local_copies += local_copy.values()
+        self.n_states += len(state)
+
+        if uncertainty is not None:
+            uncertainty = self._check_uncertainty(uncertainty, False, len(state))
+            if callable(uncertainty):
+                self.uncertainty_obj_continuous[tuple(state.values())] = uncertainty
+            else:
+                self.uncertainty_obj[tuple(state.values())] = uncertainty
+
+        if uncertainty_dependent is not None:
+            uncertainty_dependent = self._check_uncertainty_dependent(
+                uncertainty_dependent, False, len(state))
+            self.uncertainty_obj_dependent[tuple(state.values())] = uncertainty_dependent
+
+        return state, local_copy
+    
     def addVar(self,
                 lb: float = 0.0,
                 ub: float = float('inf'),
@@ -478,7 +562,7 @@ class StochasticModel:
             if callable(uncertainty):
                 self.uncertainty_obj_continuous[var] = uncertainty
             else:
-                self.uncertainty_obj[var] = uncertainty
+                self.uncertainty_obj[var] = uncertainty # gurobi var can be the key in the dict
 
         if uncertainty_dependent is not None:
             uncertainty_dependent = self._check_uncertainty_dependent(uncertainty_dependent, False, 1)
@@ -521,6 +605,7 @@ class StochasticModel:
         Examples:
         --------
         stage-wise independent discrete uncertain objective coefficients:
+
         >>> newVars = model.addVars(3, ub = 2.0, uncertainty = [[2,4,6], [3,5,7]]) # 3 variables, each column in the uncertainty are all the realizations of one variable
 
         >>> newVars = model.addVars(
@@ -530,6 +615,7 @@ class StochasticModel:
         ... ) # create 2 variables x[1, 2] and x[2, 1]
 
         stage-wise independent continuous uncertain objective coefficients:
+
         >>> def f(random_state):
         ...     return random_state.multivariate_normal(
         ...         mean = [0,0],
@@ -542,6 +628,7 @@ class StochasticModel:
         ... )
 
         Markovian objective coefficients:
+
         >>> newVars = model.addVars(
         ...     2,
         ...     ub = 2.0,
@@ -556,18 +643,15 @@ class StochasticModel:
         if uncertainty is not None:
             uncertainty = self._check_uncertainty(uncertainty, False, len(var))
             if callable(uncertainty):
-                self.uncertainty_obj_continuous[
-                    tuple(var.values())
-                ] = uncertainty
+                # var  is gurobi tupledict type
+                # it has values() attribute like a dict
+                self.uncertainty_obj_continuous[tuple(var.values())] = uncertainty
             else:
                 self.uncertainty_obj[tuple(var.values())] = uncertainty
 
         if uncertainty_dependent is not None:
             uncertainty_dependent = self._check_uncertainty_dependent(
-                uncertainty_dependent, False, len(var)
-            )
-            self.uncertainty_obj_dependent[
-                tuple(var.values())
-            ] = uncertainty_dependent
+                uncertainty_dependent, False, len(var))
+            self.uncertainty_obj_dependent[tuple(var.values())] = uncertainty_dependent
 
         return var
