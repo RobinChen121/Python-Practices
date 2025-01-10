@@ -14,13 +14,13 @@ Created on Mon Jan  6 20:48:12 2025
 
 import gurobipy
 from numpy.typing import ArrayLike
-from collections.abc import Callable, Mapping, Sequence
+from collections.abc import Callable, Mapping, Sequence, Generator
 import numpy
 from exception import SampleSizeError, DistributionError
 from numbers import Number
 
 
-# noinspection PyUnresolvedReferences
+# noinspection PyUnresolvedReferences,PyRedeclaration
 class StochasticModel:
     """
     the detailed programming model for a stage solvable by gurobi;
@@ -45,13 +45,14 @@ class StochasticModel:
             Initialize a gurobi model.
 
         """
-        self._model = gurobipy.Model(name=name, env=env)
+        self._model = gurobipy.Model(name = name, env = env)
+        self._type = None  # type of the true problem: continuous/discrete
+
         self.states = []  # states variables in the model
         self.local_copies = []  # local copies for state variables in the model
 
         self.num_states = 0  # number of state variables in the model
         self.num_samples = 1  # number of discrete uncertainties
-        self._type = None  # type of the true problem: continuous/discrete
         self.probability = None  # probabilities for the discrete uncertainties
 
         # (discrete) uncertainties
@@ -78,6 +79,21 @@ class StochasticModel:
 
         # collection of all specified dim indices of Markovian uncertainties
         self.Markovian_dim_index = []
+
+    def __getattr__(self, name: any) -> any:
+        """
+        Called when the default attribute access fails with an AttributeError.
+
+        Args:
+            name: the attribute
+
+        Returns:
+
+        """
+        try:
+            return getattr(self._model, name) # getattr() is gurobi's function to query the value of an attribute
+        except AttributeError:
+            raise AttributeError("no attribute named {}".format(name))
 
     def _check_uncertainty(self,
                            uncertainty: ArrayLike | Mapping | Callable,
@@ -244,7 +260,7 @@ class StochasticModel:
                     raise DistributionError(return_data = False)
             else:
                 try:
-                    sample = [float(item) for item in sample]
+                    [float(item) for item in sample]
                 except (ValueError, TypeError):
                     raise DistributionError(return_data = False)
                 if dimension != len(uncertainty(numpy.random)):
@@ -339,21 +355,21 @@ class StochasticModel:
             raise TypeError("wrong uncertainty_dependent format")
         return uncertainty_dependent
 
-    # noinspection PyArgumentList
     def addStateVar(self,
                     lb: float = 0.0,
                     ub: float = float('inf'),
                     obj: float = 0.0,
                     vtype: str = gurobipy.GRB.CONTINUOUS,
                     name: str = '',
-                    column: gurobipy.Columm = None,
+                    column: gurobipy.Column = None,
                     uncertainty: Callable | ArrayLike | Mapping = None,
                     uncertainty_dependent: int | ArrayLike | Mapping = None
                     ) -> tuple[gurobipy.Var, gurobipy.Var]:
         """
         Generalize Gurobi's addVar() function.
         Speciallyfor adding the state varaibles in the multi-stage stochastic models.
-        if having uncertainty, uncertainty happens in the objective coefficient of this varaible.
+
+        Uncertainty using this function is in the objective coefficient of this varaible.
 
         Args:
             lb (float, optional): Lower bound for the variable. Defaults to 0.0.
@@ -421,7 +437,7 @@ class StochasticModel:
         return state, local_copy
     
     def addStateVars(self,
-                     *indices: list,
+                     *indices: int,
                      lb: float = 0.0,
                      ub: float = float('inf'),
                      obj: float = 0.0,
@@ -434,6 +450,8 @@ class StochasticModel:
         Add multi state variables in the model. Generalize gurobipy.addVars() to
         incorporate uncertainty in the objective function. The corresponding
         local copy variables will also be added in the model.
+
+        Uncertainty using this function is in the coefficient of the vars in the objective function.
 
         Args:
             *indices: Indices for accessing the new variables.
@@ -515,6 +533,8 @@ class StochasticModel:
                 uncertainty_dependent: int | ArrayLike | Mapping = None
                ) -> gurobipy.Var:
         """
+        Add decision vararables to the model. Generalize gurobi's addVar() to incorporate uncertainties.
+        Uncertainty using this function is in the coefficient of this var in the objective function.
 
         Args:
             lb (float, optional): Lower bound for the variable. Defaults to 0.0.
@@ -572,7 +592,7 @@ class StochasticModel:
 
     def addVars(
             self,
-            *indices: list,
+            *indices: int,
             lb: float = 0.0,
             ub: float = float('inf'),
             obj: float = 0.0,
@@ -583,6 +603,7 @@ class StochasticModel:
             ) -> gurobipy.tupledict:
         """
         Generalize gurobipy.addVars() to incorporate uncertainty in the objective function.
+        Uncertainty of this function is in the coefficient of the vars in the objetive function.
 
         Args:
             *indices: Indices for accessing the new variables.
@@ -655,3 +676,204 @@ class StochasticModel:
             self.uncertainty_obj_dependent[tuple(var.values())] = uncertainty_dependent
 
         return var
+
+    def addConstr(self,
+                  constr: gurobipy.TempConstr | bool,
+                  name: str = "",
+                  uncertainty: Callable | ArrayLike | Mapping = None,
+                  uncertainty_dependent: int | ArrayLike | Mapping = None,
+                 ) -> gurobipy.Constr:
+        """
+        Add a constraint to the model. Generalize gurobipy.addConstr()
+        to incorporate uncertainty in a constraint.
+
+        Uncertainty using this function is in the RHS or coefficients of the constraint.
+
+        uncertainty or uncertainty_dependent are all in dict format.
+
+        Args:
+            constr: gurobipy TempConstr argument.
+            name: (optional) Name for new constraint.
+            uncertainty: (optional) If it is ArrayLike, it is for discrete uncertainty, and it is the scenarios (uncertainty realizations) of stage-wise independent uncertain objective
+                   coefficients.
+                   If it is Mapping, it can be discrete or continuous uncertainty depending on whether the value in the Mapping item can be callable.
+                   If it is a Callable function, it is for continuous uncertainty, and it is a multivariate random variable generator of stage-wise
+                   independent uncertain objective coefficients. It must take numpy RandomState as its only argument.
+            uncertainty_dependent: (optional) The location index in the stochastic process generator of stage-wise dependent uncertain objective coefficients.
+                For Markov uncertainty.
+
+        Returns:
+            New constraint object.
+
+        Examples:
+        --------
+        stage-wise independent finite discrete uncertain rhs/constraint coefficient:
+
+        >>> newConstr = model.addConstr(
+        ...     new + past == 3.0,
+        ...     uncertainty = {'rhs': [1,2,3], new: [3,4,5]}
+        ... )
+
+        The above example dictates scenarios of RHS to be [1,2,3] and
+        coefficient of new to be [3,4,5].
+
+        stage-wise independent continuous uncertain rhs/constraint coefficient:
+
+        >>> def f(random_state):
+        ...     return random_state.normal(0, 1)
+        >>> newConstr = model.addConstr(
+        ...     ub = 2.0,
+        ...     uncertainty = {new: f},
+        ...     uncertainty_dependent = {'rhs': [1]}
+        ... )
+
+        The above constraint contains a stage-wise independent uncertain
+        constraint coefficient and a Markovian RHS.
+        """
+        constr = self._model.addConstr(constr, name = name)
+        self._model.update()
+
+        if uncertainty is not None:
+            uncertainty = self._check_uncertainty(uncertainty, flag_dict = True, dimension = 1)
+            for key, value in uncertainty.items():
+                # key can be a gurobipy.Var or "rhs"
+                # Append constr to the key
+                if type(key) == gurobipy.Var: # meaning uncertainty is in the coefficient of the constraint
+                    if callable(value):
+                        self.uncertainty_coef_continuous[(constr, key)] = value
+                    else:
+                        self.uncertainty_coef[(constr, key)] = value
+                elif type(key) == str and key.lower() == "rhs": # meaning uncertainty is in the rhs
+                    if callable(value):
+                        self.uncertainty_rhs_continuous[constr] = value
+                    else:
+                        self.uncertainty_rhs[constr] = value
+                else:
+                    raise ValueError("wrong uncertainty key!")
+
+        if uncertainty_dependent is not None:
+            uncertainty_dependent = self._check_uncertainty_dependent(
+                uncertainty_dependent, flag_dict = True, dimension = 1 )
+            for key, value in uncertainty_dependent.items():
+                # key can be a gurobipy.Var or "rhs"
+                # Append constr to the key
+                if type(key) == gurobipy.Var: # meaning uncertainty is in the coefficient of the constraint
+                    if not key in self._model.getVars():
+                        raise ValueError("wrong uncertainty key!")
+                    self.uncertainty_coef_dependent[(constr, key)] = value
+                elif type(key) == str and key.lower() == "rhs": # meaning uncertainty is in the rhs of the constraint
+                    self.uncertainty_rhs_dependent[constr] = value
+                else:
+                    raise ValueError("wrong uncertainty key!")
+
+        return constr
+
+    def addConstrs(self,
+                   generator: Generator,
+                   name: str = '',
+                   uncertainty: Callable | ArrayLike | Mapping = None,
+                   uncertainty_dependent: int | ArrayLike | Mapping = None,
+                   ) -> gurobipy.tupledict:
+        """
+        Add multiple constraints to a model using a Python generator expression.
+
+        Generalize gurobipy.addConstrs() to incorporate uncertainty on the RHS of the constraints.
+
+        If you want to add constraints with uncertainties on coefficients,
+        use addConstr() instead and add those constraints one by one.
+
+        Args:
+            generator: A generator expression, where each iteration produces a constraint.
+            name: (optional) Name pattern for new constraints.
+                  The given name will be subscribed by the index of the generator expression.
+            uncertainty: (optional) If it is ArrayLike, it is for discrete uncertainty, and it is the scenarios (uncertainty realizations) of stage-wise independent uncertain objective
+                   coefficients.
+                   If it is Mapping, it can be discrete or continuous uncertainty depending on whether the value in the Mapping item can be callable.
+                   If it is a Callable function, it is for continuous uncertainty, and it is a multivariate random variable generator of stage-wise
+                   independent uncertain objective coefficients. It must take numpy RandomState as its only argument.
+            uncertainty_dependent: (optional) The location index in the stochastic process generator of stage-wise dependent uncertain objective coefficients.
+                For Markov uncertainty.
+
+        Returns:
+            A Gurobi tupledict that contains the newly created constraints,
+            indexed by the values generated by the generator expression.
+
+
+        Examples:
+        --------
+        >>> new = model.addStateVars(2, ub = 2.0)
+            past = model.addStateVars(2, ub = 2.0)
+
+        stage-wise independent discrete uncertain RHSs:
+
+        >>> newConstrs = model.addConstrs((new[i] + past[i] == 0 for i in range(2)),
+        ...     uncertainty = [[1,2], [2,3]]
+        ... )
+
+        The above example dictates scenarios of RHSs to be [1,2] and [2,3]
+
+        stage-wise independent continuous uncertain RHSs:
+
+        >>> def f(random_state):
+        ...     return random_state.multivariate_normal(
+        ...         mean = [0,0],
+        ...         cov = [[1,0],[0,100]]
+        ...     )
+        >>> newConstrs = model.addConstrs(
+        ...        (new[i] + past[i] == 0 for i in range(2)),
+        ...        uncertainty = f
+        ... )
+
+        Markovian uncertain RHSs:
+
+        >>> newConstrs = model.addConstrs(
+        ...     (new[i] + past[i] == 0 for i in range(2)),
+        ...     uncertainty_dependent = [0,1],
+        ... )
+        """
+        constr = self._model.addConstrs(generator, name = name)
+        self._model.update()
+
+        if uncertainty is not None:
+            uncertainty = self._check_uncertainty(uncertainty, flag_dict = False, dimension = len(constr))
+            if callable(uncertainty):
+                self.uncertainty_rhs_continuous[tuple(constr.values())] = uncertainty
+            else:
+                self.uncertainty_rhs[tuple(constr.values())] = uncertainty
+
+        if uncertainty_dependent is not None:
+            uncertainty_dependent = self._check_uncertainty_dependent(uncertainty_dependent, flag_dict = False,
+                                                                      dimension = len(constr))
+            self.uncertainty_rhs_dependent[tuple(constr.values())] = uncertainty_dependent
+
+        return constr
+
+    def set_probability(self,
+                        probability: ArrayLike) -> None:
+        """
+        Set probability measure of discrete scenarios.
+
+        Args:
+            probability: Array-like probability of scenarios. Default is uniform measure
+                         [1/n_samples for _ in range(n_samples)].
+
+                         Length of the list must equal to the length of uncertainty.
+                         The order of the list must match with the order of uncertainty list.
+
+        Returns:
+            None.
+
+        Examples:
+        --------
+        >>> newVar = model.addVar(ub = 2.0, uncertainty = [1, 2, 3])
+        >>> model.setProbability([0.2, 0.3, 0.4])
+        """
+        self.probability = list(probability)
+        if len(probability) != self.n_samples:
+            raise ValueError("probability tree != compatible with scenario tree")
+
+    def update(self) -> None:
+        """
+        Process any pending model modifications.
+        """
+        self._model.update()

@@ -7,15 +7,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="f99bd7d8-beb4-47cd-bc85-89bae93f688b" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/Python-Practices.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/Python-Practices.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/SDDP-classes/sm-detail.py" beforeDir="false" afterPath="$PROJECT_DIR$/SDDP-classes/sm-detail.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../msppy/quick_start/a_simple_MIP.py" beforeDir="false" afterPath="$PROJECT_DIR$/../msppy/quick_start/a_simple_MIP.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../msppy/quick_start/air_conditioners.py" beforeDir="false" afterPath="$PROJECT_DIR$/../msppy/quick_start/air_conditioners.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../msppy/quick_start/semiconductor.py" beforeDir="false" afterPath="$PROJECT_DIR$/../msppy/quick_start/semiconductor.py" afterDir="false" />
-    </list>
+    <list default="true" id="f99bd7d8-beb4-47cd-bc85-89bae93f688b" name="Default Changelist" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -54,7 +46,7 @@
     "RunOnceActivity.git.unshallow": "true",
     "SHARE_PROJECT_CONFIGURATION_FILES": "true",
     "git-widget-placeholder": "master",
-    "last_opened_file_path": "D:/Users/chen/git/Python-Practices",
+    "last_opened_file_path": "D:/Users/chen/git/msppy",
     "nodejs_package_manager_path": "npm",
     "settings.editor.selected.configurable": "com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable",
     "vue.rearranger.settings.migration": "true"

@@ -3,7 +3,7 @@
 """
 Created on Mon Jan  6 15:49:14 2025
 
-@author: zhenchen
+@author: zhen chen
 
 @Python version: 3.10
 
@@ -11,10 +11,12 @@ Created on Mon Jan  6 15:49:14 2025
     multi stage models;
     
 """
+from sm_detail import StochasticModel
 
-class MSLP():
+
+class MSP:
     """
-    A class of multi stage linear programming model;
+    A class of multi-stage programming model;
     """
     
     
@@ -24,13 +26,13 @@ class MSLP():
                  sense: int = 1,
                  outputFlag: int = 0,
                  discount: float = 1.0,
-                 **kwargs):
+                 **kwargs) -> None:
         """
-        
+        Initialize the MSP class.
 
         Args:
             T (int): the number of stages.
-            bound (float, optional): A known uniform lower bound or uppder bound for each stage problem.
+            bound (float, optional): A known uniform lower bound or upper bound for each stage problem.
                                      Default value is 1 billion for maximization problem and -1 billion for minimization problem. 
             sense (int, optional): model optimization sense. 1 means minimization and -1 means maximization. Defaults to 1.
             outputFlag (int, optional): Enables or disables gurobi solver output. Defaults to 0.
@@ -43,29 +45,47 @@ class MSLP():
 
         """
         self.T = T
+        self.bound = bound
         self.sense = sense
+
         self.measure = 'risk neutral'
+        self.type = 'stage-wise independent'
+
         self._set_default_bound()
+        self._set_model()
+
+    def __getitem__(self,
+                    t: int
+                    ) -> StochasticModel:
+        """
+
+        Args:
+            t: stage index
+
+        Returns:
+            StochasticModel class at one stage t
+        """
+        return self.models[t]
         
-        
-        def _set_default_bound(self):
-            """
-            set the default bound for this multi stage model;
+    def _set_default_bound(self):
+        """
+        Set the default bound for this multi-stage model.
 
-            Returns:
-                None.
+        Returns:
+            None.
 
-            """
-            if self.bound == None:
-                self.bound == 1000000000 if self.sense == 1 else -1000000000
-                
-        def _set_model(self):
-            """
-            set up the detailed gurobi solvable model for each stage
+        """
+        if self.bound is None:
+            self.bound = -1000000000 if self.sense == 1 else 1000000000
 
-            Returns:
-                None.
+    def _set_model(self):
+        """
+        Set up the detailed gurobi solvable model for each stage
 
-            """
-            pass
+        Returns:
+            None.
+
+        """
+        self.models = [StochasticModel(name = str(t)) for t in range(self.T)]
+
         
