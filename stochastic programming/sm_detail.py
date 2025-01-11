@@ -29,8 +29,6 @@ class StochasticModel:
 
     def __init__(self, name: str = '', env: object = None):
         """
-        
-
 
         Args:
             name (str, optional): Name of new model. Defaults to ''.
@@ -46,13 +44,14 @@ class StochasticModel:
 
         """
         self._model = gurobipy.Model(name = name, env = env)
-        self._type = None  # type of the true problem: continuous/discrete
+        self.type = None  # type of the true problem: continuous/discrete
+        self.flag_discrete = 0 #  whether the true problem has been discretized
 
         self.states = []  # states variables in the model
         self.local_copies = []  # local copies for state variables in the model
 
-        self.num_states = 0  # number of state variables in the model
-        self.num_samples = 1  # number of discrete uncertainties
+        self.n_states = 0  # number of state variables in the model
+        self.n_samples = 1  # number of discrete uncertainties
         self.probability = None  # probabilities for the discrete uncertainties
 
         # (discrete) uncertainties
@@ -88,7 +87,7 @@ class StochasticModel:
             name: the attribute
 
         Returns:
-
+            the attribute of this model.
         """
         try:
             return getattr(self._model, name) # getattr() is gurobi's function to query the value of an attribute
@@ -172,11 +171,11 @@ class StochasticModel:
                     raise ValueError("Scenarios must only contains numbers!")
                 uncertainty = [list(item) for item in uncertainty]
 
-                if self._type is None:  # if it is None
-                    self._type = "discrete"
+                if self.type is None:  # if it is None
+                    self.type = "discrete"
                     self.n_samples = len(uncertainty)
                 else:
-                    if self._type != "discrete":  # meaning it is continuous uncertainty
+                    if self.type != "discrete":  # meaning it is continuous uncertainty
                         raise SampleSizeError(
                             self._model.modelName,
                             "infinite",
@@ -196,11 +195,11 @@ class StochasticModel:
             uncertainty = dict(uncertainty)
             for key, value in uncertainty.items():
                 if callable(value):  # dict with callable function
-                    if self._type is None:
-                        self._type = "continuous"
+                    if self.type is None:
+                        self.type = "continuous"
                     else:
                         # already added uncertainty
-                        if self._type != "continuous":
+                        if self.type != "continuous":
                             raise SampleSizeError(
                                 self._model.modelName,
                                 self.n_samples,
@@ -228,13 +227,13 @@ class StochasticModel:
                         )
                     uncertainty[key] = list(value)
 
-                    if self._type is None:
+                    if self.type is None:
                         # add uncertainty for the first time
-                        self._type = "discrete"
+                        self.type = "discrete"
                         self.n_samples = len(value)
                     else:
                         # already added uncertainty
-                        if self._type != "discrete":
+                        if self.type != "discrete":
                             raise SampleSizeError(
                                 self._model.modelName,
                                 "infinite",
@@ -269,12 +268,12 @@ class StochasticModel:
                         dimension of the added object is {}!"
                         .format(len(uncertainty(numpy.random)), dimension)
                     )
-            if self._type is None:
+            if self.type is None:
                 # add uncertainty for the first time
-                self._type = "continuous"
+                self.type = "continuous"
             else:
                 # already added uncertainty
-                if self._type != "continuous":
+                if self.type != "continuous":
                     raise SampleSizeError(
                         self._model.modelName,
                         self.n_samples,
@@ -355,6 +354,132 @@ class StochasticModel:
             raise TypeError("wrong uncertainty_dependent format")
         return uncertainty_dependent
 
+    def _discretize(self, n_samples: int,
+                    random_state: int | numpy.random.RandomState = None,
+                    replace: bool = True) -> None:
+        """
+        Discretize the stage-wise independent continuous uncertainties.
+
+        Parameters
+        ----------
+        n_samples: The number of samples to generate uniformly from the distribution
+
+        random_state: (optional)
+            If int, random_state is the seed used by the random number generator;
+
+            If RandomState instance, random_state is the random number generator;
+
+            If None, the random number generator is the RandomState instance used by numpy.random.
+
+        replace: (optional) Whether the sample is with or without replacement.
+        """
+        if self.flag_discrete == 1:
+            return
+        # Discretize the continuous true problem
+        if self.type == "continuous":
+            self.n_samples = n_samples
+            # Order of discretization matters
+            for key, dist in sorted(
+                self.uncertainty_rhs_continuous.items(),
+                key = lambda t: repr(t[0]),
+            ):
+                self.uncertainty_rhs[key] = [
+                    dist(random_state) for _ in range(self.n_samples)
+                ]
+            for key, dist in sorted(
+                self.uncertainty_obj_continuous.items(),
+                key=lambda t: repr(t[0]),
+            ):
+                self.uncertainty_obj[key] = [
+                    dist(random_state) for _ in range(self.n_samples)
+                ]
+            for key, dist in sorted(
+                self.uncertainty_coef_continuous.items(),
+                key=lambda t: repr(t[0]),
+            ):
+                self.uncertainty_coef[key] = [
+                    dist(random_state) for _ in range(self.n_samples)
+                ]
+            for keys, dist in sorted(
+                self.uncertainty_mix_continuous.items(),
+                key=lambda t: repr(t[0]),
+            ):
+                for i in range(self.n_samples):
+                    sample = dist(random_state)
+                    for index, key in enumerate(keys):
+                        if type(key) == gurobipy.Var:
+                            if key not in self.uncertainty_obj.keys():
+                                self.uncertainty_obj[key] = [sample[index]]
+                            else:
+                                self.uncertainty_obj[key].append(sample[index])
+                        elif type(key) == gurobipy.Constr:
+                            if key not in self.uncertainty_rhs.keys():
+                                self.uncertainty_rhs[key] = [sample[index]]
+                            else:
+                                self.uncertainty_rhs[key].append(sample[index])
+                        else:
+                            if key not in self.uncertainty_coef.keys():
+                                self.uncertainty_coef[key] = [sample[index]]
+                            else:
+                                self.uncertainty_coef[key].append(
+                                    sample[index]
+                                )
+        # Discretize discrete true problem
+        else:
+            if n_samples > self.n_samples:
+                raise Exception(
+                    "n_samples should be smaller than the total number of samples!"
+                )
+            for key, samples in sorted(
+                self.uncertainty_rhs.items(), key=lambda t: repr(t[0])
+            ):
+                self.uncertainty_rhs_discrete[key] = samples
+                # numpy.random.choice does not work on multi-dimensional arrays
+                drawed_indices = rand_int(
+                    self.n_samples,
+                    random_state,
+                    size=n_samples,
+                    probability=self.probability,
+                    replace=replace,
+                )
+                self.uncertainty_rhs[key] = [
+                    samples[index]
+                    for index in drawed_indices
+                ]
+            for key, samples in sorted(
+                self.uncertainty_obj.items(), key=lambda t: repr(t[0])
+            ):
+                self.uncertainty_obj_discrete[key] = samples
+                drawed_indices = rand_int(
+                    self.n_samples,
+                    random_state,
+                    size=n_samples,
+                    probability=self.probability,
+                    replace=replace,
+                )
+                self.uncertainty_obj[key] = [
+                    samples[index]
+                    for index in drawed_indices
+                ]
+            for key, samples in sorted(
+                self.uncertainty_coef.items(), key=lambda t: repr(t[0])
+            ):
+                self.uncertainty_coef_discrete[key] = samples
+                drawed_indices = rand_int(
+                    self.n_samples,
+                    random_state,
+                    size=n_samples,
+                    probability=self.probability,
+                    replace=replace,
+                )
+                self.uncertainty_coef[key] = [
+                    samples[index]
+                    for index in drawed_indices
+                ]
+            self.n_samples_discrete = self.n_samples
+            self.n_samples = n_samples
+        self._flag_discrete = 1
+
     def addStateVar(self,
                     lb: float = 0.0,
                     ub: float = float('inf'),
@@ -421,7 +546,7 @@ class StochasticModel:
 
         self.states += [state]  # append the state to the model
         self.local_copies += [local_copy]
-        self.num_states += 1
+        self.n_states += 1
 
         if uncertainty is not None:
             uncertainty = self._check_uncertainty(uncertainty, False, 1)

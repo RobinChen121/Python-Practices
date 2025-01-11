@@ -88,4 +88,31 @@ class MSP:
         """
         self.models = [StochasticModel(name = str(t)) for t in range(self.T)]
 
+    def _check_individual_stage_models(self):
+        """
+        Check state variables are set properly. Check stage-wise continuous
+        uncertainties are discretized.
+        """
+        m = self.models[0] if type(self.models[0]) != list else self.models[0][0]
+        if not m.states: # m.states is empty
+            raise Exception("State variables must be set!")
+        n_states = m.n_states
+        for t in range(1, self.T):
+            ms = self.models[t] if type(self.models[t]) == list else [self.models[t]]
+            for m in ms:
+                if m.type == "continuous":
+                    if m.flag_discrete == 0:
+                        raise Exception(
+                            "Stage-wise independent continuous uncertainties "+
+                            "must be discretized!"
+                        )
+                    self._individual_type = "discretized"
+                else:
+                    if m._flag_discrete == 1:
+                        self._individual_type = "discretized"
+                # if m.n_states != n_states:
+                #     raise Exception(
+                #         "Dimension of state space must be same for all stages!"
+                #     )
+
         

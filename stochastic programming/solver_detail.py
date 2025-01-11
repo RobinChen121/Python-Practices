@@ -44,7 +44,16 @@ class Extensive:
         self.total_time = None
         self.type = msp.type
 
-    def __getattr__(self, name):
+    def __getattr__(self, name: any) -> any:
+        """
+        Called when the default attribute access fails with an AttributeError.
+
+        Args:
+            name: the attribute
+
+        Returns:
+            The attribute of this model.
+        """
         try:
             return getattr(self.extensive_model, name)
         except AttributeError:
