@@ -9,6 +9,9 @@ Created on 2025/1/10, 21:48
 
 """
 from msm import MSP
+import time
+import gurobipy
+import numpy
 
 
 class Extensive:
@@ -37,8 +40,10 @@ class Extensive:
         The time cost in constructing extensive model
     """
 
-    def __init__(self, msp: MSP) -> None:
-        self.msp = msp
+    def __init__(self, msp: type[MSP]) -> None:
+        self.start = 0 # starting stage
+        self.extensive_model = None
+        self.MSP = msp
         self.solving_time = None
         self.construction_time = None
         self.total_time = None
@@ -59,27 +64,29 @@ class Extensive:
         except AttributeError:
             raise AttributeError("no attribute named {}".format(name))
 
-    def solve(self, start=0, flag_rolling=0, **kwargs):
-        """Call extensive solver to solve the discretized problem. It will first
+    def solve(self, start: int = 0, flag_rolling: bool = 0, **kwargs) -> None:
+        """
+        Call extensive solver to solve the discretized problem. It will first
         construct the extensive model and then call Gurobi solver to solve it.
 
-        Parameters
-        ----------
-        **kwargs: optional
-            Gurobipy attributes to specify on extensive model.
+        Args:
+            start: starting stage index
+            flag_rolling:  whether using rolling horizon
         """
-        # extensive solver is able to solve MSLP with CTG or without CTG
-        self.MSP._check_individual_stage_models()
-        self.MSP._check_multistage_model()
+        # check whether the continuity of the problem is discretized
+        # check whether the number of states and samples are updated
+        # discrete problem does not require being discretized
+        self.MSP.check_state_and_continuous_discretized()
+        self.MSP.check_markov_and_update_num_states_samples()
 
         construction_start_time = time.time()
 
         self.extensive_model = gurobipy.Model()
-        self.extensive_model.modelsense = self.MSP.sense
+        self.extensive_model.ModelSense = self.MSP.sense
         self.start = start
 
         for k, v in kwargs.items():
-            setattr(self.extensive_model.Params, k, v)
+            setattr(self.extensive_model.Params, k, v) # set attribute for an object
         self._construct_extensive(flag_rolling)
         construction_end_time = time.time()
         self.construction_time = construction_end_time - construction_start_time
@@ -133,21 +140,27 @@ class Extensive:
         vars = self._get_first_stage_vars()
         return sum(v.obj*v.X for k,v in vars.items())
 
-    def _construct_extensive(self, flag_rolling):
-        ## Construct extensive model
-        MSP = self.MSP
-        T = MSP.T
+    def _construct_extensive(self, flag_rolling: bool) -> None:
+        """
+            Construct the extensive model.
+
+        Args:
+            flag_rolling: Whether it is rolling horizon computation
+        """
+        msp = self.MSP
+        T = msp.T
         start = self.start
-        n_Markov_states = MSP.n_Markov_states
+        n_Markov_states = msp.n_Markov_states
         n_samples = (
-            [MSP.models[t].n_samples for t in range(T)]
+            [msp.models[t].n_samples for t in range(T)]
             if n_Markov_states == 1
-            else [MSP.models[t][0].n_samples for t in range(T)]
+            else [msp.models[t][0].n_samples for t in range(T)]
         )
-        n_states = MSP.n_states
+        n_states = msp.n_states
         # check if CTG variable is added or not
+        # chen: CTG may be the cutting approximation parameter
         initial_model = (
-            MSP.models[start] if n_Markov_states == 1 else MSP.models[start][0]
+            msp.models[start] if n_Markov_states == 1 else msp.models[start][0]
         )
         flag_CTG = 1 if initial_model.alpha is not None else -1
         # |       stage 0       |        stage 1       | ... |       stage T-1      |
@@ -162,8 +175,8 @@ class Extensive:
             M = [MSP.models[t]] if n_Markov_states == 1 else MSP.models[t]
             # stage T-1 needs to add the states. sample path corresponds to
             # current node.
-            if t == T-1:
-                _, sample_paths = MSP._enumerate_sample_paths(t,start,flag_rolling)
+            if t == T - 1:
+                _, sample_paths = MSP.enumerate_sample_paths(t, start, flag_rolling)
                 states = [
                     self.extensive_model.addVars(sample_paths)
                     for _ in range(n_states[t])
@@ -171,7 +184,7 @@ class Extensive:
             # new_states is the local_copies. new_sample_paths corresponds to
             # previous node
             if t != start:
-                temp, new_sample_paths = MSP._enumerate_sample_paths(t-1,start,flag_rolling)
+                temp, new_sample_paths = MSP.enumerate_sample_paths(t-1,start,flag_rolling)
                 new_states = [
                     self.extensive_model.addVars(new_sample_paths)
                     for _ in range(n_states[t-1])

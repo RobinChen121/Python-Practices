@@ -54,19 +54,21 @@ class StochasticModel:
         self.n_samples = 1  # number of discrete uncertainties
         self.probability = None  # probabilities for the discrete uncertainties
 
-        # (discrete) uncertainties
-        # stage-wise independent discrete uncertainties
-        self.uncertainty_rhs = {}  # {} is dic format, uncertainty is in the right hand side of the constraints
+        # cutting planes approximation of recourse variable alpha
+        self.alpha = None
+        self.cuts = []
+
+        # detailed uncertainty realizations
+        self.uncertainty_rhs = {}  # {} is dic format, uncertainty is on the right hand side of the constraints
         self.uncertainty_coef = {}  # uncertainty is in the constraint coefficients
         self.uncertainty_obj = {}  # uncertainty is in the objective coefficients
 
-        # true uncertainties
-        # stage-wise independent true continuous uncertainties
+        # stage-wise independent continuous uncertainties
         self.uncertainty_rhs_continuous = {}
         self.uncertainty_coef_continuous = {}
         self.uncertainty_obj_continuous = {}
         self.uncertainty_mix_continuous = {}
-        # stage-wise independent true discrete uncertainties
+        # stage-wise independent discrete uncertainties
         self.uncertainty_rhs_discrete = {}
         self.uncertainty_coef_discrete = {}
         self.uncertainty_obj_discrete = {}
@@ -354,22 +356,50 @@ class StochasticModel:
             raise TypeError("wrong uncertainty_dependent format")
         return uncertainty_dependent
 
+    def _update_uncertainty_dependent(self, Markov_state: ArrayLike) -> None:
+        """
+        Update model with the detailed Markov states values
+
+        Args:
+            Markov_state: the detailed values of markov states
+        """
+        if self.uncertainty_coef_dependent is not None:
+            for (constr,var), value in self.uncertainty_coef_dependent.items():
+                self._model.chgCoeff(constr, var, Markov_state[value]) # change the coefficient of one var in a constraint
+        if self.uncertainty_rhs_dependent is not None:
+            for constr_tuple, value in self.uncertainty_rhs_dependent.items():
+                if type(constr_tuple) == tuple:
+                    self._model.setAttr( # change the value of one or more attributes
+                        "RHS",
+                        list(constr_tuple),
+                        [Markov_state[i] for i in value],
+                    )
+                else:
+                    constr_tuple.setAttr("RHS", Markov_state[value])
+        if self.uncertainty_obj_dependent is not None:
+            for var_tuple, value in self.uncertainty_obj_dependent.items():
+                if type(var_tuple) == tuple:
+                    self._model.setAttr(
+                        "Obj",
+                        list(var_tuple),
+                        [Markov_state[i] for i in value],
+                    )
+                else:
+                    var_tuple.setAttr("Obj", Markov_state[value])
+
     def _discretize(self, n_samples: int,
-                    random_state: int | numpy.random.RandomState = None,
+                    random_state: numpy.random.RandomState,
                     replace: bool = True) -> None:
         """
         Discretize the stage-wise independent continuous uncertainties.
+
+        chen: This function is actually not used in the stochastic programming.
 
         Parameters
         ----------
         n_samples: The number of samples to generate uniformly from the distribution
 
-        random_state: (optional)
-            If int, random_state is the seed used by the random number generator;
-
-            If RandomState instance, random_state is the random number generator;
-
-            If None, the random number generator is the RandomState instance used by numpy.random.
+        random_state:  A RandomState instance.
 
         replace: (optional) Whether the sample is with or without replacement.
         """
@@ -378,107 +408,86 @@ class StochasticModel:
         # Discretize the continuous true problem
         if self.type == "continuous":
             self.n_samples = n_samples
-            # Order of discretization matters
-            for key, dist in sorted(
-                self.uncertainty_rhs_continuous.items(),
-                key = lambda t: repr(t[0]),
+            # sort the recorded uncertainty in the dict
+            # and recorded them in another dict
+            for key, dist in sorted( # sorted the dict, default is sorting by key
+                                     # dist it a random generator function
+                self.uncertainty_rhs_continuous.items()
             ):
                 self.uncertainty_rhs[key] = [
                     dist(random_state) for _ in range(self.n_samples)
                 ]
-            for key, dist in sorted(
-                self.uncertainty_obj_continuous.items(),
-                key=lambda t: repr(t[0]),
-            ):
+            for key, dist in sorted(self.uncertainty_obj_continuous.items()):
                 self.uncertainty_obj[key] = [
                     dist(random_state) for _ in range(self.n_samples)
                 ]
-            for key, dist in sorted(
-                self.uncertainty_coef_continuous.items(),
-                key=lambda t: repr(t[0]),
-            ):
+            for key, dist in sorted(self.uncertainty_coef_continuous.items()):
                 self.uncertainty_coef[key] = [
                     dist(random_state) for _ in range(self.n_samples)
                 ]
-            for keys, dist in sorted(
-                self.uncertainty_mix_continuous.items(),
-                key=lambda t: repr(t[0]),
-            ):
+            for keys, dist in sorted(self.uncertainty_mix_continuous.items()):
                 for i in range(self.n_samples):
-                    sample = dist(random_state)
+                    sample = dist(random_state) # dist is a numpy random generator
                     for index, key in enumerate(keys):
                         if type(key) == gurobipy.Var:
                             if key not in self.uncertainty_obj.keys():
-                                self.uncertainty_obj[key] = [sample[index]]
+                                self.uncertainty_obj[key] = sample # [sample[index]]
                             else:
-                                self.uncertainty_obj[key].append(sample[index])
+                                self.uncertainty_obj[key].append(sample) # sample[index]
                         elif type(key) == gurobipy.Constr:
                             if key not in self.uncertainty_rhs.keys():
-                                self.uncertainty_rhs[key] = [sample[index]]
+                                self.uncertainty_rhs[key] = sample
                             else:
-                                self.uncertainty_rhs[key].append(sample[index])
+                                self.uncertainty_rhs[key].append(sample)
                         else:
                             if key not in self.uncertainty_coef.keys():
-                                self.uncertainty_coef[key] = [sample[index]]
+                                self.uncertainty_coef[key] = sample
                             else:
-                                self.uncertainty_coef[key].append(
-                                    sample[index]
-                                )
+                                self.uncertainty_coef[key].append(sample)
         # Discretize discrete true problem
         else:
             if n_samples > self.n_samples:
-                raise Exception(
-                    "n_samples should be smaller than the total number of samples!"
-                )
-            for key, samples in sorted(
-                self.uncertainty_rhs.items(), key=lambda t: repr(t[0])
-            ):
-                self.uncertainty_rhs_discrete[key] = samples
-                # numpy.random.choice does not work on multi-dimensional arrays
-                drawed_indices = rand_int(
+                raise Exception("n_samples should be smaller than the total number of samples!")
+            for key, samples in sorted(self.uncertainty_rhs_discrete.items()):
+                # numpy.random.choice does not work on multidimensional arrays
+                choiced_indices = rand_int(
                     self.n_samples,
                     random_state,
-                    size=n_samples,
-                    probability=self.probability,
-                    replace=replace,
+                    size = n_samples,
+                    probability = self.probability,
+                    replace = replace,
                 )
                 self.uncertainty_rhs[key] = [
                     samples[index]
-                    for index in drawed_indices
+                    for index in choiced_indices
                 ]
-            for key, samples in sorted(
-                self.uncertainty_obj.items(), key=lambda t: repr(t[0])
-            ):
-                self.uncertainty_obj_discrete[key] = samples
-                drawed_indices = rand_int(
+            for key, samples in sorted(self.uncertainty_obj_discrete.items()):
+                choiced_indices = rand_int(
                     self.n_samples,
                     random_state,
-                    size=n_samples,
-                    probability=self.probability,
-                    replace=replace,
+                    size = n_samples,
+                    probability = self.probability,
+                    replace = replace,
                 )
                 self.uncertainty_obj[key] = [
                     samples[index]
-                    for index in drawed_indices
+                    for index in choiced_indices
                 ]
-            for key, samples in sorted(
-                self.uncertainty_coef.items(), key=lambda t: repr(t[0])
-            ):
-                self.uncertainty_coef_discrete[key] = samples
-                drawed_indices = rand_int(
+            for key, samples in sorted(self.uncertainty_coef_discrete.items()):
+                choiced_indices = rand_int(
                     self.n_samples,
                     random_state,
-                    size=n_samples,
-                    probability=self.probability,
-                    replace=replace,
+                    size = n_samples,
+                    probability = self.probability,
+                    replace = replace,
                 )
                 self.uncertainty_coef[key] = [
                     samples[index]
-                    for index in drawed_indices
+                    for index in choiced_indices
                 ]
             self.n_samples_discrete = self.n_samples
             self.n_samples = n_samples
-        self._flag_discrete = 1
+        self.flag_discrete = 1
 
     def addStateVar(self,
                     lb: float = 0.0,
