@@ -24,9 +24,8 @@ class MSP:
     """
     A class of multi-stage programming model;
     """
-    
-    
-    def __init__(self, 
+
+    def __init__(self,
                  T: int,
                  bound: float = None,
                  sense: int = 1,
@@ -56,6 +55,7 @@ class MSP:
         self.T = T
         self.bound = bound
         self.sense = sense
+        self.discount = discount
 
         self.measure = 'risk neutral'
         self._type = 'stage-wise independent'

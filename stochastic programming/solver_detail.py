@@ -87,7 +87,7 @@ class Extensive:
 
         for k, v in kwargs.items():
             setattr(self.extensive_model.Params, k, v) # set attribute for an object
-        self._construct_extensive(flag_rolling)
+        self._construct_extensive(flag_rolling) # this step is very import for the extensive model solving
         construction_end_time = time.time()
         self.construction_time = construction_end_time - construction_start_time
         solving_start_time = time.time()
@@ -179,15 +179,15 @@ class Extensive:
                 _, sample_paths = MSP.enumerate_sample_paths(t, start, flag_rolling)
                 states = [
                     self.extensive_model.addVars(sample_paths)
-                    for _ in range(n_states[t])
+                    for _ in range(n_states[t]) # the number of states at one stage is usually 1
                 ]
             # new_states is the local_copies. new_sample_paths corresponds to
             # previous node
             if t != start:
-                temp, new_sample_paths = MSP.enumerate_sample_paths(t-1,start,flag_rolling)
+                temp, new_sample_paths = MSP.enumerate_sample_paths(t - 1, start, flag_rolling)
                 new_states = [
                     self.extensive_model.addVars(new_sample_paths)
-                    for _ in range(n_states[t-1])
+                    for _ in range(n_states[t - 1])
                 ]
                 if flag_CTG == 1:
                     new_stage_cost = {
