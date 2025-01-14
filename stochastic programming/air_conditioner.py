@@ -39,6 +39,7 @@ min x + 3w + 0.5y
 """
 
 from msm import MSP
+from solver_detail import Extensive
 
 
 T = 3
@@ -47,9 +48,9 @@ D = [100, 300]
 airConditioner = MSP(T, bound = 0)
 for t in range(T):
     m = airConditioner[t]
-    y_now, y_past = m.addStateVar(obj = 50, vtype =  'I')
-    x = m.addVar(ub = 200, obj = 100, vtype = 'I')
-    w = m.addVar(obj = 300, vtype = 'I')
+    y_now, y_past = m.addStateVar(obj = 50, vtype =  'I', name = 'y')
+    x = m.addVar(ub = 200, obj = 100, vtype = 'I', name = 'x')
+    w = m.addVar(obj = 300, vtype = 'I', name = 'w')
     m.update()
 
     if t == 0:
@@ -59,3 +60,5 @@ for t in range(T):
             uncertainty = {'rhs': D})
         m.set_probability([0.4, 0.6])
     # m.write('air_me_' + str(t) + '.lp')
+
+Extensive(airConditioner).solve()

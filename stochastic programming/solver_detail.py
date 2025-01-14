@@ -47,7 +47,6 @@ class Extensive:
         self.solving_time = None
         self.construction_time = None
         self.total_time = None
-        self.type = msp.type
 
     def __getattr__(self, name: any) -> any:
         """
@@ -172,11 +171,10 @@ class Extensive:
         if flag_CTG == 1:
             stage_cost = None
         for t in reversed(range(start,T)):
-            M = [MSP.models[t]] if n_Markov_states == 1 else MSP.models[t]
             # stage T-1 needs to add the states. sample path corresponds to
             # current node.
             if t == T - 1:
-                _, sample_paths = MSP.enumerate_sample_paths(t, start, flag_rolling)
+                _, sample_paths = msp.enumerate_sample_paths(t, start, flag_rolling)
                 states = [
                     self.extensive_model.addVars(sample_paths)
                     for _ in range(n_states[t]) # the number of states at one stage is usually 1
@@ -184,7 +182,7 @@ class Extensive:
             # new_states is the local_copies. new_sample_paths corresponds to
             # previous node
             if t != start:
-                temp, new_sample_paths = MSP.enumerate_sample_paths(t - 1, start, flag_rolling)
+                _, new_sample_paths = msp.enumerate_sample_paths(t - 1, start, flag_rolling)
                 new_states = [
                     self.extensive_model.addVars(new_sample_paths)
                     for _ in range(n_states[t - 1])
@@ -199,22 +197,23 @@ class Extensive:
                     self.extensive_model.addVars(sample_paths)
                     for _ in range(n_states[t])
                 ]
-
+            M = [msp.models[t]] if n_Markov_states == 1 else msp.models[t]
+            M[0].write('test.lp')
             for j in range(n_samples[t]):
                 for k, m in enumerate(M):
-                    # copy information from model in scenario j and markov state
-                    # k.
-                    m._update_uncertainty(j)
+                    # copy information from model in scenario j and markov state k
+                    # note: m is the original model, not the extensive model
+                    m.update_uncertainty(j) # m is the model at each stage
                     m.update()
+                    m.write('test1.lp')
                     # compute sample paths that go through the current node
                     current_sample_paths = (
-                        [
-                            item
+                        [   item
                             for item in sample_paths
-                            if item[0][t-start] == j and item[1][t-start] == k
+                            if item[0][t - start] == j and item[1][t - start] == k
                         ]
-                        if n_Markov_states != 1
-                        else [item for item in sample_paths if item[t-start] == j]
+                        if n_Markov_states != 1 # the following is for non-Markov problem
+                        else [item for item in sample_paths if item[t - start] == j]
                     )
                     # when the sample path is too long, change the name of variables
 
@@ -246,13 +245,13 @@ class Extensive:
                             past_sample_path = current_sample_path
 
                         if flag_CTG == -1 or t == start:
-                            weight = MSP.discount ** (
+                            weight = msp.discount ** (
                                 (t - start)
-                            ) * MSP._compute_weight_sample_path(
+                            ) * msp._compute_weight_sample_path(
                                 current_sample_path, start
                             )
                         else:
-                            currentWeight = MSP._compute_current_weight_sample_path(
+                            currentWeight = msp._compute_current_weight_sample_path(
                                 current_sample_path)
 
                         for i in range(n_states[t]):
@@ -318,7 +317,7 @@ class Extensive:
                         # add constraints
                         if t != T - 1 and flag_CTG == 1:
                             self.extensive_model.addConstr(
-                                MSP.sense
+                                msp.sense
                                 * (
                                     controls[
                                         controls_dict[m.getVarByName("alpha")]

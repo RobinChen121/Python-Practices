@@ -58,7 +58,7 @@ class StochasticModel:
         self.alpha = None
         self.cuts = []
 
-        # detailed uncertainty realizations
+        # stage-wise independent discrete uncertainty realizations
         self.uncertainty_rhs = {}  # {} is dic format, uncertainty is on the right hand side of the constraints
         self.uncertainty_coef = {}  # uncertainty is in the constraint coefficients
         self.uncertainty_obj = {}  # uncertainty is in the objective coefficients
@@ -68,7 +68,9 @@ class StochasticModel:
         self.uncertainty_coef_continuous = {}
         self.uncertainty_obj_continuous = {}
         self.uncertainty_mix_continuous = {}
-        # stage-wise independent discrete uncertainties
+
+        # the followings are actually useless in the programming
+        # it seems to record the discretization of the continuous uncertainties
         self.uncertainty_rhs_discrete = {}
         self.uncertainty_coef_discrete = {}
         self.uncertainty_obj_discrete = {}
@@ -356,7 +358,72 @@ class StochasticModel:
             raise TypeError("wrong uncertainty_dependent format")
         return uncertainty_dependent
 
-    def _update_uncertainty_dependent(self, Markov_state: ArrayLike) -> None:
+    # @property is a built-in decorator used to turn a class method into a property.
+    # This allows you to define methods that can be accessed like attributes.
+    @property
+    def controls(self):
+        """Get control variables"""
+        vars = self._model.getVars()
+        states_name = [state.varName for state in self.states]
+        local_copies_name = [
+            local_copy.varName for local_copy in self.local_copies
+        ]
+        return [
+            var
+            for var in vars
+            if var.varName not in states_name + local_copies_name
+        ]
+
+    def update_uncertainty(self, k):
+        """
+        Update the corresponding uncertainty realizations in the rhs, obj coef or const coef
+
+        Args:
+            k: the k_th realization of the uncertainty
+        """
+        # Update model with the k^th stage-wise independent discrete uncertainty
+        if self.uncertainty_coef is not None:
+            for (constr, var), value in self.uncertainty_coef.items():
+                self._model.chgCoeff(constr, var, value[k])
+        if self.uncertainty_rhs is not None:
+            for constr_tuple, value in self.uncertainty_rhs.items():
+                if type(constr_tuple) == tuple: # meaning multi constraints
+                    self._model.setAttr("RHS", list(constr_tuple), value[k]) # setAttr() function can set the attributes for a list of objects
+                else:
+                    constr_tuple.setAttr("RHS", value[k])
+        if self.uncertainty_obj is not None:
+            for var_tuple, value in self.uncertainty_obj.items():
+                if type(var_tuple) == tuple:
+                    self._model.setAttr("Obj", list(var_tuple), value[k])
+                else:
+                    var_tuple.setAttr("Obj", value[k])
+
+    def update_uncertainty_discrete(self, k):
+        """
+        This function seems to update the discretization for continuous uncertainty.
+        But basically not used in the programming.
+
+        Args:
+            k: the k_th realization of the uncertainty
+        """
+        # update model with the k^th stage-wise independent true discrete uncertainty
+        if self.uncertainty_coef_discrete is not None:
+            for (constr, var), value in self.uncertainty_coef_discrete.items():
+                self._model.chgCoeff(constr, var, value[k])
+        if self.uncertainty_rhs_discrete is not None:
+            for constr_tuple, value in self.uncertainty_rhs_discrete.items():
+                if type(constr_tuple) == tuple:
+                    self._model.setAttr("RHS", list(constr_tuple), value[k])
+                else:
+                    constr_tuple.setAttr("RHS", value[k])
+        if self.uncertainty_obj_discrete is not None:
+            for var_tuple, value in self.uncertainty_obj_discrete.items():
+                if type(var_tuple) == tuple:
+                    self._model.setAttr("Obj", list(var_tuple), value[k])
+                else:
+                    var_tuple.setAttr("Obj", value[k])
+
+    def update_uncertainty_dependent(self, Markov_state: ArrayLike) -> None:
         """
         Update model with the detailed Markov states values
 
@@ -629,7 +696,7 @@ class StochasticModel:
         >>> now,past = model.addStateVars(2, ub = 2.0, uncertainty = f)
 
         Markovian objective coefficients
-        >>> now,past = model.addStateVars(2, ub = 2.0, uncertainty_dependent = [1,2])
+        >>> now, past = model.addStateVars(2, ub = 2.0, uncertainty_dependent = [1,2])
         """
         state = self._model.addVars(
             *indices, lb = lb, ub = ub, obj = obj, vtype = vtype, name = name
@@ -970,7 +1037,7 @@ class StochasticModel:
 
         if uncertainty is not None:
             uncertainty = self._check_uncertainty(uncertainty, flag_dict = False, dimension = len(constr))
-            if callable(uncertainty):
+            if callable(uncertainty): # values() get all the constraints since constrs is a tupledict
                 self.uncertainty_rhs_continuous[tuple(constr.values())] = uncertainty
             else:
                 self.uncertainty_rhs[tuple(constr.values())] = uncertainty
