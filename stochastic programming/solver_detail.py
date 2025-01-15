@@ -40,7 +40,7 @@ class Extensive:
         The time cost in constructing extensive model
     """
 
-    def __init__(self, msp: type[MSP]) -> None:
+    def __init__(self, msp: MSP) -> None:
         self.start = 0 # starting stage
         self.extensive_model = None
         self.MSP = msp
@@ -215,24 +215,13 @@ class Extensive:
                         if n_Markov_states != 1 # the following is for non-Markov problem
                         else [item for item in sample_paths if item[t - start] == j]
                     )
-                    # when the sample path is too long, change the name of variables
-
-                    controls_ = m.controls
-                    states_ = m.states
-                    local_copies_ = m.local_copies
-                    controls_dict = {v: i for i, v in enumerate(controls_)}
-                    states_dict = {v: i for i, v in enumerate(states_)}
-                    local_copies_dict = {
-                        v: i for i, v in enumerate(local_copies_)
-                    }
 
                     for current_sample_path in current_sample_paths:
                         flag_reduced_name = 0
                         if len(str(current_sample_path)) > 100:
-                            flag_reduced_name = 1
+                            flag_reduced_name = 1 # when the sample path is too long, change the name of variables
                         if t != start:
-                            # compute sample paths that go through the
-                            # ancester node
+                            # compute sample paths that go through the ancestor node
                             past_sample_path = (
                                 current_sample_path[:-1]
                                 if n_Markov_states == 1
@@ -247,7 +236,7 @@ class Extensive:
                         if flag_CTG == -1 or t == start:
                             weight = msp.discount ** (
                                 (t - start)
-                            ) * msp._compute_weight_sample_path(
+                            ) * msp.compute_weight_sample_path(
                                 current_sample_path, start
                             )
                         else:
@@ -288,6 +277,16 @@ class Extensive:
                                 new_states[i][current_sample_path].vtype = local_copies_[i].vtype
                                 if flag_reduced_name == 0:
                                     new_states[i][current_sample_path].varName = local_copies_[i].varname + str(current_sample_path).replace(" ", "")
+
+                        controls_ = m.controls  # Trailing Underscore (var_): Used to avoid conflicts with Python keywords
+                        states_ = m.states
+                        local_copies_ = m.local_copies
+                        controls_dict = {v: i for i, v in enumerate(controls_)}
+                        states_dict = {v: i for i, v in enumerate(states_)}
+                        local_copies_dict = {
+                            v: i for i, v in enumerate(local_copies_)
+                        }
+
                         # copy local variables
                         controls = [None for _ in range(len(controls_))]
                         for i, var in enumerate(controls_):
@@ -357,7 +356,7 @@ class Extensive:
                                         )
                             #! end expression loop
                             self.extensive_model.addConstr(
-                                lhs=lhs, sense=constr_.sense, rhs=rhs_
+                                lhs = lhs, sense = constr_.sense, rhs = rhs_
                             )
                         #! end copying the constraints
                     #! end MC loop

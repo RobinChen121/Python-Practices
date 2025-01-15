@@ -52,7 +52,7 @@ class StochasticModel:
 
         self.n_states = 0  # number of state variables in the model
         self.n_samples = 1  # number of discrete uncertainties
-        self.probability = None  # probabilities for the discrete uncertainties
+        self.probability = None # probabilities for the discrete uncertainties
 
         # cutting planes approximation of recourse variable alpha
         self.alpha = None
@@ -362,15 +362,18 @@ class StochasticModel:
     # This allows you to define methods that can be accessed like attributes.
     @property
     def controls(self):
-        """Get control variables"""
-        vars = self._model.getVars()
+        """
+        Get control variables that are not state names or local copy variable names
+
+        """
+        model_vars = self._model.getVars() # vars is a built-in function of function to get the attributes of a class
         states_name = [state.varName for state in self.states]
         local_copies_name = [
             local_copy.varName for local_copy in self.local_copies
         ]
         return [
             var
-            for var in vars
+            for var in model_vars
             if var.varName not in states_name + local_copies_name
         ]
 

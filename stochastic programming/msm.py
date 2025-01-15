@@ -20,10 +20,12 @@ from itertools import product
 from collections.abc import Callable
 
 
+# noinspection PyUnresolvedReferences
 class MSP:
     """
     A class of multi-stage programming model;
     """
+
 
     def __init__(self,
                  T: int,
@@ -62,6 +64,7 @@ class MSP:
         self._flag_discrete = 0
         self._individual_type = 'original'
         self.Markov_states = None
+        self.Markovian_uncertainty = None
         self.transition_matrix = None
         self.dim_Markov_states = {}
         self.n_Markov_states = 1 # the default 1 meaning this class is not Markovian
@@ -102,6 +105,37 @@ class MSP:
 
         """
         self.models = [StochasticModel(name = str(t)) for t in range(self.T)]
+
+    def _set_up_probability(self):
+        """
+        Return uniform measure if no given probability measure
+
+        """
+        if self.n_Markov_states == 1:
+            probability = [None for _ in range(self.T)]
+            for t in range(self.T):
+                m = self.models[t]
+                if m.probability is not None:
+                    probability[t] = m.probability
+                else:
+                    probability[t: int] = [
+                        1.0/m.n_samples for _ in range(m.n_samples)
+                    ]
+        else:
+            probability = [
+                [None for _ in range(self.n_Markov_states[t: int])]
+                for t in range(self.T)
+            ]
+            for t in range(self.T):
+                for k in range(self.n_Markov_states[t: int]):
+                    m = self.models[t][k]
+                    if m.probability is not None:
+                        probability[t][k] = m.probability
+                    else:
+                        probability[t][k: int] = [
+                            1.0/m.n_samples for _ in range(m.n_samples)
+                        ]
+        return probability
 
     def enumerate_sample_paths(self, T: int, start: int = 0, flag_rolling: bool = 0) -> tuple[int, list]:
         """
@@ -267,7 +301,7 @@ class MSP:
             if type(self.models[0]) != list:
                 models = self.models
                 self.models = [
-                    [None for k in range(self.n_Markov_states[t])]
+                    [None for k in range(self.n_Markov_states[t: int])]
                     for t in range(self.T)
                 ]
                 for t in range(self.T):
@@ -286,6 +320,45 @@ class MSP:
             if self._type == 'stage-wise independent'
             else [self.models[t][0].n_samples for t in range(self.T)]
         )
+
+    def compute_weight_sample_path(self, sample_path: list | list[list], start: int = 0) -> float:
+        """
+        Compute weight/probability of (going through) a certain sample path.
+
+        Args:
+            sample_path: indices of all the realizations in a scenario
+            start: the starting stage
+
+        Returns:
+            The weight of the sample path
+
+        """
+        probability = self._set_up_probability()
+        T = (
+            start + len(sample_path)
+            if self.n_Markov_states == 1
+            else start + len(sample_path[0])
+        )
+        if self.n_Markov_states == 1:
+            weight = numpy.prod(
+                [probability[t][sample_path[t - start]] for t in range(start, T)]
+            )
+        else:
+            weight = numpy.prod(
+                [
+                    self.transition_matrix[t][sample_path[1][t - 1 - start]][
+                        sample_path[1][t - start] # the transition probability of this markov sample path
+                    ]
+                    for t in range(start + 1, T)
+                ]
+            )
+            weight *= numpy.prod(
+                [   # for Markov situation, the index 1 is the Markov states index, and 0 is the uncertainty index
+                    probability[t][sample_path[1][t - start]][sample_path[0][t - start]]
+                    for t in range(start, T)
+                ]
+            )
+        return float(weight)
 
 
         
