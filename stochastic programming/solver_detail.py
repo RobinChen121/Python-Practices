@@ -91,6 +91,7 @@ class Extensive:
         self.construction_time = construction_end_time - construction_start_time
         solving_start_time = time.time()
         self.extensive_model.optimize()
+        self.extensive_model.write('final.lp')
         solving_end_time = time.time()
         self.solving_time = solving_end_time - solving_start_time
         self.total_time = self.construction_time + self.solving_time
@@ -143,8 +144,20 @@ class Extensive:
         """
             Construct the extensive model.
 
+            The basic idea of this function is:
+            backward from the last stage,
+            enumerate all the sample paths and add all the state /local copy variables;
+            for each sample path,
+            update the corresponding uncertainty,
+            copy the variables and constraints,
+            and obj coefficients are updated by the obj in adding Variable functions.
+
         Args:
             flag_rolling: Whether it is rolling horizon computation
+
+        For CTG, it is an alpha added in the constraints:
+        alpha + ax + by >= c in minimization problem
+        alpha + ax + by <= c in maximization problem
         """
         msp = self.MSP
         T = msp.T
@@ -163,37 +176,37 @@ class Extensive:
         )
         flag_CTG = 1 if initial_model.alpha is not None else -1
         # |       stage 0       |        stage 1       | ... |       stage T-1      |
-        # |local_copies, states | local_copies, states | ... | local_copies, states |
-        # |local_copies,        | local_copies,        | ... | local_copies, states |
+        # |local_copies, states_extensive | local_copies, states_extensive | ... | local_copies, states_extensive |
+        # |local_copies,        | local_copies,        | ... | local_copies, states_extensive |
         # extensive formulation only includes necessary variables
-        states = None
+        states_extensive = None
         sample_paths = None
         if flag_CTG == 1:
             stage_cost = None
-        for t in reversed(range(start,T)):
-            # stage T-1 needs to add the states. sample path corresponds to
-            # current node.
+        for t in reversed(range(start, T)):
+            # enumerate sample paths only necessarily at stage T - 1
             if t == T - 1:
                 _, sample_paths = msp.enumerate_sample_paths(t, start, flag_rolling)
-                states = [
-                    self.extensive_model.addVars(sample_paths)
+                states_extensive = [ # states_extensive is a 2-dimensional list
+                    self.extensive_model.addVars(sample_paths) # all the state vars are added at stage T - 1
                     for _ in range(n_states[t]) # the number of states at one stage is usually 1
                 ]
-            # new_states is the local_copies. new_sample_paths corresponds to
-            # previous node
+            # local copy states is the previous stage state variables. last_stage_sample_paths corresponds to paths
+            # of the previous stage
             if t != start:
-                _, new_sample_paths = msp.enumerate_sample_paths(t - 1, start, flag_rolling)
-                new_states = [
-                    self.extensive_model.addVars(new_sample_paths)
+                # last_stage_sample_paths can be truncated from sample_paths
+                _, last_stage_sample_paths = msp.enumerate_sample_paths(t - 1, start, flag_rolling)
+                local_copy_states = [
+                    self.extensive_model.addVars(last_stage_sample_paths)
                     for _ in range(n_states[t - 1])
                 ]
                 if flag_CTG == 1:
-                    new_stage_cost = {
-                        new_sample_path: 0
-                        for new_sample_path in new_sample_paths
+                    new_stage_cost = { # new_stage_cost is a dict
+                        last_stage_sample_path: 0
+                        for last_stage_sample_path in last_stage_sample_paths
                     }
             else:
-                new_states = [
+                local_copy_states = [
                     self.extensive_model.addVars(sample_paths)
                     for _ in range(n_states[t])
                 ]
@@ -203,9 +216,9 @@ class Extensive:
                 for k, m in enumerate(M):
                     # copy information from model in scenario j and markov state k
                     # note: m is the original model, not the extensive model
+                    # uncertainty realization in obj, lhs or rhs is updated by the following line of code
                     m.update_uncertainty(j) # m is the model at each stage
-                    m.update()
-                    m.write('test1.lp')
+
                     # compute sample paths that go through the current node
                     current_sample_paths = (
                         [   item
@@ -216,12 +229,21 @@ class Extensive:
                         else [item for item in sample_paths if item[t - start] == j]
                     )
 
+                    controls_ = m.controls  # Trailing Underscore (var_): Used to avoid conflicts with Python keywords
+                    states_ = m.states
+                    local_copies_ = m.local_copies
+                    controls_dict = {v: i for i, v in enumerate(controls_)}
+                    states_dict = {v: i for i, v in enumerate(states_)}
+                    local_copies_dict = {
+                        v: i for i, v in enumerate(local_copies_)
+                    }
+
                     for current_sample_path in current_sample_paths:
                         flag_reduced_name = 0
-                        if len(str(current_sample_path)) > 100:
+                        if len(str(current_sample_path)) > 100: # use when addVar name in the later codes
                             flag_reduced_name = 1 # when the sample path is too long, change the name of variables
                         if t != start:
-                            # compute sample paths that go through the ancestor node
+                            # the sample path that goes through the ancestor node
                             past_sample_path = (
                                 current_sample_path[:-1]
                                 if n_Markov_states == 1
@@ -240,52 +262,52 @@ class Extensive:
                                 current_sample_path, start
                             )
                         else:
-                            currentWeight = msp._compute_current_weight_sample_path(
+                            current_node_weight = msp.compute_current_node_weight(
                                 current_sample_path)
 
                         for i in range(n_states[t]):
                             obj = (
-                                states_[i].obj * numpy.array(weight)
+                                states_[i].obj * weight
                                 if flag_CTG == -1 or t == start
                                 else 0
                             )
-                            states[i][current_sample_path].lb = states_[i].lb
-                            states[i][current_sample_path].ub = states_[i].ub
-                            states[i][current_sample_path].obj = obj
-                            states[i][current_sample_path].vtype = states_[
-                                i
-                            ].vtype
+                            states_extensive[i][current_sample_path].lb = states_[i].lb
+                            states_extensive[i][current_sample_path].ub = states_[i].ub
+                            states_extensive[i][current_sample_path].obj = obj
+                            states_extensive[i][current_sample_path].vtype = states_[i].vtype
                             if flag_reduced_name == 0:
-                                states[i][current_sample_path].varName = states_[
+                                states_extensive[i][current_sample_path].varName = states_[
                                     i
                                 ].varName + str(current_sample_path).replace(
                                     " ", ""
                                 )
-                            # cost-to-go update
+                            # cost-to-go update when ctg is true
                             if t != start and flag_CTG == 1:
                                 new_stage_cost[past_sample_path] += (
-                                    states[i][current_sample_path]
+                                    states_extensive[i][current_sample_path]
                                     * states_[i].obj
-                                    * currentWeight
+                                    * current_node_weight
                                 )
 
-                        if t == start:
+                        if t == start: # local_copy_states only have name at stage start
                             for i in range(n_states[t]):
-                                new_states[i][current_sample_path].lb = local_copies_[i].lb
-                                new_states[i][current_sample_path].ub = local_copies_[i].ub
-                                new_states[i][current_sample_path].obj = local_copies_[i].obj
-                                new_states[i][current_sample_path].vtype = local_copies_[i].vtype
+                                local_copy_states[i][current_sample_path].lb = local_copies_[i].lb
+                                local_copy_states[i][current_sample_path].ub = local_copies_[i].ub
+                                local_copy_states[i][current_sample_path].obj = local_copies_[i].obj
+                                local_copy_states[i][current_sample_path].vtype = local_copies_[i].vtype
                                 if flag_reduced_name == 0:
-                                    new_states[i][current_sample_path].varName = local_copies_[i].varname + str(current_sample_path).replace(" ", "")
-
-                        controls_ = m.controls  # Trailing Underscore (var_): Used to avoid conflicts with Python keywords
-                        states_ = m.states
-                        local_copies_ = m.local_copies
-                        controls_dict = {v: i for i, v in enumerate(controls_)}
-                        states_dict = {v: i for i, v in enumerate(states_)}
-                        local_copies_dict = {
-                            v: i for i, v in enumerate(local_copies_)
-                        }
+                                    local_copy_states[i][current_sample_path].varName = (local_copies_[i].varname +
+                                                                                         str(current_sample_path).replace(" ", ""))
+                        else:
+                            for i in range(n_states[t]):
+                                local_copy_states[i][past_sample_path].lb = local_copies_[i].lb
+                                local_copy_states[i][past_sample_path].ub = local_copies_[i].ub
+                                local_copy_states[i][past_sample_path].obj = local_copies_[i].obj
+                                local_copy_states[i][past_sample_path].vtype = local_copies_[i].vtype
+                                if flag_reduced_name == 0:
+                                    local_copy_states[i][past_sample_path].varName = (local_copies_[i].varname +
+                                                                                         str(past_sample_path).replace(
+                                                                                             " ", ""))
 
                         # copy local variables
                         controls = [None for _ in range(len(controls_))]
@@ -296,21 +318,21 @@ class Extensive:
                                 else 0
                             )
                             controls[i] = self.extensive_model.addVar(
-                                lb=var.lb,
-                                ub=var.ub,
-                                obj=obj,
-                                vtype=var.vtype,
-                                name=(
+                                lb = var.lb,
+                                ub = var.ub,
+                                obj = obj,
+                                vtype = var.vtype,
+                                name = (
                                     var.varname
                                     + str(current_sample_path).replace(" ", "")
                                     if flag_reduced_name == 0
                                     else ""
                                 ),
                             )
-                            # cost-to-go update
+                            # cost-to-go update when ctg is true and t is not the starting stage
                             if t != start and flag_CTG == 1:
                                 new_stage_cost[past_sample_path] += (
-                                    controls[i] * var.obj * currentWeight
+                                    controls[i] * var.obj * current_node_weight
                                 )
                         # self.extensive_model.update()
                         # add constraints
@@ -325,12 +347,15 @@ class Extensive:
                                 )
                                 >= 0
                             )
+                        # add constraint for each current sample path
                         for constr_ in m.getConstrs():
                             rhs_ = constr_.rhs
+                            # getRow() Retrieve the list of variables that participate in a constraint,
+                            # and the associated coefficients. The result is returned as a LinExpr object.
                             expr_ = m.getRow(constr_)
                             lhs = gurobipy.LinExpr()
                             for i in range(expr_.size()):
-
+                                # 3 type of vars: state var, local copy var, control var
                                 if expr_.getVar(i) in controls_dict.keys():
                                     pos = controls_dict[expr_.getVar(i)]
                                     lhs += expr_.getCoeff(i) * controls[pos]
@@ -338,7 +363,7 @@ class Extensive:
                                     pos = states_dict[expr_.getVar(i)]
                                     lhs += (
                                         expr_.getCoeff(i)
-                                        * states[pos][current_sample_path]
+                                        * states_extensive[pos][current_sample_path]
                                     )
                                 elif (
                                     expr_.getVar(i) in local_copies_dict.keys()
@@ -347,22 +372,27 @@ class Extensive:
                                     if t != start:
                                         lhs += (
                                             expr_.getCoeff(i)
-                                            * new_states[pos][past_sample_path]
+                                            * local_copy_states[pos][past_sample_path]
                                         )
                                     else:
                                         lhs += (
                                             expr_.getCoeff(i)
-                                            * new_states[pos][current_sample_path]
+                                            * local_copy_states[pos][current_sample_path]
                                         )
                             #! end expression loop
-                            self.extensive_model.addConstr(
+                            self.extensive_model.addConstr( # model is updated in the addVar or addConstr
                                 lhs = lhs, sense = constr_.sense, rhs = rhs_
-                            )
+                                )
+                            pass
                         #! end copying the constraints
                     #! end MC loop
                 #! end scenarios loop
             #! end scenario loop
-            states = new_states
+            states_extensive = local_copy_states
             if flag_CTG == 1:
                 stage_cost = new_stage_cost
-            sample_paths = new_sample_paths
+            sample_paths = last_stage_sample_paths
+
+            name = 'test_' + str(t) + '.lp'
+            self.extensive_model.update()
+            self.extensive_model.write(name)

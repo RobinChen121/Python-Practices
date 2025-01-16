@@ -118,7 +118,7 @@ class MSP:
                 if m.probability is not None:
                     probability[t] = m.probability
                 else:
-                    probability[t: int] = [
+                    probability[t] = [
                         1.0/m.n_samples for _ in range(m.n_samples)
                     ]
         else:
@@ -360,5 +360,31 @@ class MSP:
             )
         return float(weight)
 
+    def compute_current_node_weight(self, sample_path: list | list[list]) -> float:
+        """
+        Compute the weight/probability of the last node in a sample_path
+
+        Args:
+            sample_path: indices of all the realizations in a scenario
+
+        """
+        probability = self._set_up_probability()
+        t = (
+            len(sample_path) - 1
+            if self.n_Markov_states == 1
+            else len(sample_path[0]) - 1
+        )
+        if self.n_Markov_states == 1:
+            weight = probability[t][sample_path[t]]
+        else:
+            weight = (
+                self.transition_matrix[t][sample_path[1][t - 1]][
+                    sample_path[1][t]
+                ]
+                if t > 0
+                else 1
+            )
+            weight *= probability[t][sample_path[1][t]][sample_path[0][t]]
+        return weight
 
         
