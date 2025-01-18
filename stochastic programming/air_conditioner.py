@@ -61,4 +61,6 @@ for t in range(T):
         m.set_probability([0.4, 0.6])
     # m.write('air_me_' + str(t) + '.lp')
 
-Extensive(airConditioner).solve()
+_, _, extensive_obj = Extensive(airConditioner).solve()
+print("the obj of the extensive model is %.2f" % extensive_obj)
+# SDDiP(airConditioner).solve(cuts =['B'], max_iterations=10)

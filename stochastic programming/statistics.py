@@ -11,6 +11,45 @@ Created on 2025/1/11, 17:29
 import numpy.random
 from numpy.typing import ArrayLike
 from collections.abc import Callable
+from scipy import stats
+
+
+def compute_CI(array, percentile: int) -> float:
+    """
+    Compute percentile % CI (confidence level) for the given array.
+
+    """
+    if len(array) == 1:
+        raise NotImplementedError
+    mean = numpy.mean(array)
+    # standard error
+    se = numpy.std(array, ddof = 1) / numpy.sqrt(len(array))
+    # critical value
+    cv = (
+        stats.t.ppf(1 - (1 - percentile/100)/2, len(array) - 1)
+        if len(array) != 1
+        else 0
+    )
+    return mean - cv * se, mean + cv * se
+
+def allocate_jobs(n_forward_samples: int, n_processes: int) -> list[range]:
+    """
+    Allocate forward samples for each cpu processor.
+
+    Args:
+        n_forward_samples: the number of samples in the forward pass
+        n_processes: the number of cpu processor
+
+    Returns:
+        Allocated jobs (samples) for each processor
+    """
+    chunk = int(n_forward_samples / n_processes)
+    division = list(range(0, n_forward_samples, chunk))
+    if n_forward_samples % n_processes == 0:
+        division.append(n_forward_samples)
+    else:
+        division[-1] = n_forward_samples
+    return [range(division[p], division[p + 1]) for p in range(n_processes)]
 
 
 def rand_int(k: int | ArrayLike,

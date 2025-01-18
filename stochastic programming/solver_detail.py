@@ -5,13 +5,19 @@ Created on 2025/1/10, 21:48
 
 @Python version: 3.10
 
-@disp:  Different classed of stochastic programming solvers.
+@disp:  Different classes of stochastic programming solvers.
 
 """
 from msm import MSP
+from statistics import rand_int, allocate_jobs, compute_CI
+from collections import abc
 import time
 import gurobipy
 import numpy
+import math
+import multiprocessing
+import numbers
+import pandas
 
 
 class Extensive:
@@ -63,14 +69,21 @@ class Extensive:
         except AttributeError:
             raise AttributeError("no attribute named {}".format(name))
 
-    def solve(self, start: int = 0, flag_rolling: bool = 0, **kwargs) -> None:
+    def solve(self, log_to_console: bool = False,
+              start: int = 0,
+              flag_rolling: bool = 0,
+              **kwargs) -> tuple:
         """
         Call extensive solver to solve the discretized problem. It will first
         construct the extensive model and then call Gurobi solver to solve it.
 
         Args:
+            log_to_console: whether to log to console
             start: starting stage index
             flag_rolling:  whether using rolling horizon
+
+        Returns:
+            a tuple of construct time, solving time and the objective value of the model
         """
         # check whether the continuity of the problem is discretized
         # check whether the number of states and samples are updated
@@ -90,12 +103,12 @@ class Extensive:
         construction_end_time = time.time()
         self.construction_time = construction_end_time - construction_start_time
         solving_start_time = time.time()
+        self.extensive_model.Params.LogToConsole = log_to_console
         self.extensive_model.optimize()
-        self.extensive_model.write('final.lp')
         solving_end_time = time.time()
         self.solving_time = solving_end_time - solving_start_time
         self.total_time = self.construction_time + self.solving_time
-        return self.extensive_model.objVal
+        return self.construction_time, self.solving_time, self.extensive_model.objVal
 
     def _get_varname(self):
         if type(self.MSP.models[self.start]) != list:
@@ -107,38 +120,45 @@ class Extensive:
     def _get_first_stage_vars(self):
         names = self._get_varname()
         if self._type not in ['Markovian', 'Markov chain']:
-            vars = {name:self.extensive_model.getVarByName(name+'(0,)')
+            vars_ = {name:self.extensive_model.getVarByName(name + '(0,)')
                 for name in names}
         else:
-            vars = {name:self.extensive_model.getVarByName(name+'((0,),(0,))')
+            vars_ = {name:self.extensive_model.getVarByName(name + '((0,),(0,))')
                 for name in names}
-        return vars
+        return vars_
 
     def _get_first_stage_states(self):
         names = self._get_varname()
         if self._type not in ['Markovian', 'Markov chain']:
-            states = {name:self.extensive_model.getVarByName(name+'(0,)')
+            states = {name: self.extensive_model.getVarByName(name + '(0,)')
                 for name in names}
         else:
-            states = {name:self.extensive_model.getVarByName(name+'((0,),(0,))')
+            states = {name: self.extensive_model.getVarByName(name + '((0,),(0,))')
                 for name in names}
         return states
 
     @property
     def first_stage_solution(self):
-        """the obtained solution in the first stage"""
+        """
+        the obtained solution in the first stage
+
+        """
         states = self._get_first_stage_states()
-        return {k:v.X for k,v in states.items()}
+        return {k: v.X for k, v in states.items()}
 
     @property
     def first_stage_all_solution(self):
-        vars = self._get_first_stage_vars()
-        return {k:v.X for k,v in vars.items()}
+        """
+        this property is actually same with fist_stage_solution
+
+        """
+        vars_ = self._get_first_stage_vars()
+        return {k:v.X for k,v in vars_.items()}
 
     @property
     def first_stage_cost(self):
-        vars = self._get_first_stage_vars()
-        return sum(v.obj*v.X for k,v in vars.items())
+        vars_ = self._get_first_stage_vars()
+        return sum(v.obj*v.X for k,v in vars_.items())
 
     def _construct_extensive(self, flag_rolling: bool) -> None:
         """
@@ -194,7 +214,6 @@ class Extensive:
             # local copy states is the previous stage state variables. last_stage_sample_paths corresponds to paths
             # of the previous stage
             if t != start:
-                # last_stage_sample_paths can be truncated from sample_paths
                 _, last_stage_sample_paths = msp.enumerate_sample_paths(t - 1, start, flag_rolling)
                 local_copy_states = [
                     self.extensive_model.addVars(last_stage_sample_paths)
@@ -211,14 +230,14 @@ class Extensive:
                     for _ in range(n_states[t])
                 ]
             M = [msp.models[t]] if n_Markov_states == 1 else msp.models[t]
-            M[0].write('test.lp')
             for j in range(n_samples[t]):
                 for k, m in enumerate(M):
                     # copy information from model in scenario j and markov state k
                     # note: m is the original model, not the extensive model
                     # uncertainty realization in obj, lhs or rhs is updated by the following line of code
                     m.update_uncertainty(j) # m is the model at each stage
-
+                    m.update() # do not forget to update the model,
+                               # or else the following codes can't get the updated uncertainty in obj/rhs/coef
                     # compute sample paths that go through the current node
                     current_sample_paths = (
                         [   item
@@ -275,7 +294,7 @@ class Extensive:
                             states_extensive[i][current_sample_path].ub = states_[i].ub
                             states_extensive[i][current_sample_path].obj = obj
                             states_extensive[i][current_sample_path].vtype = states_[i].vtype
-                            if flag_reduced_name == 0:
+                            if flag_reduced_name == 0: # the names of the previous stage local copies will change
                                 states_extensive[i][current_sample_path].varName = states_[
                                     i
                                 ].varName + str(current_sample_path).replace(
@@ -383,7 +402,7 @@ class Extensive:
                             self.extensive_model.addConstr( # model is updated in the addVar or addConstr
                                 lhs = lhs, sense = constr_.sense, rhs = rhs_
                                 )
-                            pass
+                            # pass
                         #! end copying the constraints
                     #! end MC loop
                 #! end scenarios loop
@@ -393,6 +412,851 @@ class Extensive:
                 stage_cost = new_stage_cost
             sample_paths = last_stage_sample_paths
 
-            name = 'test_' + str(t) + '.lp'
-            self.extensive_model.update()
-            self.extensive_model.write(name)
+            # name = 'test_' + str(t) + '.lp'
+            # self.extensive_model.update()
+            # self.extensive_model.write(name)
+
+
+class SDDP(object):
+    """
+    SDDP solver base class.
+
+    Parameters
+    ----------
+    MSP: list
+        A multi-stage stochastic program object.
+    """
+
+    def __init__(self, msp: MSP, biased_sampling = False):
+        self.db = []
+        self.pv = []
+        self.msp = msp
+        self.forward_T = msp.T
+        self.cut_T = msp.T - 1
+        self.cut_type = ["B"]
+        self.cut_type_list = [["B"] for t in range(self.cut_T)]
+        self.iteration = 0
+        self.n_processes = 1
+        self.n_steps = 1
+        self.percentile = 95
+        self.biased_sampling = biased_sampling
+
+        if self.biased_sampling:
+            try:
+                self.a = self.msp.a
+                self.l = self.msp.l
+                for t in range(self.msp.T):
+                    m = self.msp.models[t]
+                    n_samples = m.n_samples
+                    m.counts = numpy.zeros(n_samples)
+                    m.weights = numpy.ones(n_samples) / n_samples
+            except AttributeError:
+                raise Exception("Risk averse parameters unset!")
+
+    def __repr__(self):
+        return (
+            "<{} solver instance, {} processes, {} steps>"
+            .format(self.__class__, self.n_processes, self.n_steps)
+        )
+
+    def _compute_idx(self, t):
+        return (t, t)
+
+    def _select_trial_solution(self, random_state, forward_solution):
+        return forward_solution[:-1]
+
+    def _forward(
+            self,
+            random_state=None,
+            sample_path_idx=None,
+            markovian_idx=None,
+            markovian_samples=None,
+            solve_true=False,
+            query=None,
+            query_dual=None,
+            query_stage_cost=None):
+        """Single forward step. """
+        msp = self.msp
+        forward_solution = [None for _ in range(self.forward_T)]
+        pv = 0
+        query = [] if query is None else list(query)
+        query_dual = [] if query_dual is None else list(query_dual)
+        solution = {item: numpy.full(self.forward_T, numpy.nan) for item in query}
+        solution_dual = {item: numpy.full(self.forward_T, numpy.nan) for item in query_dual}
+        stage_cost = numpy.full(self.forward_T, numpy.nan)
+        # time loop
+        for t in range(self.forward_T):
+            idx, tm_idx = self._compute_idx(t)
+            if msp._type == "stage-wise independent":
+                m = msp.models[idx]
+            else:
+                if t == 0:
+                    m = msp.models[idx][0]
+                    state = 0
+                else:
+                    if sample_path_idx is not None:
+                        state = sample_path_idx[1][t]
+                    elif markovian_idx is not None:
+                        state = markovian_idx[t]
+                    else:
+                        state = random_state.choice(
+                            range(msp.n_Markov_states[idx]),
+                            p=msp.transition_matrix[tm_idx][state]
+                        )
+                    m = msp.models[idx][state]
+                    if markovian_idx is not None:
+                        m._update_uncertainty_dependent(markovian_samples[t])
+            if t > 0:
+                m._update_link_constrs(forward_solution[t - 1])
+                # exhaustive evaluation when the sample paths are given
+                if sample_path_idx is not None:
+                    if msp._type == "stage-wise independent":
+                        scen = sample_path_idx[t]
+                    else:
+                        scen = sample_path_idx[0][t]
+                    m._update_uncertainty(scen)
+                # true stagewise independent randomness is infinite and solve
+                # for true
+                elif m._type == 'continuous' and solve_true:
+                    m._sample_uncertainty(random_state)
+                # true stagewise independent randomness is large and solve
+                # for true
+                elif m._type == 'discrete' and m._flag_discrete == 1 and solve_true:
+                    scen = rand_int(
+                        k=m.n_samples_discrete,
+                        probability=m.probability,
+                        random_state=random_state,
+                    )
+                    m._update_uncertainty(scen)
+                # other cases include
+                # 1: true stagewise independent randomness is infinite and solve
+                # for approximation problem
+                # 2: true stagewise independent randomness is large and solve
+                # for approximation problem
+                # 3: true stagewise independent randomness is small. In this
+                # case, true problem and approximation problem are the same.
+                else:
+                    if self.biased_sampling:
+                        sampling_probability = m.weights
+                    else:
+                        sampling_probability = m.probability
+
+                    scen = rand_int(
+                        k=m.n_samples,
+                        probability=sampling_probability,
+                        random_state=random_state,
+                    )
+                    m._update_uncertainty(scen)
+            if self.iteration != 0 and self.rgl_a != 0:
+                m.regularize(self.rgl_center[t], self.rgl_norm, self.rgl_a,
+                             self.rgl_b, self.iteration)
+            m.optimize()
+            if m.status not in [2, 11]:
+                m.write_infeasible_model("forward_" + str(m.modelName))
+            forward_solution[t] = msp._get_forward_solution(m, t)
+            for var in m.getVars():
+                if var.varName in query:
+                    solution[var.varName][t] = var.X
+            for constr in m.getConstrs():
+                if constr.constrName in query_dual:
+                    solution_dual[constr.constrName][t] = constr.PI
+            if query_stage_cost:
+                stage_cost[t] = msp._get_stage_cost(m, t) / pow(msp.discount, t)
+            pv += msp._get_stage_cost(m, t)
+            if markovian_idx is not None:
+                m._update_uncertainty_dependent(msp.Markov_states[idx][markovian_idx[t]])
+            if self.iteration != 0 and self.rgl_a != 0:
+                m._deregularize()
+        # ! time loop
+        if query == [] and query_dual == [] and query_stage_cost is None:
+            return {
+                'forward_solution': forward_solution,
+                'pv': pv
+            }
+        else:
+            return {
+                'solution': solution,
+                'soultion_dual': solution_dual,
+                'stage_cost': stage_cost,
+                'forward_solution': forward_solution,
+                'pv': pv
+            }
+
+    def _add_and_store_cuts(
+            self, t, rhs, grad, cuts=None, cut_type=None, j=None
+    ):
+        """Store cut information (rhs and grad) to cuts for the j th step, for cut
+        type cut_type and for stage t."""
+        msp = self.msp
+        if msp.n_Markov_states == 1:
+            msp.models[t - 1]._add_cut(rhs, grad)
+            if cuts is not None:
+                cuts[t - 1][cut_type][j][:] = numpy.append(rhs, grad)
+        else:
+            for k in range(msp.n_Markov_states[t - 1]):
+                msp.models[t - 1][k]._add_cut(rhs[k], grad[k])
+                if cuts is not None:
+                    cuts[t - 1][cut_type][j][k][:] = numpy.append(rhs[k], grad[k])
+
+    def _compute_cuts(self, t, m, objLPScen, gradLPScen):
+        msp = self.msp
+        if msp.n_Markov_states == 1:
+            return m._average(objLPScen[0], gradLPScen[0])
+        objLPScen = objLPScen.reshape(
+            msp.n_Markov_states[t] * msp.n_samples[t])
+        gradLPScen = gradLPScen.reshape(
+            msp.n_Markov_states[t] * msp.n_samples[t], msp.n_states[t])
+        probability_ind = (
+            m.probability if m.probability
+            else numpy.ones(m.n_samples) / m.n_samples
+        )
+        probability = numpy.einsum('ij,k->ijk', msp.transition_matrix[t],
+                                   probability_ind)
+        probability = probability.reshape(msp.n_Markov_states[t - 1],
+                                          msp.n_Markov_states[t] * msp.n_samples[t])
+        objLP = numpy.empty(msp.n_Markov_states[t - 1])
+        gradLP = numpy.empty((msp.n_Markov_states[t - 1], msp.n_states[t]))
+        for k in range(msp.n_Markov_states[t - 1]):
+            objLP[k], gradLP[k] = m._average(objLPScen, gradLPScen,
+                                             probability[k])
+        return objLP, gradLP
+
+    def _backward(self, forward_solution, j=None, lock=None, cuts=None):
+        """Single backward step of SDDP serially or in parallel.
+
+        Parameters
+        ----------
+        forward_solution:
+            feasible solutions obtained from forward step
+
+        j: int
+            index of forward sampling
+
+        lock: multiprocessing.Lock
+
+        cuts: dict
+            A dictionary stores cuts coefficients and rhs.
+            Key of the dictionary is the cut type. Value of the dictionary is
+            the cut coefficients and rhs.
+        """
+        msp = self.msp
+        for t in range(msp.T - 1, 0, -1):
+            if msp.n_Markov_states == 1:
+                M, n_Markov_states = [msp.models[t]], 1
+            else:
+                M, n_Markov_states = msp.models[t], msp.n_Markov_states[t]
+            objLPScen = numpy.empty((n_Markov_states, msp.n_samples[t]))
+            gradLPScen = numpy.empty((n_Markov_states, msp.n_samples[t],
+                                      msp.n_states[t]))
+            for k, m in enumerate(M):
+                if msp.n_Markov_states != 1:
+                    m._update_link_constrs(forward_solution[t - 1])
+                objLPScen[k], gradLPScen[k] = m._solveLP()
+
+                if self.biased_sampling:
+                    self._compute_bs_frequency(objLPScen[k], m, t)
+
+            objLP, gradLP = self._compute_cuts(t, m, objLPScen, gradLPScen)
+            objLP -= numpy.matmul(gradLP, forward_solution[t - 1])
+            self._add_and_store_cuts(t, objLP, gradLP, cuts, "B", j)
+            self._add_cuts_additional_procedure(t, objLP, gradLP, objLPScen,
+                                                gradLPScen, forward_solution[t - 1], cuts, "B", j)
+
+    def _add_cuts_additional_procedure(*args, **kwargs):
+        pass
+
+    def _compute_bs_frequency(self, obj, m, t):
+
+        n_samples = m.n_samples
+
+        if self.iteration > 0:
+            objSortedIndex = numpy.argsort(obj)
+            tempSum = 0
+
+            for index in objSortedIndex:
+                tempSum += m.weights[index]
+                if tempSum >= 1 - self.a[t]:
+                    obj_kappa = index
+                    break
+
+            for k in range(n_samples):
+                if obj[k] >= obj[obj_kappa]:
+                    m.counts[k] += 1
+                m.counts[k] *= 1 - math.pow(0.5, self.iteration)
+
+            countSorted = numpy.sort(m.counts)
+            countSortedIndex = numpy.argsort(m.counts)
+
+            kappa = math.ceil((1 - self.a[t]) * n_samples)
+            count_kappa = countSorted[kappa - 1]
+
+            upper_orders = countSortedIndex[[i for i in range(n_samples)
+                                             if i > kappa - 1]]
+            lower_orders = countSortedIndex[[i for i in range(n_samples)
+                                             if i < kappa - 1]]
+
+            for k in range(n_samples):
+                if m.counts[k] < count_kappa:
+                    m.weights[k] = (1 - self.l[t]) / n_samples
+                elif m.counts[k] == count_kappa and k in lower_orders:
+                    m.weights[k] = (1 - self.l[t]) / n_samples
+                elif m.counts[k] == count_kappa and k not in upper_orders:
+                    m.weights[k] = ((1 - self.l[t]) / n_samples + self.l[t]
+                                    - self.l[t] * (n_samples - kappa) / (self.a[t] * n_samples))
+                elif m.counts[k] > count_kappa or k in upper_orders:
+                    m.weights[k] = ((1 - self.l[t]) / n_samples
+                                    + self.l[t] / (self.a[t] * n_samples))
+
+    def _SDDP_single(self):
+        """A single serial SDDP step. Returns the policy value."""
+        # random_state is constructed by number of iteration.
+        random_state = numpy.random.RandomState(self.iteration)
+        temp = self._forward(random_state)
+        solution = temp['forward_solution']
+        pv = temp['pv']
+        self.rgl_center = solution
+        solution = self._select_trial_solution(random_state, solution)
+        self._backward(solution)
+        return [pv]
+
+    def _SDDP_single_process(self, pv, jobs, lock, cuts, forward_solution=None):
+        """Multiple SDDP jobs by single process. pv will store the policy values.
+        cuts will store the cut information. Have not use the lock parameter so
+        far."""
+        # random_state is constructed by the number of iteration and the index
+        # of the first job that the current process does
+        random_state = numpy.random.RandomState([self.iteration, jobs[0]])
+        for j in jobs:
+            temp = self._forward(random_state)
+            solution = temp['forward_solution']
+            pv[j] = temp['pv']
+            # regularization needs to store last forward_solution
+            if j == jobs[-1] and self.rgl_a != 0:
+                for t in range(self.forward_T):
+                    idx, _ = self._compute_idx(t)
+                    for i in range(self.msp.n_states[idx]):
+                        forward_solution[t][i] = solution[t][i]
+            solution = self._select_trial_solution(random_state, solution)
+            self._backward(solution, j, lock, cuts)
+
+    def _add_cut_from_multiprocessing_array(self, cuts):
+        for t in range(self.cut_T):
+            for cut_type in self.cut_type_list[t]:
+                for cut in cuts[t][cut_type]:
+                    if self.msp.n_Markov_states == 1:
+                        self.msp.models[t]._add_cut(rhs=cut[0], gradient=cut[1:])
+                    else:
+                        for k in range(self.msp.n_Markov_states[t]):
+                            self.msp.models[t][k]._add_cut(
+                                rhs=cut[k][0], gradient=cut[k][1:])
+
+    def _remove_redundant_cut(self, clean_stages):
+        for t in clean_stages:
+            M = (
+                [self.msp.models[t]]
+                if self.msp.n_Markov_states == 1
+                else self.msp.models[t]
+            )
+            for m in M:
+                m.update()
+                constr = m.cuts
+                for idx, cut in enumerate(constr):
+                    if cut.sense == '>':
+                        cut.sense = '<'
+                    elif cut.sense == '<':
+                        cut.sense = '>'
+                    flag = 1
+                    for k in range(m.n_samples):
+                        m._update_uncertainty(k)
+                        m.optimize()
+                        if m.status == 4:
+                            m.Params.DualReductions = 0
+                            m.optimize()
+                        if m.status not in [3, 11]:
+                            flag = 0
+                    if flag == 1:
+                        m._remove_cut(idx)
+                    else:
+                        if cut.sense == '>':
+                            cut.sense = '<'
+                        elif cut.sense == '<':
+                            cut.sense = '>'
+                m.update()
+
+    def _compute_cut_type(self):
+        pass
+
+    def _SDDP_multiprocessesing(self):
+        """Prepare a collection of multiprocessing arrays to store cuts.
+        Cuts are stored in the form of:
+         Independent case (index: t, cut_type, j):
+            {t:{cut_type: [cut_coeffs_and_rhs]}
+         Markovian case (index: t, cut_type, j, k):
+            {t:{cut_type: [[cut_coeffs_and_rhs]]}
+        """
+        procs = [None] * self.n_processes
+        if self.msp.n_Markov_states == 1:
+            cuts = {
+                t: {
+                    cut_type: [multiprocessing.RawArray("d",
+                                                        [0] * (self.msp.n_states[t] + 1))
+                               for _ in range(self.n_steps)]
+                    for cut_type in self.cut_type_list[t]}
+                for t in range(self.cut_T)}
+        else:
+            cuts = {
+                t: {
+                    cut_type: [
+                        [multiprocessing.RawArray("d",
+                                                  [0] * (self.msp.n_states[t] + 1))
+                         for _ in range(self.msp.n_Markov_states[t])]
+                        for _ in range(self.n_steps)]
+                    for cut_type in self.cut_type_list[t]}
+                for t in range(self.cut_T)}
+
+        pv = multiprocessing.Array("d", [0] * self.n_steps)
+        lock = multiprocessing.Lock()
+        forward_solution = None
+        # regularization needs to store last forward_solution
+        if self.rgl_a != 0:
+            forward_solution = [multiprocessing.Array(
+                "d", [0] * self.msp.n_states[self._compute_idx(t)[0]])
+                for t in range(self.forward_T)
+            ]
+
+        for p in range(self.n_processes):
+            procs[p] = multiprocessing.Process(
+                target=self._SDDP_single_process,
+                args=(pv, self.jobs[p], lock, cuts, forward_solution),
+            )
+            procs[p].start()
+        for proc in procs:
+            proc.join()
+
+        self._add_cut_from_multiprocessing_array(cuts)
+        # regularization needs to store last forward_solution
+        if self.rgl_a != 0:
+            self.rgl_center = [list(item) for item in forward_solution]
+
+        return [item for item in pv]
+
+    def solve(
+            self,
+            n_processes: int = 1,
+            n_steps: int =1,
+            max_iterations: int = 10000,
+            max_stable_iterations=10000,
+            max_time=1000000.0,
+            tol=0.001,
+            freq_evaluations=None,
+            percentile=95,
+            tol_diff=float("-inf"),
+            random_state=None,
+            evaluation_true=False,
+            freq_comparisons=None,
+            n_simulations=3000,
+            n_simulations_true=3000,
+            query=None,
+            query_T=None,
+            query_dual=None,
+            query_stage_cost=False,
+            query_policy_value=False,
+            freq_clean=None,
+            logFile=1,
+            logToConsole=1,
+            directory='',
+            rgl_norm='L2',
+            rgl_a=0,
+            rgl_b=0.95,
+    ):
+        """
+        Solve the discretized problem.
+
+        Parameters
+        ----------
+
+        n_processes: int, optional (default=1)
+            The number of processes to run in parallel. Run serial SDDP if 1.
+            If n_steps is 1, n_processes is coerced to be 1.
+
+        n_steps: int, optional (default=1)
+            The number of forward/backward steps to run in each cut iteration.
+            It is coerced to be 1 if n_processes is 1.
+
+        max_iterations: int, optional (default=10000)
+            The maximum number of iterations to run SDDP.
+
+        max_stable_iterations: int, optional (default=10000)
+            The maximum number of iterations to have same deterministic bound
+
+        tol: float, optional (default=1e-3)
+            tolerance for convergence of bounds
+
+        freq_evaluations: int, optional (default=None)
+            The frequency of evaluating gap on the discretized problem. It will
+            be ignored if risk averse
+
+        percentile: float, optional (default=95)
+            The percentile used to compute confidence interval
+
+        diff: float, optional (default=-inf)
+            The stabilization threshold
+
+        freq_comparisons: int, optional (default=None)
+            The frequency of comparisons of policies
+
+        n_simulations: int, optional (default=10000)
+            The number of simluations to run when evaluating a policy
+            on the discretized problem
+
+        freq_clean: int/list, optional (default=None)
+            The frequency of removing redundant cuts.
+            If int, perform cleaning at the same frequency for all stages.
+            If list, perform cleaning at different frequency for each stage;
+            must be of length T-1 (the last stage does not have any cuts).
+
+        random_state: int, RandomState instance or None, optional (default=None)
+            Used in evaluations and comparisons. (In the forward step, there is
+            an internal random_state which is not supposed to be changed.)
+            If int, random_state is the seed used by the random number
+            generator;
+            If RandomState instance, random_state is the random number
+            generator;
+            If None, the random number generator is the RandomState
+            instance used by numpy.random.
+
+        logFile: binary, optional (default=1)
+            Switch of logging to log file
+
+        logToConsole: binary, optional (default=1)
+            Switch of logging to console
+
+        Examples
+        --------
+
+        >>> SDDP().solve(max_iterations=10, max_time=10,
+            max_stable_iterations=10)
+        Optimality gap based stopping criteria: evaluate the obtained policy
+        every freq_evaluations iterations by running n_simulations Monte Carlo
+        simulations. If the gap becomes not larger than tol, the algorithm
+        will be stopped.
+        >>> SDDP().solve(freq_evaluations=10, n_simulations=1000, tol=1e-2)
+        Simulation can be turned off; the solver will evaluate the exact expected
+        policy value.
+        >>> SDDP().solve(freq_evaluation=10, n_simulations=-1, tol=1e-2)
+        Stabilization based stopping criteria: compare the policy every
+        freq_comparisons iterations by computing the CI of difference of the
+        expected policy values. If the upper end of CI becomes not larger
+        than tol diff, the algorithm will be stopped.
+        >>> SDDP().solve(freq_comparisons=10, n_simulations=1000, tol=1e-2)
+        Turn off simulation and
+
+        """
+        msp = self.msp
+        if freq_clean is not None:
+            if isinstance(freq_clean, (numbers.Integral, numpy.integer)):
+                freq_clean = [freq_clean] * (msp.T - 1)
+            if isinstance(freq_clean, ((abc.Sequence, numpy.ndarray))):
+                if len(freq_clean) != msp.T - 1:
+                    raise ValueError("freq_clean list must be of length T-1!")
+            else:
+                raise TypeError("freq_clean must be int/list instead of {}!"
+                                .format(type(freq_clean)))
+        if not msp._flag_update:
+            msp._update()
+        stable_iterations = 0
+        total_time = 0
+        a = time.time()
+        gap = 1.0
+        right_end_of_CI = float("inf")
+        db_past = msp.bound
+        self.percentile = percentile
+        self.rgl_norm = rgl_norm
+        self.rgl_a = rgl_a
+        self.rgl_b = rgl_b
+
+        # distinguish pv_sim from pv
+        pv_sim_past = None
+
+        if n_processes != 1:
+            self.n_steps = n_steps
+            self.n_processes = min(n_steps, n_processes)
+            self.jobs = allocate_jobs(self.n_steps, self.n_processes)
+
+        logger_sddp = LoggerSDDP(
+            logFile=logFile,
+            logToConsole=logToConsole,
+            n_processes=self.n_processes,
+            percentile=self.percentile,
+            directory=directory,
+        )
+        logger_sddp.header()
+        if freq_evaluations is not None or freq_comparisons is not None:
+            logger_evaluation = LoggerEvaluation(
+                n_simulations=n_simulations,
+                percentile=percentile,
+                logFile=logFile,
+                logToConsole=logToConsole,
+                directory=directory,
+            )
+            logger_evaluation.header()
+        if freq_comparisons is not None:
+            logger_comparison = LoggerComparison(
+                n_simulations=n_simulations,
+                percentile=percentile,
+                logFile=logFile,
+                logToConsole=logToConsole,
+                directory=directory,
+            )
+            logger_comparison.header()
+        try:
+            while (
+                    self.iteration < max_iterations
+                    and total_time < max_time
+                    and stable_iterations < max_stable_iterations
+                    and tol < gap
+                    and (tol_diff < right_end_of_CI or right_end_of_CI < 0)
+            ):
+                start = time.time()
+
+                self._compute_cut_type()
+
+                if self.n_processes == 1:
+                    pv = self._SDDP_single()
+                else:
+                    pv = self._SDDP_multiprocessesing()
+
+                m = (
+                    msp.models[0]
+                    if msp.n_Markov_states == 1
+                    else msp.models[0][0]
+                )
+                m.optimize()
+                if m.status not in [2, 11]:
+                    m.write_infeasible_model(
+                        "backward_" + str(m._model.modelName) + ".lp"
+                    )
+                db = m.objBound
+                self.db.append(db)
+                msp.db = db
+                if self.n_processes != 1:
+                    CI = compute_CI(pv, percentile)
+                self.pv.append(pv)
+
+                if self.iteration >= 1:
+                    if db_past == db:
+                        stable_iterations += 1
+                    else:
+                        stable_iterations = 0
+                self.iteration += 1
+                db_past = db
+
+                end = time.time()
+                elapsed_time = end - start
+                total_time += elapsed_time
+
+                if self.n_processes == 1:
+                    logger_sddp.text(
+                        iteration=self.iteration,
+                        db=db,
+                        pv=pv[0],
+                        time=elapsed_time,
+                    )
+                else:
+                    logger_sddp.text(
+                        iteration=self.iteration,
+                        db=db,
+                        CI=CI,
+                        time=elapsed_time,
+                    )
+                if (
+                        freq_evaluations is not None
+                        and self.iteration % freq_evaluations == 0
+                        or freq_comparisons is not None
+                        and self.iteration % freq_comparisons == 0
+                ):
+                    directory = '' if directory is None else directory
+                    start = time.time()
+                    evaluation = Evaluation(msp)
+                    evaluation.run(
+                        n_simulations=n_simulations,
+                        query=query,
+                        query_T=query_T,
+                        query_dual=query_dual,
+                        query_stage_cost=query_stage_cost,
+                        percentile=percentile,
+                        n_processes=n_processes,
+                    )
+                    if query_policy_value:
+                        pandas.DataFrame(evaluation.pv).to_csv(directory +
+                                                               "iter_{}_pv.csv".format(self.iteration))
+                    if query is not None:
+                        for item in query:
+                            evaluation.solution[item].to_csv(directory +
+                                                             "iter_{}_{}.csv".format(self.iteration, item))
+                    if query_dual is not None:
+                        for item in query_dual:
+                            evaluation.solution_dual[item].to_csv(directory +
+                                                                  "iter_{}_{}.csv".format(self.iteration, item))
+                    if query_stage_cost:
+                        evaluation.stage_cost.to_csv(directory +
+                                                     "iter_{}_stage_cost.csv".format(self.iteration))
+                    if evaluation_true:
+                        evaluationTrue = EvaluationTrue(msp)
+                        evaluationTrue.run(
+                            n_simulations=n_simulations,
+                            query=query,
+                            query_T=query_T,
+                            query_dual=query_dual,
+                            query_stage_cost=query_stage_cost,
+                            percentile=percentile,
+                            n_processes=n_processes,
+                        )
+                        if query_policy_value:
+                            pandas.DataFrame(evaluationTrue.pv).to_csv(directory +
+                                                                       "iter_{}_pv_true.csv".format(self.iteration))
+                        if query is not None:
+                            for item in query:
+                                evaluationTrue.solution[item].to_csv(directory +
+                                                                     "iter_{}_{}_true.csv".format(self.iteration, item))
+                        if query_dual is not None:
+                            for item in query_dual:
+                                evaluationTrue.solution_dual[item].to_csv(directory +
+                                                                          "iter_{}_{}_true.csv".format(self.iteration,
+                                                                                                       item))
+                        if query_stage_cost:
+                            evaluationTrue.stage_cost.to_csv(directory +
+                                                             "iter_{}_stage_cost_true.csv".format(self.iteration))
+                    elapsed_time = time.time() - start
+                    gap = evaluation.gap
+                    if n_simulations == -1:
+                        logger_evaluation.text(
+                            iteration=self.iteration,
+                            db=db,
+                            pv=evaluation.epv,
+                            gap=gap,
+                            time=elapsed_time,
+                        )
+                    elif n_simulations == 1:
+                        logger_evaluation.text(
+                            iteration=self.iteration,
+                            db=db,
+                            pv=evaluation.pv,
+                            gap=gap,
+                            time=elapsed_time,
+                        )
+                    else:
+                        logger_evaluation.text(
+                            iteration=self.iteration,
+                            db=db,
+                            CI=evaluation.CI,
+                            gap=gap,
+                            time=elapsed_time,
+                        )
+                if (
+                        freq_comparisons is not None
+                        and self.iteration % freq_comparisons == 0
+                ):
+                    start = time.time()
+                    pv_sim = evaluation.pv
+                    if self.iteration / freq_comparisons >= 2:
+                        diff = msp.sense * (numpy.array(pv_sim_past) - numpy.array(pv_sim))
+                        if n_simulations == -1:
+                            diff_mean = numpy.mean(diff)
+                            right_end_of_CI = diff_mean
+                        else:
+                            diff_CI = compute_CI(diff, self.percentile)
+                            right_end_of_CI = diff_CI[1]
+                        elapsed_time = time.time() - start
+                        if n_simulations == -1:
+                            logger_comparison.text(
+                                iteration=self.iteration,
+                                ref_iteration=self.iteration - freq_comparisons,
+                                diff=diff_mean,
+                                time=elapsed_time,
+                            )
+                        else:
+                            logger_comparison.text(
+                                iteration=self.iteration,
+                                ref_iteration=self.iteration - freq_comparisons,
+                                diff_CI=diff_CI,
+                                time=elapsed_time,
+                            )
+                    pv_sim_past = pv_sim
+                if freq_clean is not None:
+                    clean_stages = [
+                        t
+                        for t in range(1, msp.T - 1)
+                        if self.iteration % freq_clean[t] == 0
+                    ]
+                    if len(clean_stages) != 0:
+                        self._remove_redundant_cut(clean_stages)
+                # self._clean()
+        except KeyboardInterrupt:
+            stop_reason = "interruption by the user"
+        # SDDP iteration stops
+        msp.db = self.db[-1]
+        if self.iteration >= max_iterations:
+            stop_reason = "iteration:{} has reached".format(max_iterations)
+        if total_time >= max_time:
+            stop_reason = "time:{} has reached".format(max_time)
+        if stable_iterations >= max_stable_iterations:
+            stop_reason = "stable iteration:{} has reached".format(max_stable_iterations)
+        if gap <= tol:
+            stop_reason = "convergence tolerance:{} has reached".format(tol)
+        if right_end_of_CI <= tol_diff:
+            stop_reason = "stabilization threshold:{} has reached".format(tol_diff)
+
+        b = time.time()
+        logger_sddp.footer(reason=stop_reason)
+        if freq_evaluations is not None or freq_comparisons is not None:
+            logger_evaluation.footer()
+        if freq_comparisons is not None:
+            logger_comparison.footer()
+        self.total_time = total_time
+
+    @property
+    def first_stage_solution(self):
+        """the obtained solution in the first stage"""
+        return (
+            {var.varName: var.X for var in self.msp.models[0].getVars()}
+            if self.msp.n_Markov_states == 1
+            else {var.varName: var.X for var in self.msp.models[0][0].getVars()}
+        )
+
+    def plot_bounds(self, start=0, window=1, smooth=0, ax=None):
+        """
+        plot the evolution of bounds
+
+        Parameters
+        ----------
+        ax: Matplotlib AxesSubplot instance, optional
+            The specified subplot is used to plot; otherwise a new figure is created.
+
+        window: int, optional (default=1)
+            The length of the moving windows to aggregate the policy values. If
+            length is bigger than 1, approximate confidence interval of the
+            policy values and statistical bounds will be plotted.
+
+        smooth: bool, optional (default=0)
+            If 1, fit a smooth line to the policy values to better visualize
+            the trend of statistical values/bounds.
+
+        start: int, optional (default=0)
+            The start iteration to plot the bounds. Set start to other values
+            can zoom in the evolution of bounds in most recent iterations.
+
+        Returns
+        -------
+        matplotlib.pyplot.figure instance
+        """
+        from msppy.utils.plot import plot_bounds
+        return plot_bounds(self.db, self.pv, self.msp.sense, self.percentile,
+                           start=start, window=window, smooth=smooth, ax=ax)
+
+    @property
+    def bounds(self):
+        """dataframe of the obtained bound"""
+        df = pandas.DataFrame.from_records(self.pv)
+        df['db'] = self.db
+        return df

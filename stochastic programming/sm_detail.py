@@ -399,7 +399,8 @@ class StochasticModel:
                 if type(var_tuple) == tuple:
                     self._model.setAttr("Obj", list(var_tuple), value[k])
                 else:
-                    var_tuple.setAttr("Obj", value[k])
+                     var_tuple.setAttr("Obj", value[k])
+        # self._model.update()
 
     def update_uncertainty_discrete(self, k):
         """
