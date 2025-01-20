@@ -37,7 +37,11 @@ class Logger:
             logger.addHandler(streamHandler)
         self.logger = logger
         self.time = 0
+        self.n_slots = 50
 
+    def footer(self, *args) -> None:
+        self.logger.info("-" * self.n_slots)
+        self.logger.info("Time: {} seconds".format(self.time))
 
 class LoggerSDDP(Logger):
     """
@@ -70,11 +74,11 @@ class LoggerSDDP(Logger):
         self.logger.info("-" * self.n_slots)
         if self.n_processes > 1:
             self.logger.info(
-                "{:>12s}{:>20s}{:^40s}{:>12s}"
+                "{:>12s}{:>20s}{:^50s}{:>12s}" # s is not necessary
                 .format(
                     "Iteration",
                     "Bound",
-                    "Value {}% CI ({})".format(self.percentile, self.n_processes),
+                    "Value {}%CI ({}processor)".format(self.percentile, self.n_processes),
                     "Time"
                 )
             )
@@ -90,6 +94,149 @@ class LoggerSDDP(Logger):
             )
         self.logger.info("-" * self.n_slots)
 
+    def text(self, iteration, db: float, time, pv: float = None, CI: list = None):
+        if self.n_processes > 1:
+            self.logger.info(
+                "{:>12d}{:>20f}{:>19f}, {:<19f}{:>12f}".format(
+                    iteration, db, CI[0], CI[1], time
+                )
+            )
+        else:
+            self.logger.info(
+                "{:>12d}{:>20f}{:>20f}{:>12f}".format(
+                    iteration, db, pv, time
+                )
+            )
+        self.time += time
+
+    def footer(self, reason: str) -> None:
+        super().footer()
+        self.logger.info("Algorithm stops since " + reason)
+
+class LoggerEvaluation(Logger):
+    def __init__(self, percentile: float, n_simulations: int, **kwargs):
+        self.percentile = percentile
+        self.n_simulations = n_simulations
+        self.n_slots = 76 if self.n_simulations in [-1,1] else 96
+        super().__init__(**kwargs)
+
+    def __repr__(self):
+        return "Evaluation"
+
+    def header(self):
+        self.logger.info("-" * self.n_slots)
+        self.logger.info(
+            "{:^{width}s}".format(
+                "Evaluation for approximation model, Zhen Chen",
+                width = self.n_slots
+            )
+        )
+        self.logger.info("-" * self.n_slots)
+        if self.n_simulations not in [-1,1]:
+            self.logger.info(
+                "{:>12s}{:>20s}{:^50s}{:>12s}{:>12s}"
+                .format(
+                    "Iteration",
+                    "Bound",
+                    "Value {}% CI({} simulations)".format(self.percentile, self.n_simulations),
+                    "Time",
+                    "Gap",
+                )
+            )
+        else:
+            self.logger.info(
+                "{:>12s}{:>20s}{:>20s}{:>12s}"
+                .format(
+                    "Iteration",
+                    "Bound",
+                    "Value",
+                    "Time",
+                )
+            )
+        self.logger.info("-" * self.n_slots)
+
+    def text(self, iteration, db: float, time: float, pv: float = None, CI: list = None, gap: float = None):
+        if self.n_simulations > 1:
+            format_ = "{:>12d}{:>20f}{:>19f}, {:<19f}{:>12f}"
+            if gap in [-1, None]:
+                format_ += "{:>12}"
+            else:
+                format_ += "{:>12.2%}"
+            self.logger.info(
+                format_.format(
+                    iteration, db, CI[0], CI[1], time, gap
+                )
+            )
+        else:
+            format_ = "{:>12d}{:>20f}{:>20f}{:>12f}"
+            if gap in [-1, None]:
+                format_ += "{:>12}"
+            else:
+                format_ += "{:>12.2%}"
+            self.logger.info(
+                format_.format(
+                    iteration, db, pv, time, gap
+                )
+            )
+        self.time += time
+
+class LoggerComparison(Logger):
+    def __init__(self, percentile: float, n_simulations: int, **kwargs):
+        self.percentile = percentile
+        self.n_simulations = n_simulations
+        self.n_slots = 64 if self.n_simulations in [-1,1] else 84
+        super().__init__(**kwargs)
+
+    def __repr__(self):
+        return "Comparison"
+
+    def header(self):
+        assert self.n_simulations != 1
+        self.logger.info("-" * self.n_slots)
+        self.logger.info(
+            "{:^{width}s}".format(
+                "Comparison for approximation model, Zhen Chen",
+                width = self.n_slots
+            )
+        )
+        self.logger.info("-" * self.n_slots)
+        if self.n_simulations != -1:
+            self.logger.info(
+                "{:>12s}{:>20s}{:^40s}{:>12s}"
+                .format(
+                    "Iteration",
+                    "Reference iter.",
+                    "Difference {}% CI ({})".format(self.percentile,self.n_simulations),
+                    "Time",
+                )
+            )
+        else:
+            self.logger.info(
+                "{:>12s}{:>20s}{:>20s}{:>12s}"
+                .format(
+                    "Iteration",
+                    "Reference iter.",
+                    "Difference",
+                    "Time",
+                )
+            )
+        self.logger.info("-" * self.n_slots)
+
+    def text(self, iteration: int, ref_iteration: int, time: float, diff_CI: list = None, diff: float = None):
+        assert self.n_simulations != 1
+        if self.n_simulations != -1:
+            self.logger.info(
+                "{:>12d}{:>20d}{:>19f}, {:<19f}{:>12f}".format(
+                    iteration, ref_iteration, diff_CI[0], diff_CI[1], time
+                )
+            )
+        else:
+            self.logger.info(
+                "{:>12d}{:>20d}{:>20f}{:>12f}".format(
+                    iteration, ref_iteration, diff, time
+                )
+            )
+        self.time += time
 
 if __name__ == '__main__':
     test = Logger()

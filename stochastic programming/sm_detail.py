@@ -883,7 +883,7 @@ class StochasticModel:
         return var
 
     def addConstr(self,
-                  constr: gurobipy.TempConstr | gurobipy.Var | gurobipy.LinExpr,
+                  constr: any,
                   sense: int = None,
                   rhs: float | gurobipy.Var | gurobipy.LinExpr = None,
                   name: str = "",

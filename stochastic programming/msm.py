@@ -50,6 +50,8 @@ class MSP:
             A class of multi-stage linear programming model
 
         """
+        self.a = 0 # used for AVAR(CVAR)
+        self.l = 0 # used for AVAR
         self.n_samples = [] # number of samples for each stage
         self.n_states = [] # number of states for each stage
         self.Markovian_uncertainty_function = None # random generator function
@@ -60,7 +62,7 @@ class MSP:
         self.discount = discount
 
         self.measure = 'risk neutral'
-        self._type = 'stage-wise independent'
+        self.type = 'stage-wise independent'
         self._flag_discrete = 0
         self._individual_type = 'original'
         self.Markov_states = None
@@ -226,7 +228,7 @@ class MSP:
         self.dim_Markov_states, self.n_Markov_states = info
         self.Markov_states = Markov_states
         self.transition_matrix = [numpy.array(item) for item in transition_matrix]
-        self._type = 'Markov-discrete'
+        self.type = 'Markov-discrete'
 
     def add_MC_uncertainty_continuous(self, Markovian_uncertainty: Callable):
         """
@@ -260,7 +262,7 @@ class MSP:
             raise ValueError("Markovian uncertainty has already added!")
         self.dim_Markov_states = check_Markov_callable_uncertainty(Markovian_uncertainty, self.T)
         self.Markovian_uncertainty_function = Markovian_uncertainty
-        self._type = 'Markov-continuous'
+        self.type = 'Markov-continuous'
 
     def check_state_and_continuous_discretized(self):
         """
@@ -293,10 +295,10 @@ class MSP:
         Update the number of states and samples in the class.
 
         """
-        if self._type == "Markovian-continuous" and self._flag_discrete == 0:
+        if self.type == "Markovian-continuous" and self._flag_discrete == 0:
             raise Exception("Markovian uncertainties must be discretized!")
-        if self._type == "Markov-discrete" or (
-            self._type == "Markov-continuous" and self._flag_discrete == 1
+        if self.type == "Markov-discrete" or (
+            self.type == "Markov-continuous" and self._flag_discrete == 1
         ):
             if type(self.models[0]) != list:
                 models = self.models
@@ -312,12 +314,12 @@ class MSP:
                         self.models[t][k] = m.copy() # copy the model m
         self.n_states = (
             [self.models[t].n_states for t in range(self.T)]
-            if self._type == 'stage-wise independent'
+            if self.type == 'stage-wise independent'
             else [self.models[t][0].n_states for t in range(self.T)]
         )
         self.n_samples = (
             [self.models[t].n_samples for t in range(self.T)]
-            if self._type == 'stage-wise independent'
+            if self.type == 'stage-wise independent'
             else [self.models[t][0].n_samples for t in range(self.T)]
         )
 

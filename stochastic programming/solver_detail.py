@@ -10,6 +10,8 @@ Created on 2025/1/10, 21:48
 """
 from msm import MSP
 from statistics import rand_int, allocate_jobs, compute_CI
+from logger import LoggerSDDP, LoggerEvaluation, LoggerComparison
+from evaluation import Evaluation, EvaluationTrue
 from collections import abc
 import time
 import gurobipy
@@ -160,6 +162,7 @@ class Extensive:
         vars_ = self._get_first_stage_vars()
         return sum(v.obj*v.X for k,v in vars_.items())
 
+    # noinspection PyTypeChecker
     def _construct_extensive(self, flag_rolling: bool) -> None:
         """
             Construct the extensive model.
@@ -201,8 +204,9 @@ class Extensive:
         # extensive formulation only includes necessary variables
         states_extensive = None
         sample_paths = None
-        if flag_CTG == 1:
-            stage_cost = None
+        stage_cost = {}
+        new_stage_cost = {}
+        last_stage_sample_paths = []
         for t in reversed(range(start, T)):
             # enumerate sample paths only necessarily at stage T - 1
             if t == T - 1:
@@ -251,7 +255,7 @@ class Extensive:
                     controls_ = m.controls  # Trailing Underscore (var_): Used to avoid conflicts with Python keywords
                     states_ = m.states
                     local_copies_ = m.local_copies
-                    controls_dict = {v: i for i, v in enumerate(controls_)}
+                    controls_dict: dict[gurobipy.Var, int] = {v: i for i, v in enumerate(controls_)}
                     states_dict = {v: i for i, v in enumerate(states_)}
                     local_copies_dict = {
                         v: i for i, v in enumerate(local_copies_)
@@ -274,6 +278,8 @@ class Extensive:
                         else:
                             past_sample_path = current_sample_path
 
+                        current_node_weight = 0
+                        weight = 0
                         if flag_CTG == -1 or t == start:
                             weight = msp.discount ** (
                                 (t - start)
@@ -329,7 +335,7 @@ class Extensive:
                                                                                              " ", ""))
 
                         # copy local variables
-                        controls = [None for _ in range(len(controls_))]
+                        controls = [gurobipy.Var for _ in range(len(controls_))]
                         for i, var in enumerate(controls_):
                             obj = (
                                 var.obj * weight
@@ -359,10 +365,7 @@ class Extensive:
                             self.extensive_model.addConstr(
                                 msp.sense
                                 * (
-                                    controls[
-                                        controls_dict[m.getVarByName("alpha")]
-                                    ]
-                                    - stage_cost[current_sample_path]
+                                    controls[controls_dict[m.getVarByName("alpha")]]- stage_cost[current_sample_path]
                                 )
                                 >= 0
                             )
@@ -421,15 +424,14 @@ class SDDP(object):
     """
     SDDP solver base class.
 
-    Parameters
-    ----------
-    MSP: list
-        A multi-stage stochastic program object.
+    Args:
+        msp: A multi-stage stochastic program object
+        biased_sampling: whether used biased sampling, i,e, sample probabilities are with weights
     """
 
     def __init__(self, msp: MSP, biased_sampling = False):
-        self.db = []
-        self.pv = []
+        self.db = [] # best objective bound
+        self.pv = [] # policy value
         self.msp = msp
         self.forward_T = msp.T
         self.cut_T = msp.T - 1
@@ -442,6 +444,17 @@ class SDDP(object):
         self.biased_sampling = biased_sampling
 
         if self.biased_sampling:
+            # l: float between 0 and 1/array-like of floats between 0 and 1
+            #    The weights of AVaR from stage 2 to stage T.
+            #    If floated, the weight will be assigned to the same number.
+            #    If array-like, must be of length T-1 (for finite horizon problem)
+            #    or T (for infinite horizon problem).
+            #
+            # a: float between 0 and 1/array-like of floats between 0 and 1.
+            #    The quantile parameters in value-at-risk from stage 2 to stage T
+            #    If floated, those parameters will be assigned to the same number.
+            #    If array-like, must be of length T-1 (for finite horizon problem)
+            #    or T (for infinite horizon problem).
             try:
                 self.a = self.msp.a
                 self.l = self.msp.l
@@ -459,23 +472,35 @@ class SDDP(object):
             .format(self.__class__, self.n_processes, self.n_steps)
         )
 
-    def _compute_idx(self, t):
-        return (t, t)
-
-    def _select_trial_solution(self, random_state, forward_solution):
-        return forward_solution[:-1]
+    def _select_trial_solution(self, forward_solution: list[list]) -> list:
+        if self:
+            return forward_solution[:-1]
 
     def _forward(
             self,
-            random_state=None,
-            sample_path_idx=None,
-            markovian_idx=None,
-            markovian_samples=None,
-            solve_true=False,
-            query=None,
-            query_dual=None,
-            query_stage_cost=None):
-        """Single forward step. """
+            random_state: numpy.random.RandomState = None,
+            sample_path_idx: list | list[list] = None,
+            markovian_idx: list = None,
+            markovian_samples: list = None,
+            solve_true: bool = False,
+            query: list = None,
+            query_dual: list = None,
+            query_stage_cost: bool = False
+            ) -> tuple:
+        """
+        Single forward step.
+
+        Args:
+            random_state: a numpy RandomState instance.
+            sample_path_idx: Indices of the sample path.
+            markovian_idx: markovian uncertainty index
+            markovian_samples: the markovian sample
+            solve_true: whether solving the true continuous-uncertainty problem
+            query: the vars that wants to check(query)
+            query_dual: the constraints that wants to check
+            query_stage_cost: whether to query values of individual stage costs.
+
+        """
         msp = self.msp
         forward_solution = [None for _ in range(self.forward_T)]
         pv = 0
@@ -486,42 +511,43 @@ class SDDP(object):
         stage_cost = numpy.full(self.forward_T, numpy.nan)
         # time loop
         for t in range(self.forward_T):
-            idx, tm_idx = self._compute_idx(t)
-            if msp._type == "stage-wise independent":
+            idx, tm_idx = (t, t)
+            if msp.type == "stage-wise independent":
                 m = msp.models[idx]
-            else:
+            else: # markovian discrete or markovian continuous
+                state_index = 0
                 if t == 0:
                     m = msp.models[idx][0]
-                    state = 0
                 else:
+                    last_state_index = state_index
                     if sample_path_idx is not None:
-                        state = sample_path_idx[1][t]
+                        state_index = sample_path_idx[1][t]
                     elif markovian_idx is not None:
-                        state = markovian_idx[t]
+                        state_index = markovian_idx[t]
                     else:
-                        state = random_state.choice(
+                        state_index = random_state.choice(
                             range(msp.n_Markov_states[idx]),
-                            p=msp.transition_matrix[tm_idx][state]
+                            p = msp.transition_matrix[tm_idx][last_state_index]
                         )
-                    m = msp.models[idx][state]
+                    m = msp.models[idx][state_index]
                     if markovian_idx is not None:
                         m._update_uncertainty_dependent(markovian_samples[t])
             if t > 0:
                 m._update_link_constrs(forward_solution[t - 1])
                 # exhaustive evaluation when the sample paths are given
                 if sample_path_idx is not None:
-                    if msp._type == "stage-wise independent":
+                    if msp.type == "stage-wise independent":
                         scen = sample_path_idx[t]
                     else:
                         scen = sample_path_idx[0][t]
                     m._update_uncertainty(scen)
                 # true stagewise independent randomness is infinite and solve
                 # for true
-                elif m._type == 'continuous' and solve_true:
+                elif m.type == 'continuous' and solve_true:
                     m._sample_uncertainty(random_state)
                 # true stagewise independent randomness is large and solve
                 # for true
-                elif m._type == 'discrete' and m._flag_discrete == 1 and solve_true:
+                elif m.type == 'discrete' and m._flag_discrete == 1 and solve_true:
                     scen = rand_int(
                         k=m.n_samples_discrete,
                         probability=m.probability,
@@ -715,7 +741,7 @@ class SDDP(object):
         solution = temp['forward_solution']
         pv = temp['pv']
         self.rgl_center = solution
-        solution = self._select_trial_solution(random_state, solution)
+        solution = self._select_trial_solution(solution)
         self._backward(solution)
         return [pv]
 
@@ -733,10 +759,10 @@ class SDDP(object):
             # regularization needs to store last forward_solution
             if j == jobs[-1] and self.rgl_a != 0:
                 for t in range(self.forward_T):
-                    idx, _ = self._compute_idx(t)
+                    idx = t
                     for i in range(self.msp.n_states[idx]):
                         forward_solution[t][i] = solution[t][i]
-            solution = self._select_trial_solution(random_state, solution)
+            solution = self._select_trial_solution(solution)
             self._backward(solution, j, lock, cuts)
 
     def _add_cut_from_multiprocessing_array(self, cuts):
@@ -820,7 +846,7 @@ class SDDP(object):
         # regularization needs to store last forward_solution
         if self.rgl_a != 0:
             forward_solution = [multiprocessing.Array(
-                "d", [0] * self.msp.n_states[self._compute_idx(t)[0]])
+                "d", [0] * self.msp.n_states[t])
                 for t in range(self.forward_T)
             ]
 

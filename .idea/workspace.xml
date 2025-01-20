@@ -8,10 +8,12 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="f99bd7d8-beb4-47cd-bc85-89bae93f688b" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/Python-Practices.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/Python-Practices.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/stochastic programming/evaluation.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/practices/test.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/stochastic programming/dynamic programming/logger.py" beforeDir="false" afterPath="$PROJECT_DIR$/stochastic programming/logger.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/stochastic programming/air_conditioner.py" beforeDir="false" afterPath="$PROJECT_DIR$/stochastic programming/air_conditioner.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/stochastic programming/logger.py" beforeDir="false" afterPath="$PROJECT_DIR$/stochastic programming/logger.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/stochastic programming/msm.py" beforeDir="false" afterPath="$PROJECT_DIR$/stochastic programming/msm.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/stochastic programming/sm_detail.py" beforeDir="false" afterPath="$PROJECT_DIR$/stochastic programming/sm_detail.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/stochastic programming/solver_detail.py" beforeDir="false" afterPath="$PROJECT_DIR$/stochastic programming/solver_detail.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../msppy/.idea/msppy.iml" beforeDir="false" afterPath="$PROJECT_DIR$/../msppy/.idea/msppy.iml" afterDir="false" />
     </list>
@@ -47,6 +49,8 @@
   </component>
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
+    "Python.air_conditioner.executor": "Run",
+    "Python.determin_orderLoan.executor": "Run",
     "Python.logger.executor": "Debug",
     "Python.portfolio_optimization.executor": "Run",
     "Python.saa_orderLoan_LowerBounds.executor": "Run",
@@ -478,6 +482,11 @@
           <url>file://$PROJECT_DIR$/stochastic programming/logger.py</url>
           <line>29</line>
           <option name="timeStamp" value="197" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/stochastic programming/solver_detail.py</url>
+          <line>24</line>
+          <option name="timeStamp" value="198" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
