@@ -8,14 +8,18 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="f99bd7d8-beb4-47cd-bc85-89bae93f688b" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/stochastic programming/evaluation.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/stochastic programming/news_vendor.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../msppy/quick_start/final.lp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/dictionaries/zhenchen.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dictionaries/zhenchen.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/stochastic programming/air_conditioner.py" beforeDir="false" afterPath="$PROJECT_DIR$/stochastic programming/air_conditioner.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/stochastic programming/logger.py" beforeDir="false" afterPath="$PROJECT_DIR$/stochastic programming/logger.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/stochastic programming/msm.py" beforeDir="false" afterPath="$PROJECT_DIR$/stochastic programming/msm.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/stochastic programming/sm_detail.py" beforeDir="false" afterPath="$PROJECT_DIR$/stochastic programming/sm_detail.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/stochastic programming/solver_detail.py" beforeDir="false" afterPath="$PROJECT_DIR$/stochastic programming/solver_detail.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/stochastic programming/statistics.py" beforeDir="false" afterPath="$PROJECT_DIR$/stochastic programming/statistics.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../msppy/.idea/msppy.iml" beforeDir="false" afterPath="$PROJECT_DIR$/../msppy/.idea/msppy.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../msppy/msppy/msp.py" beforeDir="false" afterPath="$PROJECT_DIR$/../msppy/msppy/msp.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../msppy/msppy/sp.py" beforeDir="false" afterPath="$PROJECT_DIR$/../msppy/msppy/sp.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../msppy/quick_start/newsvendor.py" beforeDir="false" afterPath="$PROJECT_DIR$/../msppy/quick_start/newsvendor.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -52,6 +56,8 @@
     "Python.air_conditioner.executor": "Run",
     "Python.determin_orderLoan.executor": "Run",
     "Python.logger.executor": "Debug",
+    "Python.news_vendor.executor": "Run",
+    "Python.newsvendor.executor": "Run",
     "Python.portfolio_optimization.executor": "Run",
     "Python.saa_orderLoan_LowerBounds.executor": "Run",
     "RunOnceActivity.ShowReadmeOnStart": "true",
@@ -474,19 +480,24 @@
           <option name="timeStamp" value="195" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/stochastic programming/solver_detail.py</url>
-          <line>10</line>
-          <option name="timeStamp" value="196" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/stochastic programming/logger.py</url>
           <line>29</line>
           <option name="timeStamp" value="197" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/stochastic programming/solver_detail.py</url>
-          <line>24</line>
-          <option name="timeStamp" value="198" />
+          <url>file://$PROJECT_DIR$/stochastic programming/news_vendor.py</url>
+          <line>27</line>
+          <option name="timeStamp" value="199" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/stochastic programming/msm.py</url>
+          <line>222</line>
+          <option name="timeStamp" value="200" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/stochastic programming/msm.py</url>
+          <line>223</line>
+          <option name="timeStamp" value="202" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

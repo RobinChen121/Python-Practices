@@ -177,13 +177,13 @@ class MSP:
                     else [(0,)]
                 )
             # n_sample_paths = n_Markov_state_paths * n_sample_paths
-            sample_paths = list(product(sample_paths, Markov_state_paths)) # chen: I need to fully understand when coming across the corresponding problems
+            sample_paths = list(product(sample_paths, Markov_state_paths)) # chen: index 1 of sample_paths is the markov state index
         return len(sample_paths), sample_paths
 
     def add_MC_uncertainty_discrete(
             self,
-            Markov_states: ArrayLike,
-            transition_matrix: ArrayLike
+            Markov_states: list[list[list[float]]],
+            transition_matrix: list[list[list[float]]]
         ) -> None:
         """
         Add a Markov chain process -- discrete uncertainty.
@@ -220,7 +220,7 @@ class MSP:
         ...     ]
         ... )
         """
-        if self.Markovian_uncertainty is None or self.Markov_states is None:
+        if self.Markovian_uncertainty is not None and self.Markov_states is not None:
             raise ValueError("Markovian uncertainty has already added!")
         info = check_Markov_states_and_transition_matrix(
             Markov_states, transition_matrix, self.T

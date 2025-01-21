@@ -56,7 +56,7 @@ def rand_int(k: int | ArrayLike,
              random_state: numpy.random.RandomState,
              probability: ArrayLike = None,
              size: int = None,
-             replace: bool = None) -> list:
+             replace: bool = None) -> float:
     """
     Randomly generate samples from range(k) with given
     probability with/without replacement
@@ -69,18 +69,18 @@ def rand_int(k: int | ArrayLike,
         replace: sampling with replacement or not
 
     Returns:
-        A list of random samples.
+        A random sample.
 
     """
     if probability is None:
-        return random_state.randint(low=0, high=k, size=size)
+        return random_state.randint(low = 0, high = k, size = size)
     else:
-        return random_state.choice(a=k, p=probability, size=size, replace=replace)
+        return random_state.choice(a = k, p = probability, size = size, replace = replace)
 
 
 def check_Markov_states_and_transition_matrix(
-        Markov_states: ArrayLike,
-        transition_matrix: ArrayLike,
+        Markov_states: list[list[list[float]]],
+        transition_matrix: list[list[list[float]]],
         T: int) -> tuple[list, list]:
     """
     Check Markov states and transition matrix are in the right form.

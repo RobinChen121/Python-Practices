@@ -494,7 +494,7 @@ class SDDP(object):
             random_state: a numpy RandomState instance.
             sample_path_idx: Indices of the sample path.
             markovian_idx: markovian uncertainty index
-            markovian_samples: the markovian sample
+            markovian_samples: the markovian samples
             solve_true: whether solving the true continuous-uncertainty problem
             query: the vars that wants to check(query)
             query_dual: the constraints that wants to check
@@ -521,17 +521,17 @@ class SDDP(object):
                 else:
                     last_state_index = state_index
                     if sample_path_idx is not None:
-                        state_index = sample_path_idx[1][t]
+                        state_index = sample_path_idx[1][t] # index 1 of sample_paths is the markov state index
                     elif markovian_idx is not None:
                         state_index = markovian_idx[t]
                     else:
                         state_index = random_state.choice(
-                            range(msp.n_Markov_states[idx]),
+                            range(msp.n_Markov_states[idx]), # transition_matrix is 3-D matrix
                             p = msp.transition_matrix[tm_idx][last_state_index]
                         )
                     m = msp.models[idx][state_index]
                     if markovian_idx is not None:
-                        m._update_uncertainty_dependent(markovian_samples[t])
+                        m.update_uncertainty_dependent(markovian_samples[t])
             if t > 0:
                 m._update_link_constrs(forward_solution[t - 1])
                 # exhaustive evaluation when the sample paths are given

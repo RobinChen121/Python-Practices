@@ -59,26 +59,31 @@ class StochasticModel:
         self.cuts = []
 
         # stage-wise independent discrete uncertainty realizations
-        self.uncertainty_rhs = {}  # {} is dic format, uncertainty is on the right hand side of the constraints
+        # they are dicts
+        self.uncertainty_rhs = {}  # key is the constraint, value is the uncertainty right hand side values
         self.uncertainty_coef = {}  # uncertainty is in the constraint coefficients
+                                    # key is (constraint, var), value is the uncertainty values
         self.uncertainty_obj = {}  # uncertainty is in the objective coefficients
+                                   # key is the var, value is the uncertainty values
 
         # stage-wise independent continuous uncertainties
-        self.uncertainty_rhs_continuous = {}
-        self.uncertainty_coef_continuous = {}
-        self.uncertainty_obj_continuous = {}
-        self.uncertainty_mix_continuous = {}
+        # they are dicts, their values are the values of the uncertainty
+        self.uncertainty_rhs_continuous = {} # key is the constraint, value is the random generator function
+        self.uncertainty_coef_continuous = {} # key is (constraint, var), value is the random generator function
+        self.uncertainty_obj_continuous = {} # key is the var, value is the random generator function
+        self.uncertainty_mix_continuous = {} # seems useless currently
+
+        # indices of stage-dependent uncertainties
+        # they are dicts, their values are the indices of the uncertainty
+        self.uncertainty_rhs_dependent = {} # key is the constraint, value is the dependent index
+        self.uncertainty_coef_dependent = {} # key is (constraint, var), value is the dependent index
+        self.uncertainty_obj_dependent = {} # key is the var, value is the dependent index
 
         # the followings are actually useless in the programming
         # it seems to record the discretization of the continuous uncertainties
         self.uncertainty_rhs_discrete = {}
         self.uncertainty_coef_discrete = {}
         self.uncertainty_obj_discrete = {}
-
-        # indices of stage-dependent uncertainties
-        self.uncertainty_rhs_dependent = {}
-        self.uncertainty_coef_dependent = {}
-        self.uncertainty_obj_dependent = {}
 
         # collection of all specified dim indices of Markovian uncertainties
         self.Markovian_dim_index = []
@@ -427,6 +432,7 @@ class StochasticModel:
                 else:
                     var_tuple.setAttr("Obj", value[k])
 
+    # noinspection PyArgumentList
     def update_uncertainty_dependent(self, Markov_state: ArrayLike) -> None:
         """
         Update model with the detailed Markov states values
@@ -435,15 +441,19 @@ class StochasticModel:
             Markov_state: the detailed values of markov states
         """
         if self.uncertainty_coef_dependent is not None:
-            for (constr,var), value in self.uncertainty_coef_dependent.items():
+            for (constr,var), value in self.uncertainty_coef_dependent.items(): # the value is the index
                 self._model.chgCoeff(constr, var, Markov_state[value]) # change the coefficient of one var in a constraint
         if self.uncertainty_rhs_dependent is not None:
             for constr_tuple, value in self.uncertainty_rhs_dependent.items():
+                # setAttr(): two arguments (i.e., setAttr(attrname, newvalue)) to set a model attribute;
+                # three arguments (i.e., setAttr(attrname, objects, newvalues)) to
+                # set attribute values for a list or dict of model objects
+                # (Var objects, Constr objects, etc.)
                 if type(constr_tuple) == tuple:
                     self._model.setAttr( # change the value of one or more attributes
                         "RHS",
                         list(constr_tuple),
-                        [Markov_state[i] for i in value],
+                        [Markov_state[i] for i in value]
                     )
                 else:
                     constr_tuple.setAttr("RHS", Markov_state[value])
@@ -453,7 +463,7 @@ class StochasticModel:
                     self._model.setAttr(
                         "Obj",
                         list(var_tuple),
-                        [Markov_state[i] for i in value],
+                        [Markov_state[i] for i in value]
                     )
                 else:
                     var_tuple.setAttr("Obj", Markov_state[value])
@@ -884,7 +894,7 @@ class StochasticModel:
 
     def addConstr(self,
                   constr: any,
-                  sense: int = None,
+                  sense: str = None,
                   rhs: float | gurobipy.Var | gurobipy.LinExpr = None,
                   name: str = "",
                   uncertainty: Callable | ArrayLike | Mapping = None,
@@ -903,12 +913,12 @@ class StochasticModel:
             rhs: Right-hand side for the new constraint. Can be a constant, a Var, or a LinExpr.
             sense: Sense for the new constraint (GRB.LESS_EQUAL, GRB.EQUAL, or GRB.GREATER_EQUAL).
             name: (optional) Name for new constraint.
-            uncertainty: (optional) If it is ArrayLike, it is for discrete uncertainty, and it is the scenarios (uncertainty realizations) of stage-wise independent uncertain objective
-                   coefficients.
+            uncertainty: (optional) If it is ArrayLike, it is for discrete uncertainty, and it is the scenarios (uncertainty realizations) of stage-wise
+                   independent uncertain constraint coefficient and RHS.
                    If it is Mapping, it can be discrete or continuous uncertainty depending on whether the value in the Mapping item can be callable.
                    If it is a Callable function, it is for continuous uncertainty, and it is a multivariate random variable generator of stage-wise
-                   independent uncertain objective coefficients. It must take numpy RandomState as its only argument.
-            uncertainty_dependent: (optional) The location index in the stochastic process generator of stage-wise dependent uncertain objective coefficients.
+                   independent uncertain constraint coefficient and RHS. It must take numpy RandomState as its only argument.
+            uncertainty_dependent: (optional) The location index in the stochastic process generator of stage-wise dependent uncertain constraint coefficient and RHS.
                 For Markov uncertainty.
 
         Returns:
@@ -963,7 +973,7 @@ class StochasticModel:
         if uncertainty_dependent is not None:
             uncertainty_dependent = self._check_uncertainty_dependent(
                 uncertainty_dependent, flag_dict = True, dimension = 1 )
-            for key, value in uncertainty_dependent.items():
+            for key, value in uncertainty_dependent.items(): # value is the index of the dependent uncertainty
                 # key can be a gurobipy.Var or "rhs"
                 # Append constr to the key
                 if type(key) == gurobipy.Var: # meaning uncertainty is in the coefficient of the constraint
@@ -995,12 +1005,12 @@ class StochasticModel:
             generator: A generator expression, where each iteration produces a constraint.
             name: (optional) Name pattern for new constraints.
                   The given name will be subscribed by the index of the generator expression.
-            uncertainty: (optional) If it is ArrayLike, it is for discrete uncertainty, and it is the scenarios (uncertainty realizations) of stage-wise independent uncertain objective
-                   coefficients.
+            uncertainty: (optional) If it is ArrayLike, it is for discrete uncertainty, and it is the scenarios (uncertainty realizations) of stage-wise
+                   independent uncertain constraint coefficient and RHS.
                    If it is Mapping, it can be discrete or continuous uncertainty depending on whether the value in the Mapping item can be callable.
                    If it is a Callable function, it is for continuous uncertainty, and it is a multivariate random variable generator of stage-wise
-                   independent uncertain objective coefficients. It must take numpy RandomState as its only argument.
-            uncertainty_dependent: (optional) The location index in the stochastic process generator of stage-wise dependent uncertain objective coefficients.
+                   independent uncertain constraint coefficient and RHS. It must take numpy RandomState as its only argument.
+            uncertainty_dependent: (optional) The location index in the stochastic process generator of stage-wise dependent uncertain constraint coefficient and RHS
                 For Markov uncertainty.
 
         Returns:

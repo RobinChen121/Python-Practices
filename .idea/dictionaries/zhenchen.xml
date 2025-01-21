@@ -1,6 +1,7 @@
 <component name="ProjectDictionaryState">
   <dictionary name="zhenchen">
     <words>
+      <w>attrname</w>
       <w>choiced</w>
       <w>coef</w>
       <w>constr</w>
@@ -9,6 +10,8 @@
       <w>discretization</w>
       <w>discretized</w>
       <w>markovian</w>
+      <w>newvalue</w>
+      <w>newvalues</w>
       <w>semicont</w>
       <w>semiint</w>
       <w>vtype</w>
