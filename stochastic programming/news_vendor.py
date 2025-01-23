@@ -17,7 +17,7 @@ selling amount is restricted between half of demand and full demand.
 """
 
 from msm import MSP
-from solver_detail import Extensive,SDDP
+from solver_detail import Extensive, SDDP
 import gurobipy
 T = 4
 PurchasePrice = [5.0, 8.0]

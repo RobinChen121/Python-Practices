@@ -12,9 +12,8 @@ Created on Mon Jan  6 15:49:14 2025
     
 """
 from sm_detail import StochasticModel
-from numpy.typing import ArrayLike
-from statistics import check_Markov_states_and_transition_matrix
-from statistics import check_Markov_callable_uncertainty
+from msppy_chen.statistics import check_Markov_states_and_transition_matrix
+from msppy_chen.statistics import check_Markov_callable_uncertainty
 import numpy
 from itertools import product
 from collections.abc import Callable
@@ -303,7 +302,7 @@ class MSP:
             if type(self.models[0]) != list:
                 models = self.models
                 self.models = [
-                    [None for k in range(self.n_Markov_states[t: int])]
+                    [None for _ in range(self.n_Markov_states[t])]
                     for t in range(self.T)
                 ]
                 for t in range(self.T):
@@ -317,6 +316,7 @@ class MSP:
             if self.type == 'stage-wise independent'
             else [self.models[t][0].n_states for t in range(self.T)]
         )
+
         self.n_samples = (
             [self.models[t].n_samples for t in range(self.T)]
             if self.type == 'stage-wise independent'

@@ -11,13 +11,13 @@ Created on Mon Jan  6 20:48:12 2025
     
     
 """
-
 import gurobipy
 from numpy.typing import ArrayLike
 from collections.abc import Callable, Mapping, Sequence, Generator
 import numpy
 from exception import SampleSizeError, DistributionError
 from numbers import Number
+import copy as deepcopy
 
 
 # noinspection PyUnresolvedReferences,PyRedeclaration
@@ -1066,6 +1066,54 @@ class StochasticModel:
             self.uncertainty_rhs_dependent[tuple(constr.values())] = uncertainty_dependent
 
         return constr
+
+    def copy(self):
+        """
+        Create a deepcopy of a stochastic model.
+        The deepcopy() in the copy module is not suitable.
+
+        Returns:
+            The copied StochasticModel object.
+        """
+        cls = self.__class__ # get the class of the current instance
+        result = cls.__new__(cls) # create a new instance of the given class
+        # copy the internal Gurobi model
+        result._model = self._model.copy()
+        for attribute, value in self.__dict__.items(): # __dict__ get all the attributes in the function of __init__()
+            # for mutable data types like list, dict, set, should use deep copy
+            if attribute == "_model":
+                pass
+            else:
+                # copy all attributes that have not been assigned a value
+                # setattr is a python built-in function
+                setattr(result, attribute, None)
+                dict = {'value': value, 'target': result, 'attribute': attribute}
+                # copy all uncertainties
+                if attribute.startswith("uncertainty"):
+                    setattr(result, attribute, {})
+                    if attribute.startswith("uncertainty_rhs"):
+                        deepcopy._copy_uncertainty_rhs(**dict)
+                    elif attribute.startswith("uncertainty_coef"):
+                        deepcopy._copy_uncertainty_coef(**dict)
+                    elif attribute.startswith("uncertainty_obj"):
+                        deepcopy._copy_uncertainty_obj(**dict)
+                    elif attribute.startswith("uncertainty_mix"):
+                        deepcopy._copy_uncertainty_mix(**dict)
+                    else:
+                        raise Exception("alien uncertainties added!")
+                # copy all variables
+                elif attribute in ["states", "local_copies", "alpha"]:
+                    deepcopy._copy_vars(**dict)
+                # copy all constraints
+                elif attribute in ["cuts", "link_constrs"]:
+                    deepcopy._copy_constrs(**dict)
+                # copy probability measure
+                elif attribute == "probability":
+                    result.probability = None if value is None else list(value)
+                else:
+                    setattr(result, attribute, value)
+
+        return result
 
     def set_probability(self,
                         probability: ArrayLike) -> None:
