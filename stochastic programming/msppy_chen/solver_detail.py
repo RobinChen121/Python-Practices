@@ -9,8 +9,8 @@ Created on 2025/1/10, 21:48
 
 """
 from msm import MSP
-from msppy_chen.statistics import rand_int, allocate_jobs, compute_CI
-from logger import LoggerSDDP, LoggerEvaluation, LoggerComparison
+from util.statistics import rand_int, allocate_jobs, compute_CI
+from util.logger import LoggerSDDP, LoggerEvaluation, LoggerComparison
 from evaluation import Evaluation, EvaluationTrue
 from collections import abc
 import time

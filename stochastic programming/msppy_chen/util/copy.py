@@ -8,8 +8,14 @@ Created on 2025/1/23, 0:20
 @disp:  deep copy for some mutable data structure
 
 """
-def _copy_uncertainty_rhs(value, target, attribute):
-    """Copy rhs uncertainty (attribute, value) to target"""
+from numpy.typing import ArrayLike
+from sm_detail import StochasticModel
+
+def copy_uncertainty_rhs(value: ArrayLike, target: StochasticModel, attribute):
+    """
+    Copy rhs uncertainty (attribute, value) to target
+
+    """
     result = {}
     for constr_tuple, value in value.items():
         if type(constr_tuple) == tuple:

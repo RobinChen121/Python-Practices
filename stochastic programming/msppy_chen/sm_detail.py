@@ -15,9 +15,9 @@ import gurobipy
 from numpy.typing import ArrayLike
 from collections.abc import Callable, Mapping, Sequence, Generator
 import numpy
-from exception import SampleSizeError, DistributionError
+from util.exception import SampleSizeError, DistributionError
 from numbers import Number
-import copy as deepcopy
+import util.copy as deepcopy
 
 
 # noinspection PyUnresolvedReferences,PyRedeclaration
@@ -1087,26 +1087,26 @@ class StochasticModel:
                 # copy all attributes that have not been assigned a value
                 # setattr is a python built-in function
                 setattr(result, attribute, None)
-                dict = {'value': value, 'target': result, 'attribute': attribute}
+                dict_ = {'value': value, 'target': result, 'attribute': attribute}
                 # copy all uncertainties
                 if attribute.startswith("uncertainty"):
                     setattr(result, attribute, {})
                     if attribute.startswith("uncertainty_rhs"):
-                        deepcopy._copy_uncertainty_rhs(**dict)
+                        deepcopy.copy_uncertainty_rhs(**dict_) # ** is for dictionary unpacking
                     elif attribute.startswith("uncertainty_coef"):
-                        deepcopy._copy_uncertainty_coef(**dict)
+                        deepcopy._copy_uncertainty_coef(**dict_)
                     elif attribute.startswith("uncertainty_obj"):
-                        deepcopy._copy_uncertainty_obj(**dict)
+                        deepcopy._copy_uncertainty_obj(**dict_)
                     elif attribute.startswith("uncertainty_mix"):
-                        deepcopy._copy_uncertainty_mix(**dict)
+                        deepcopy._copy_uncertainty_mix(**dict_)
                     else:
                         raise Exception("alien uncertainties added!")
                 # copy all variables
                 elif attribute in ["states", "local_copies", "alpha"]:
-                    deepcopy._copy_vars(**dict)
+                    deepcopy._copy_vars(**dict_)
                 # copy all constraints
                 elif attribute in ["cuts", "link_constrs"]:
-                    deepcopy._copy_constrs(**dict)
+                    deepcopy._copy_constrs(**dict_)
                 # copy probability measure
                 elif attribute == "probability":
                     result.probability = None if value is None else list(value)

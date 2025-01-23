@@ -12,8 +12,8 @@ Created on Mon Jan  6 15:49:14 2025
     
 """
 from sm_detail import StochasticModel
-from msppy_chen.statistics import check_Markov_states_and_transition_matrix
-from msppy_chen.statistics import check_Markov_callable_uncertainty
+from util.statistics import check_Markov_states_and_transition_matrix
+from util.statistics import check_Markov_callable_uncertainty
 import numpy
 from itertools import product
 from collections.abc import Callable
