@@ -15,6 +15,7 @@ from sm_detail import StochasticModel
 from util.statistics import check_Markov_states_and_transition_matrix
 from util.statistics import check_Markov_callable_uncertainty
 import numpy
+from numpy.typing import ArrayLike
 from itertools import product
 from collections.abc import Callable
 
@@ -393,5 +394,160 @@ class MSP:
             )
             weight *= probability[t][sample_path[1][t]][sample_path[0][t]]
         return weight
+
+    def set_AVaR(self, l: float | ArrayLike, a: float, method: str = 'indirect') -> None:
+        """
+        Set linear combination of expectation and conditional value at risk
+        (average value at risk) as risk measure
+
+        Args:
+            method: 'direct'/'indirect'
+                    direct method directly solves the risk-averse problem;
+                    indirect method adds additional state variables and transform the
+                    risk-averse problem into risk neutral.
+
+            l: float between 0 and 1/array-like of floats between 0 and 1.
+               The weights of AVaR from stage 2 to stage T
+               If floated, the weight will be assigned to the same number.
+               If array-like, must be of length T-1 (for finite horizon problem)
+               or T (for infinite horizon problem).
+
+            a: float between 0 and 1/array-like of floats between 0 and 1
+               The quantile parameters in value-at-risk from stage 2 to stage T
+               If floated, those parameters will be assigned to the same number.
+               If array-like, must be of length T-1 (for finite horizon problem)
+               or T (for infinite horizon problem).
+
+        Notes:
+            Bigger l means more risk-averse;
+            smaller a means more risk-averse.
+        """
+        if isinstance(l, (abc.Sequence, numpy.ndarray)):
+            if len(l) not in [self.T - 1, self.T]:
+                raise ValueError("Length of l must be T-1/T!")
+            if not all(1 >= item >= 0 for item in l): # nice coding
+                raise ValueError("l must be between 0 and 1!")
+            l = [None] + list(l)
+        elif isinstance(l, (numbers.Number)):
+            if l > 1 or l < 0:
+                raise ValueError("l must be between 0 and 1!")
+            l = [None] + [l] * (self.T - 1)
+        else:
+            raise TypeError("l should be float/array-like instead of \
+            {}!".format(type(l)))
+        if isinstance(a, (abc.Sequence, numpy.ndarray)):
+            if len(a) not in [self.T - 1, self.T]:
+                raise ValueError("Length of a must be T-1!")
+            if not all(item <= 1 and item >= 0 for item in a):
+                raise ValueError("a must be between 0 and 1!")
+            a = [None] + list(a)
+        elif isinstance(a, (numbers.Number)):
+            if a > 1 or a < 0:
+                raise ValueError("a must be between 0 and 1!")
+            a = [None] + [a] * (self.T - 1)
+        else:
+            raise TypeError("a should be float/array-like instead of \
+            {}!".format(type(a)))
+
+        self.a = a
+        self.l = l
+
+        if method == 'direct':
+            self._set_up_CTG()
+            from msppy.utils.measure import Expectation_AVaR
+            from functools import partial
+            for t in range(1, self.T):
+                M = (
+                    self.models[t]
+                    if type(self.models[t]) == list
+                    else [self.models[t]]
+                )
+                for m in M:
+                    m.measure = partial(Expectation_AVaR,
+                                        a=a[t], l=l[t])
+            for t in range(self.T):
+                M = (
+                    self.models[t]
+                    if type(self.models[t]) == list
+                    else [self.models[t]]
+                )
+                for m in M:
+                    stage_cost = m.addVar(
+                        name="stage_cost",
+                        lb=-gurobipy.GRB.INFINITY,
+                        ub=gurobipy.GRB.INFINITY,
+                    )
+                    alpha = m.alpha if m.alpha is not None else 0.0
+                    m.addConstr(m.getObjective() - self.discount * alpha == stage_cost)
+                    m.update()
+
+
+        elif method == 'indirect':
+            self._set_up_CTG()
+            self._delete_link_constrs()
+            for t in range(self.T):
+                M = (
+                    self.models[t]
+                    if type(self.models[t]) == list
+                    else [self.models[t]]
+                )
+                for m in M:
+                    p_now, p_past = m.addStateVar(
+                        lb=-gurobipy.GRB.INFINITY,
+                        ub=gurobipy.GRB.INFINITY,
+                        name="additional_state",
+                    )
+                    v = m.addVar(name="additional_var")
+                    m.addConstr(self.sense * (p_now - self.bound) >= 0)
+                    z = m.getObjective()
+                    stage_cost = m.addVar(
+                        name="stage_cost",
+                        lb=-gurobipy.GRB.INFINITY,
+                        ub=gurobipy.GRB.INFINITY,
+                    )
+                    alpha = m.alpha if m.alpha is not None else 0.0
+                    if t > 0:
+                        if m.uncertainty_obj != {}:
+                            m.addConstr(
+                                z - self.discount * alpha == stage_cost,
+                                uncertainty=m.uncertainty_obj,
+                            )
+                            m.uncertainty_obj = {}
+                            m.setObjective(
+                                (1 - l[t])
+                                * (
+                                        stage_cost
+                                        + self.discount * alpha
+                                )
+                                + l[t] * p_past
+                                + self.sense * l[t] / a[t] * v
+                            )
+                            m.addConstr(
+                                v
+                                >= (
+                                        stage_cost
+                                        + self.discount * alpha
+                                        - p_past
+                                )
+                                * self.sense
+                            )
+                        else:
+                            m.addConstr(z - self.discount * alpha == stage_cost)
+                            m.setObjective(
+                                (1 - l[t]) * z
+                                + l[t] * p_past
+                                + self.sense * l[t] / a[t] * v
+                            )
+                            m.addConstr(
+                                v
+                                >= (z - p_past)
+                                * self.sense
+                            )
+                    else:
+                        m.addConstr(z - self.discount * alpha == stage_cost)
+                    m.update()
+        else:
+            raise NotImplementedError
+        self.measure = "risk averse"
 
         

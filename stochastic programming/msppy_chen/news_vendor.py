@@ -54,7 +54,6 @@ for t in range(T):
         m.addConstr(sell >= 0.5 * random)
     if t == 0:
         m.addConstr(now == 5.0)
-Extensive(newsVendor).solve()
+Extensive(newsVendor).solve() # no need for non-anticipative constraints since all the variables are indexed by sample paths
 # newsVendor.set_AVaR(a=0.6, l=0.5)
-# Extensive(newsVendor).solve()
 # SDDP(newsVendor).solve(max_iterations=100)

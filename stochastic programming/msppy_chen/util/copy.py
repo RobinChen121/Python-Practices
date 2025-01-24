@@ -12,7 +12,7 @@ from numpy.typing import ArrayLike
 import gurobipy
 
 
-def copy_uncertainty_rhs(target, attribute: str, value: ArrayLike) -> None:
+def copy_uncertainty_rhs(target: 'StochasticModel', attribute: str, value: ArrayLike) -> None:
     """
     Copy rhs uncertainty (attribute, value) to target
 
@@ -35,8 +35,11 @@ def copy_uncertainty_rhs(target, attribute: str, value: ArrayLike) -> None:
             result[s] = value
     setattr(target, attribute, result)
 
-def _copy_uncertainty_coef( target, attribute, value):
-    """Copy coef uncertainty (attribute, value) to target"""
+def copy_uncertainty_coef(target, attribute: str, value: dict):
+    """
+    Copy coef uncertainty (attribute, value) to target
+
+    """
     result = {}
     for key, value in value.items():
         constr = target._model.getConstrByName(key[0].constrName)
@@ -44,8 +47,11 @@ def _copy_uncertainty_coef( target, attribute, value):
         result[(constr, var)] = value
     setattr(target, attribute, result)
 
-def _copy_uncertainty_obj(target, attribute, value):
-    """Copy obj uncertainty (attribute, value) to target"""
+def copy_uncertainty_obj(target, attribute: str, value: dict):
+    """
+    Copy obj uncertainty (attribute, value) to target
+
+    """
     result = {}
     for var_tuple, value in value.items():
         if type(var_tuple) == tuple:
@@ -56,8 +62,11 @@ def _copy_uncertainty_obj(target, attribute, value):
             result[s] = value
     setattr(target, attribute, result)
 
-def _copy_uncertainty_mix(target, attribute, value):
-    """Copy mixed uncertainty (attribute, value) to target"""
+def copy_uncertainty_mix(target, attribute: str, value: list | gurobipy.Var | gurobipy.Constr):
+    """
+    Copy mixed uncertainty (attribute, value) to target
+
+    """
     result = {}
     for keys, dist in value.items():
         s = []
@@ -73,9 +82,11 @@ def _copy_uncertainty_mix(target, attribute, value):
         result[tuple(s)] = dist
     setattr(target, attribute, result)
 
-def _copy_vars(target, attribute, value):
+def copy_vars(target, attribute: str, value: list | gurobipy.Var):
     """
-     copy vars (attribute, value) to target
+     copy vars (attribute, value) to target.
+     It finds the var in the _model, otherwise the copied vars
+     will be different with the namesake var in the _model.
 
      """
     if type(value) == list:
@@ -88,8 +99,11 @@ def _copy_vars(target, attribute, value):
         )
     setattr(target, attribute, result)
 
-def _copy_constrs(target, attribute, value):
-    """Copy constrs (attribute, value) to target"""
+def copy_constrs(target, attribute: str, value: list | gurobipy.TempConstr):
+    """
+    Copy constrs (attribute, value) to target
+
+    """
     if type(value) == list:
         result = [
             target._model.getConstrByName(x.constrName) for x in value
