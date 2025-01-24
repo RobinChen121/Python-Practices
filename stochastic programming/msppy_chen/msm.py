@@ -395,7 +395,7 @@ class MSP:
             weight *= probability[t][sample_path[1][t]][sample_path[0][t]]
         return weight
 
-    def set_AVaR(self, l: float | ArrayLike, a: float, method: str = 'indirect') -> None:
+    def set_AVaR(self, l: float | ArrayLike, a: float | ArrayLike, method: str = 'indirect') -> None:
         """
         Set linear combination of expectation and conditional value at risk
         (average value at risk) as risk measure
@@ -419,8 +419,8 @@ class MSP:
                or T (for infinite horizon problem).
 
         Notes:
-            Bigger l means more risk-averse;
-            smaller a means more risk-averse.
+            Bigger l means more risk-averse, l = 1 means the objective is to fully minimize AVAR.
+            smaller a means more risk-averse, the smaller a means more penalty (to be certified)
         """
         if isinstance(l, (abc.Sequence, numpy.ndarray)):
             if len(l) not in [self.T - 1, self.T]:
@@ -428,33 +428,30 @@ class MSP:
             if not all(1 >= item >= 0 for item in l): # nice coding
                 raise ValueError("l must be between 0 and 1!")
             l = [None] + list(l)
-        elif isinstance(l, (numbers.Number)):
+        elif isinstance(l, numbers.Number):
             if l > 1 or l < 0:
                 raise ValueError("l must be between 0 and 1!")
             l = [None] + [l] * (self.T - 1)
         else:
-            raise TypeError("l should be float/array-like instead of \
-            {}!".format(type(l)))
+            raise TypeError("l should be float/array-like instead of {}!".format(type(l)))
         if isinstance(a, (abc.Sequence, numpy.ndarray)):
             if len(a) not in [self.T - 1, self.T]:
                 raise ValueError("Length of a must be T-1!")
-            if not all(item <= 1 and item >= 0 for item in a):
+            if not all(0 <= item <= 1 for item in a):
                 raise ValueError("a must be between 0 and 1!")
             a = [None] + list(a)
-        elif isinstance(a, (numbers.Number)):
+        elif isinstance(a, numbers.Number):
             if a > 1 or a < 0:
                 raise ValueError("a must be between 0 and 1!")
             a = [None] + [a] * (self.T - 1)
         else:
-            raise TypeError("a should be float/array-like instead of \
-            {}!".format(type(a)))
-
+            raise TypeError("a should be float/array-like instead of {}!".format(type(a)))
         self.a = a
         self.l = l
 
         if method == 'direct':
             self._set_up_CTG()
-            from msppy.utils.measure import Expectation_AVaR
+            from msppy_chen.utils.measure import Expectation_AVaR
             from functools import partial
             for t in range(1, self.T):
                 M = (

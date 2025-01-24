@@ -1119,6 +1119,30 @@ class StochasticModel:
 
         return result
 
+    def _set_up_CTG(self, discount: float, bound: float):
+        # if it's a minimization problem, we need a lower bound for alpha
+        if self.modelsense == 1:
+            if self.alpha is None:
+                self.alpha = self._model.addVar(
+                    lb = bound,
+                    ub = gurobipy.GRB.INFINITY,
+                    obj = discount,
+                    name = "alpha")
+
+        # if it's a maximization problem, we need an upper bound for alpha
+        else:
+            if self.alpha is None:
+                self.alpha = self._model.addVar(
+                    ub=bound,
+                    lb=-gurobipy.GRB.INFINITY,
+                    obj=discount,
+                    name="alpha"
+                )
+
+    def _delete_CTG(self):
+        if self.alpha is not None:
+            self._model.remove(self.alpha)
+            self.alpha = None
 
     def set_probability(self,
                         probability: ArrayLike) -> None:
