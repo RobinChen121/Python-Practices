@@ -1084,36 +1084,37 @@ class StochasticModel:
             if attribute == "_model":
                 pass
             else:
-                # copy all attributes that have not been assigned a value
+                # firstly copy all attributes and set their values to None
                 # setattr is a python built-in function
-                setattr(result, attribute, None)
-                dict_ = {'value': value, 'target': result, 'attribute': attribute}
-                # copy all uncertainties
-                if attribute.startswith("uncertainty"):
-                    setattr(result, attribute, {})
-                    if attribute.startswith("uncertainty_rhs"):
-                        deepcopy.copy_uncertainty_rhs(**dict_) # ** is for dictionary unpacking
-                    elif attribute.startswith("uncertainty_coef"):
-                        deepcopy._copy_uncertainty_coef(**dict_)
-                    elif attribute.startswith("uncertainty_obj"):
-                        deepcopy._copy_uncertainty_obj(**dict_)
-                    elif attribute.startswith("uncertainty_mix"):
-                        deepcopy._copy_uncertainty_mix(**dict_)
-                    else:
-                        raise Exception("alien uncertainties added!")
-                # copy all variables
-                elif attribute in ["states", "local_copies", "alpha"]:
-                    deepcopy._copy_vars(**dict_)
-                # copy all constraints
-                elif attribute in ["cuts", "link_constrs"]:
-                    deepcopy._copy_constrs(**dict_)
-                # copy probability measure
-                elif attribute == "probability":
-                    result.probability = None if value is None else list(value)
-                else:
-                    setattr(result, attribute, value)
+                setattr(result, attribute, value)
+                # dict_ = {'target': result, 'attribute': attribute, 'value': value}
+                # # copy all uncertainties
+                # if attribute.startswith("uncertainty"):
+                #     setattr(result, attribute, {})
+                #     if attribute.startswith("uncertainty_rhs"):
+                #         deepcopy.copy_uncertainty_rhs(**dict_) # ** is for dictionary unpacking
+                #     elif attribute.startswith("uncertainty_coef"):
+                #         deepcopy._copy_uncertainty_coef(**dict_)
+                #     elif attribute.startswith("uncertainty_obj"):
+                #         deepcopy._copy_uncertainty_obj(**dict_)
+                #     elif attribute.startswith("uncertainty_mix"):
+                #         deepcopy._copy_uncertainty_mix(**dict_)
+                #     else:
+                #         raise Exception("alien uncertainties added!")
+                # # copy all variables
+                # elif attribute in ["states", "local_copies", "alpha"]:
+                #     deepcopy._copy_vars(**dict_)
+                # # copy all constraints
+                # elif attribute in ["cuts", "link_constrs"]:
+                #     deepcopy._copy_constrs(**dict_)
+                # # copy probability measure
+                # elif attribute == "probability":
+                #     result.probability = None if value is None else list(value)
+                # else:
+                #     setattr(result, attribute, value)
 
         return result
+
 
     def set_probability(self,
                         probability: ArrayLike) -> None:

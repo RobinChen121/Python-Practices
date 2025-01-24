@@ -91,7 +91,7 @@ class Extensive:
         # check whether the number of states and samples are updated
         # discrete problem does not require being discretized
         self.MSP.check_state_and_continuous_discretized()
-        self.MSP.check_markov_and_update_num_states_samples()
+        self.MSP.check_markov_copy_models_update_nums()
 
         construction_start_time = time.time()
 
@@ -110,6 +110,8 @@ class Extensive:
         solving_end_time = time.time()
         self.solving_time = solving_end_time - solving_start_time
         self.total_time = self.construction_time + self.solving_time
+        print('*'*30)
+        print('the result of extensive model is %.4f' % self.extensive_model.ObjVal)
         return self.construction_time, self.solving_time, self.extensive_model.objVal
 
     def _get_varname(self):
@@ -381,6 +383,7 @@ class Extensive:
                                 if expr_.getVar(i) in controls_dict.keys():
                                     pos = controls_dict[expr_.getVar(i)]
                                     lhs += expr_.getCoeff(i) * controls[pos]
+                                # chen: without deep copy, the following line of code may be wrong
                                 elif expr_.getVar(i) in states_dict.keys():
                                     pos = states_dict[expr_.getVar(i)]
                                     lhs += (

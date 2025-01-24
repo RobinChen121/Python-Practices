@@ -9,11 +9,17 @@ Created on 2025/1/23, 0:20
 
 """
 from numpy.typing import ArrayLike
-from sm_detail import StochasticModel
+import gurobipy
 
-def copy_uncertainty_rhs(value: ArrayLike, target: StochasticModel, attribute):
+
+def copy_uncertainty_rhs(target, attribute: str, value: ArrayLike) -> None:
     """
     Copy rhs uncertainty (attribute, value) to target
+
+    Args:
+        target: the targeted Stochastic Model
+        attribute: the name of the attribute
+        value: the attribute values
 
     """
     result = {}
@@ -29,7 +35,7 @@ def copy_uncertainty_rhs(value: ArrayLike, target: StochasticModel, attribute):
             result[s] = value
     setattr(target, attribute, result)
 
-def _copy_uncertainty_coef(value, target, attribute):
+def _copy_uncertainty_coef( target, attribute, value):
     """Copy coef uncertainty (attribute, value) to target"""
     result = {}
     for key, value in value.items():
@@ -38,7 +44,7 @@ def _copy_uncertainty_coef(value, target, attribute):
         result[(constr, var)] = value
     setattr(target, attribute, result)
 
-def _copy_uncertainty_obj(value, target, attribute):
+def _copy_uncertainty_obj(target, attribute, value):
     """Copy obj uncertainty (attribute, value) to target"""
     result = {}
     for var_tuple, value in value.items():
@@ -50,7 +56,7 @@ def _copy_uncertainty_obj(value, target, attribute):
             result[s] = value
     setattr(target, attribute, result)
 
-def _copy_uncertainty_mix(value, target, attribute):
+def _copy_uncertainty_mix(target, attribute, value):
     """Copy mixed uncertainty (attribute, value) to target"""
     result = {}
     for keys, dist in value.items():
@@ -67,8 +73,11 @@ def _copy_uncertainty_mix(value, target, attribute):
         result[tuple(s)] = dist
     setattr(target, attribute, result)
 
-def _copy_vars(value, target, attribute):
-    """Copy vars (attribute, value) to target"""
+def _copy_vars(target, attribute, value):
+    """
+     copy vars (attribute, value) to target
+
+     """
     if type(value) == list:
         result = [target._model.getVarByName(x.varName) for x in value]
     else:
@@ -79,7 +88,7 @@ def _copy_vars(value, target, attribute):
         )
     setattr(target, attribute, result)
 
-def _copy_constrs(value, target, attribute):
+def _copy_constrs(target, attribute, value):
     """Copy constrs (attribute, value) to target"""
     if type(value) == list:
         result = [

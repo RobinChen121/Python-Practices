@@ -124,16 +124,16 @@ class MSP:
                     ]
         else:
             probability = [
-                [None for _ in range(self.n_Markov_states[t: int])]
+                [None for _ in range(self.n_Markov_states[t])]
                 for t in range(self.T)
             ]
             for t in range(self.T):
-                for k in range(self.n_Markov_states[t: int]):
+                for k in range(self.n_Markov_states[t]):
                     m = self.models[t][k]
                     if m.probability is not None:
                         probability[t][k] = m.probability
                     else:
-                        probability[t][k: int] = [
+                        probability[t][k] = [
                             1.0/m.n_samples for _ in range(m.n_samples)
                         ]
         return probability
@@ -287,7 +287,7 @@ class MSP:
                     if m.flag_discrete == 1:
                         self._individual_type = "discretized"
 
-    def check_markov_and_update_num_states_samples(self) -> None:
+    def check_markov_copy_models_update_nums(self) -> None:
         """
         Check Markovian uncertainties are discretized.
         Copy Stochastic Models for every Markov states.
@@ -310,7 +310,12 @@ class MSP:
                     for k in range(self.n_Markov_states[t]):
                         m.update_uncertainty_dependent(self.Markov_states[t][k])
                         m.update()
-                        self.models[t][k] = m.copy() # copy the model m
+                        self.models[t][k] = m.copy() # copy the model m, should use deep copy
+                                                     # without the deep copy, the markov models
+                                                     # in one stage may share same vars or constraints
+                    if t == 3:
+                        pass
+
         self.n_states = (
             [self.models[t].n_states for t in range(self.T)]
             if self.type == 'stage-wise independent'
