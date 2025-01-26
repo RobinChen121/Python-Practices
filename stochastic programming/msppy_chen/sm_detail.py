@@ -15,21 +15,24 @@ import gurobipy
 from numpy.typing import ArrayLike
 from collections.abc import Callable, Mapping, Sequence, Generator
 import numpy
-from util.exception import SampleSizeError, DistributionError
+from utils.exception import SampleSizeError, DistributionError
 from numbers import Number
-import util.copy as deepcopy
-from util.measure import Expectation
+import utils.copy as deepcopy
+from utils.measure import Expectation
+from utils.statistics import rand_int, check_random_state
 
 
 # noinspection PyUnresolvedReferences,PyRedeclaration
 class StochasticModel:
     """
-    the detailed programming model for a stage solvable by gurobi;
+    The detailed programming model for a stage solvable by gurobi.
 
     Attributes:
         _model: the gurobi model
         type: type of the true problem
-        flag_discrete:  whether the true problem has been discretized
+        flag_discretized:  whether the true problem has been discretized
+        uncertainty_coef_continuous: key is (constraint, var), value is the random generator function
+        local_copies: local copies for state variables in the model, eg: for inventory problem, it's I_{t-1}
 
     """
 
@@ -50,11 +53,11 @@ class StochasticModel:
 
         """
         self._model = gurobipy.Model(name = name, env = env)
-        self.type = None  # type of the true problem: continuous/discrete
-        self.flag_discrete = 0 #  whether the true problem has been discretized
+        self.type: str = None  # type of the true problem: continuous/discrete
+        self.flag_discretized = 0 #  whether the true problem has been discretized
 
         self.states = []  # states variables in the model, eg: for inventory problem, it's I_t
-        self.local_copies = []  # local copies for state variables in the model, eg: for inventory problem, it's I_{t-1}
+        self.local_copies: list = []  # local copies for state variables in the model, eg: for inventory problem, it's I_{t-1}
 
         self.n_states = 0  # number of state variables in the model
         self.n_samples = 1  # number of discrete uncertainties
@@ -76,10 +79,10 @@ class StochasticModel:
 
         # stage-wise independent continuous uncertainties
         # they are dicts, their values are the values of the uncertainty
-        self.uncertainty_rhs_continuous = {} # key is the constraint, value is the random generator function
-        self.uncertainty_coef_continuous = {} # key is (constraint, var), value is the random generator function
-        self.uncertainty_obj_continuous = {} # key is the var, value is the random generator function
-        self.uncertainty_mix_continuous = {} # seems useless currently
+        self.uncertainty_rhs_continuous: dict = {} # key is the constraint, value is the random generator function
+        self.uncertainty_coef_continuous: dict = {} # key is (constraint, var), value is the random generator function
+        self.uncertainty_obj_continuous: dict = {} # key is the var, value is the random generator function
+        self.uncertainty_mix_continuous: dict = {} # seems useless currently
 
         # indices of stage-dependent uncertainties
         # they are dicts, their values are the indices of the uncertainty
@@ -393,6 +396,57 @@ class StochasticModel:
             if var.varName not in states_name + local_copies_name
         ]
 
+    def sample_uncertainty(self, randomState_instance: any = None) -> None:
+        """
+            update the uncertainty for the true problem.
+            this function is actually not used in the quick_start examples.
+
+        Args:
+            randomState_instance: an instance of numpy.random.RandomState
+
+        """
+        # Sample stage-wise independent true continuous uncertainty
+        randomState_instance = check_random_state(randomState_instance) # make sure randomState_instance is a numpy.random.RandomState instance
+        if self.uncertainty_coef_continuous is not None:
+            for (
+                (constr, var),
+                dist,
+            ) in self.uncertainty_coef_continuous.items():
+                self._model.chgCoeff(constr, var, dist(randomState_instance))
+        if self.uncertainty_rhs_continuous is not None:
+            for constr_tuple, dist in self.uncertainty_rhs_continuous.items():
+                if type(constr_tuple) == tuple:
+                    self._model.setAttr("RHS", list(constr_tuple), dist(randomState_instance))
+                else:
+                    constr_tuple.setAttr("RHS", dist(randomState_instance))
+        if self.uncertainty_obj_continuous is not None:
+            for var_tuple, dist in self.uncertainty_obj_continuous.items():
+                if type(var_tuple) == tuple:
+                    self._model.setAttr("Obj", list(var_tuple), dist(randomState_instance))
+                else:
+                    var_tuple.setAttr("Obj", dist(randomState_instance))
+        if self.uncertainty_mix_continuous is not None:
+            for keys, dist in self.uncertainty_mix_continuous.items():
+                sample = dist(randomState_instance)
+                for index, key in enumerate(keys):
+                    if type(key) == gurobipy.Var:
+                        key.setAttr("Obj", sample[index])
+                    elif type(key) == gurobipy.Constr:
+                        key.setAttr("RHS", sample[index])
+                    else:
+                        self._model.chgCoeff(key[0], key[1], sample[index])
+
+    def update_link_constrs(self, fwdSolution: float) -> None:
+        """
+            updated the linked constraints(an auxiliary variable equals the state variable, i.e., local copy,
+             solution of previous stage)
+        Args:
+            fwdSolution: the value of this stage's state(local copy)
+             variable from the solution of previous stage model
+        """
+        self._model.setAttr("RHS", self.link_constrs, fwdSolutionn)
+
+
     def update_uncertainty(self, k):
         """
         Update the corresponding uncertainty realizations in the rhs, obj coef or const coef
@@ -480,7 +534,7 @@ class StochasticModel:
                     var_tuple.setAttr("Obj", Markov_state[value])
 
     def _discretize(self, n_samples: int,
-                    random_state: numpy.random.RandomState,
+                    randomState_instance: numpy.random.RandomState,
                     replace: bool = True) -> None:
         """
         Discretize the stage-wise independent continuous uncertainties.
@@ -491,11 +545,11 @@ class StochasticModel:
         ----------
         n_samples: The number of samples to generate uniformly from the distribution
 
-        random_state:  A RandomState instance.
+        randomState_instance:  A RandomState instance.
 
         replace: (optional) Whether the sample is with or without replacement.
         """
-        if self.flag_discrete == 1:
+        if self.flag_discretized == 1:
             return
         # Discretize the continuous true problem
         if self.type == "continuous":
@@ -507,19 +561,19 @@ class StochasticModel:
                 self.uncertainty_rhs_continuous.items()
             ):
                 self.uncertainty_rhs[key] = [
-                    dist(random_state) for _ in range(self.n_samples)
+                    dist(randomState_instance) for _ in range(self.n_samples)
                 ]
             for key, dist in sorted(self.uncertainty_obj_continuous.items()):
                 self.uncertainty_obj[key] = [
-                    dist(random_state) for _ in range(self.n_samples)
+                    dist(randomState_instance) for _ in range(self.n_samples)
                 ]
             for key, dist in sorted(self.uncertainty_coef_continuous.items()):
                 self.uncertainty_coef[key] = [
-                    dist(random_state) for _ in range(self.n_samples)
+                    dist(randomState_instance) for _ in range(self.n_samples)
                 ]
             for keys, dist in sorted(self.uncertainty_mix_continuous.items()):
                 for i in range(self.n_samples):
-                    sample = dist(random_state) # dist is a numpy random generator
+                    sample = dist(randomState_instance) # dist is a numpy random generator
                     for index, key in enumerate(keys):
                         if type(key) == gurobipy.Var:
                             if key not in self.uncertainty_obj.keys():
@@ -544,7 +598,7 @@ class StochasticModel:
                 # numpy.random.choice does not work on multidimensional arrays
                 choiced_indices = rand_int(
                     self.n_samples,
-                    random_state,
+                    randomState_instance,
                     size = n_samples,
                     probability = self.probability,
                     replace = replace,
@@ -556,7 +610,7 @@ class StochasticModel:
             for key, samples in sorted(self.uncertainty_obj_discrete.items()):
                 choiced_indices = rand_int(
                     self.n_samples,
-                    random_state,
+                    randomState_instance,
                     size = n_samples,
                     probability = self.probability,
                     replace = replace,
@@ -568,7 +622,7 @@ class StochasticModel:
             for key, samples in sorted(self.uncertainty_coef_discrete.items()):
                 choiced_indices = rand_int(
                     self.n_samples,
-                    random_state,
+                    randomState_instance,
                     size = n_samples,
                     probability = self.probability,
                     replace = replace,
@@ -579,7 +633,7 @@ class StochasticModel:
                 ]
             self.n_samples_discrete = self.n_samples
             self.n_samples = n_samples
-        self.flag_discrete = 1
+        self.flag_discretized = 1
 
     def addStateVar(self,
                     lb: float = 0.0,
@@ -1203,8 +1257,31 @@ class StochasticModel:
         if len(probability) != self.n_samples:
             raise ValueError("probability tree != compatible with scenario tree")
 
+    def solveLP(self) -> tuple[float, float]:
+        """
+            solve the backward model in one stage
+        Returns:
+            the objective and dual values of the linked constraints
+        """
+        objSample = numpy.empty(self.n_samples)
+        gradLPSample = numpy.empty((self.n_samples, self.n_states))
+        for k in range(self.n_samples):
+            self._update_uncertainty(k)
+            self.optimize()
+            if self._model.status not in [2, 11]:
+                self.write_infeasible_model("backward_failedSolved" + str(self._model.modelName))
+            objSample[k] = self.objVal
+            gradLPSample[k] = self.getAttr("Pi", self.link_constrs)
+        return objSample, gradLPSample
+
     def update(self) -> None:
         """
         Process any pending model modifications.
         """
         self._model.update()
+
+    def write_infeasible_model(self, text):
+        self._model.write('./' + text + ".lp")
+        raise Exception(
+            "infeasibility caught; check complete recourse condition!"
+        )

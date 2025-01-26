@@ -66,7 +66,10 @@ class LoggerSDDP(Logger):
     def __repr__(self):
         return "SDDP"
 
-    def header(self):
+    def header(self) -> None:
+        """
+            header of the SDDP logger
+        """
         self.logger.info("-" * self.n_slots)
         self.logger.info(
             "{:^{width}}".format("SDDP Solver, Zhen Chen", width = self.n_slots)
@@ -123,7 +126,10 @@ class LoggerEvaluation(Logger):
     def __repr__(self):
         return "Evaluation"
 
-    def header(self):
+    def header(self) -> None:
+        """
+            header of the evaluation logger
+        """
         self.logger.info("-" * self.n_slots)
         self.logger.info(
             "{:^{width}s}".format(
@@ -190,7 +196,10 @@ class LoggerComparison(Logger):
     def __repr__(self):
         return "Comparison"
 
-    def header(self):
+    def header(self) -> None:
+        """
+            header of the comparison logger
+        """
         assert self.n_simulations != 1
         self.logger.info("-" * self.n_slots)
         self.logger.info(

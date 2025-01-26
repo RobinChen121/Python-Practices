@@ -12,8 +12,8 @@ Created on Mon Jan  6 15:49:14 2025
     
 """
 from sm_detail import StochasticModel
-from util.statistics import check_Markov_states_and_transition_matrix
-from util.statistics import check_Markov_callable_uncertainty
+from utils.statistics import check_Markov_states_and_transition_matrix
+from utils.statistics import check_Markov_callable_uncertainty
 import numpy
 from numpy.typing import ArrayLike
 from itertools import product
@@ -58,6 +58,7 @@ class MSP:
         self.n_samples = [] # number of samples for each stage
         self.n_states = [] # number of states for each stage
         self.Markovian_uncertainty_function = None # random generator function
+
         self.models = None
         self.T = T
         self.bound = bound # A known uniform lower bound or upper bound for each stage problem
@@ -77,7 +78,7 @@ class MSP:
         self._set_default_bound()
         self._set_model()
 
-        self.flag_update = 0 # whether the model has been updated
+        self.flag_updated: bool = 0 # whether the model has been updated
 
     def __getitem__(self,
                     t: int
@@ -138,6 +139,9 @@ class MSP:
                 m.update()
 
     def _set_up_CTG(self):
+        """
+            add alpha as a decision variable in the model of each stage
+        """
         for t in range(self.T - 1):
             self._set_up_CTG_for_t(t)
 
@@ -438,6 +442,46 @@ class MSP:
             weight *= probability[t][sample_path[1][t]][sample_path[0][t]]
         return weight
 
+    def get_stage_cost(self, t: int) -> float:
+        """
+            get the stage cost
+        Args:
+            t: the stage index
+
+        """
+        m = self.models[t]
+        if self.measure == "risk neutral":
+            if m.alpha is not None:
+                return pow(self.discount, t) * (
+                    m.objVal - self.discount*m.alpha.X
+                )
+            else:
+                return pow(self.discount, t) * m.objVal
+        else:
+            return pow(self.discount,t) * m.getVarByName("stage_cost").X
+
+    def get_state_solution(self, t: int) -> list:
+        """
+            get the solutions of state variables at one stage
+        Args:
+            t: the stage index
+
+        """
+        m = self.models[t]
+        solution = [None for _ in m.states]
+        # avoid numerical issues
+        for idx, var in enumerate(m.states):
+            if var.vtype in ['B','I']:
+                solution[idx] = int(round(var.X))
+            else:
+                if var.X < var.lb:
+                    solution[idx] = var.lb
+                elif var.X > var.ub:
+                    solution[idx] = var.ub
+                else:
+                    solution[idx] = var.X
+        return solution
+
     def update(self):
         self._check_first_stage_model()
         self._check_inidividual_Markovian_index()
@@ -447,7 +491,7 @@ class MSP:
             self._set_up_CTG()
         self._set_up_link_constrs()
         self._check_multistage_model()
-        self.flag_update = 1
+        self.flag_updated = 1
 
     def set_AVaR(self, l: float | ArrayLike, a: float | ArrayLike, method: str = 'indirect') -> None:
         """
@@ -532,9 +576,10 @@ class MSP:
                     # as a variable.
                     if self.flag_CTG:
                         self._set_up_CTG()  # add alpha in the model
-                        alpha = m.alpha if m.alpha is not None else 0.0
-                        m.addConstr(m.getObjective() - self.discount * alpha == stage_cost)
-                        m.update()
+                    alpha = m.alpha if m.alpha is not None else 0.0
+                    # foe ease of get the stage cost in the AVAR model
+                    m.addConstr(m.getObjective() - self.discount * alpha == stage_cost)
+                    m.update()
 
         # the indirect may be seldom used
         elif method == 'indirect': # add additional constraints and variables for the risk-averse computation

@@ -12,6 +12,7 @@ import numpy.random
 from numpy.typing import ArrayLike
 from collections.abc import Callable
 from scipy import stats
+import numbers
 
 
 def compute_CI(array, percentile: int) -> float:
@@ -23,14 +24,15 @@ def compute_CI(array, percentile: int) -> float:
         raise NotImplementedError
     mean = numpy.mean(array)
     # standard error
-    se = numpy.std(array, ddof = 1) / numpy.sqrt(len(array))
+    se = numpy.std(array, ddof=1) / numpy.sqrt(len(array))
     # critical value
     cv = (
-        stats.t.ppf(1 - (1 - percentile/100)/2, len(array) - 1)
+        stats.t.ppf(1 - (1 - percentile / 100) / 2, len(array) - 1)
         if len(array) != 1
         else 0
     )
     return mean - cv * se, mean + cv * se
+
 
 def allocate_jobs(n_forward_samples: int, n_processes: int) -> list[range]:
     """
@@ -53,7 +55,7 @@ def allocate_jobs(n_forward_samples: int, n_processes: int) -> list[range]:
 
 
 def rand_int(k: int | ArrayLike,
-             random_state: numpy.random.RandomState,
+             randomState_instance: numpy.random.RandomState,
              probability: ArrayLike = None,
              size: int = None,
              replace: bool = None) -> float:
@@ -63,7 +65,7 @@ def rand_int(k: int | ArrayLike,
 
     Args:
         k: If int, it is range(k), else it is a ArrayLike
-        random_state: A instance of Numpy RandomState
+        randomState_instance: A instance of Numpy RandomState
         probability: Given probability
         size: The size of the output samples
         replace: sampling with replacement or not
@@ -73,9 +75,31 @@ def rand_int(k: int | ArrayLike,
 
     """
     if probability is None:
-        return random_state.randint(low = 0, high = k, size = size)
+        return randomState_instance.randint(low = 0, high = k, size = size)
     else:
-        return random_state.choice(a = k, p = probability, size = size, replace = replace)
+        return randomState_instance.choice(a = k, p = probability, size = size, replace = replace)
+
+
+def check_random_state(seed) -> numpy.random.RandomState:
+    """
+    Check the seed and turn the seed into a RandomState instance.
+
+    Args:
+      seed: None, numpy.random, int, instance of RandomState
+            If None, return numpy.random.
+            If int, return a new RandomState instance with seed.
+            Otherwise, raise ValueError.
+    """
+    if seed in [None, numpy.random]:
+        return numpy.random.RandomState()
+    if isinstance(seed, (numbers.Integral, numpy.integer)):
+        return numpy.random.RandomState(seed)
+    if isinstance(seed, numpy.random.RandomState):
+        return seed
+    raise ValueError(
+        "{%r} cannot be used to seed a numpy.random.RandomState instance"
+        .format(seed)
+    )
 
 
 def check_Markov_states_and_transition_matrix(
