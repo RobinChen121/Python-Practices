@@ -18,13 +18,19 @@ import numpy
 from util.exception import SampleSizeError, DistributionError
 from numbers import Number
 import util.copy as deepcopy
+from util.measure import Expectation
 
 
 # noinspection PyUnresolvedReferences,PyRedeclaration
 class StochasticModel:
     """
     the detailed programming model for a stage solvable by gurobi;
-    
+
+    Attributes:
+        _model: the gurobi model
+        type: type of the true problem
+        flag_discrete:  whether the true problem has been discretized
+
     """
 
     def __init__(self, name: str = '', env: object = None):
@@ -55,8 +61,10 @@ class StochasticModel:
         self.probability = None # probabilities for the discrete uncertainties
 
         # cutting planes approximation of recourse variable alpha
-        self.alpha = None
+        self.alpha = None # it is a gurobi variable
+
         self.cuts = []
+        self.link_constrs = [] # the linked constraints
 
         # stage-wise independent discrete uncertainty realizations
         # they are dicts
@@ -87,6 +95,9 @@ class StochasticModel:
 
         # collection of all specified dim indices of Markovian uncertainties
         self.Markovian_dim_index = []
+
+        # risk measure, it is a function
+        self.measure = Expectation
 
     def __getattr__(self, name: any) -> any:
         """
@@ -1119,8 +1130,32 @@ class StochasticModel:
 
         return result
 
-    def _set_up_CTG(self, discount: float, bound: float):
+    def set_up_link_constrs(self):
+        if not self.link_constrs:
+            self.link_constrs = list(
+                self._model.addConstrs(
+                    (var == var.lb for var in self.local_copies),
+                    name = "link_constrs",
+                ).values()
+            )
+
+    def delete_link_constrs(self):
+        if self.link_constrs:
+            for constr in self.link_constrs:
+                self._model.remove(constr)
+            self.link_constrs = []
+
+    def set_up_CTG(self, discount: float, bound: float):
+        """
+            add a new variable alpha in the model
+        Args:
+            discount: discount factor in the multi-stage model
+            bound: bound for the alpha value
+        """
         # if it's a minimization problem, we need a lower bound for alpha
+        # For CTG, it is an alpha added in the constraints:
+        #         alpha + ax + by >= c in minimization problem
+        #         alpha + ax + by <= c in maximization problem
         if self.modelsense == 1:
             if self.alpha is None:
                 self.alpha = self._model.addVar(
@@ -1133,13 +1168,13 @@ class StochasticModel:
         else:
             if self.alpha is None:
                 self.alpha = self._model.addVar(
-                    ub=bound,
-                    lb=-gurobipy.GRB.INFINITY,
-                    obj=discount,
-                    name="alpha"
+                    ub = bound,
+                    lb = -gurobipy.GRB.INFINITY,
+                    obj = discount,
+                    name = "alpha"
                 )
 
-    def _delete_CTG(self):
+    def delete_CTG(self):
         if self.alpha is not None:
             self._model.remove(self.alpha)
             self.alpha = None

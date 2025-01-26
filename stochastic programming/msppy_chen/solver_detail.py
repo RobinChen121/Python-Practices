@@ -464,7 +464,10 @@ class SDDP(object):
                 for t in range(self.msp.T):
                     m = self.msp.models[t]
                     n_samples = m.n_samples
+                    # the following 2 attributes will be added to the model when biased sampling
                     m.counts = numpy.zeros(n_samples)
+                    # sample weights will be updated by another function
+                    # in the backward step if biased sampling
                     m.weights = numpy.ones(n_samples) / n_samples
             except AttributeError:
                 raise Exception("Risk averse parameters unset!")
@@ -489,7 +492,7 @@ class SDDP(object):
             query: list = None,
             query_dual: list = None,
             query_stage_cost: bool = False
-            ) -> tuple:
+            ) -> dict:
         """
         Single forward step.
 
@@ -872,127 +875,124 @@ class SDDP(object):
     def solve(
             self,
             n_processes: int = 1,
-            n_steps: int =1,
+            n_steps: int = 1,
             max_iterations: int = 10000,
-            max_stable_iterations=10000,
-            max_time=1000000.0,
-            tol=0.001,
-            freq_evaluations=None,
-            percentile = 95,
-            tol_diff=float("-inf"),
-            random_state=None,
-            evaluation_true=False,
-            freq_comparisons=None,
-            n_simulations=3000,
-            n_simulations_true=3000,
-            query=None,
+            max_stable_iterations: int = 10000,
+            max_time: float = 1000000.0,
+            tol: float = 0.001,
+            freq_evaluations = None,
+            percentile: int = 95,
+            tol_diff: float = float("-inf"),
+            freq_comparisons: int = None,
+            n_simulations: int = 3000,
+            query: list = None,
             query_T=None,
             query_dual=None,
             query_stage_cost=False,
             query_policy_value=False,
-            freq_clean=None,
-            logFile = 1,
-            logToConsole = 1,
-            directory='',
-            rgl_norm='L2',
-            rgl_a=0,
-            rgl_b=0.95,
+            freq_clean: int | list = None,
+            logFile: bool = True,
+            logToConsole: bool = True,
+            directory: str = '',
+            rgl_norm = 'L2',
+            rgl_a: float = 0,
+            rgl_b: float = 0.95,
     ):
         """
         Solve the discretized problem.
 
-        Parameters
-        ----------
+        Args:
+          rgl_b:
+          rgl_a:
+          rgl_norm:
+          directory: the output directory of the logger and csv files
+          query_policy_value:
+          query_stage_cost:
+          query_dual:
 
-        n_processes: int, optional (default=1)
+          query_T:
+          query: the vars that wants to check(query)
+          n_processes: int, optional (default=1)
             The number of processes to run in parallel. Run serial SDDP if 1.
             If n_steps is 1, n_processes is coerced to be 1.
 
-        n_steps: int, optional (default=1)
+          n_steps: int, optional (default=1)
             The number of forward/backward steps to run in each cut iteration.
             It is coerced to be 1 if n_processes is 1.
 
-        max_iterations: int, optional (default=10000)
+          max_iterations: int, optional (default=10000)
             The maximum number of iterations to run SDDP.
 
-        max_stable_iterations: int, optional (default=10000)
+          max_stable_iterations: int, optional (default=10000)
             The maximum number of iterations to have same deterministic bound
 
-        tol: float, optional (default=1e-3)
+          max_time: the maximum running time
+
+          tol: float, optional (default=1e-3)
             tolerance for convergence of bounds
 
-        freq_evaluations: int, optional (default=None)
+          freq_evaluations: int, optional (default=None)
             The frequency of evaluating gap on the discretized problem. It will
-            be ignored if risk averse
+            be ignored if risk-averse
 
-        percentile: float, optional (default=95)
+          percentile: float, optional (default=95)
             The percentile used to compute confidence interval
 
-        diff: float, optional (default=-inf)
+          tol_diff: float, optional (default=-inf)
             The stabilization threshold
 
-        freq_comparisons: int, optional (default=None)
+          freq_comparisons: int, optional (default=None)
             The frequency of comparisons of policies
 
-        n_simulations: int, optional (default=10000)
+          n_simulations: int, optional (default=10000)
             The number of simluations to run when evaluating a policy
             on the discretized problem
 
-        freq_clean: int/list, optional (default=None)
+          freq_clean: int/list, optional (default=None)
             The frequency of removing redundant cuts.
             If int, perform cleaning at the same frequency for all stages.
-            If list, perform cleaning at different frequency for each stage;
+            If listed, perform cleaning at different frequency for each stage;
             must be of length T-1 (the last stage does not have any cuts).
 
-        random_state: int, RandomState instance or None, optional (default=None)
-            Used in evaluations and comparisons. (In the forward step, there is
-            an internal random_state which is not supposed to be changed.)
-            If int, random_state is the seed used by the random number
-            generator;
-            If RandomState instance, random_state is the random number
-            generator;
-            If None, the random number generator is the RandomState
-            instance used by numpy.random.
-
-        logFile: binary, optional (default=1)
+          logFile: binary, optional (default=1)
             Switch of logging to log file
 
-        logToConsole: binary, optional (default=1)
+          logToConsole: binary, optional (default=1)
             Switch of logging to console
 
-        Examples
+        Examples:
         --------
+        >>> SDDP().solve(max_iterations = 10, max_time = 10,
+            max_stable_iterations = 10)
 
-        >>> SDDP().solve(max_iterations=10, max_time=10,
-            max_stable_iterations=10)
         Optimality gap based stopping criteria: evaluate the obtained policy
         every freq_evaluations iterations by running n_simulations Monte Carlo
         simulations. If the gap becomes not larger than tol, the algorithm
         will be stopped.
-        >>> SDDP().solve(freq_evaluations=10, n_simulations=1000, tol=1e-2)
+        >>> SDDP().solve(freq_evaluations = 10, n_simulations = 1000, tol = 1e-2)
         Simulation can be turned off; the solver will evaluate the exact expected
         policy value.
-        >>> SDDP().solve(freq_evaluation=10, n_simulations=-1, tol=1e-2)
+        >>> SDDP().solve(freq_evaluation = 10, n_simulations = -1, tol = 1e-2)
+
         Stabilization based stopping criteria: compare the policy every
         freq_comparisons iterations by computing the CI of difference of the
         expected policy values. If the upper end of CI becomes not larger
         than tol diff, the algorithm will be stopped.
-        >>> SDDP().solve(freq_comparisons=10, n_simulations=1000, tol=1e-2)
-        Turn off simulation and
+        >>> SDDP().solve(freq_comparisons = 10, n_simulations = 1000, tol = 1e-2)
 
         """
         msp = self.msp
         if freq_clean is not None:
             if isinstance(freq_clean, (numbers.Integral, numpy.integer)):
                 freq_clean = [freq_clean] * (msp.T - 1)
-            if isinstance(freq_clean, ((abc.Sequence, numpy.ndarray))):
+            if isinstance(freq_clean, (abc.Sequence, numpy.ndarray)):
                 if len(freq_clean) != msp.T - 1:
-                    raise ValueError("freq_clean list must be of length T-1!")
+                    raise ValueError("freq_clean list must be of length T - 1!")
             else:
                 raise TypeError("freq_clean must be int/list instead of {}!"
                                 .format(type(freq_clean)))
-        if not msp._flag_update:
-            msp._update()
+        if not msp.flag_update:
+            msp.update()
         stable_iterations = 0
         total_time = 0
         a = time.time()
@@ -1017,7 +1017,7 @@ class SDDP(object):
             logToConsole=logToConsole,
             n_processes=self.n_processes,
             percentile=self.percentile,
-            directory=directory,
+            directory = directory,
         )
         logger_sddp.header()
         if freq_evaluations is not None or freq_comparisons is not None:

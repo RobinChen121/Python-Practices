@@ -33,6 +33,7 @@ class MSP:
                  sense: int = 1,
                  outputFlag: int = 0,
                  discount: float = 1.0,
+                 flag_CTG: bool = False,
                  **kwargs) -> None:
         """
         Initialize the MSP class.
@@ -45,11 +46,13 @@ class MSP:
             outputFlag (int, optional): Enables or disables gurobi solver output. Defaults to 0.
             discount (flot, optional): The discount factor used to compute present value.
                                        float between 0(exclusive) and 1(inclusive). Defaults to 1.0.
+            flag_CTG: whether setting CTG in the model.
 
         Returns:
             A class of multi-stage linear programming model
 
         """
+        self.flag_CTG = flag_CTG # whether setting CTG in the model
         self.a = 0 # used for AVAR(CVAR)
         self.l = 0 # used for AVAR
         self.n_samples = [] # number of samples for each stage
@@ -57,7 +60,7 @@ class MSP:
         self.Markovian_uncertainty_function = None # random generator function
         self.models = None
         self.T = T
-        self.bound = bound
+        self.bound = bound # A known uniform lower bound or upper bound for each stage problem
         self.sense = sense
         self.discount = discount
 
@@ -73,6 +76,8 @@ class MSP:
 
         self._set_default_bound()
         self._set_model()
+
+        self.flag_update = 0 # whether the model has been updated
 
     def __getitem__(self,
                     t: int
@@ -107,6 +112,44 @@ class MSP:
 
         """
         self.models = [StochasticModel(name = str(t)) for t in range(self.T)]
+
+    def _set_up_link_constrs(self):
+        # model copies may not be ready while state size may have changed
+        for t in range(1, self.T):
+            M = (
+                self.models[t]
+                if type(self.models[t]) == list
+                else [self.models[t]]
+            )
+            for m in M:
+                m.set_up_link_constrs()
+                m.update()
+
+    def _delete_link_constrs(self):
+        # model copies may not be ready while state size may have changed
+        for t in range(1, self.T):
+            M = (
+                self.models[t]
+                if type(self.models[t]) == list
+                else [self.models[t]]
+            )
+            for m in M:
+                m.delete_link_constrs()
+                m.update()
+
+    def _set_up_CTG(self):
+        for t in range(self.T - 1):
+            self._set_up_CTG_for_t(t)
+
+    def _set_up_CTG_for_t(self, t):
+        M = (
+            [self.models[t]]
+            if type(self.models[t]) != list
+            else self.models[t]
+        )
+        for m in M:
+            m.set_up_CTG(discount = self.discount, bound = self.bound)
+            m.update()
 
     def _set_up_probability(self):
         """
@@ -395,6 +438,17 @@ class MSP:
             weight *= probability[t][sample_path[1][t]][sample_path[0][t]]
         return weight
 
+    def update(self):
+        self._check_first_stage_model()
+        self._check_inidividual_Markovian_index()
+        self._check_individual_stage_models()
+
+        if self.flag_CTG:
+            self._set_up_CTG()
+        self._set_up_link_constrs()
+        self._check_multistage_model()
+        self.flag_update = 1
+
     def set_AVaR(self, l: float | ArrayLike, a: float | ArrayLike, method: str = 'indirect') -> None:
         """
         Set linear combination of expectation and conditional value at risk
@@ -420,7 +474,7 @@ class MSP:
 
         Notes:
             Bigger l means more risk-averse, l = 1 means the objective is to fully minimize AVAR.
-            smaller a means more risk-averse, the smaller a means more penalty (to be certified)
+            smaller a means more risk-averse, the smaller a means larger values of AVAR (to be certified)
         """
         if isinstance(l, (abc.Sequence, numpy.ndarray)):
             if len(l) not in [self.T - 1, self.T]:
@@ -450,7 +504,6 @@ class MSP:
         self.l = l
 
         if method == 'direct':
-            self._set_up_CTG()
             from msppy_chen.utils.measure import Expectation_AVaR
             from functools import partial
             for t in range(1, self.T):
@@ -460,8 +513,8 @@ class MSP:
                     else [self.models[t]]
                 )
                 for m in M:
-                    m.measure = partial(Expectation_AVaR,
-                                        a=a[t], l=l[t])
+                    # change the measure function to be AVAR
+                    m.measure = partial(Expectation_AVaR, a = a[t], l = l[t])
             for t in range(self.T):
                 M = (
                     self.models[t]
@@ -470,16 +523,21 @@ class MSP:
                 )
                 for m in M:
                     stage_cost = m.addVar(
-                        name="stage_cost",
-                        lb=-gurobipy.GRB.INFINITY,
-                        ub=gurobipy.GRB.INFINITY,
+                        name = "stage_cost",
+                        lb = -gurobipy.GRB.INFINITY,
+                        ub = gurobipy.GRB.INFINITY,
                     )
-                    alpha = m.alpha if m.alpha is not None else 0.0
-                    m.addConstr(m.getObjective() - self.discount * alpha == stage_cost)
-                    m.update()
+                    # For CTG, it is an alpha subtracted in the constraints
+                    # and objective function, and the stage cost is computed
+                    # as a variable.
+                    if self.flag_CTG:
+                        self._set_up_CTG()  # add alpha in the model
+                        alpha = m.alpha if m.alpha is not None else 0.0
+                        m.addConstr(m.getObjective() - self.discount * alpha == stage_cost)
+                        m.update()
 
-
-        elif method == 'indirect':
+        # the indirect may be seldom used
+        elif method == 'indirect': # add additional constraints and variables for the risk-averse computation
             self._set_up_CTG()
             self._delete_link_constrs()
             for t in range(self.T):
@@ -490,24 +548,24 @@ class MSP:
                 )
                 for m in M:
                     p_now, p_past = m.addStateVar(
-                        lb=-gurobipy.GRB.INFINITY,
-                        ub=gurobipy.GRB.INFINITY,
-                        name="additional_state",
+                        lb = -gurobipy.GRB.INFINITY,
+                        ub = gurobipy.GRB.INFINITY,
+                        name = "additional_state",
                     )
-                    v = m.addVar(name="additional_var")
+                    v = m.addVar(name = "additional_var")
                     m.addConstr(self.sense * (p_now - self.bound) >= 0)
                     z = m.getObjective()
                     stage_cost = m.addVar(
-                        name="stage_cost",
-                        lb=-gurobipy.GRB.INFINITY,
-                        ub=gurobipy.GRB.INFINITY,
+                        name = "stage_cost",
+                        lb = -gurobipy.GRB.INFINITY,
+                        ub = gurobipy.GRB.INFINITY,
                     )
                     alpha = m.alpha if m.alpha is not None else 0.0
                     if t > 0:
                         if m.uncertainty_obj != {}:
                             m.addConstr(
                                 z - self.discount * alpha == stage_cost,
-                                uncertainty=m.uncertainty_obj,
+                                uncertainty = m.uncertainty_obj,
                             )
                             m.uncertainty_obj = {}
                             m.setObjective(
@@ -517,7 +575,7 @@ class MSP:
                                         + self.discount * alpha
                                 )
                                 + l[t] * p_past
-                                + self.sense * l[t] / a[t] * v
+                                + self.sense * v * l[t] / a[t]
                             )
                             m.addConstr(
                                 v
@@ -528,12 +586,13 @@ class MSP:
                                 )
                                 * self.sense
                             )
-                        else:
+                        else: # if no uncertainty in the objective
+                              # z is the model's original objective
                             m.addConstr(z - self.discount * alpha == stage_cost)
                             m.setObjective(
                                 (1 - l[t]) * z
                                 + l[t] * p_past
-                                + self.sense * l[t] / a[t] * v
+                                + self.sense * v * l[t] / a[t]
                             )
                             m.addConstr(
                                 v
