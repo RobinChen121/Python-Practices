@@ -1132,6 +1132,23 @@ class StochasticModel:
 
         return constr
 
+    def average(self, objLP_samples: ArrayLike,
+                gradLP_samples: ArrayLike,
+                probability: list = None) -> tuple[float, float]:
+        """
+            get the expectation of objectives and gradients
+        Args:
+            objLP_samples: objectives of all the samples
+            gradLP_samples: gradients of all the samples
+            probability: given probabilities of all the samples
+
+        """
+        p = self.probability if probability is None else probability
+        return self.measure(
+            obj = objLP_samples,
+            grad = gradLP_samples,
+            p = p)
+
     def copy(self):
         """
         Create a deepcopy of a stochastic model.
@@ -1263,16 +1280,16 @@ class StochasticModel:
         Returns:
             the objective and dual values of the linked constraints
         """
-        objSample = numpy.empty(self.n_samples)
-        gradLPSample = numpy.empty((self.n_samples, self.n_states))
+        objLP_sample = numpy.empty(self.n_samples)
+        gradLP_sample = numpy.empty((self.n_samples, self.n_states))
         for k in range(self.n_samples):
             self._update_uncertainty(k)
             self.optimize()
             if self._model.status not in [2, 11]:
                 self.write_infeasible_model("backward_failedSolved" + str(self._model.modelName))
-            objSample[k] = self.objVal
-            gradLPSample[k] = self.getAttr("Pi", self.link_constrs)
-        return objSample, gradLPSample
+            objLP_sample[k] = self.objVal
+            gradLP_sample[k] = self.getAttr("Pi", self.link_constrs)
+        return objLP_sample, gradLP_sample
 
     def update(self) -> None:
         """

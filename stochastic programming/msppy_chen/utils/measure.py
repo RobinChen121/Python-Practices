@@ -15,6 +15,7 @@ from typing import Tuple
 def Expectation(obj: ArrayLike, grad: ArrayLike, p: None | ArrayLike) -> Tuple[float, float]:
     """
         Take expectation for objective and gradients (slopes of the cut constraints)
+        for given probabilities
     Args:
         obj: objectives
         grad: gradients (slopes of the cut constraints)
@@ -33,7 +34,7 @@ def Expectation_AVaR(obj: ArrayLike,
                      p: None | ArrayLike,
                      a: float,
                      l: float,
-                     sense: int)-> Tuple[float, float]:
+                     sense: int)-> tuple:
     """
         Compute the expectation of the risk-averse situation.
     Args:

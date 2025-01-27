@@ -9,10 +9,12 @@ Created on 2025/1/10, 21:48
 
 """
 from msm import MSP
+from sm_detail import StochasticModel
 from utils.statistics import rand_int, allocate_jobs, compute_CI
 from utils.logger import LoggerSDDP, LoggerEvaluation, LoggerComparison
 from evaluation import Evaluation, EvaluationTrue
 from collections import abc
+from numpy.typing import ArrayLike
 import time
 import gurobipy
 import numpy
@@ -433,9 +435,21 @@ class SDDP(object):
     Args:
         msp: A multi-stage stochastic program object
         biased_sampling: whether used biased sampling, i,e, sample probabilities are with weights
+
+    Attributes:
+        l: float between 0 and 1/array-like of floats between 0 and 1
+                The weights of AVaR from stage 2 to stage T.
+                If floated, the weight will be assigned to the same number.
+                If array-like, must be of length T-1 (for finite horizon problem)
+                or T (for infinite horizon problem).
+        a: float between 0 and 1/array-like of floats between 0 and 1.
+                The quantile parameters in value-at-risk from stage 2 to stage T
+                If floated, those parameters will be assigned to the same number.
+                If array-like, must be of length T-1 (for finite horizon problem)
+                or T (for infinite horizon problem).
     """
 
-    def __init__(self, msp: MSP, biased_sampling=False):
+    def __init__(self, msp: MSP, biased_sampling = False):
         # the following 3 lines are for regularization setting
         self.rgl_b = None
         self.rgl_a = None
@@ -648,16 +662,19 @@ class SDDP(object):
                 if cuts is not None:
                     cuts[t - 1][cut_type][j][k][:] = numpy.append(rhs[k], grad[k])
 
-    def _compute_cuts(self, t, m, objLPScen, gradLPScen):
+    def _compute_cuts(self, t: int, m: StochasticModel,
+                      objLP_samples: ArrayLike,
+                      gradLP_samples: ArrayLike) -> tuple:
         msp = self.msp
         if msp.n_Markov_states == 1:
-            return m._average(objLPScen[0], gradLPScen[0])
-        objLPScen = objLPScen.reshape(
+            return m.average(objLP_samples[0], gradLP_samples[0]) # only 1 rows
+        objLP_samples = objLP_samples.reshape( # may be not necessary
             msp.n_Markov_states[t] * msp.n_samples[t])
-        gradLPScen = gradLPScen.reshape(
+        gradLP_samples = gradLP_samples.reshape(
             msp.n_Markov_states[t] * msp.n_samples[t], msp.n_states[t])
+        # for markov, transition probability between states in consecutive stages is considered
         probability_ind = (
-            m.probability if m.probability
+            m.probability if m.probability # will update the probability if m.probability is not none
             else numpy.ones(m.n_samples) / m.n_samples
         )
         probability = numpy.einsum('ij,k->ijk', msp.transition_matrix[t],
@@ -667,7 +684,7 @@ class SDDP(object):
         objLP = numpy.empty(msp.n_Markov_states[t - 1])
         gradLP = numpy.empty((msp.n_Markov_states[t - 1], msp.n_states[t]))
         for k in range(msp.n_Markov_states[t - 1]):
-            objLP[k], gradLP[k] = m._average(objLPScen, gradLPScen,
+            objLP[k], gradLP[k] = m.average(objLP_samples, gradLP_samples,
                                              probability[k])
         return objLP, gradLP
 
@@ -678,8 +695,7 @@ class SDDP(object):
         Args:
           state_solution: feasible state solutions obtained from forward step
           j: index of forward sampling
-          cuts: dict
-            A dictionary stores cuts coefficients and rhs.
+          cuts: a dictionary stores cuts coefficients and rhs.
             Key of the dictionary is the cut type. Value of the dictionary is
             the cut coefficients and rhs.
         """
@@ -689,30 +705,38 @@ class SDDP(object):
                 M, n_Markov_states = [msp.models[t]], 1
             else:
                 M, n_Markov_states = msp.models[t], msp.n_Markov_states[t]
-            objLPScen = numpy.empty((n_Markov_states, msp.n_samples[t]))
-            gradLPScen = numpy.empty((n_Markov_states, msp.n_samples[t],
+            objLP_samples = numpy.empty((n_Markov_states, msp.n_samples[t]))
+            gradLP_samples = numpy.empty((n_Markov_states, msp.n_samples[t],
                                       msp.n_states[t]))
             for k, m in enumerate(M):
+                m: StochasticModel
                 if msp.n_Markov_states != 1:
-                    m._update_link_constrs(state_solution[t - 1])
-                objLPScen[k], gradLPScen[k] = m.solveLP()
+                    m.update_link_constrs(state_solution[t - 1])
+                objLP_samples[k], gradLP_samples[k] = m.solveLP()
 
-                if self.biased_sampling:
-                    self._compute_bs_frequency(objLPScen[k], m, t)
+                # if self.biased_sampling:
+                #     # actually not used, the function is flawed
+                #     self._compute_bs_frequency(objLP_samples, m, t)
 
-            objLP, gradLP = self._compute_cuts(t, m, objLPScen, gradLPScen)
+            objLP, gradLP = self._compute_cuts(t, m, objLP_samples, gradLP_samples)
             objLP -= numpy.matmul(gradLP, state_solution[t - 1])
             self._add_and_store_cuts(t, objLP, gradLP, cuts, "B", j)
-            self._add_cuts_additional_procedure(t, objLP, gradLP, objLPScen,
-                                                gradLPScen, state_solution[t - 1], cuts, "B", j)
+            self._add_cuts_additional_procedure(t, objLP, gradLP, objLP_samples,
+                                                gradLP_samples, state_solution[t - 1], cuts, "B", j)
 
     def _add_cuts_additional_procedure(*args, **kwargs):
         pass
 
-    def _compute_bs_frequency(self, obj, m, t):
+    def _compute_bs_frequency(self, obj: list[float], m: StochasticModel, t: int):
+        """
+            This function is flawed and not used.
 
+        Args:
+            obj: objectives of different samples. may be wrong, not sure whether it is a list or float
+            m: the StochasticModel
+            t: stage index
+        """
         n_samples = m.n_samples
-
         if self.iteration > 0:
             objSortedIndex = numpy.argsort(obj)
             tempSum = 0
