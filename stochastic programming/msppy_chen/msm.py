@@ -78,7 +78,8 @@ class MSP:
         self._set_default_bound()
         self._set_model()
 
-        self.flag_updated: bool = 0 # whether the model has been updated
+        self.flag_updated: bool = False # whether the model has been updated
+        self.flag_infinity: bool = False # whether
 
     def __getitem__(self,
                     t: int

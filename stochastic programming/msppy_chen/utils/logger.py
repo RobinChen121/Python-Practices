@@ -97,17 +97,26 @@ class LoggerSDDP(Logger):
             )
         self.logger.info("-" * self.n_slots)
 
-    def text(self, iteration, db: float, time, pv: float = None, CI: list = None):
+    def text(self, iteration, obj_bound: float, time, policy_value: float = None, CI: list = None):
+        """
+            body text of the logger
+        Args:
+            iteration: iteration index
+            obj_bound: objective bound
+            time: elapsed time
+            policy_value: policy value at the current iteration
+            CI: confidence interval
+        """
         if self.n_processes > 1:
             self.logger.info(
                 "{:>12d}{:>20f}{:>19f}, {:<19f}{:>12f}".format(
-                    iteration, db, CI[0], CI[1], time
+                    iteration, obj_bound, CI[0], CI[1], time
                 )
             )
         else:
             self.logger.info(
                 "{:>12d}{:>20f}{:>20f}{:>12f}".format(
-                    iteration, db, pv, time
+                    iteration, obj_bound, policy_value, time
                 )
             )
         self.time += time
@@ -161,7 +170,17 @@ class LoggerEvaluation(Logger):
             )
         self.logger.info("-" * self.n_slots)
 
-    def text(self, iteration, db: float, time: float, pv: float = None, CI: list = None, gap: float = None):
+    def text(self, iteration, obj_bound: float, time: float, policy_value: float = None, CI: list = None, gap: float = None):
+        """
+            body text of the logger
+        Args:
+            iteration: iteration index
+            obj_bound: objective bound
+            time: elapsed time
+            policy_value: policy value at the current iteration
+            CI: confidence interval
+            gap:
+        """
         if self.n_simulations > 1:
             format_ = "{:>12d}{:>20f}{:>19f}, {:<19f}{:>12f}"
             if gap in [-1, None]:
@@ -170,7 +189,7 @@ class LoggerEvaluation(Logger):
                 format_ += "{:>12.2%}"
             self.logger.info(
                 format_.format(
-                    iteration, db, CI[0], CI[1], time, gap
+                    iteration, obj_bound, CI[0], CI[1], time, gap
                 )
             )
         else:
@@ -181,7 +200,7 @@ class LoggerEvaluation(Logger):
                 format_ += "{:>12.2%}"
             self.logger.info(
                 format_.format(
-                    iteration, db, pv, time, gap
+                    iteration, obj_bound, policy_value, time, gap
                 )
             )
         self.time += time

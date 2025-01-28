@@ -1132,6 +1132,15 @@ class StochasticModel:
 
         return constr
 
+    def add_cut(self, rhs: float | gurobipy.LinExpr, gradient: ArrayLike):
+        temp = gurobipy.LinExpr(gradient, self.states) # product of the two parameters
+        self.cuts.append(
+            self._model.addConstr(
+                self.modelSense * (self.alpha - temp - rhs) >= 0
+            )
+        )
+        self._model.update()
+
     def average(self, objLP_samples: ArrayLike,
                 gradLP_samples: ArrayLike,
                 probability: list = None) -> tuple[float, float]:

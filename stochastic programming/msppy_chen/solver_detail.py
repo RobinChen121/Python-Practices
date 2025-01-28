@@ -8,8 +8,10 @@ Created on 2025/1/10, 21:48
 @disp:  Different classes of stochastic programming solvers.
 
 """
-from msm import MSP
-from sm_detail import StochasticModel
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from sm_detail import StochasticModel
+    from msm import MSP
 from utils.statistics import rand_int, allocate_jobs, compute_CI
 from utils.logger import LoggerSDDP, LoggerEvaluation, LoggerComparison
 from evaluation import Evaluation, EvaluationTrue
@@ -447,30 +449,35 @@ class SDDP(object):
                 If floated, those parameters will be assigned to the same number.
                 If array-like, must be of length T-1 (for finite horizon problem)
                 or T (for infinite horizon problem).
+
+        obj_bound: list, objective bound found by the solver at each iteration
+        policy_value: list, policy value at each iteration
     """
 
     def __init__(self, msp: MSP, biased_sampling = False):
         # the following 3 lines are for regularization setting
-        self.rgl_b = None
-        self.rgl_a = None
-        self.rgl_norm = None
+        self.rgl_b: float = None
+        self.rgl_a: float = None
+        self.rgl_norm: str = None
 
-        self.obj_bound = []  # objective bound found by the solver
-        self.policy_value = []  # policy value
-        self.msp = msp
-        self.forward_T = msp.T
-        self.cut_T = msp.T - 1
-        self.cut_type = ["B"]
-        self.cut_type_list = [["B"] for t in range(self.cut_T)]
-        self.iteration = 0
+        self.obj_bound: list = []  # objective bound found by the solver at each iteration
+        self.policy_value: list = []  # policy value at each iteration
+        self.msp: MSP = msp
+        self.forward_T: int = msp.T
+        self.cut_T: int = msp.T - 1
+        self.cut_type: list[str] = ["B"]
+        self.cut_type_list: list[list[str]] = [["B"] for t in range(self.cut_T)]
+        self.iteration: int = 0
 
         # the following 3 lines are for parallel computation setting
-        self.n_processes = 1
-        self.jobs = None
-        self.n_steps = 1
+        self.n_processes: int = 1
+        self.jobs: list = None
+        self.n_steps: int = 1
 
         self.percentile = 95
         self.biased_sampling = biased_sampling
+
+        self.total_time: float = None
 
         if self.biased_sampling:
             # l: float between 0 and 1/array-like of floats between 0 and 1
@@ -514,10 +521,10 @@ class SDDP(object):
             sample_path_idx: list | list[list] = None,
             markovian_idx: list = None,
             markovian_samples: list = None,
-            solve_true: bool = False,
+            solve_true_flag: bool = False,
             query_vars: list = None,
             query_constraints: list = None,
-            query_stage_cost: bool = False
+            query_stage_cost_flag: bool = False
     ) -> dict:
         """
         Single forward step.
@@ -527,10 +534,10 @@ class SDDP(object):
             sample_path_idx: Indices of the sample path.
             markovian_idx: markovian uncertainty index
             markovian_samples: the markovian samples
-            solve_true: whether solving the true continuous-uncertainty problem
+            solve_true_flag: whether solving the true continuous-uncertainty problem
             query_vars: the vars that wants to check(query_vars)
             query_constraints: the constraints that wants to check
-            query_stage_cost: whether to query_vars values of individual stage costs
+            query_stage_cost_flag: whether to query_vars values of individual stage costs
 
         """
         msp = self.msp
@@ -576,10 +583,10 @@ class SDDP(object):
 
                 # solving the true problem does not happen in the given examples of the quick_start folder
                 # true stage-wise independent randomness is infinite and solve for true
-                elif m.type == 'continuous' and solve_true: # only use when solving the true continuous-uncertainty problem
+                elif m.type == 'continuous' and solve_true_flag: # only use when solving the true continuous-uncertainty problem
                     m.sample_uncertainty(randomState_instance)
                 # true stage-wise independent randomness is large and solve for true
-                elif m.type == 'discrete' and m.flag_discretized == 1 and solve_true:
+                elif m.type == 'discrete' and m.flag_discretized == 1 and solve_true_flag:
                     uncertainty_index = rand_int(
                         k = m.n_samples_discrete,
                         probability = m.probability,
@@ -624,7 +631,7 @@ class SDDP(object):
             for constr in m.getConstrs():
                 if constr.constrName in query_constraints:
                     query_constraint_dualValue[constr.constrName][t] = constr.PI
-            if query_stage_cost:
+            if query_stage_cost_flag:
                 stage_cost[t] = msp.get_stage_cost(t) / pow(msp.discount, t)
             policy_value += msp.get_stage_cost(t)
             if markovian_idx is not None:
@@ -632,7 +639,7 @@ class SDDP(object):
             if self.iteration != 0 and self.rgl_a != 0:
                 m.deregularize()
         # ! time loop
-        if query_vars == [] and query_constraints == [] and query_stage_cost is None:
+        if query_vars == [] and query_constraints == [] and query_stage_cost_flag is None:
             return {
                 'state_solution': state_solution,
                 'policy_value': policy_value
@@ -647,24 +654,49 @@ class SDDP(object):
             }
 
     def _add_and_store_cuts(
-            self, t, rhs, grad, cuts=None, cut_type=None, j=None
-    ):
-        """Store cut information (rhs and grad) to cuts for the j th step, for cut
-        type cut_type and for stage t."""
+            self, t: int, rhs: float, grad, cuts: ArrayLike = None, cut_type: str = None, j: int = None
+    ) -> None:
+        """
+        Store cut information (rhs and grad) to cuts for the j th step, for cut
+        type cut_type and for stage t.
+
+        Args:
+            t: stage index
+            rhs: right hand side of the cut constraint
+            grad: gradient of the cut constraint
+            cuts: a list of dictionary stores cuts coefficients and rhs.
+                  Key of the dictionary is the cut type. Value of the dictionary is
+                  the cut coefficients and rhs.
+            cut_type: the cut type
+            j: the cut adding index, for parallel processing
+
+        """
         msp = self.msp
         if msp.n_Markov_states == 1:
-            msp.models[t - 1]._add_cut(rhs, grad)
+            msp.models[t - 1].add_cut(rhs, grad)
             if cuts is not None:
                 cuts[t - 1][cut_type][j][:] = numpy.append(rhs, grad)
         else:
             for k in range(msp.n_Markov_states[t - 1]):
-                msp.models[t - 1][k]._add_cut(rhs[k], grad[k])
+                msp.models[t - 1][k].add_cut(rhs[k], grad[k])
                 if cuts is not None:
                     cuts[t - 1][cut_type][j][k][:] = numpy.append(rhs[k], grad[k])
 
     def _compute_cuts(self, t: int, m: StochasticModel,
                       objLP_samples: ArrayLike,
-                      gradLP_samples: ArrayLike) -> tuple:
+                      gradLP_samples: ArrayLike)\
+                     -> tuple[float, float] |tuple[ArrayLike, ArrayLike]:
+        """
+            get the expected value of objectives and gradients of all the samples
+        Args:
+            t: stage index
+            m: the gurobi model at stage t
+            objLP_samples: objectives of all the samples at stage t
+            gradLP_samples:  gradients of the linked constraints of all the samples at stage t
+
+        Returns:
+
+        """
         msp = self.msp
         if msp.n_Markov_states == 1:
             return m.average(objLP_samples[0], gradLP_samples[0]) # only 1 rows
@@ -694,10 +726,10 @@ class SDDP(object):
 
         Args:
           state_solution: feasible state solutions obtained from forward step
-          j: index of forward sampling
+          j: index of forward sampling in parallel processing
           cuts: a dictionary stores cuts coefficients and rhs.
-            Key of the dictionary is the cut type. Value of the dictionary is
-            the cut coefficients and rhs.
+                Key of the dictionary is the cut type. Value of the dictionary is
+                the cut coefficients and rhs.
         """
         msp = self.msp
         for t in range(msp.T - 1, 0, -1):
@@ -715,14 +747,16 @@ class SDDP(object):
                 objLP_samples[k], gradLP_samples[k] = m.solveLP()
 
                 # if self.biased_sampling:
-                #     # actually not used, the function is flawed
+                #     # chen: actually not used, the function is flawed
                 #     self._compute_bs_frequency(objLP_samples, m, t)
 
-            objLP, gradLP = self._compute_cuts(t, m, objLP_samples, gradLP_samples)
-            objLP -= numpy.matmul(gradLP, state_solution[t - 1])
-            self._add_and_store_cuts(t, objLP, gradLP, cuts, "B", j)
-            self._add_cuts_additional_procedure(t, objLP, gradLP, objLP_samples,
-                                                gradLP_samples, state_solution[t - 1], cuts, "B", j)
+            objLP, gradLP = self._compute_cuts(t, M[0], objLP_samples, gradLP_samples)
+            # according to the cut constraint formula, the following is the difference
+            objLP -= numpy.matmul(gradLP, state_solution[t - 1]) # matrix product
+
+            self._add_and_store_cuts(t, rhs = objLP, grad = gradLP, cuts = cuts, cut_type = "B", j = j)
+            # self._add_cuts_additional_procedure(t, objLP, gradLP, objLP_samples,
+            #                                     gradLP_samples, state_solution[t - 1], cuts, "B", j)
 
     def _add_cuts_additional_procedure(*args, **kwargs):
         pass
@@ -928,15 +962,15 @@ class SDDP(object):
             tol_diff: float = float("-inf"),
             freq_comparisons: int = None,
             n_simulations: int = 3000,
-            evaluation_true: bool = False,
+            evaluation_true_flag: bool = False,
             query_vars: list = None,
             query_T: int = None,
             query_constraints: list = None,
-            query_stage_cost: bool = False,
-            query_policy_value: bool = False,
+            query_stage_cost_flag: bool = False,
+            query_policy_value_flag: bool = False,
             freq_clean: int | list = None,
-            logFile: bool = True,
-            logToConsole: bool = True,
+            logFile_flag: bool = True,
+            logToConsole_flag: bool = True,
             directory: str = '',
             rgl_norm: str = 'L2',
             rgl_a: float = 0,
@@ -946,15 +980,15 @@ class SDDP(object):
         Solve the discretized problem.
 
         Args:
-          evaluation_true: whether evaluating the true problem
+          evaluation_true_flag: whether evaluating the true problem
           rgl_b: regulization coefficient b
           rgl_a: regulization coefficient a
           rgl_norm: regularized norm, 'L1' or 'L2'
           directory: the output directory of the logger and csv files
 
           query_vars: the vars that wants to check(query_vars)
-          query_policy_value: whether to query_vars the policy value
-          query_stage_cost: whether to query_vars the individual stage costs
+          query_policy_value_flag: whether to query_vars the policy value
+          query_stage_cost_flag: whether to query_vars the individual stage costs
           query_constraints: the constraints that wants to check
           query_T: the last stage in querying
 
@@ -988,9 +1022,9 @@ class SDDP(object):
               If int, perform cleaning at the same frequency for all stages.
               If listed, perform cleaning at different frequency for each stage;
               must be of length T-1 (the last stage does not have any cuts).
-          logFile: binary, optional (default=1)
+          logFile_flag: binary, optional (default=1)
               Switch of logging to log file
-          logToConsole: binary, optional (default=1)
+          logToConsole_flag: binary, optional (default=1)
               Switch of logging to console
 
         Examples:
@@ -1045,8 +1079,8 @@ class SDDP(object):
             self.jobs = allocate_jobs(self.n_steps, self.n_processes)
 
         logger_sddp = LoggerSDDP(
-            logFile = logFile,
-            logToConsole = logToConsole,
+            logFile_flag = logFile_flag,
+            logToConsole_flag = logToConsole_flag,
             n_processes = self.n_processes,
             percentile = self.percentile,
             directory = directory,
@@ -1056,8 +1090,8 @@ class SDDP(object):
             logger_evaluation = LoggerEvaluation(
                 n_simulations = n_simulations,
                 percentile = percentile,
-                logFile = logFile,
-                logToConsole = logToConsole,
+                logFile_flag = logFile_flag,
+                logToConsole_flag = logToConsole_flag,
                 directory = directory,
             )
             logger_evaluation.header()
@@ -1065,8 +1099,8 @@ class SDDP(object):
             logger_comparison = LoggerComparison(
                 n_simulations = n_simulations,
                 percentile = percentile,
-                logFile = logFile,
-                logToConsole = logToConsole,
+                logFile_flag = logFile_flag,
+                logToConsole_flag = logToConsole_flag,
                 directory = directory,
             )
             logger_comparison.header()
@@ -1092,9 +1126,9 @@ class SDDP(object):
                     else msp.models[0][0]
                 )
                 m.optimize()
-                if m.status not in [2, 11]:
+                if m.status not in [2, 11]: # not solved successfully
                     m.write_infeasible_model(
-                        "backward_" + str(m._model.modelName) + ".lp"
+                        "backward_" + str(m.model.modelName) + ".lp"
                     )
                 obj_bound = m.objBound
                 self.obj_bound.append(obj_bound)
@@ -1117,17 +1151,17 @@ class SDDP(object):
 
                 if self.n_processes == 1:
                     logger_sddp.text(
-                        iteration=self.iteration,
-                        obj_bound=obj_bound,
-                        policy_value=policy_value[0],
-                        time=elapsed_time,
+                        iteration = self.iteration,
+                        obj_bound = obj_bound,
+                        policy_value = policy_value[0],
+                        time = elapsed_time,
                     )
                 else:
                     logger_sddp.text(
-                        iteration=self.iteration,
-                        obj_bound=obj_bound,
-                        CI=CI,
-                        time=elapsed_time,
+                        iteration = self.iteration,
+                        obj_bound = obj_bound,
+                        CI = CI,
+                        time = elapsed_time,
                     )
                 if (
                         freq_evaluations is not None
@@ -1139,16 +1173,16 @@ class SDDP(object):
                     start = time.time()
                     evaluation = Evaluation(msp)
                     evaluation.run(
-                        n_simulations=n_simulations,
-                        query_vars=query_vars,
-                        query_T=query_T,
-                        query_constraints=query_constraints,
-                        query_stage_cost=query_stage_cost,
-                        percentile=percentile,
-                        n_processes=n_processes,
+                        n_simulations = n_simulations,
+                        query_vars = query_vars,
+                        query_T = query_T,
+                        query_constraints = query_constraints,
+                        query_stage_cost_flag = query_stage_cost_flag,
+                        percentile = percentile,
+                        n_processes = n_processes,
                     )
-                    if query_policy_value:
-                        pandas.DataFrame(evaluation.policy_value).to_csv(directory +
+                    if query_policy_value_flag:
+                        pandas.DataFrame(evaluation.policy_values).to_csv(directory +
                                                                "iter_{}_policy_value.csv".format(self.iteration))
                     if query_vars is not None:
                         for item in query_vars:
@@ -1158,21 +1192,21 @@ class SDDP(object):
                         for item in query_constraints:
                             evaluation.solution_dual[item].to_csv(directory +
                                                                   "iter_{}_{}.csv".format(self.iteration, item))
-                    if query_stage_cost:
+                    if query_stage_cost_flag:
                         evaluation.stage_cost.to_csv(directory +
                                                      "iter_{}_stage_cost.csv".format(self.iteration))
-                    if evaluation_true:
+                    if evaluation_true_flag:
                         evaluationTrue = EvaluationTrue(msp)
                         evaluationTrue.run(
-                            n_simulations=n_simulations,
-                            query_vars=query_vars,
-                            query_T=query_T,
-                            query_constraints=query_constraints,
-                            query_stage_cost=query_stage_cost,
-                            percentile=percentile,
-                            n_processes=n_processes,
+                            n_simulations = n_simulations,
+                            query_vars = query_vars,
+                            query_T = query_T,
+                            query_constraints = query_constraints,
+                            query_stage_cost_flag = query_stage_cost_flag,
+                            percentile = percentile,
+                            n_processes = n_processes,
                         )
-                        if query_policy_value:
+                        if query_policy_value_flag:
                             pandas.DataFrame(evaluationTrue.policy_value).to_csv(directory +
                                                                        "iter_{}_policy_value_true.csv".format(self.iteration))
                         if query_vars is not None:
@@ -1184,7 +1218,7 @@ class SDDP(object):
                                 evaluationTrue.solution_dual[item].to_csv(directory +
                                                                           "iter_{}_{}_true.csv".format(self.iteration,
                                                                                                        item))
-                        if query_stage_cost:
+                        if query_stage_cost_flag:
                             evaluationTrue.stage_cost.to_csv(directory +
                                                              "iter_{}_stage_cost_true.csv".format(self.iteration))
                     elapsed_time = time.time() - start
@@ -1267,7 +1301,6 @@ class SDDP(object):
         if right_end_of_CI <= tol_diff:
             stop_reason = "stabilization threshold:{} has reached".format(tol_diff)
 
-        b = time.time()
         logger_sddp.footer(reason=stop_reason)
         if freq_evaluations is not None or freq_comparisons is not None:
             logger_evaluation.footer()
