@@ -16,23 +16,23 @@ class Logger:
     Basic log class
 
     Args:
-        logFile: bool, whether to log in a file
-        logToConsole: bool, whether to log to console
+        logToFile_flag: bool, whether to log in a file
+        logToConsole_flag: bool, whether to log to console
         directory: directory address for the log file
 
     """
 
-    def __init__(self, logFile: bool = False, logToConsole: bool = False, directory: str = ''):
+    def __init__(self, logToFile_flag: bool = False, logToConsole_flag: bool = False, directory: str = ''):
         name = ""
         logger = logging.getLogger(
             name)  # getLogger() return a logger with the specified name or, if name is None, return the root logger of the hierarchy.
         logger.setLevel(logging.INFO)
         if logger.hasHandlers():
             logger.handlers.clear()
-        if logFile != 0:
+        if logToFile_flag != 0:
             handler = logging.FileHandler(directory + name + ".log", mode="w")
             logger.addHandler(handler)
-        if logToConsole != 0:
+        if logToConsole_flag != 0:
             streamHandler = logging.StreamHandler()
             logger.addHandler(streamHandler)
         self.logger = logger
@@ -50,8 +50,8 @@ class LoggerSDDP(Logger):
     Args:
         percentile: the percentile used to compute confidence interval
         n_process: the number of cpu processors
-        **kwargs: logFile: bool, whether to log in a file
-                  logToConsole: bool, whether to log to console
+        **kwargs: logToFile_flag: bool, whether to log in a file
+                  logToConsole_flag: bool, whether to log to console
                   directory: directory address for the log file
     Attributes:
         n_slots: width of the output string

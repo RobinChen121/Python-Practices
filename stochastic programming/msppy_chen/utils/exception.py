@@ -26,16 +26,28 @@ class DistributionError(Exception):
     Exception class to raise if continuous distribution is not added
     properly
     """
-    def __init__(self, arg = True, return_data = True):
-        if arg == False:
+    def __init__(self, arg: bool = True, return_data: bool= True):
+        if not arg:
             Exception.__init__(
                 self,
                 "Continuous distribution should always take \
                 numpy.random.RandomState as its single argument.",
             )
-        if return_data == False:
+        if not return_data:
             Exception.__init__(
                 self,
-                "Univariate distribution should always return a number; \
+                "Uni-variate distribution should always return a number; \
                 Multivariate distribution should always return an array-like.",
             )
+
+class MarkovianDimensionError(Exception):
+    """
+    Exception class to raise if dim index is not specified
+    properly
+
+    """
+    def __init__(self):
+        Exception.__init__(
+            self,
+            "Dimension indices of Markovian uncertainties not set properly."
+        )

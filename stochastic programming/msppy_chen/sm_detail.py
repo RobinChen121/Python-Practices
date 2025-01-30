@@ -53,7 +53,7 @@ class StochasticModel:
 
         """
         self._model = gurobipy.Model(name = name, env = env)
-        self.type: str = None  # type of the true problem: continuous/discrete
+        self.type: str = ''  # type of the true problem: continuous/discrete
         self.flag_discretized = 0 #  whether the true problem has been discretized
 
         self.states = []  # states variables in the model, eg: for inventory problem, it's I_t
@@ -250,7 +250,7 @@ class StochasticModel:
                         )
                     uncertainty[key] = list(value)
 
-                    if self.type is None:
+                    if self.type is None or self.type == '':
                         # add uncertainty for the first time
                         self.type = "discrete"
                         self.n_samples = len(value)
@@ -441,10 +441,10 @@ class StochasticModel:
             updated the linked constraints(an auxiliary variable equals the state variable, i.e., local copy,
              solution of previous stage)
         Args:
-            fwdSolution: the value of this stage's state(local copy)
+            fwdSolution (object): the value of this stage's state(local copy)
              variable from the solution of previous stage model
         """
-        self._model.setAttr("RHS", self.link_constrs, fwdSolutionn)
+        self._model.setAttr("RHS", self.link_constrs, fwdSolution)
 
 
     def update_uncertainty(self, k):
@@ -1136,7 +1136,7 @@ class StochasticModel:
         temp = gurobipy.LinExpr(gradient, self.states) # product of the two parameters
         self.cuts.append(
             self._model.addConstr(
-                self.modelSense * (self.alpha - temp - rhs) >= 0
+                self.modelsense * (self.alpha - temp - rhs) >= 0
             )
         )
         self._model.update()
@@ -1210,7 +1210,10 @@ class StochasticModel:
 
         return result
 
-    def set_up_link_constrs(self):
+    def set_up_link_constrs(self)-> None:
+        """
+            set up the local copies-link constraints
+        """
         if not self.link_constrs:
             self.link_constrs = list(
                 self._model.addConstrs(
@@ -1219,7 +1222,11 @@ class StochasticModel:
                 ).values()
             )
 
-    def delete_link_constrs(self):
+    def delete_link_constrs(self)-> None:
+        """
+            deleted the local copies-link constraints
+
+        """
         if self.link_constrs:
             for constr in self.link_constrs:
                 self._model.remove(constr)
@@ -1283,7 +1290,7 @@ class StochasticModel:
         if len(probability) != self.n_samples:
             raise ValueError("probability tree != compatible with scenario tree")
 
-    def solveLP(self) -> tuple[float, float]:
+    def solveLP(self) -> tuple:
         """
             solve the backward model in one stage
         Returns:
@@ -1292,7 +1299,7 @@ class StochasticModel:
         objLP_sample = numpy.empty(self.n_samples)
         gradLP_sample = numpy.empty((self.n_samples, self.n_states))
         for k in range(self.n_samples):
-            self._update_uncertainty(k)
+            self.update_uncertainty(k)
             self.optimize()
             if self._model.status not in [2, 11]:
                 self.write_infeasible_model("backward_failedSolved" + str(self._model.modelName))

@@ -14,10 +14,14 @@ Created on Mon Jan  6 15:49:14 2025
 from sm_detail import StochasticModel
 from utils.statistics import check_Markov_states_and_transition_matrix
 from utils.statistics import check_Markov_callable_uncertainty
+from utils.exception import MarkovianDimensionError
 import numpy
 from numpy.typing import ArrayLike
 from itertools import product
 from collections.abc import Callable
+from collections import abc
+import numbers
+import gurobipy
 
 
 # noinspection PyUnresolvedReferences
@@ -31,7 +35,7 @@ class MSP:
                  T: int,
                  bound: float = None,
                  sense: int = 1,
-                 outputFlag: int = 0,
+                 outputLogFlag: bool = False,
                  discount: float = 1.0,
                  flag_CTG: bool = False,
                  **kwargs) -> None:
@@ -39,11 +43,12 @@ class MSP:
         Initialize the MSP class.
 
         Args:
-            T (int): the number of stages.
+            T (int): The number of stages.
             bound (float, optional): A known uniform lower bound or upper bound for each stage problem.
                                      Default value is 1 billion for maximization problem and -1 billion for minimization problem. 
-            sense (int, optional): model optimization sense. 1 means minimization and -1 means maximization. Defaults to 1.
-            outputFlag (int, optional): Enables or disables gurobi solver output. Defaults to 0.
+            sense (int, optional): Model optimization sense. 1 means minimization and -1 means maximization. Defaults to 1.
+            outputLogFlag (int, optional): enables or disables solver output. Use LogFile and LogToConsole for finer-grain control.
+                                        Setting outputLogFlag to 0 is equivalent to setting LogFile to "" and LogToConsole to 0.
             discount (flot, optional): The discount factor used to compute present value.
                                        float between 0(exclusive) and 1(inclusive). Defaults to 1.0.
             flag_CTG: whether setting CTG in the model.
@@ -52,6 +57,13 @@ class MSP:
             A class of multi-stage linear programming model
 
         """
+        if (T < 2
+                or discount > 1
+                or discount < 0
+                or sense not in [-1, 1]
+                or outputLogFlag not in [0, 1]):
+            raise Exception('Arguments of SDDP construction are not valid!')
+
         self.flag_CTG = flag_CTG # whether setting CTG in the model
         self.a = 0 # used for AVAR(CVAR)
         self.l = 0 # used for AVAR
@@ -77,9 +89,23 @@ class MSP:
 
         self._set_default_bound()
         self._set_model()
+        self._set_up_model_attr(sense, outputLogFlag, kwargs)
 
         self.flag_updated: bool = False # whether the model has been updated
         self.flag_infinity: bool = False # whether
+
+    def _check_first_stage_model(self):
+        """
+        Ensure the first stage model is deterministic. The First stage model
+        is only allowed to have uncertainty with length one.
+
+        """
+        m = self.models[0] if type(self.models[0]) != list else self.models[0][0]
+        if m.n_samples != 1:
+            raise Exception("First stage must be deterministic!")
+        # else:
+        #     m._update_uncertainty(0)
+        #     m.update()
 
     def __getitem__(self,
                     t: int
@@ -115,8 +141,21 @@ class MSP:
         """
         self.models = [StochasticModel(name = str(t)) for t in range(self.T)]
 
+    def _set_up_model_attr(self, sense, outputLogFlag, kwargs):
+        for t in range(self.T):
+            m = self.models[t]
+            m.Params.outputLogFlag = outputLogFlag
+            m.setAttr('modelsense', sense)
+            for k, v in kwargs.items():
+                m.setParam(k, v)
+
     def _set_up_link_constrs(self):
-        # model copies may not be ready while state size may have changed
+        """
+            set up the local copies-link constraints for each stage
+            # model copies may not be ready while state size may have changed
+
+        """
+
         for t in range(1, self.T):
             M = (
                 self.models[t]
@@ -128,7 +167,11 @@ class MSP:
                 m.update()
 
     def _delete_link_constrs(self):
-        # model copies may not be ready while state size may have changed
+        """
+            delete the local copies-link constraints for each stage
+            # model copies may not be ready while state size may have changed
+
+        """
         for t in range(1, self.T):
             M = (
                 self.models[t]
@@ -333,7 +376,7 @@ class MSP:
                         )
                     self._individual_type = "discretized"
                 else:
-                    if m.flag_discrete == 1:
+                    if m.flag_discretized == 1:
                         self._individual_type = "discretized"
 
     def check_markov_copy_models_update_nums(self) -> None:
@@ -376,6 +419,23 @@ class MSP:
             if self.type == 'stage-wise independent'
             else [self.models[t][0].n_samples for t in range(self.T)]
         )
+
+    def check_sample_path_dimension(self):
+        """
+        Check dimension indices of sample path generator are set properly.
+
+        """
+        for t in range(self.T):
+            M = (
+                self.models[t]
+                if type(self.models[t]) == list
+                else [self.models[t]]
+            )
+            for m in M:
+                if m.Markovian_dim_index:
+                    if any(index not in range(self.dim_Markov_states[t])
+                            for index in m.Markovian_dim_index):
+                        raise MarkovianDimensionError
 
     def compute_weight_sample_path(self, sample_path: list | list[list], start: int = 0) -> float:
         """
@@ -443,14 +503,144 @@ class MSP:
             weight *= probability[t][sample_path[1][t]][sample_path[0][t]]
         return weight
 
-    def get_stage_cost(self, t: int) -> float:
+    def discretize(
+            self,
+            n_samples = None,
+            random_state = None,
+            replace=True,
+            n_Markov_states=None,
+            method='SA',
+            n_sample_paths=None,
+            Markov_states=None,
+            transition_matrix=None,
+            int_flag=0):
+        """Discretize Markovian continuous uncertainty by k-means or (robust)
+        stochastic approximation.
+
+        Parameters
+        ----------
+        n_samples: int, optional, default=None
+            number of i.i.d. samples to generate for stage-wise independent
+            randomness.
+
+        random_state: None | int | instance of RandomState, optional, default=None
+            If int, random_state is the seed used by the
+            random number generator;
+            If RandomState instance, random_state is the
+            random number generator;
+            If None, the random number generator is the
+            RandomState instance used by numpy.random.
+
+        replace: bool, optional, default=True
+            Indicates generating i.i.d. samples with/without replacement for
+            stage-wise independent randomness.
+
+        n_Markov_states: list | int, optional, default=None
+            If list, it specifies different dimensions of Markov state space
+            over time. Length of the list should equal length of the Markovian
+            uncertainty.
+            If int, it specifies dimensions of Markov state space.
+            Note: If the uncertainties are int, trained Markov states will be
+            rounded to integers, and duplicates will be removed. In such cases,
+            there is no guaranttee that the number of Markov states is n_Markov_states.
+
+        method: binary, optional, default=0
+            'input': the approximating Markov chain is given by user input (
+            through specifying Markov_states and transition_matrix)
+            'SAA': use k-means to train Markov chain.
+            'SA': use stochastic approximation to train Markov chain.
+            'RSA': use robust stochastic approximation to train Markov chain.
+
+        n_sample_paths: int, optional, default=None
+            number of sample paths to train the Markov chain.
+
+        Markov_states/transition_matrix: matrix-like, optional, default=None
+            The user input of approximating Markov chain.
+        """
+        if n_samples is not None:
+            if isinstance(n_samples, (numbers.Integral, numpy.integer)):
+                if n_samples < 1:
+                    raise ValueError("n_samples should be bigger than zero!")
+                n_samples = (
+                    [1]
+                    +[n_samples] * (self.T-1)
+                )
+            elif isinstance(n_samples, (abc.Sequence, numpy.ndarray)):
+                if len(n_samples) != self.T:
+                    raise ValueError(
+                        "n_samples list should be of length {} rather than {}!"
+                        .format(self.T,len(n_samples))
+                    )
+                if n_samples[0] != 1:
+                    raise ValueError(
+                        "The first stage model should be deterministic!"
+                    )
+            else:
+                raise ValueError("Invalid input of n_samples!")
+            # discretize stage-wise independent continuous distribution
+            random_state = check_random_state(random_state)
+            for t in range(1,self.T):
+                self.models[t]._discretize(n_samples[t],random_state,replace)
+        if n_Markov_states is None and method != 'input': return
+        if method == 'input' and (Markov_states is None or
+            transition_matrix is None): return
+        if n_Markov_states is not None:
+            if isinstance(n_Markov_states, (numbers.Integral, numpy.integer)):
+                if n_Markov_states < 1:
+                    raise ValueError("n_Markov_states should be bigger than zero!")
+                n_Markov_states = (
+                    [1]
+                    +[n_Markov_states] * (self.T-1)
+                )
+            elif isinstance(n_Markov_states, (abc.Sequence, numpy.ndarray)):
+                if len(n_Markov_states) != self.T:
+                    raise ValueError(
+                        "n_Markov_states list should be of length {} rather than {}!"
+                        .format(self.T,len(n_Markov_states))
+                    )
+                if n_Markov_states[0] != 1:
+                    raise ValueError(
+                        "The first stage model should be deterministic!"
+                    )
+            else:
+                raise ValueError("Invalid input of n_Markov_states!")
+        from msppy.discretize import Markovian
+        if method in ['RSA','SA','SAA']:
+            markovian = Markovian(
+                f=self.Markovian_uncertainty,
+                n_Markov_states=n_Markov_states,
+                n_sample_paths=n_sample_paths,
+                int_flag=int_flag,
+            )
+        if method in ['RSA','SA','SAA']:
+            self.Markov_states,self.transition_matrix = getattr(markovian, method)()
+        elif method == 'input':
+            dim_Markov_states, n_Markov_states = (
+                check_Markov_states_and_transition_matrix(
+                    Markov_states=Markov_states,
+                    transition_matrix=transition_matrix,
+                    T=self.T,
+                )
+            )
+            if dim_Markov_states != self.dim_Markov_states:
+                raise ValueError("The dimension of the given sample path "
+                    +"generator is not the same as the given Markov chain "
+                    +"approximation!")
+            self.Markov_states = Markov_states
+            self.transition_matrix = [numpy.array(item) for item in transition_matrix]
+        self._flag_discrete = 1
+        self.n_Markov_states = n_Markov_states
+        if method in ['RSA','SA','SAA']:
+            return markovian
+
+    def get_stage_cost(self, m: StochasticModel, t: int) -> float:
         """
             get the stage cost
         Args:
             t: the stage index
+            m: an instance of StochasticModel
 
         """
-        m = self.models[t]
         if self.measure == "risk neutral":
             if m.alpha is not None:
                 return pow(self.discount, t) * (
@@ -461,15 +651,16 @@ class MSP:
         else:
             return pow(self.discount,t) * m.getVarByName("stage_cost").X
 
-    def get_state_solution(self, t: int) -> list:
+    @staticmethod
+    def get_state_solution(m: StochasticModel, t: int) -> list[float]:
         """
             get the solutions of state variables at one stage
         Args:
             t: the stage index
+            m: an instace of StochasticModel
 
         """
-        m = self.models[t]
-        solution = [None for _ in m.states]
+        solution = [0.0 for _ in m.states]
         # avoid numerical issues
         for idx, var in enumerate(m.states):
             if var.vtype in ['B','I']:
@@ -485,13 +676,13 @@ class MSP:
 
     def update(self):
         self._check_first_stage_model()
-        self._check_inidividual_Markovian_index()
-        self._check_individual_stage_models()
+        self.check_state_and_continuous_discretized()
+        self.check_markov_copy_models_update_nums()
 
         if self.flag_CTG:
             self._set_up_CTG()
         self._set_up_link_constrs()
-        self._check_multistage_model()
+        self.check_markov_copy_models_update_nums()
         self.flag_updated = 1
 
     def set_AVaR(self, l: float | ArrayLike, a: float | ArrayLike, method: str = 'indirect') -> None:

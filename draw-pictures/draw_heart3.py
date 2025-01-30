@@ -3,7 +3,7 @@
 """
 Created on Wed Nov  8 11:35:14 2023
 
-@author: zhenchen
+@author: zhen chen
 
 @disp:  
     
@@ -31,5 +31,6 @@ PLOT, = ax.plot([], []) # return all the lines
 plt.text(-1.2, 3, r'$f(x)=x^{2/3}+0.9(3.3-x^2)^{1/2}\sin(\alpha\pi x)$') 
 time_text = ax.text(-0.45, 2.5,'') # transform = ax.transAxes
 
-ani = FuncAnimation(fig, animate, frames = np.arange(1, 20.1, 0.1), interval = 20, repeat = False)
-ani.save("heart.gif") # 保存图像为 1 个 gif 文件
+ani = FuncAnimation(fig, animate, frames = 100, interval = 200, repeat = False)
+plt.show()
+# ani.save("heart.gif") # 保存图像为 1 个 gif 文件

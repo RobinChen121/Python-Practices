@@ -12,8 +12,8 @@ import pandas
 from utils.statistics import compute_CI, allocate_jobs
 from numpy.typing import ArrayLike
 from typing import TYPE_CHECKING
-if TYPE_CHECKING:
-    from msm import MSP
+# if TYPE_CHECKING:
+from msm import MSP
 
 
 class _Evaluation:

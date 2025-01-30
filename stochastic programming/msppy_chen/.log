@@ -1,0 +1,270 @@
+----------------------------------------------------------------
+                     SDDP Solver, Zhen Chen                     
+----------------------------------------------------------------
+   Iteration               Bound               Value        Time
+----------------------------------------------------------------
+Gurobi Optimizer version 10.0.1 build v10.0.1rc0 (mac64[rosetta2])
+
+CPU model: Apple M1 Pro
+Thread count: 8 physical cores, 8 logical processors, using up to 8 threads
+
+Optimize a model with 3 rows, 7 columns and 3 nonzeros
+Model fingerprint: 0xc146740d
+Coefficient statistics:
+  Matrix range     [1e+00, 1e+00]
+  Objective range  [1e+00, 1e+00]
+  Bounds range     [1e+02, 1e+03]
+  RHS range        [5e+00, 1e+03]
+Presolve removed 3 rows and 7 columns
+Presolve time: 0.00s
+Presolve: All rows and columns removed
+Iteration    Objective       Primal Inf.    Dual Inf.      Time
+       0   -1.0000000e+03   0.000000e+00   2.000000e-06      0s
+
+Solved in 0 iterations and 0.00 seconds (0.00 work units)
+Optimal objective -1.000000000e+03
+Gurobi Optimizer version 10.0.1 build v10.0.1rc0 (mac64[rosetta2])
+
+CPU model: Apple M1 Pro
+Thread count: 8 physical cores, 8 logical processors, using up to 8 threads
+
+Optimize a model with 9 rows, 10 columns and 20 nonzeros
+Model fingerprint: 0xdc0a5b2d
+Coefficient statistics:
+  Matrix range     [5e-01, 7e+00]
+  Objective range  [5e-01, 4e+00]
+  Bounds range     [1e+02, 1e+03]
+  RHS range        [5e+00, 1e+03]
+Presolve removed 9 rows and 10 columns
+Presolve time: 0.00s
+Presolve: All rows and columns removed
+Iteration    Objective       Primal Inf.    Dual Inf.      Time
+       0   -1.0275000e+03   0.000000e+00   0.000000e+00      0s
+
+Solved in 0 iterations and 0.00 seconds (0.00 work units)
+Optimal objective -1.027500000e+03
+Gurobi Optimizer version 10.0.1 build v10.0.1rc0 (mac64[rosetta2])
+
+CPU model: Apple M1 Pro
+Thread count: 8 physical cores, 8 logical processors, using up to 8 threads
+
+Optimize a model with 9 rows, 10 columns and 20 nonzeros
+Model fingerprint: 0x6ea7410d
+Coefficient statistics:
+  Matrix range     [5e-01, 8e+00]
+  Objective range  [5e-01, 4e+00]
+  Bounds range     [1e+02, 1e+03]
+  RHS range        [2e+01, 1e+03]
+Presolve removed 9 rows and 10 columns
+Presolve time: 0.00s
+Presolve: All rows and columns removed
+Iteration    Objective       Primal Inf.    Dual Inf.      Time
+       0   -9.8666667e+02   0.000000e+00   0.000000e+00      0s
+
+Solved in 0 iterations and 0.00 seconds (0.00 work units)
+Optimal objective -9.866666667e+02
+Gurobi Optimizer version 10.0.1 build v10.0.1rc0 (mac64[rosetta2])
+
+CPU model: Apple M1 Pro
+Thread count: 8 physical cores, 8 logical processors, using up to 8 threads
+
+Optimize a model with 9 rows, 9 columns and 19 nonzeros
+Model fingerprint: 0x7fa8675c
+Coefficient statistics:
+  Matrix range     [5e-01, 8e+00]
+  Objective range  [5e-01, 4e+00]
+  Bounds range     [1e+02, 1e+02]
+  RHS range        [2e+01, 1e+03]
+Presolve removed 9 rows and 9 columns
+Presolve time: 0.00s
+Presolve: All rows and columns removed
+Iteration    Objective       Primal Inf.    Dual Inf.      Time
+       0    3.4666667e+02   0.000000e+00   0.000000e+00      0s
+
+Solved in 0 iterations and 0.00 seconds (0.00 work units)
+Optimal objective  3.466666667e+02
+Gurobi Optimizer version 10.0.1 build v10.0.1rc0 (mac64[rosetta2])
+
+CPU model: Apple M1 Pro
+Thread count: 8 physical cores, 8 logical processors, using up to 8 threads
+
+Optimize a model with 9 rows, 9 columns and 19 nonzeros
+Model fingerprint: 0xe4211d38
+Coefficient statistics:
+  Matrix range     [5e-01, 7e+00]
+  Objective range  [5e-01, 4e+00]
+  Bounds range     [1e+02, 1e+02]
+  RHS range        [8e+00, 1e+03]
+Presolve removed 9 rows and 9 columns
+Presolve time: 0.00s
+Presolve: All rows and columns removed
+Iteration    Objective       Primal Inf.    Dual Inf.      Time
+       0    3.1200000e+02   0.000000e+00   0.000000e+00      0s
+
+Solved in 0 iterations and 0.00 seconds (0.00 work units)
+Optimal objective  3.120000000e+02
+Gurobi Optimizer version 10.0.1 build v10.0.1rc0 (mac64[rosetta2])
+
+CPU model: Apple M1 Pro
+Thread count: 8 physical cores, 8 logical processors, using up to 8 threads
+
+Optimize a model with 9 rows, 9 columns and 19 nonzeros
+Coefficient statistics:
+  Matrix range     [5e-01, 7e+00]
+  Objective range  [5e-01, 4e+00]
+  Bounds range     [1e+02, 1e+02]
+  RHS range        [2e+01, 1e+03]
+Iteration    Objective       Primal Inf.    Dual Inf.      Time
+       0    2.8000000e+02   0.000000e+00   0.000000e+00      0s
+
+Solved in 0 iterations and 0.00 seconds (0.00 work units)
+Optimal objective  2.800000000e+02
+Gurobi Optimizer version 10.0.1 build v10.0.1rc0 (mac64[rosetta2])
+
+CPU model: Apple M1 Pro
+Thread count: 8 physical cores, 8 logical processors, using up to 8 threads
+
+Optimize a model with 9 rows, 9 columns and 19 nonzeros
+Coefficient statistics:
+  Matrix range     [5e-01, 8e+00]
+  Objective range  [5e-01, 4e+00]
+  Bounds range     [1e+02, 1e+02]
+  RHS range        [8e+00, 1e+03]
+Iteration    Objective       Primal Inf.    Dual Inf.      Time
+       0    3.3866667e+02   0.000000e+00   0.000000e+00      0s
+
+Solved in 0 iterations and 0.00 seconds (0.00 work units)
+Optimal objective  3.386666667e+02
+Gurobi Optimizer version 10.0.1 build v10.0.1rc0 (mac64[rosetta2])
+
+CPU model: Apple M1 Pro
+Thread count: 8 physical cores, 8 logical processors, using up to 8 threads
+
+Optimize a model with 9 rows, 9 columns and 19 nonzeros
+Coefficient statistics:
+  Matrix range     [5e-01, 8e+00]
+  Objective range  [5e-01, 4e+00]
+  Bounds range     [1e+02, 1e+02]
+  RHS range        [2e+01, 1e+03]
+Iteration    Objective       Primal Inf.    Dual Inf.      Time
+       0    3.4666667e+02   0.000000e+00   0.000000e+00      0s
+
+Solved in 0 iterations and 0.00 seconds (0.00 work units)
+Optimal objective  3.466666667e+02
+Gurobi Optimizer version 10.0.1 build v10.0.1rc0 (mac64[rosetta2])
+
+CPU model: Apple M1 Pro
+Thread count: 8 physical cores, 8 logical processors, using up to 8 threads
+
+Optimize a model with 10 rows, 10 columns and 23 nonzeros
+Model fingerprint: 0x3af8c666
+Coefficient statistics:
+  Matrix range     [3e-01, 9e+00]
+  Objective range  [5e-01, 4e+00]
+  Bounds range     [1e+02, 1e+03]
+  RHS range        [5e+00, 1e+03]
+Presolve removed 10 rows and 10 columns
+Presolve time: 0.00s
+Presolve: All rows and columns removed
+Iteration    Objective       Primal Inf.    Dual Inf.      Time
+       0   -1.0120000e+03   0.000000e+00   0.000000e+00      0s
+
+Solved in 0 iterations and 0.00 seconds (0.00 work units)
+Optimal objective -1.012000000e+03
+Gurobi Optimizer version 10.0.1 build v10.0.1rc0 (mac64[rosetta2])
+
+CPU model: Apple M1 Pro
+Thread count: 8 physical cores, 8 logical processors, using up to 8 threads
+
+Optimize a model with 10 rows, 10 columns and 23 nonzeros
+Coefficient statistics:
+  Matrix range     [3e-01, 9e+00]
+  Objective range  [5e-01, 4e+00]
+  Bounds range     [1e+02, 1e+03]
+  RHS range        [5e+00, 1e+03]
+Iteration    Objective       Primal Inf.    Dual Inf.      Time
+       0   -1.0200000e+03   0.000000e+00   0.000000e+00      0s
+
+Solved in 0 iterations and 0.00 seconds (0.00 work units)
+Optimal objective -1.020000000e+03
+Gurobi Optimizer version 10.0.1 build v10.0.1rc0 (mac64[rosetta2])
+
+CPU model: Apple M1 Pro
+Thread count: 8 physical cores, 8 logical processors, using up to 8 threads
+
+Optimize a model with 10 rows, 10 columns and 23 nonzeros
+Coefficient statistics:
+  Matrix range     [3e-01, 9e+00]
+  Objective range  [5e-01, 4e+00]
+  Bounds range     [1e+02, 1e+03]
+  RHS range        [5e+00, 1e+03]
+Iteration    Objective       Primal Inf.    Dual Inf.      Time
+       0   -9.9200000e+02   8.304167e+01   0.000000e+00      0s
+       1   -9.9200000e+02   0.000000e+00   0.000000e+00      0s
+
+Solved in 1 iterations and 0.00 seconds (0.00 work units)
+Optimal objective -9.920000000e+02
+Gurobi Optimizer version 10.0.1 build v10.0.1rc0 (mac64[rosetta2])
+
+CPU model: Apple M1 Pro
+Thread count: 8 physical cores, 8 logical processors, using up to 8 threads
+
+Optimize a model with 10 rows, 10 columns and 23 nonzeros
+Coefficient statistics:
+  Matrix range     [3e-01, 9e+00]
+  Objective range  [5e-01, 4e+00]
+  Bounds range     [1e+02, 1e+03]
+  RHS range        [5e+00, 1e+03]
+Iteration    Objective       Primal Inf.    Dual Inf.      Time
+       0   -9.8666667e+02   0.000000e+00   0.000000e+00      0s
+
+Solved in 0 iterations and 0.00 seconds (0.00 work units)
+Optimal objective -9.866666667e+02
+Gurobi Optimizer version 10.0.1 build v10.0.1rc0 (mac64[rosetta2])
+
+CPU model: Apple M1 Pro
+Thread count: 8 physical cores, 8 logical processors, using up to 8 threads
+
+Optimize a model with 10 rows, 10 columns and 23 nonzeros
+Coefficient statistics:
+  Matrix range     [2e-01, 7e+00]
+  Objective range  [5e-01, 4e+00]
+  Bounds range     [1e+02, 1e+03]
+  RHS range        [5e+00, 1e+03]
+Iteration    Objective       Primal Inf.    Dual Inf.      Time
+       0   -1.0225000e+03   0.000000e+00   0.000000e+00      0s
+
+Solved in 0 iterations and 0.00 seconds (0.00 work units)
+Optimal objective -1.022500000e+03
+Gurobi Optimizer version 10.0.1 build v10.0.1rc0 (mac64[rosetta2])
+
+CPU model: Apple M1 Pro
+Thread count: 8 physical cores, 8 logical processors, using up to 8 threads
+
+Optimize a model with 10 rows, 10 columns and 23 nonzeros
+Coefficient statistics:
+  Matrix range     [2e-01, 7e+00]
+  Objective range  [5e-01, 4e+00]
+  Bounds range     [1e+02, 1e+03]
+  RHS range        [5e+00, 1e+03]
+Iteration    Objective       Primal Inf.    Dual Inf.      Time
+       0   -1.0275000e+03   0.000000e+00   0.000000e+00      0s
+
+Solved in 0 iterations and 0.00 seconds (0.00 work units)
+Optimal objective -1.027500000e+03
+Gurobi Optimizer version 10.0.1 build v10.0.1rc0 (mac64[rosetta2])
+
+CPU model: Apple M1 Pro
+Thread count: 8 physical cores, 8 logical processors, using up to 8 threads
+
+Optimize a model with 4 rows, 7 columns and 6 nonzeros
+Coefficient statistics:
+  Matrix range     [5e-01, 2e+00]
+  Objective range  [1e+00, 1e+00]
+  Bounds range     [1e+02, 1e+03]
+  RHS range        [5e+00, 1e+03]
+Iteration    Objective       Primal Inf.    Dual Inf.      Time
+       0      handle free variables                          0s
+
+Solved in 0 iterations and 0.00 seconds (0.00 work units)
+Optimal objective -1.000000000e+03

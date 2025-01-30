@@ -8,10 +8,10 @@ Created on 2025/1/10, 21:48
 @disp:  Different classes of stochastic programming solvers.
 
 """
-from typing import TYPE_CHECKING
-if TYPE_CHECKING:
-    from sm_detail import StochasticModel
-    from msm import MSP
+# from typing import TYPE_CHECKING
+# if TYPE_CHECKING:
+from sm_detail import StochasticModel
+from msm import MSP
 from utils.statistics import rand_int, allocate_jobs, compute_CI
 from utils.logger import LoggerSDDP, LoggerEvaluation, LoggerComparison
 from evaluation import Evaluation, EvaluationTrue
@@ -114,7 +114,7 @@ class Extensive:
         solving_end_time = time.time()
         self.solving_time = solving_end_time - solving_start_time
         self.total_time = self.construction_time + self.solving_time
-        print('*' * 30)
+        print('*' * 30, end = '\n')
         print('the result of extensive model is %.4f' % self.extensive_model.ObjVal)
         return self.construction_time, self.solving_time, self.extensive_model.objVal
 
@@ -541,7 +541,7 @@ class SDDP(object):
 
         """
         msp = self.msp
-        state_solution = [None for _ in range(self.forward_T)]
+        state_solution = [[] for _ in range(self.forward_T)]
         policy_value = 0 # policy value, i.e., the final objective value of the sampled path
         query_vars = [] if query_vars is None else list(query_vars)
         query_constraints = [] if query_constraints is None else list(query_constraints)
@@ -632,8 +632,8 @@ class SDDP(object):
                 if constr.constrName in query_constraints:
                     query_constraint_dualValue[constr.constrName][t] = constr.PI
             if query_stage_cost_flag:
-                stage_cost[t] = msp.get_stage_cost(t) / pow(msp.discount, t)
-            policy_value += msp.get_stage_cost(t)
+                stage_cost[t] = msp.get_stage_cost(m, t) / pow(msp.discount, t)
+            policy_value += msp.get_stage_cost(m, t)
             if markovian_idx is not None:
                 m.update_uncertainty_dependent(msp.Markov_states[idx][markovian_idx[t]])
             if self.iteration != 0 and self.rgl_a != 0:
@@ -876,7 +876,7 @@ class SDDP(object):
                         cut.sense = '>'
                     flag = 1
                     for k in range(m.n_samples):
-                        m._update_uncertainty(k)
+                        m.update_uncertainty(k)
                         m.optimize()
                         if m.status == 4:
                             m.Params.DualReductions = 0
@@ -969,7 +969,7 @@ class SDDP(object):
             query_stage_cost_flag: bool = False,
             query_policy_value_flag: bool = False,
             freq_clean: int | list = None,
-            logFile_flag: bool = True,
+            logToFile_flag: bool = True,
             logToConsole_flag: bool = True,
             directory: str = '',
             rgl_norm: str = 'L2',
@@ -1022,7 +1022,7 @@ class SDDP(object):
               If int, perform cleaning at the same frequency for all stages.
               If listed, perform cleaning at different frequency for each stage;
               must be of length T-1 (the last stage does not have any cuts).
-          logFile_flag: binary, optional (default=1)
+          logToFile_flag: binary, optional (default=1)
               Switch of logging to log file
           logToConsole_flag: binary, optional (default=1)
               Switch of logging to console
@@ -1079,7 +1079,7 @@ class SDDP(object):
             self.jobs = allocate_jobs(self.n_steps, self.n_processes)
 
         logger_sddp = LoggerSDDP(
-            logFile_flag = logFile_flag,
+            logToFile_flag = logToFile_flag,
             logToConsole_flag = logToConsole_flag,
             n_processes = self.n_processes,
             percentile = self.percentile,
@@ -1090,7 +1090,7 @@ class SDDP(object):
             logger_evaluation = LoggerEvaluation(
                 n_simulations = n_simulations,
                 percentile = percentile,
-                logFile_flag = logFile_flag,
+                logToFile_flag = logToFile_flag,
                 logToConsole_flag = logToConsole_flag,
                 directory = directory,
             )
@@ -1099,7 +1099,7 @@ class SDDP(object):
             logger_comparison = LoggerComparison(
                 n_simulations = n_simulations,
                 percentile = percentile,
-                logFile_flag = logFile_flag,
+                logToFile_flag = logToFile_flag,
                 logToConsole_flag = logToConsole_flag,
                 directory = directory,
             )

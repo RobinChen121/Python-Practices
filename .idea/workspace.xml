@@ -8,12 +8,23 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="f99bd7d8-beb4-47cd-bc85-89bae93f688b" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/stochastic programming/msppy_chen/.log" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/stochastic programming/msppy_chen/portfolio_optimization.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../msppy/quick_start/final.lp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/Python-Practices.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/Python-Practices.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/dictionaries/zhenchen.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dictionaries/zhenchen.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/draw-pictures/draw_heart3.py" beforeDir="false" afterPath="$PROJECT_DIR$/draw-pictures/draw_heart3.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/stochastic programming/msppy_chen/evaluation.py" beforeDir="false" afterPath="$PROJECT_DIR$/stochastic programming/msppy_chen/evaluation.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/stochastic programming/msppy_chen/msm.py" beforeDir="false" afterPath="$PROJECT_DIR$/stochastic programming/msppy_chen/msm.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/stochastic programming/msppy_chen/sddp.py" beforeDir="false" afterPath="$PROJECT_DIR$/stochastic programming/msppy_chen/sddp_me_test.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/stochastic programming/msppy_chen/sm_detail.py" beforeDir="false" afterPath="$PROJECT_DIR$/stochastic programming/msppy_chen/sm_detail.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/stochastic programming/msppy_chen/solver_detail.py" beforeDir="false" afterPath="$PROJECT_DIR$/stochastic programming/msppy_chen/solver_detail.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/stochastic programming/msppy_chen/utils/exception.py" beforeDir="false" afterPath="$PROJECT_DIR$/stochastic programming/msppy_chen/utils/exception.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/stochastic programming/msppy_chen/utils/logger.py" beforeDir="false" afterPath="$PROJECT_DIR$/stochastic programming/msppy_chen/utils/logger.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/stochastic programming/msppy_chen/utils/statistics.py" beforeDir="false" afterPath="$PROJECT_DIR$/stochastic programming/msppy_chen/utils/statistics.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../msppy/.idea/msppy.iml" beforeDir="false" afterPath="$PROJECT_DIR$/../msppy/.idea/msppy.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../msppy/quick_start/newsvendor.py" beforeDir="false" afterPath="$PROJECT_DIR$/../msppy/quick_start/newsvendor.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../msppy/requirement.txt" beforeDir="false" afterPath="$PROJECT_DIR$/../msppy/requirement.txt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -45,25 +56,27 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;Python.air_conditioner.executor&quot;: &quot;Run&quot;,
-    &quot;Python.determin_orderLoan.executor&quot;: &quot;Run&quot;,
-    &quot;Python.logger.executor&quot;: &quot;Debug&quot;,
-    &quot;Python.news_vendor.executor&quot;: &quot;Run&quot;,
-    &quot;Python.newsvendor.executor&quot;: &quot;Run&quot;,
-    &quot;Python.portfolio_optimization.executor&quot;: &quot;Run&quot;,
-    &quot;Python.saa_orderLoan_LowerBounds.executor&quot;: &quot;Run&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
-    &quot;last_opened_file_path&quot;: &quot;D:/Users/chen/git/msppy&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;fileTemplates&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Python.air_conditioner.executor": "Run",
+    "Python.determin_orderLoan.executor": "Run",
+    "Python.draw_heart3.executor": "Run",
+    "Python.evaluation.executor": "Run",
+    "Python.logger.executor": "Debug",
+    "Python.news_vendor.executor": "Debug",
+    "Python.newsvendor.executor": "Run",
+    "Python.portfolio_optimization.executor": "Run",
+    "Python.saa_orderLoan_LowerBounds.executor": "Run",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "git-widget-placeholder": "master",
+    "last_opened_file_path": "D:/Users/chen/git/msppy",
+    "nodejs_package_manager_path": "npm",
+    "settings.editor.selected.configurable": "Errors",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
   <component name="PyConsoleOptionsProvider">
     <option name="myPythonConsoleState">
       <console-settings module-name="Python-Practices" is-module-sdk="true">
@@ -83,198 +96,6 @@
       <recent name="D:\Users\chen_\git\Python-Practices\statistics book\draw_pics" />
       <recent name="D:\Users\chen_\git\Python-Practices" />
     </key>
-  </component>
-  <component name="RunManager">
-    <configuration name="determin_orderLoan (1)" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
-      <module name="Python-Practices" />
-      <option name="ENV_FILES" value="" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/linear programming/gurobi/scenario programming SCF Lost-sale" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/linear programming/gurobi/scenario programming SCF Lost-sale/determin_orderLoan.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
-    <configuration name="determin_orderLoan" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
-      <module name="Python-Practices" />
-      <option name="ENV_FILES" value="" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/linear programming/gurobi/scenario programming SCF Lost-sale" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="D:\Users\chen_\git\Python-Practices\linear programming\gurobi\scenario programming SCF Lost-sale\determin_orderLoan.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
-    <configuration name="determin_orderLoan" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
-      <module name="Python-Practices" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/linear programming/gurobi/scenario programming SCF Lost-sale" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="D:\Users\chen_\git\Python-Practices\linear programming\gurobi\scenario programming SCF Lost-sale\determin_orderLoan.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
-    <configuration name="portfolio_optimization" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
-      <module name="msppy" />
-      <option name="ENV_FILES" value="" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/../msppy/quick_start" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/../msppy/quick_start/portfolio_optimization.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
-    <configuration name="quantile_regression" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
-      <module name="Python-Practices" />
-      <option name="ENV_FILES" value="" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/sk-learn" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/sk-learn/quantile_regression.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
-    <configuration name="saa_multiperiod_test" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
-      <module name="Python-Practices" />
-      <option name="ENV_FILES" value="" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/linear programming/gurobi/SAA" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/linear programming/gurobi/SAA/saa_multiperiod_test.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
-    <configuration name="saa_orderLoan" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
-      <module name="Python-Practices" />
-      <option name="ENV_FILES" value="" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/linear programming/gurobi/SAA" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/linear programming/gurobi/SAA/saa_orderLoan.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
-    <configuration name="saa_orderLoan_LowerBounds" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
-      <module name="Python-Practices" />
-      <option name="ENV_FILES" value="" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/linear programming/gurobi/SAA" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/linear programming/gurobi/SAA/saa_orderLoan_LowerBounds.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
-    <recent_temporary>
-      <list>
-        <item itemvalue="Python.portfolio_optimization" />
-        <item itemvalue="Python.saa_orderLoan_LowerBounds" />
-        <item itemvalue="Python.saa_orderLoan" />
-        <item itemvalue="Python.saa_multiperiod_test" />
-        <item itemvalue="Python.quantile_regression" />
-      </list>
-    </recent_temporary>
   </component>
   <component name="SharedIndexes">
     <attachedChunks>
@@ -472,6 +293,21 @@
           <url>file://$PROJECT_DIR$/../msppy/quick_start/selling_tickets.py</url>
           <line>5</line>
           <option name="timeStamp" value="195" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/stochastic programming/msppy_chen/solver_detail.py</url>
+          <line>1128</line>
+          <option name="timeStamp" value="197" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/stochastic programming/msppy_chen/news_vendor.py</url>
+          <line>58</line>
+          <option name="timeStamp" value="198" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/stochastic programming/msppy_chen/news_vendor.py</url>
+          <line>57</line>
+          <option name="timeStamp" value="199" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

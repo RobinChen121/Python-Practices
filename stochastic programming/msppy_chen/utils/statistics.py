@@ -15,7 +15,7 @@ from scipy import stats
 import numbers
 
 
-def compute_CI(array, percentile: int) -> float:
+def compute_CI(array, percentile: int) -> tuple[float, float]:
     """
     Compute percentile % CI (confidence level) for the given array.
 
