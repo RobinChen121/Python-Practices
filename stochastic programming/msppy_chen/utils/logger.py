@@ -61,7 +61,7 @@ class LoggerSDDP(Logger):
         self.percentile = percentile
         self.n_processes = n_processes
         super().__init__(**kwargs)
-        self.n_slots = 84 if self.n_processes > 1 else 64
+        self.n_slots = 100 if self.n_processes > 1 else 64
 
     def __repr__(self):
         return "SDDP"
@@ -77,7 +77,7 @@ class LoggerSDDP(Logger):
         self.logger.info("-" * self.n_slots)
         if self.n_processes > 1:
             self.logger.info(
-                "{:>12s}{:>20s}{:^50s}{:>12s}" # s is not necessary
+                "{:<10s}{:^30s}{:^50s}{:>10s}" # s is not necessary
                 .format(
                     "Iteration",
                     "Bound",
@@ -97,7 +97,7 @@ class LoggerSDDP(Logger):
             )
         self.logger.info("-" * self.n_slots)
 
-    def text(self, iteration, obj_bound: float, time, policy_value: float = None, CI: list = None):
+    def text(self, iteration, obj_bound: float, time, policy_value: float = None, CI: tuple = None):
         """
             body text of the logger
         Args:

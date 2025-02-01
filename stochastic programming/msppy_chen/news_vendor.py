@@ -16,7 +16,7 @@ selling amount is restricted between half of demand and full demand.
 
 """
 
-from msm import MSP
+from msm import MSLP
 from solver_detail import Extensive, SDDP
 import gurobipy
 
@@ -26,7 +26,7 @@ PurchasePrice = [5.0, 8.0]
 Demand = [[10.0, 15.0], [12.0, 20.0], [8.0, 20.0]]
 RetailPrice = 7.0
 
-newsVendor = MSP(T = T, sense = 1, bound = -1000)
+newsVendor = MSLP(T = T, sense = 1, bound = -1000)
 newsVendor.add_MC_uncertainty_discrete(
     Markov_states = [
         [[5.0]],
@@ -56,4 +56,4 @@ for t in range(T):
         m.addConstr(now == 5.0)
 Extensive(newsVendor).solve() # no need for non-anticipative constraints since all the variables are indexed by sample paths
 newsVendor.set_AVaR(a = 0.6, l = 0.5)
-SDDP(newsVendor).solve(max_iterations = 100)
+SDDP(newsVendor).solve(n_processes = 2, n_steps = 2, max_iterations = 100)

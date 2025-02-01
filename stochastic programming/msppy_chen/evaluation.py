@@ -13,9 +13,10 @@ from utils.statistics import compute_CI, allocate_jobs
 from numpy.typing import ArrayLike
 from typing import TYPE_CHECKING
 # if TYPE_CHECKING:
-from msm import MSP
+from msm import MSLP
 
 
+# noinspection PyTypeChecker
 class _Evaluation:
     """
     Evaluation base class.
@@ -64,15 +65,15 @@ class _Evaluation:
     n_simulations: number of simulations
     """
 
-    def __init__(self, msp: MSP):
+    def __init__(self, msp: MSLP):
         self.MSP = msp
-        self.policy_bound: float = MSP.policy_bound
+        self.policy_bound: float = MSLP.bound
         self.policy_values: list = None
         self.CI: tuple = None
         self.exact_policy_value: float = None
         self.gap: float = None
         self.stage_cost: ArrayLike = None
-        self.solution: ArrayLike = None
+        self.solution: dict = None
         self.n_sample_paths: int = None
         self.sample_path_idx: list = None
         self.markovian_idx: list = None
@@ -97,8 +98,8 @@ class _Evaluation:
         except ZeroDivisionError:
             self.gap = -1
 
-    # def _compute_sample_path_idx_and_markovian_path(self):
-    #     pass
+    def _compute_sample_path_idx_and_markovian_path(self, T):
+        pass
 
     def run(
             self,
@@ -194,7 +195,7 @@ class _Evaluation:
             self.exact_policy_value = numpy.dot(
                 policy_values,
                 [
-                    msp._compute_weight_sample_path(self.sample_path_idx[j])
+                    msp.compute_weight_sample_path(self.sample_path_idx[j])
                     for j in range(self.n_sample_paths)
                 ],
             )
@@ -223,7 +224,7 @@ class _Evaluation:
         MSP = self.MSP
         markovian_samples = markovian_idices = None
         solver = self.solver
-        if MSP._type == "Markovian" and self.solve_true:
+        if MSP.type == "Markovian" and self.solve_true:
             markovian_samples = MSP.Markovian_uncertainty(
                 random_state, len(jobs))
             markovian_idices = numpy.zeros([len(jobs), solver.forward_T], dtype=int)
@@ -283,14 +284,14 @@ class EvaluationTrue(Evaluation):
     __doc__ = Evaluation.__doc__
 
     def run(self, *args, **kwargs):
-        MSP = self.MSP
-        if MSP.__class__.__name__ == 'MSIP':
-            MSP._back_binarize()
+        msp = self.MSP
+        if msp.__class__.__name__ == 'MSIP':
+            msp._back_binarize()
         # discrete finite model should call evaluate instead
         if (
-                MSP._type in ["stage-wise independent", "Markov chain"]
-                and MSP._individual_type == "original"
-                and not hasattr(MSP, "bin_stage")
+                msp.type in ["stage-wise independent", "Markov chain"]
+                and msp.individual_type == "original"
+                and not hasattr(msp, "bin_stage")
         ):
             return super().run(*args, **kwargs)
         return _Evaluation.run(self, *args, **kwargs)
@@ -298,8 +299,8 @@ class EvaluationTrue(Evaluation):
     def _compute_sample_path_idx_and_markovian_path(self, T):
         MSP = self.MSP
         if (
-                MSP._type in ["stage-wise independent", "Markov chain"]
-                and MSP._individual_type == "original"
+                MSP.type in ["stage-wise independent", "Markov chain"]
+                and MSP.individual_type == "original"
                 and not hasattr(MSP, "bin_stage")
         ):
             return super()._compute_sample_path_idx_and_markovian_path(T)

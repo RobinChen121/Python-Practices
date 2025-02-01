@@ -25,11 +25,12 @@ import gurobipy
 
 
 # noinspection PyUnresolvedReferences
-class MSP:
+class MSLP:
     """
-    A class of multi-stage programming model;
+    A class of multi-stage linear programming model;
     """
 
+    bound = None
 
     def __init__(self,
                  T: int,
@@ -57,6 +58,8 @@ class MSP:
             A class of multi-stage linear programming model
 
         """
+        self.bound = bound  # A known uniform lower bound or upper bound for each stage problem
+
         if (T < 2
                 or discount > 1
                 or discount < 0
@@ -73,14 +76,13 @@ class MSP:
 
         self.models = None
         self.T = T
-        self.bound = bound # A known uniform lower bound or upper bound for each stage problem
         self.sense = sense
         self.discount = discount
 
         self.measure = 'risk neutral'
         self.type = 'stage-wise independent'
         self._flag_discrete = 0
-        self._individual_type = 'original'
+        self.individual_type = 'original'
         self.Markov_states = None
         self.Markovian_uncertainty = None
         self.transition_matrix = None
@@ -144,7 +146,7 @@ class MSP:
     def _set_up_model_attr(self, sense, outputLogFlag, kwargs):
         for t in range(self.T):
             m = self.models[t]
-            m.Params.outputLogFlag = outputLogFlag
+            m.Params.LogToConsole = outputLogFlag
             m.setAttr('modelsense', sense)
             for k, v in kwargs.items():
                 m.setParam(k, v)

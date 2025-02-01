@@ -11,7 +11,7 @@ Created on 2025/1/10, 21:48
 # from typing import TYPE_CHECKING
 # if TYPE_CHECKING:
 from sm_detail import StochasticModel
-from msm import MSP
+from msm import MSLP
 from utils.statistics import rand_int, allocate_jobs, compute_CI
 from utils.logger import LoggerSDDP, LoggerEvaluation, LoggerComparison
 from evaluation import Evaluation, EvaluationTrue
@@ -38,7 +38,7 @@ class Extensive:
 
     Parameters:
     ----------
-    msp: A multi-stage stochastic program object.
+    msp: A multi-stage stochastic liner program object.
 
     Attributes
     ----------
@@ -52,7 +52,7 @@ class Extensive:
         The time cost in constructing extensive model
     """
 
-    def __init__(self, msp: MSP) -> None:
+    def __init__(self, msp: MSLP) -> None:
         self.start = 0  # starting stage
         self.extensive_model = None
         self.MSP = msp
@@ -454,7 +454,7 @@ class SDDP(object):
         policy_value: list, policy value at each iteration
     """
 
-    def __init__(self, msp: MSP, biased_sampling = False):
+    def __init__(self, msp: MSLP, biased_sampling = False):
         # the following 3 lines are for regularization setting
         self.rgl_b: float = None
         self.rgl_a: float = None
@@ -462,7 +462,7 @@ class SDDP(object):
 
         self.obj_bound: list = []  # objective bound found by the solver at each iteration
         self.policy_value: list = []  # policy value at each iteration
-        self.msp: MSP = msp
+        self.msp: MSLP = msp
         self.forward_T: int = msp.T
         self.cut_T: int = msp.T - 1
         self.cut_type: list[str] = ["B"]
@@ -471,7 +471,7 @@ class SDDP(object):
 
         # the following 3 lines are for parallel computation setting
         self.n_processes: int = 1
-        self.jobs: list = None
+        self.jobs: list = []
         self.n_steps: int = 1
 
         self.percentile = 95
@@ -896,7 +896,8 @@ class SDDP(object):
         pass
 
     def _SDDP_multiprocessesing(self):
-        """Prepare a collection of multiprocessing arrays to store cuts.
+        """
+        Prepare a collection of multiprocessing arrays to store cuts.
         Cuts are stored in the form of:
          Independent case (index: t, cut_type, j):
             {t:{cut_type: [cut_coeffs_and_rhs]}
@@ -922,6 +923,7 @@ class SDDP(object):
                         for _ in range(self.n_steps)]
                     for cut_type in self.cut_type_list[t]}
                 for t in range(self.cut_T)}
+            pass
 
         policy_value = multiprocessing.Array("d", [0] * self.n_steps)
         lock = multiprocessing.Lock()
@@ -1086,7 +1088,7 @@ class SDDP(object):
             directory = directory,
         )
         logger_sddp.header()
-        if freq_evaluations is not None or freq_comparisons is not None:
+        if freq_evaluations is not None:
             logger_evaluation = LoggerEvaluation(
                 n_simulations = n_simulations,
                 percentile = percentile,
@@ -1104,6 +1106,7 @@ class SDDP(object):
                 directory = directory,
             )
             logger_comparison.header()
+        stop_reason = ''
         try:
             while (
                     self.iteration < max_iterations
@@ -1133,6 +1136,7 @@ class SDDP(object):
                 obj_bound = m.objBound
                 self.obj_bound.append(obj_bound)
                 msp.obj_bound = obj_bound
+                CI = ()
                 if self.n_processes != 1:
                     CI = compute_CI(policy_value, percentile)
                 self.policy_value.append(policy_value)
@@ -1301,12 +1305,14 @@ class SDDP(object):
         if right_end_of_CI <= tol_diff:
             stop_reason = "stabilization threshold:{} has reached".format(tol_diff)
 
-        logger_sddp.footer(reason=stop_reason)
+        logger_sddp.footer(reason = stop_reason)
         if freq_evaluations is not None or freq_comparisons is not None:
             logger_evaluation.footer()
         if freq_comparisons is not None:
             logger_comparison.footer()
         self.total_time = total_time
+        print('*'*50, end = '\n')
+        print('the final result of SDDP is %.2f' % msp.obj_bound)
 
     @property
     def first_stage_solution(self):

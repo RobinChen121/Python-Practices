@@ -38,14 +38,14 @@ min x + 3w + 0.5y
      
 """
 
-from msm import MSP
+from msm import MSLP
 from solver_detail import Extensive
 
 
 T = 3
 D = [100, 300]
 
-airConditioner = MSP(T, bound = 0)
+airConditioner = MSLP(T, bound = 0)
 for t in range(T):
     m = airConditioner[t]
     y_now, y_past = m.addStateVar(obj = 50, vtype =  'I', name = 'y')
