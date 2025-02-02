@@ -8,15 +8,29 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="f99bd7d8-beb4-47cd-bc85-89bae93f688b" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/dictionaries/zhenchen.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dictionaries/zhenchen.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/practices/multi-process/array-2process.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/practices/multi-process/fibnocci.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/practices/multi-process/multi-process-array.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/practices/multi-process/multiprocess-fork-spawn.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/practices/multi-process/multiprocess-lock.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/practices/multi-process/multiprocess-lock2.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/practices/multi-process/multiprocess-manager.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/practices/multi-process/multiprocess-pickle.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/practices/multi-process/multiprocess-pickle2.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/practices/multi-process/multiprocess-pipe.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/practices/multi-process/multiprocess-queue.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/practices/MemorizeTimeTesting.py" beforeDir="false" afterPath="$PROJECT_DIR$/practices/MemorizeTimeTesting.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/practices/multiprocess.py" beforeDir="false" afterPath="$PROJECT_DIR$/practices/multi-process/multiprocess-pool.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/practices/multiprocess2.py" beforeDir="false" afterPath="$PROJECT_DIR$/practices/multi-process/multiprocess-process.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/practices/multiprocess3.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/practices/multiprocess4.py" beforeDir="false" afterPath="$PROJECT_DIR$/practices/multi-process/multiprocess-process2.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/practices/multiprocess5.py" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/stochastic programming/msppy_chen/.log" beforeDir="false" afterPath="$PROJECT_DIR$/stochastic programming/msppy_chen/.log" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/stochastic programming/msppy_chen/air_conditioner.py" beforeDir="false" afterPath="$PROJECT_DIR$/stochastic programming/msppy_chen/air_conditioner.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/stochastic programming/msppy_chen/evaluation.py" beforeDir="false" afterPath="$PROJECT_DIR$/stochastic programming/msppy_chen/evaluation.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/stochastic programming/msppy_chen/msm.py" beforeDir="false" afterPath="$PROJECT_DIR$/stochastic programming/msppy_chen/msm.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/stochastic programming/msppy_chen/news_vendor.py" beforeDir="false" afterPath="$PROJECT_DIR$/stochastic programming/msppy_chen/news_vendor.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/stochastic programming/msppy_chen/solver_detail.py" beforeDir="false" afterPath="$PROJECT_DIR$/stochastic programming/msppy_chen/solver_detail.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/stochastic programming/msppy_chen/utils/logger.py" beforeDir="false" afterPath="$PROJECT_DIR$/stochastic programming/msppy_chen/utils/logger.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../msppy/quick_start/absolute.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/../msppy/quick_start/absolute.ipynb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../msppy/quick_start/final.lp" beforeDir="false" afterPath="$PROJECT_DIR$/../msppy/quick_start/final.lp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../msppy/quick_start/newsvendor.py" beforeDir="false" afterPath="$PROJECT_DIR$/../msppy/quick_start/newsvendor.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -51,11 +65,28 @@
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
     "Python tests.Doctest via pytest in solver_detail.py.executor": "Debug",
+    "Python.MemorizeTimeTesting.executor": "Run",
+    "Python.a_simple_MIP.executor": "Run",
     "Python.air_conditioner.executor": "Run",
+    "Python.array-2process.executor": "Run",
     "Python.determin_orderLoan.executor": "Run",
     "Python.draw_heart3.executor": "Run",
     "Python.evaluation.executor": "Run",
+    "Python.fibnocci.executor": "Run",
     "Python.logger.executor": "Debug",
+    "Python.multi-process-array.executor": "Debug",
+    "Python.multiprocess-fork-spawn.executor": "Run",
+    "Python.multiprocess-lock.executor": "Run",
+    "Python.multiprocess-lock2.executor": "Run",
+    "Python.multiprocess-pickle.executor": "Run",
+    "Python.multiprocess-pickle2.executor": "Run",
+    "Python.multiprocess2.executor": "Run",
+    "Python.multiprocess3.executor": "Run",
+    "Python.multiprocess4.executor": "Run",
+    "Python.multiprocess5.executor": "Run",
+    "Python.multiprocess6.executor": "Run",
+    "Python.multiprocess7.executor": "Run",
+    "Python.multiprocess8.executor": "Run",
     "Python.news_vendor.executor": "Debug",
     "Python.newsvendor.executor": "Run",
     "Python.portfolio_optimization.executor": "Run",
@@ -66,7 +97,7 @@
     "git-widget-placeholder": "master",
     "last_opened_file_path": "D:/Users/chen/git/msppy",
     "nodejs_package_manager_path": "npm",
-    "settings.editor.selected.configurable": "Errors",
+    "settings.editor.selected.configurable": "advanced.settings",
     "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
@@ -83,11 +114,11 @@
       <recent name="D:\Users\chen_\git\Python-Practices\Chonqqing Power Grid" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/practices/multi-process" />
       <recent name="$PROJECT_DIR$/stochastic programming" />
       <recent name="D:\Users\chen_\git\Python-Practices\crawler" />
       <recent name="D:\Users\chen_\git\Python-Practices\statistics book" />
       <recent name="D:\Users\chen_\git\Python-Practices\statistics book\draw_pics" />
-      <recent name="D:\Users\chen_\git\Python-Practices" />
     </key>
   </component>
   <component name="SharedIndexes">
@@ -294,20 +325,27 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/stochastic programming/msppy_chen/solver_detail.py</url>
-          <line>1161</line>
-          <option name="timeStamp" value="206" />
+          <line>916</line>
+          <option name="timeStamp" value="231" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/practices/multi-process/fibnocci.py</url>
+          <line>53</line>
+          <option name="timeStamp" value="247" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/stochastic programming/msppy_chen/solver_detail.py</url>
-          <line>906</line>
-          <option name="timeStamp" value="217" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/stochastic programming/msppy_chen/solver_detail.py</url>
-          <line>925</line>
-          <option name="timeStamp" value="218" />
+          <line>970</line>
+          <option name="timeStamp" value="250" />
         </line-breakpoint>
       </breakpoints>
+      <default-breakpoints>
+        <breakpoint type="python-exception">
+          <properties notifyOnTerminate="true" exception="BaseException">
+            <option name="notifyOnTerminate" value="true" />
+          </properties>
+        </breakpoint>
+      </default-breakpoints>
     </breakpoint-manager>
     <watches-manager>
       <configuration name="PythonConfigurationType">

@@ -3,7 +3,7 @@
 """
 Created on Wed Nov 27 22:20:40 2024
 
-@author: zhenchen
+@author: zhen chen
 
 @disp:  test multi processing in python
 

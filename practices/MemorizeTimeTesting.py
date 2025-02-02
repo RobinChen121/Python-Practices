@@ -1,6 +1,6 @@
 import time
 import functools
-import collections
+from collections.abc import Hashable
 
 
 class memoized(object):
@@ -12,7 +12,7 @@ class memoized(object):
       self.func = func
       self.cache = {}
    def __call__(self, *args):
-      if not isinstance(args, collections.Hashable):
+      if not isinstance(args, Hashable):
          # uncacheable. a list, for instance.
          # better to not cache than blow up.
          return self.func(*args)
@@ -41,15 +41,15 @@ def fib2(n) :
         return n
     return fib2(n-1)+fib2(n-2)
 
-start = time.clock()
-a = fib(40)
+start = time.time()
+a = fib(30)
 print(a)
-end = time.clock()
+end = time.time()
 cpu_time = end-start
 print('cpu  time is %.3f' % cpu_time)
-start = time.clock()
-b = fib2(40)
+start = time.time()
+b = fib2(30)
 print(b)
-end = time.clock()
+end = time.time()
 cpu_time = end-start
-print('cpu  time after memoizing is %.3f' % cpu_time)
+print('cpu  time after memorizing is %.3f' % cpu_time)

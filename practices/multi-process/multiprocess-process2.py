@@ -3,7 +3,7 @@
 """
 Created on Sun Jan  5 15:18:29 2025
 
-@author: zhenchen
+@author: zhen chen
 
 @Python version: 3.10
 
@@ -13,6 +13,7 @@ Created on Sun Jan  5 15:18:29 2025
 """
 
 from multiprocessing import Process
+import os
 
 
 def print_func(continent='Asia'):
@@ -21,7 +22,7 @@ def print_func(continent='Asia'):
 if __name__ == "__main__":  # confirms that the code is under main function
     names = ['America', 'Europe', 'Africa']
     procs = []
-    proc = Process(target=print_func)  # instantiating without any argument
+    proc = Process(target = print_func)  # instantiating without any argument
     procs.append(proc)
     proc.start()
 

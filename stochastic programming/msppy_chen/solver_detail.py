@@ -24,6 +24,7 @@ import math
 import multiprocessing
 import numbers
 import pandas
+import pdb
 
 
 class Extensive:
@@ -654,7 +655,12 @@ class SDDP(object):
             }
 
     def _add_and_store_cuts(
-            self, t: int, rhs: float, grad, cuts: ArrayLike = None, cut_type: str = None, j: int = None
+            self, t: int,
+            rhs: float | ArrayLike,
+            grad: float | ArrayLike,
+            cuts: ArrayLike = None,
+            cut_type: str = None,
+            j: int = None
     ) -> None:
         """
         Store cut information (rhs and grad) to cuts for the j th step, for cut
@@ -681,6 +687,7 @@ class SDDP(object):
                 msp.models[t - 1][k].add_cut(rhs[k], grad[k])
                 if cuts is not None:
                     cuts[t - 1][cut_type][j][k][:] = numpy.append(rhs[k], grad[k])
+                pass
 
     def _compute_cuts(self, t: int, m: StochasticModel,
                       objLP_samples: ArrayLike,
@@ -720,9 +727,13 @@ class SDDP(object):
                                              probability[k])
         return objLP, gradLP
 
-    def _backward(self, state_solution: list[float], j: int = None, cuts = None):
+    def _backward(self, state_solution: list[float],
+                  j: int = None,
+                  lock = None,
+                  cuts = None) -> None:
         """
             Single backward step of SDDP serially or in parallel.
+            Add and store cuts in this step.
 
         Args:
           state_solution: feasible state solutions obtained from forward step
@@ -754,7 +765,11 @@ class SDDP(object):
             # according to the cut constraint formula, the following is the difference
             objLP -= numpy.matmul(gradLP, state_solution[t - 1]) # matrix product
 
-            self._add_and_store_cuts(t, rhs = objLP, grad = gradLP, cuts = cuts, cut_type = "B", j = j)
+            if lock is None:
+                self._add_and_store_cuts(t, rhs = objLP, grad = gradLP, cuts = cuts, cut_type = "B", j = j)
+            else:
+                with lock:
+                    self._add_and_store_cuts(t, rhs=objLP, grad=gradLP, cuts=cuts, cut_type="B", j=j)
             # self._add_cuts_additional_procedure(t, objLP, gradLP, objLP_samples,
             #                                     gradLP_samples, state_solution[t - 1], cuts, "B", j)
 
@@ -809,45 +824,6 @@ class SDDP(object):
                     m.weights[k] = ((1 - self.l[t]) / n_samples
                                     + self.l[t] / (self.a[t] * n_samples))
 
-    def _SDDP_single(self) -> list[float]:
-        """
-        A single serial SDDP step including both
-        the forward pass and backward pass.
-
-        Returns:
-            Returns the policy value in list format
-
-        """
-        # randomState_instance is constructed by the iteration index
-        randomState_instance = numpy.random.RandomState(self.iteration)
-        temp = self._forward(randomState_instance)
-        state_solution = temp['state_solution']
-        policy_value = temp['policy_value']
-        self.rgl_center = state_solution
-        pre_state_solution = self._select_trial_solution(state_solution)
-        self._backward(pre_state_solution)
-        return [policy_value]
-
-    def _SDDP_single_process(self, policy_value, jobs, lock, cuts, state_solution = None):
-        """Multiple SDDP jobs by single process. policy_value will store the policy values.
-        cuts will store the cut information. Have not use the lock parameter so
-        far."""
-        # randomState_instance is constructed by the number of iteration and the index
-        # of the first job that the current process does
-        randomState_instance = numpy.random.RandomState([self.iteration, jobs[0]])
-        for j in jobs:
-            temp = self._forward(randomState_instance)
-            solution = temp['state_solution']
-            policy_value[j] = temp['policy_value']
-            # regularization needs to store last state_solution
-            if j == jobs[-1] and self.rgl_a != 0:
-                for t in range(self.forward_T):
-                    idx = t
-                    for i in range(self.msp.n_states[idx]):
-                        state_solution[t][i] = solution[t][i]
-            solution = self._select_trial_solution(solution)
-            self._backward(solution, j, lock, cuts)
-
     def _add_cut_from_multiprocessing_array(self, cuts):
         for t in range(self.cut_T):
             for cut_type in self.cut_type_list[t]:
@@ -895,6 +871,51 @@ class SDDP(object):
     def _compute_cut_type(self):
         pass
 
+    def _SDDP_single(self) -> list[float]:
+        """
+        A single serial SDDP step including both
+        the forward pass and backward pass.
+
+        Returns:
+            Returns the policy value in list format
+
+        """
+        # randomState_instance is constructed by the iteration index
+        randomState_instance = numpy.random.RandomState(self.iteration)
+        temp = self._forward(randomState_instance)
+        state_solution = temp['state_solution']
+        # this policy_value is a float
+        policy_value = temp['policy_value']
+        self.rgl_center = state_solution
+        pre_state_solution = self._select_trial_solution(state_solution)
+        self._backward(pre_state_solution)
+        return [policy_value]
+
+    def _SDDP_single_process(self, jobs, lock, cuts):
+        """
+        Multiple SDDP jobs by single process. policy_value will store the policy values.
+        cuts will store the cut information.
+        Have not use the lock parameter so far.
+
+        """
+        # randomState_instance is constructed by the number of iteration and the index
+        # of the first job that the current process does.
+        # list can be the seed of the random generator
+        randomState_instance = numpy.random.RandomState([self.iteration, jobs[0]])
+        for j in jobs:
+            temp = self._forward(randomState_instance)
+            state_solution = temp['state_solution']
+            # policy_value[j] = temp['policy_value']
+            # regularization needs to store last state_solution
+            # if j == jobs[-1] and self.rgl_a != 0:
+            #     for t in range(self.forward_T):
+            #         idx = t
+            #         for i in range(self.msp.n_states[idx]):
+            #             state_solution[t][i] = solution[t][i]
+            pre_state_solution = self._select_trial_solution(state_solution)
+            self._backward(pre_state_solution, j, lock, cuts)
+            pdb.set_trace()
+
     def _SDDP_multiprocessesing(self):
         """
         Prepare a collection of multiprocessing arrays to store cuts.
@@ -905,42 +926,49 @@ class SDDP(object):
             {t:{cut_type: [[cut_coeffs_and_rhs]]}
         """
         procs = [None] * self.n_processes
-        if self.msp.n_Markov_states == 1:
-            cuts = {
-                t: {
-                    cut_type: [multiprocessing.RawArray("d",
-                                                        [0] * (self.msp.n_states[t] + 1))
-                               for _ in range(self.n_steps)]
-                    for cut_type in self.cut_type_list[t]}
-                for t in range(self.cut_T)}
-        else:
-            cuts = {
-                t: {
-                    cut_type: [
-                        [multiprocessing.RawArray("d",
-                                                  [0] * (self.msp.n_states[t] + 1))
-                         for _ in range(self.msp.n_Markov_states[t])]
-                        for _ in range(self.n_steps)]
-                    for cut_type in self.cut_type_list[t]}
-                for t in range(self.cut_T)}
-            pass
+        # if self.msp.n_Markov_states == 1:
+        #     cuts = {
+        #         t: {
+        #             # RawArray: an array allocated from shared memory
+        #             cut_type: [multiprocessing.RawArray("d",
+        #                                                 [0] * (self.msp.n_states[t] + 1))
+        #                        for _ in range(self.n_steps)]
+        #             for cut_type in self.cut_type_list[t]}
+        #         for t in range(self.cut_T)}
+        # else:
+        #     cuts = {
+        #         t: {
+        #             cut_type: [
+        #                 [multiprocessing.RawArray("d",
+        #                                           [0] * (self.msp.n_states[t] + 1))
+        #                  for _ in range(self.msp.n_Markov_states[t])]
+        #                 for _ in range(self.n_steps)]
+        #             for cut_type in self.cut_type_list[t]}
+        #         for t in range(self.cut_T)}
+        cuts = None
 
-        policy_value = multiprocessing.Array("d", [0] * self.n_steps)
-        lock = multiprocessing.Lock()
+        # 'd' means decimal
+        # policy_value = multiprocessing.Array("d", [0] * self.n_steps)
+        policy_value = []
+        # lock = multiprocessing.Lock()
         state_solution = None
         # regularization needs to store last state_solution
-        if self.rgl_a != 0:
-            state_solution = [multiprocessing.Array(
-                "d", [0] * self.msp.n_states[t])
-                for t in range(self.forward_T)
-            ]
+        # if self.rgl_a != 0:
+        #     state_solution = [multiprocessing.Array(
+        #         "d", [0] * self.msp.n_states[t])
+        #         for t in range(self.forward_T)
+        #     ]
 
         for p in range(self.n_processes):
+            # self._SDDP_single_process(self.jobs[p], lock, cuts)
+            # pass
+
             procs[p] = multiprocessing.Process(
-                target=self._SDDP_single_process,
-                args=(policy_value, self.jobs[p], lock, cuts, state_solution),
+                target = self._SDDP_single_process,
+                args = (self.jobs[p], '', cuts),
             )
-            procs[p].start()
+            # pdb.set_trace()
+            procs[p].start() # somthing wrong here
         for proc in procs:
             proc.join()
 
