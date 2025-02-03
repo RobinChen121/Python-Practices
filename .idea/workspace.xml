@@ -8,25 +8,12 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="f99bd7d8-beb4-47cd-bc85-89bae93f688b" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/practices/multi-process/array-2process.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/practices/multi-process/fibnocci.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/practices/multi-process/multi-process-array.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/practices/multi-process/multiprocess-fork-spawn.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/practices/multi-process/multiprocess-lock.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/practices/multi-process/multiprocess-lock2.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/practices/multi-process/multiprocess-manager.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/practices/multi-process/multiprocess-pickle.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/practices/multi-process/multiprocess-pickle2.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/practices/multi-process/multiprocess-pipe.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/practices/multi-process/multiprocess-queue.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/draw-pictures/draw_lineprogramming.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/draw-pictures/draw_lineprogramming2.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/practices/multi-process/multiprocess_class.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/practices/multi-process/multiprocess_class2.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/dictionaries/zhenchen.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dictionaries/zhenchen.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/practices/MemorizeTimeTesting.py" beforeDir="false" afterPath="$PROJECT_DIR$/practices/MemorizeTimeTesting.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/practices/multiprocess.py" beforeDir="false" afterPath="$PROJECT_DIR$/practices/multi-process/multiprocess-pool.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/practices/multiprocess2.py" beforeDir="false" afterPath="$PROJECT_DIR$/practices/multi-process/multiprocess-process.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/practices/multiprocess3.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/practices/multiprocess4.py" beforeDir="false" afterPath="$PROJECT_DIR$/practices/multi-process/multiprocess-process2.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/practices/multiprocess5.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/stochastic programming/msppy_chen/.log" beforeDir="false" afterPath="$PROJECT_DIR$/stochastic programming/msppy_chen/.log" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/stochastic programming/msppy_chen/solver_detail.py" beforeDir="false" afterPath="$PROJECT_DIR$/stochastic programming/msppy_chen/solver_detail.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../msppy/quick_start/absolute.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/../msppy/quick_start/absolute.ipynb" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../msppy/quick_start/final.lp" beforeDir="false" afterPath="$PROJECT_DIR$/../msppy/quick_start/final.lp" afterDir="false" />
@@ -71,10 +58,13 @@
     "Python.array-2process.executor": "Run",
     "Python.determin_orderLoan.executor": "Run",
     "Python.draw_heart3.executor": "Run",
+    "Python.draw_lineprogramming.executor": "Run",
+    "Python.draw_lineprogramming2.executor": "Run",
     "Python.evaluation.executor": "Run",
     "Python.fibnocci.executor": "Run",
     "Python.logger.executor": "Debug",
     "Python.multi-process-array.executor": "Debug",
+    "Python.multiprocess-class.executor": "Run",
     "Python.multiprocess-fork-spawn.executor": "Run",
     "Python.multiprocess-lock.executor": "Run",
     "Python.multiprocess-lock2.executor": "Run",
@@ -87,6 +77,8 @@
     "Python.multiprocess6.executor": "Run",
     "Python.multiprocess7.executor": "Run",
     "Python.multiprocess8.executor": "Run",
+    "Python.multiprocess_class.executor": "Run",
+    "Python.multiprocess_class2.executor": "Run",
     "Python.news_vendor.executor": "Debug",
     "Python.newsvendor.executor": "Run",
     "Python.portfolio_optimization.executor": "Run",
@@ -95,7 +87,7 @@
     "RunOnceActivity.git.unshallow": "true",
     "SHARE_PROJECT_CONFIGURATION_FILES": "true",
     "git-widget-placeholder": "master",
-    "last_opened_file_path": "D:/Users/chen/git/msppy",
+    "last_opened_file_path": "/Users/zhenchen/Documents/Python-Practices/practices/multi-process",
     "nodejs_package_manager_path": "npm",
     "settings.editor.selected.configurable": "advanced.settings",
     "vue.rearranger.settings.migration": "true"
@@ -111,6 +103,7 @@
   </component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/practices/multi-process" />
       <recent name="D:\Users\chen_\git\Python-Practices\Chonqqing Power Grid" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
@@ -335,8 +328,18 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/stochastic programming/msppy_chen/solver_detail.py</url>
-          <line>970</line>
+          <line>973</line>
           <option name="timeStamp" value="250" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/stochastic programming/msppy_chen/solver_detail.py</url>
+          <line>974</line>
+          <option name="timeStamp" value="251" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$USER_HOME$/anaconda3/lib/python3.10/multiprocessing/process.py</url>
+          <line>120</line>
+          <option name="timeStamp" value="252" />
         </line-breakpoint>
       </breakpoints>
       <default-breakpoints>

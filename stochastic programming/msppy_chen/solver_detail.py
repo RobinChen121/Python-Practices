@@ -925,7 +925,7 @@ class SDDP(object):
          Markovian case (index: t, cut_type, j, k):
             {t:{cut_type: [[cut_coeffs_and_rhs]]}
         """
-        procs = [None] * self.n_processes
+
         # if self.msp.n_Markov_states == 1:
         #     cuts = {
         #         t: {
@@ -959,14 +959,17 @@ class SDDP(object):
         #         for t in range(self.forward_T)
         #     ]
 
-        for p in range(self.n_processes):
-            # self._SDDP_single_process(self.jobs[p], lock, cuts)
-            # pass
-
-            procs[p] = multiprocessing.Process(
+        procs = [multiprocessing.Process(
                 target = self._SDDP_single_process,
                 args = (self.jobs[p], '', cuts),
-            )
+            ) for p in  range(self.n_processes)]
+        for p in range(self.n_processes):
+            # self._SDDP_single_process(self.jobs[p], lock, cuts)
+
+            # procs[p] = multiprocessing.Process(
+            #     target = self._SDDP_single_process,
+            #     args = (self.jobs[p], '', cuts),
+            # )
             # pdb.set_trace()
             procs[p].start() # somthing wrong here
         for proc in procs:
@@ -974,8 +977,8 @@ class SDDP(object):
 
         self._add_cut_from_multiprocessing_array(cuts)
         # regularization needs to store last state_solution
-        if self.rgl_a != 0:
-            self.rgl_center = [list(item) for item in state_solution]
+        # if self.rgl_a != 0:
+        #     self.rgl_center = [list(item) for item in state_solution]
 
         return [item for item in policy_value]
 
