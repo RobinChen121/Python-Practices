@@ -11,7 +11,7 @@ SDDP result is -24.692 after 400 iterations
 
 """
 
-from msm import MSP
+from msm import MSLP
 from solver_detail import SDDP, Extensive
 from evaluation import Evaluation,EvaluationTrue
 import numpy
@@ -30,7 +30,7 @@ def g(random_state, size):
     return a
 
 T = 4
-AssetMgt = MSP(T = T, sense = -1, bound = 1e5, outputFlag = 0)
+AssetMgt = MSLP(T = T, sense = -1, bound = 1e5, outputFlag = 0)
 AssetMgt.add_MC_uncertainty_continuous(g)
 for t in range(T):
     m = AssetMgt[t]

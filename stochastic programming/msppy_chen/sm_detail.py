@@ -1212,7 +1212,9 @@ class StochasticModel:
 
     def set_up_link_constrs(self)-> None:
         """
-            set up the local copies-link constraints
+            set up the local copies-link constraints;
+            will update the rhs in update_link_constraint;
+
         """
         if not self.link_constrs:
             self.link_constrs = list(
@@ -1318,3 +1320,6 @@ class StochasticModel:
         raise Exception(
             "infeasibility caught; check complete recourse condition!"
         )
+
+class StochasticModelLG(StochasticModel):
+    pass

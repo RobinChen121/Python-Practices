@@ -1150,7 +1150,7 @@ class SDDP(object):
 
                 # self._compute_cut_type() # this line is not used
                 if self.n_processes == 1:
-                    policy_value = self._SDDP_single() # forward pass in the SDDP
+                    policy_value = self._SDDP_single()
                 else:
                     policy_value = self._SDDP_multiprocessesing()
 
@@ -1390,3 +1390,191 @@ class SDDP(object):
         df = pandas.DataFrame.from_records(self.policy_value)
         df['obj_bound'] = self.obj_bound
         return df
+
+class SDDiP(SDDP):
+    __doc__ = SDDP.__doc__ # parent docstring is not inherited automatically
+
+    def solve(
+            self,
+            cuts,
+            pattern=None,
+            relax_stage=None,
+            level_step_size=0.2929,
+            level_max_stable_iterations=1000,
+            level_max_iterations=1000,
+            level_max_time=1000,
+            level_mip_gap=1e-4,
+            level_tol=1e-3,
+            *args,
+            **kwargs):
+        """Call SDDiP solver to solve the discretized problem.
+
+        Parameters
+        ----------
+        cuts: list
+            Entries of the list could be 'B','SB','LG'
+
+        pattern: dict, optional (default=None)
+            The pattern of adding cuts can be cyclical or barrier-in.
+            See the example below.
+
+        relax_stage: int, optional (default=None)
+            All stage models after relax_stage (exclusive) will be relaxed.
+
+        level_step_size: float, optional (default=0.2929)
+            Step size for level method.
+
+        level_max_stable_iterations: int, optional (default=1000)
+            The maximum number of iterations to have the same deterministic g_*
+            for the level method.
+
+        level_mip_gap: float, optional (default=1e-4)
+            The MIPGap used when solving the inner problem for the level method.
+
+        level_max_iterations: int, optional (default=1000)
+            The maximum number of iterations to run for the level method.
+
+        level_max_time: int, optional (default=1000)
+            The maximum number of time to run for the level method.
+
+        level_tol: float, optional (default=1e-3)
+            Tolerance for convergence of bounds for the level method.
+
+        Examples
+        --------
+        >>> SDDiP().solve(max_iterations=10, cut=['SB'])
+
+        The following cyclical add difference cuts. Specifically, for every six
+        iterations add Benders' cuts for the first four,
+        strengthened Benders' cuts for the fifth,
+        and Lagrangian cuts for the last.
+
+        >>> SDDiP().solve(max_iterations=10, cut=['B','SB','LG'],
+        ...     pattern={"cycle": (4, 1, 1)})
+
+        The following add difference cuts from certain iterations. Specifically,
+        add Benders' cuts from the beginning,
+        Strengthened Benders' cuts from the fourth iteration,
+        and Lagragian cuts from the fifth iteration.
+
+        >>> SDDiP().solve(max_iterations=10, cut=['B','SB','LG'],
+        ...     pattern={'in': (0, 4, 5)})
+        """
+        if pattern != None:
+            if not all(
+                len(item) == len(cuts)
+                for item in pattern.values()
+            ):
+                raise Exception("pattern is not compatible with cuts!")
+        self.relax_stage = relax_stage if relax_stage != None else self.MSP.T - 1
+        self.cut_type = cuts
+        self.cut_pattern = pattern
+        self.level_step_size = level_step_size
+        self.level_max_stable_iterations = level_max_stable_iterations
+        self.level_max_iterations = level_max_iterations
+        self.level_max_time = level_max_time
+        self.level_mip_gap = level_mip_gap
+        self.level_tol = level_tol
+        super().solve(*args, **kwargs)
+
+    def _backward(self, forward_solution, j=None, lock=None, cuts=None):
+        MSP = self.MSP
+        for t in range(MSP.T-1, 0, -1):
+            if MSP.n_Markov_states == 1:
+                M, n_Markov_states = [MSP.models[t]], 1
+            else:
+                M, n_Markov_states = MSP.models[t], MSP.n_Markov_states[t]
+            objLPScen = numpy.empty((n_Markov_states, MSP.n_samples[t]))
+            gradLPScen = numpy.empty((n_Markov_states, MSP.n_samples[t],
+                MSP.n_states[t]))
+            objSBScen = numpy.empty((n_Markov_states, MSP.n_samples[t]))
+            objLGScen = numpy.empty((n_Markov_states, MSP.n_samples[t]))
+            gradLGScen = numpy.empty((n_Markov_states, MSP.n_samples[t],
+                MSP.n_states[t]))
+            for k, model in enumerate(M):
+                if MSP.n_Markov_states != 1:
+                    model._update_link_constrs(forward_solution[t-1])
+                model.update()
+                m = model.relax() if model.isMIP else model
+                objLPScen[k], gradLPScen[k] = m._solveLP()
+                # SB and LG share the same model
+                if (
+                    "SB" in self.cut_type_list[t-1]
+                    or "LG" in self.cut_type_list[t-1]
+                ):
+                    m = model.copy()
+                    m._delete_link_constrs()
+                if "SB" in self.cut_type_list[t-1]:
+                    objSBScen[k] = m._solveSB(gradLPScen[k])
+                if "LG" in self.cut_type_list[t-1]:
+                    objVal_primal = model._solvePrimal()
+                    flag_bin = (
+                        True if hasattr(self, "n_binaries")
+                        else False
+                    )
+                    objLGScen[k], gradLGScen[k] = m._solveLG(
+                        gradLPScen=gradLPScen[k],
+                        given_bound=MSP.bound,
+                        objVal_primal=objVal_primal,
+                        flag_tight = flag_bin,
+                        forward_solution=forward_solution[t-1],
+                        step_size=self.level_step_size,
+                        max_stable_iterations=self.level_max_stable_iterations,
+                        max_iterations=self.level_max_iterations,
+                        max_time=self.level_max_time,
+                        MIPGap=self.level_mip_gap,
+                        tol=self.level_tol,
+                    )
+            #! Markov states iteration ends
+            if "B" in self.cut_type_list[t-1]:
+                objLP, gradLP = self._compute_cuts(t, m, objLPScen, gradLPScen)
+                objLP -= numpy.matmul(gradLP, forward_solution[t-1])
+                self._add_and_store_cuts(t, objLP, gradLP, cuts, "B", j)
+                self._add_cuts_additional_procedure(t, objLP, gradLP, objLPScen,
+                    gradLPScen, forward_solution[t-1], cuts, "B", j)
+            if "SB" in self.cut_type_list[t-1]:
+                objSB, gradLP = self._compute_cuts(t, m, objSBScen, gradLPScen)
+                self._add_and_store_cuts(t, objSB, gradLP, cuts, "SB", j)
+                self._add_cuts_additional_procedure(t, objSB, gradLP, objSBScen,
+                    gradLPScen, forward_solution[t-1], cuts, "SB", j)
+            if "LG" in self.cut_type_list[t-1]:
+                objLG, gradLG = self._compute_cuts(t, m, objLGScen, gradLGScen)
+                self._add_and_store_cuts(t, objLG, gradLG, cuts, "LG", j)
+                self._add_cuts_additional_procedure(t, objLG, gradLG, objLGScen,
+                    gradLGScen, forward_solution[t-1], cuts, "LG", j)
+        #! Time iteration ends
+
+    def _compute_cut_type_by_iteration(self):
+        if self.cut_pattern == None:
+            return list(self.cut_type)
+        else:
+            if "cycle" in self.cut_pattern.keys():
+                cycle = self.cut_pattern["cycle"]
+                ## decide pos belongs to which interval ##
+                interval = numpy.cumsum(cycle) - 1
+                pos = self.iteration % sum(cycle)
+                for i in range(len(interval)):
+                    if pos <= interval[i]:
+                        return [self.cut_type[i]]
+            if "in" in self.cut_pattern.keys():
+                barrier_in = self.cut_pattern["in"]
+                cut = []
+                for i in range(len(barrier_in)):
+                    if self.iteration >= barrier_in[i]:
+                        cut.append(self.cut_type[i])
+                if "B" in cut and "SB" in cut:
+                    cut.remove("B")
+                return cut
+
+    def _compute_cut_type_by_stage(self, t, cut_type):
+        if t > self.relax_stage or self.MSP.isMIP[t] != 1:
+            cut_type = ["B"]
+        return cut_type
+
+    def _compute_cut_type(self):
+        cut_type_list = [None] * self.cut_T
+        cut_type_by_iteration = self._compute_cut_type_by_iteration()
+        for t in range(1, self.cut_T+1):
+            cut_type_list[t-1] = self._compute_cut_type_by_stage(
+                t, cut_type_by_iteration)
+        self.cut_type_list = cut_type_list

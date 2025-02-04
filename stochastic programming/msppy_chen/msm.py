@@ -11,7 +11,7 @@ Created on Mon Jan  6 15:49:14 2025
     multi stage models;
     
 """
-from sm_detail import StochasticModel
+from sm_detail import StochasticModel, StochasticModelLG
 from utils.statistics import check_Markov_states_and_transition_matrix
 from utils.statistics import check_Markov_callable_uncertainty
 from utils.exception import MarkovianDimensionError
@@ -96,7 +96,7 @@ class MSLP:
         self.flag_updated: bool = False # whether the model has been updated
         self.flag_infinity: bool = False # whether
 
-    def _check_first_stage_model(self):
+    def _check_first_stage_deterministic(self):
         """
         Ensure the first stage model is deterministic. The First stage model
         is only allowed to have uncertainty with length one.
@@ -659,7 +659,7 @@ class MSLP:
             get the solutions of state variables at one stage
         Args:
             t: the stage index
-            m: an instace of StochasticModel
+            m: an instance of StochasticModel
 
         """
         solution = [0.0 for _ in m.states]
@@ -845,4 +845,149 @@ class MSLP:
             raise NotImplementedError
         self.measure = "risk averse"
 
+class MSIP(MSLP):
+
+    def _set_up_model(self):
+        self.models = [StochasticModelLG(name = str(t)) for t in range(self.T)]
+
+    def _check_individual_stage_models(self):
+        """
+        Check state variables are set properly. Check stage-wise continuous
+        uncertainties are discretized.
+
+        """
+        if not hasattr(self, "bin_stage"):
+            self.bin_stage = 0
+        M = self.models[0]
+        N = (
+            self.models[self.bin_stage-1]
+            if self.bin_stage not in [0, self.T]
+            else self.models[0]
+        )
+        if M.states == []:
+            raise Exception("State variables must be set!")
+        if N.states == []:
+            raise Exception("State variables must be set!")
+        n_states_binary_space = M.n_states
+        n_states_original_space = N.n_states
+        for t in range(self.T):
+            m = self.models[t]
+            if m._type == "continuous":
+                self._individual_type = "continuous"
+                if m._flag_discrete == 0:
+                    raise Exception(
+                        "stage-wise independent continuous uncertainties "
+                        + "must be discretized!"
+                    )
+            if t < self.bin_stage-1:
+                if m.n_states != n_states_binary_space:
+                    raise Exception(
+                        "state spaces must be of the same dim for all stages!"
+                    )
+            else:
+                if m.n_states != n_states_original_space:
+                    raise Exception(
+                        "state spaces must be of the same dim for all stages!"
+                    )
+        if self._type == "Markovian" and self._flag_discrete == 0:
+            raise Exception(
+                "stage-wise dependent continuous uncertainties "
+                + "must be discretized!"
+            )
+        self.n_states = [self.models[t].n_states for t in range(self.T)]
+
+    def _check_MIP(self):
+        self.isMIP = [0] * self.T
+        for t in range(self.T):
+            if self.models[t].isMIP == 1:
+                self.isMIP[t] = 1
+
+    def binarize(self, precision=0, bin_stage=0):
+        """Binarize MSIP.
+
+        Parameters
+        ----------
+        precision: int, optional (default=0)
+            The number of decimal places of accuracy
+
+        bin_stage: int, optional (default=0)
+            All stage models before bin_stage (exclusive) will be binarized.
+        """
+        # bin_stage should be within [0, self.T]
+        self.bin_stage = int(bin_stage)
+        self.bin_stage = min(self.bin_stage, self.T)
+        self.bin_stage = max(0, self.bin_stage)
+        precision = int(precision)
+        self.precision = 10 ** precision
+        # Binarize the model if bin_stage is not 0
+        if self.bin_stage != 0:
+            self.n_binaries = []
+        # Check MSIP is qualified for binariation
+        for t in range(self.bin_stage):
+            n_binaries = []
+            m = (
+                self.models[t][0]
+                if type(self.models[t]) == list
+                else self.models[t]
+            )
+            for x in m.states:
+                if (
+                    x.lb == -gurobipy.GRB.INFINITY
+                    or x.ub == gurobipy.GRB.INFINITY
+                ):
+                    raise Exception("missing bounds for the state variables!")
+                elif x.lb == x.ub:
+                    n_binaries.append(1)
+                elif x.vtype in ["B", "I"]:
+                    n_binaries.append(int(math.log2(x.ub - x.lb)) + 1)
+                else:
+                    n_binaries.append(
+                        int(math.log2(self.precision * (x.ub - x.lb))) + 1
+                    )
+            if self.n_binaries == []:
+                self.n_binaries = n_binaries
+            else:
+                if self.n_binaries != n_binaries:
+                    raise Exception(
+                        "bounds should be the same over time for state variables!"
+                    )
+        # Binarize MSIP
+        for t in range(self.bin_stage):
+            M = (
+                [self.models[t]]
+                if self.n_Markov_states == 1
+                else self.models[t]
+            )
+            transition = (
+                1
+                if t == self.bin_stage-1
+                and self.bin_stage not in [0, self.T]
+                else 0
+            )
+            for m in M:
+                m._binarize(self.precision, self.n_binaries, transition)
+
+    def _update(self):
+        self._check_MIP()
+        super()._update()
+
+    def _back_binarize(self):
+        if not hasattr(self, "n_binaries"):
+            return
+        for t in range(self.bin_stage):
+            M = (
+                [self.models[t]]
+                if self.n_Markov_states == 1
+                else self.models[t]
+            )
+            transition = (
+                1
+                if t == self.bin_stage-1
+                and self.bin_stage not in [0, self.T]
+                else 0
+            )
+            for m in M:
+                m._back_binarize(self.precision, self.n_binaries, transition)
+        self._set_up_link_constrs()
+        self.bin_stage = 0
         
