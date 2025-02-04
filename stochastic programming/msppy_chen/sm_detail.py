@@ -1210,6 +1210,73 @@ class StochasticModel:
 
         return result
 
+    def _binarize(self, precision: int, n_binaries, transition: bool = 0):
+        """
+             Binarize StochasticModel. StochasticModel at transition stage keeps
+             states in original space while binarizing local_copies
+        Args:
+            precision: the number of decimal places of accuracy
+            n_binaries: the number of state variables that needs to be binarized
+            transition: whether this stage is the last binarization stage
+        """
+
+        self.n_states_original_space = self.n_states
+        self.local_copies_original_space = self.local_copies
+        self.states_original_space = self.states
+        if transition == 0:
+            self.states = []
+            self.n_states = 0
+        self.local_copies = []
+        for i, (x, y) in enumerate(
+            # The zip() function returns a zip object, which is an iterator of tuples where
+            # the first item in each passed iterator is paired together,
+            # and then the second item in each passed iterator are paired together etc.
+                zip(self.states_original_space, self.local_copies_original_space)
+        ):
+            states = None
+            if transition == 0:
+                states = self.addVars(
+                    n_binaries[i], vtype = gurobipy.GRB.BINARY, name = x.varName
+                ).values()
+            local_copies = self.addVars(
+                n_binaries[i], vtype = gurobipy.GRB.BINARY, name = y.varName
+            ).values()
+            self.update()
+
+            temp1 = gurobipy.quicksum(
+                    pow(2, k) * list(states)[k] for k in range(n_binaries[i])
+            )
+            temp2 = gurobipy.quicksum(
+                pow(2, k) * list(local_copies)[k] for k in range(n_binaries[i])
+            )
+            # Assume bounds are the same over time!
+            if x.vtype not in ["I", "B"]:
+                if transition == 0:
+                    self.addConstr(
+                        temp1 == precision * (x - x.lb), # constraint for binarization of state variables
+                        name = "binarize_states_{}".format(i),
+                    )
+                self.addConstr(
+                    temp2 == precision * (y - y.lb), # constraint for binarization of local copy variables
+                    name = "binarize_local_copies_{}".format(i),
+                )
+            else:
+                x.lb = math.ceil(x.lb)
+                y.lb = math.ceil(y.lb)
+                if transition == 0:
+                    self.addConstr(
+                        temp1 == x - x.lb,
+                        name = "binarize_states_{}".format(i),
+                    )
+                self.addConstr(
+                    temp2 == y - y.lb,
+                    name = "binarize_local_copies_{}".format(i),
+                )
+            if transition == 0:
+                self.states += states
+                self.n_states += n_binaries[i]
+            self.local_copies += local_copies
+
     def set_up_link_constrs(self)-> None:
         """
             set up the local copies-link constraints;

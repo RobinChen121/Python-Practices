@@ -11,6 +11,8 @@ Created on Mon Jan  6 15:49:14 2025
     multi stage models;
     
 """
+import math
+
 from sm_detail import StochasticModel, StochasticModelLG
 from utils.statistics import check_Markov_states_and_transition_matrix
 from utils.statistics import check_Markov_callable_uncertainty
@@ -544,7 +546,7 @@ class MSLP:
             If int, it specifies dimensions of Markov state space.
             Note: If the uncertainties are int, trained Markov states will be
             rounded to integers, and duplicates will be removed. In such cases,
-            there is no guaranttee that the number of Markov states is n_Markov_states.
+            there is no guarantee that the number of Markov states is n_Markov_states.
 
         method: binary, optional, default=0
             'input': the approximating Markov chain is given by user input (
@@ -847,6 +849,19 @@ class MSLP:
 
 class MSIP(MSLP):
 
+    def __init__(self,
+                 T: int,
+                 bound: float = None,
+                 sense: int = 1,
+                 outputLogFlag: bool = False,
+                 discount: float = 1.0,
+                 flag_CTG: bool = False,
+                 **kwargs):
+        super().__init__(T, bound, sense, outputLogFlag, discount, flag_CTG, **kwargs)
+        self.n_binaries = []
+        self.precision = 0
+        self.bin_stage = 0
+
     def _set_up_model(self):
         self.models = [StochasticModelLG(name = str(t)) for t in range(self.T)]
 
@@ -902,8 +917,9 @@ class MSIP(MSLP):
             if self.models[t].isMIP == 1:
                 self.isMIP[t] = 1
 
-    def binarize(self, precision=0, bin_stage=0):
-        """Binarize MSIP.
+    def binarize(self, precision: int = 0, bin_stage: int = 0) -> None:
+        """
+        Binarize MSIP.
 
         Parameters
         ----------
@@ -911,18 +927,17 @@ class MSIP(MSLP):
             The number of decimal places of accuracy
 
         bin_stage: int, optional (default=0)
-            All stage models before bin_stage (exclusive) will be binarized.
+            Stage index, in which all stage models before bin_stage (exclusive) will be binarized.
         """
         # bin_stage should be within [0, self.T]
         self.bin_stage = int(bin_stage)
         self.bin_stage = min(self.bin_stage, self.T)
-        self.bin_stage = max(0, self.bin_stage)
         precision = int(precision)
         self.precision = 10 ** precision
         # Binarize the model if bin_stage is not 0
         if self.bin_stage != 0:
-            self.n_binaries = []
-        # Check MSIP is qualified for binariation
+            self.n_binaries = [] # number of binaries in each stage
+        # Check MSIP is qualified for binarization
         for t in range(self.bin_stage):
             n_binaries = []
             m = (
@@ -931,7 +946,7 @@ class MSIP(MSLP):
                 else self.models[t]
             )
             for x in m.states:
-                if (
+                if ( # binarization must have bounds for the state variables
                     x.lb == -gurobipy.GRB.INFINITY
                     or x.ub == gurobipy.GRB.INFINITY
                 ):
@@ -944,8 +959,8 @@ class MSIP(MSLP):
                     n_binaries.append(
                         int(math.log2(self.precision * (x.ub - x.lb))) + 1
                     )
-            if self.n_binaries == []:
-                self.n_binaries = n_binaries
+            if not self.n_binaries: # meaning self.n_binaries is []
+                self.n_binaries.append(n_binaries) # chen: revise the original codes, making self.n_binaries 2-d list
             else:
                 if self.n_binaries != n_binaries:
                     raise Exception(
@@ -958,18 +973,18 @@ class MSIP(MSLP):
                 if self.n_Markov_states == 1
                 else self.models[t]
             )
-            transition = (
+            transition = ( # bool
                 1
-                if t == self.bin_stage-1
+                if t == self.bin_stage - 1 # last binary stage
                 and self.bin_stage not in [0, self.T]
                 else 0
             )
             for m in M:
-                m._binarize(self.precision, self.n_binaries, transition)
+                m.binarize(self.precision, self.n_binaries[t], transition)
 
     def _update(self):
         self._check_MIP()
-        super()._update()
+        super().update()
 
     def _back_binarize(self):
         if not hasattr(self, "n_binaries"):
