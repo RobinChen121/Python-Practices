@@ -80,7 +80,7 @@ def rand_int(k: int | ArrayLike,
         return randomState_instance.choice(a = k, p = probability, size = size, replace = replace)
 
 
-def check_random_state(seed) -> numpy.random.RandomState:
+def check_random_state(seed: numpy.random.RandomState | int | None) -> numpy.random.RandomState:
     """
     Check the seed and turn the seed into a RandomState instance.
 

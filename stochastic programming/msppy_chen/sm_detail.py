@@ -1210,7 +1210,7 @@ class StochasticModel:
 
         return result
 
-    def _binarize(self, precision: int, n_binaries, transition: bool = 0):
+    def binarize(self, precision: int, n_binaries, transition: bool = 0):
         """
              Binarize StochasticModel. StochasticModel at transition stage keeps
              states in original space while binarizing local_copies
@@ -1276,6 +1276,46 @@ class StochasticModel:
                 self.states += states
                 self.n_states += n_binaries[i]
             self.local_copies += local_copies
+
+    def back_binarize(self, precision, n_binaries, transition: bool = 0):
+        if not hasattr(self, "states_original_space"):
+            return
+        for i, (x, y) in enumerate(
+            zip(self.states_original_space, self.local_copies_original_space)
+        ):
+            # Binarized states don't exist at transition stage
+            if x.vtype not in ["B","I"]:
+                if transition == 0:
+                    temp = self.getConstrByName("binarize_states_{}".format(i))
+                    # Retrieve the list of variables that participate in a constraint,
+                    # and the associated coefficients. The result is returned as a LinExpr object.
+                    expr = self.getRow(temp)
+                    rhs = temp.rhs
+                    self.remove(temp)
+                    self.addConstr(
+                        expr >= rhs,
+                        name = "back_binarize_states_lower"
+                    )
+                    self.addConstr(
+                        expr <= rhs + 0.99,
+                        name="back_binarize_states_upper"
+                    )
+                temp = self.getConstrByName("binarize_local_copies_{}".format(i))
+                expr = self.getRow(temp)
+                rhs = temp.rhs
+                self.remove(temp)
+                self.addConstr(expr >= rhs)
+                self.addConstr(expr <= rhs + 0.99)
+
+        # Re-set-up states and local copies
+        self.states = self.states_original_space
+        self.local_copies = self.local_copies_original_space
+        self.n_states = len(self.states)
+        # Re-set-up linking constraints
+        for constr in self.link_constrs:
+            self.remove(constr)
+        self.link_constrs = []
+        self._model.update()
 
     def set_up_link_constrs(self)-> None:
         """

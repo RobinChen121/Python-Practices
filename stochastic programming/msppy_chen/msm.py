@@ -15,7 +15,7 @@ import math
 
 from sm_detail import StochasticModel, StochasticModelLG
 from utils.statistics import check_Markov_states_and_transition_matrix
-from utils.statistics import check_Markov_callable_uncertainty
+from utils.statistics import check_Markov_callable_uncertainty, check_random_state
 from utils.exception import MarkovianDimensionError
 import numpy
 from numpy.typing import ArrayLike
@@ -509,16 +509,17 @@ class MSLP:
 
     def discretize(
             self,
-            n_samples = None,
-            random_state = None,
-            replace=True,
+            n_samples: int = None,
+            random_state: numpy.random.RandomState | int | None = None,
+            replace: bool = True,
             n_Markov_states=None,
-            method='SA',
+            method: str = 'SA',
             n_sample_paths=None,
             Markov_states=None,
             transition_matrix=None,
             int_flag=0):
-        """Discretize Markovian continuous uncertainty by k-means or (robust)
+        """
+        Discretize Markovian continuous uncertainty by k-means or (robust)
         stochastic approximation.
 
         Parameters
@@ -584,7 +585,7 @@ class MSLP:
             # discretize stage-wise independent continuous distribution
             random_state = check_random_state(random_state)
             for t in range(1,self.T):
-                self.models[t]._discretize(n_samples[t],random_state,replace)
+                self.models[t].discretize(n_samples[t],random_state,replace)
         if n_Markov_states is None and method != 'input': return
         if method == 'input' and (Markov_states is None or
             transition_matrix is None): return
@@ -875,26 +876,26 @@ class MSIP(MSLP):
             self.bin_stage = 0
         M = self.models[0]
         N = (
-            self.models[self.bin_stage-1]
+            self.models[self.bin_stage - 1]
             if self.bin_stage not in [0, self.T]
             else self.models[0]
         )
-        if M.states == []:
+        if not M.states:
             raise Exception("State variables must be set!")
-        if N.states == []:
+        if not N.states:
             raise Exception("State variables must be set!")
         n_states_binary_space = M.n_states
         n_states_original_space = N.n_states
         for t in range(self.T):
             m = self.models[t]
-            if m._type == "continuous":
+            if m.type == "continuous":
                 self._individual_type = "continuous"
-                if m._flag_discrete == 0:
+                if m.flag_discrete == 0:
                     raise Exception(
                         "stage-wise independent continuous uncertainties "
                         + "must be discretized!"
                     )
-            if t < self.bin_stage-1:
+            if t < self.bin_stage - 1:
                 if m.n_states != n_states_binary_space:
                     raise Exception(
                         "state spaces must be of the same dim for all stages!"
@@ -1002,7 +1003,7 @@ class MSIP(MSLP):
                 else 0
             )
             for m in M:
-                m._back_binarize(self.precision, self.n_binaries, transition)
+                m.back_binarize(self.precision, self.n_binaries, transition)
         self._set_up_link_constrs()
         self.bin_stage = 0
         
