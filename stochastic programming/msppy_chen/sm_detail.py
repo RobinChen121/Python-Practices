@@ -1235,10 +1235,10 @@ class StochasticModel:
             # the first item in each passed iterator is paired together,
             # and then the second item in each passed iterator are paired together etc.
                 zip(self.states_original_space, self.local_copies_original_space)
-        ):
+        ): # x are state variables and y are local copy variables
             states = None
             if transition == 0:
-                states = self.addVars(
+                states = self.addVars( # binary state variables
                     n_binaries[i], vtype = gurobipy.GRB.BINARY, name = x.varName
                 ).values()
             local_copies = self.addVars(
@@ -1281,6 +1281,16 @@ class StochasticModel:
             self.local_copies += local_copies
 
     def back_binarize(self, precision, n_binaries, transition: bool = 0):
+        """
+
+        Args:
+            precision:
+            n_binaries:
+            transition:
+
+        Returns:
+
+        """
         if not hasattr(self, "states_original_space"):
             return
         for i, (x, y) in enumerate(

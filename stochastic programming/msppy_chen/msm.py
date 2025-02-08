@@ -922,6 +922,8 @@ class MSIP(MSLP):
         """
         Binarize MSIP.
 
+        The number of binary variables at each stage are same.
+
         Parameters
         ----------
         precision: int, optional (default=0)
@@ -964,8 +966,8 @@ class MSIP(MSLP):
                 self.n_binaries = n_binaries
             else:
                 if self.n_binaries != n_binaries:
-                    raise Exception(
-                        "bounds should be the same over time for state variables!"
+                    raise Exception( # this is a
+                        "number of binaries should be the same over time for state variables!"
                     )
         # Binarize MSIP
         for t in range(self.bin_stage):
@@ -975,10 +977,10 @@ class MSIP(MSLP):
                 else self.models[t]
             )
             transition = ( # bool
-                1
+                True
                 if t == self.bin_stage - 1 # last binary stage
                 and self.bin_stage not in [0, self.T]
-                else 0
+                else False
             )
             for m in M:
                 m.binarize(self.precision, self.n_binaries, transition)
@@ -997,10 +999,10 @@ class MSIP(MSLP):
                 else self.models[t]
             )
             transition = (
-                1
+                True
                 if t == self.bin_stage-1
                 and self.bin_stage not in [0, self.T]
-                else 0
+                else False
             )
             for m in M:
                 m.back_binarize(self.precision, self.n_binaries, transition)

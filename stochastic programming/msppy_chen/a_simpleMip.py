@@ -40,6 +40,8 @@ MIP = MSIP(T = 2, bound = -10)
 for t in range(2):
     m = MIP.models[t]
     # chi_past are local copies(real state variables for stage 2)
+    # 2 chi_now and 2 chi_past
+    # actually there are 4 chi variables in the model
     chi_now, chi_past = m.addStateVars(2, name = 'chi', lb = [1.5, 1.5], ub = [6, 7.5])
     if t == 0:
         x = m.addVars(2, obj = [-2.5, -2.0], name = 'x', lb = -gurobipy.GRB.INFINITY)
@@ -58,7 +60,7 @@ for t in range(2):
             4*y[0] + 1*y[1] - chi_past[1] >= 0,
             uncertainty = {'rhs': [-1.2, -3]}
         )
-print('extensive solver: ', Extensive(MIP).solve(outputFlag = 0))
+# print('extensive solver: ', Extensive(MIP).solve(outputFlag = 0))
 MIP.binarize(bin_stage = 2, precision = precision)
 SDDiP(MIP).solve(cuts = ['LG'], max_iterations = 128) # LG means Lagrange
 # resultTrue = EvaluationTrue(MIP) # chen: there are some errors running multiprocessing simulation
