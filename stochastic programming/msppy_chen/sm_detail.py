@@ -52,6 +52,9 @@ class StochasticModel:
             Initialize a gurobi model.
 
         """
+        self.states_original_space = None
+        self.local_copies_original_space = None
+        self.n_states_original_space = None
         self._model = gurobipy.Model(name = name, env = env)
         self.type: str = ''  # type of the true problem: continuous/discrete
         self.flag_discretized = 0 #  whether the true problem has been discretized
@@ -1210,7 +1213,7 @@ class StochasticModel:
 
         return result
 
-    def binarize(self, precision: int, n_binaries, transition: bool = 0):
+    def binarize(self, precision: int, n_binaries: list[int], transition: bool = 0):
         """
              Binarize StochasticModel. StochasticModel at transition stage keeps
              states in original space while binarizing local_copies
@@ -1340,6 +1343,18 @@ class StochasticModel:
             for constr in self.link_constrs:
                 self._model.remove(constr)
             self.link_constrs = []
+
+    def solveLP(self):
+        objLPScen = numpy.empty(self.n_samples)
+        gradLPScen = numpy.empty((self.n_samples, self.n_states))
+        for k in range(self.n_samples):
+            self._update_uncertainty(k)
+            self.optimize()
+            if self._model.status not in [2,11]:
+                self.write_infeasible_model("backward_" + str(self._model.modelName))
+            objLPScen[k] = self.objVal
+            gradLPScen[k] = self.getAttr("Pi", self.link_constrs)
+        return objLPScen, gradLPScen
 
     def set_up_CTG(self, discount: float, bound: float):
         """

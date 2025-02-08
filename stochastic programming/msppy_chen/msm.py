@@ -680,7 +680,7 @@ class MSLP:
         return solution
 
     def update(self):
-        self._check_first_stage_model()
+        self._check_first_stage_deterministic()
         self.check_state_and_continuous_discretized()
         self.check_markov_copy_models_update_nums()
 
@@ -961,7 +961,7 @@ class MSIP(MSLP):
                         int(math.log2(self.precision * (x.ub - x.lb))) + 1
                     )
             if not self.n_binaries: # meaning self.n_binaries is []
-                self.n_binaries.append(n_binaries) # chen: revise the original codes, making self.n_binaries 2-d list
+                self.n_binaries = n_binaries
             else:
                 if self.n_binaries != n_binaries:
                     raise Exception(
@@ -981,7 +981,7 @@ class MSIP(MSLP):
                 else 0
             )
             for m in M:
-                m.binarize(self.precision, self.n_binaries[t], transition)
+                m.binarize(self.precision, self.n_binaries, transition)
 
     def _update(self):
         self._check_MIP()

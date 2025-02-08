@@ -1466,7 +1466,7 @@ class SDDiP(SDDP):
                 for item in pattern.values()
             ):
                 raise Exception("pattern is not compatible with cuts!")
-        self.relax_stage = relax_stage if relax_stage != None else self.MSP.T - 1
+        self.relax_stage = relax_stage if relax_stage != None else self.msp.T - 1
         self.cut_type = cuts
         self.cut_pattern = pattern
         self.level_step_size = level_step_size
@@ -1478,7 +1478,7 @@ class SDDiP(SDDP):
         super().solve(*args, **kwargs)
 
     def _backward(self, forward_solution, j=None, lock=None, cuts=None):
-        MSP = self.MSP
+        MSP = self.msp
         for t in range(MSP.T-1, 0, -1):
             if MSP.n_Markov_states == 1:
                 M, n_Markov_states = [MSP.models[t]], 1
@@ -1496,7 +1496,7 @@ class SDDiP(SDDP):
                     model._update_link_constrs(forward_solution[t-1])
                 model.update()
                 m = model.relax() if model.isMIP else model
-                objLPScen[k], gradLPScen[k] = m._solveLP()
+                objLPScen[k], gradLPScen[k] = m.solveLP()
                 # SB and LG share the same model
                 if (
                     "SB" in self.cut_type_list[t-1]

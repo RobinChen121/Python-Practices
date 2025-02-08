@@ -3,7 +3,7 @@
 """
 Created on Mon Apr  3 09:44:50 2023
 
-@author: zhenchen
+@author: zhen chen
 
 @disp:  compare the exponential approximation in the smoothing method
     
