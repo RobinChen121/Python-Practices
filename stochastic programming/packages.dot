@@ -1,0 +1,28 @@
+digraph "packages" {
+rankdir=BT
+charset="utf-8"
+"msppy_chen" [color="black", label=<msppy_chen>, shape="box", style="solid"];
+"msppy_chen.a_simpleMip" [color="black", label=<msppy_chen.a_simpleMip>, shape="box", style="solid"];
+"msppy_chen.air_conditioner" [color="black", label=<msppy_chen.air_conditioner>, shape="box", style="solid"];
+"msppy_chen.evaluation" [color="black", label=<msppy_chen.evaluation>, shape="box", style="solid"];
+"msppy_chen.msm" [color="black", label=<msppy_chen.msm>, shape="box", style="solid"];
+"msppy_chen.news_vendor" [color="black", label=<msppy_chen.news_vendor>, shape="box", style="solid"];
+"msppy_chen.portfolio_optimization" [color="black", label=<msppy_chen.portfolio_optimization>, shape="box", style="solid"];
+"msppy_chen.sddp_me_test" [color="black", label=<msppy_chen.sddp_me_test>, shape="box", style="solid"];
+"msppy_chen.sm_detail" [color="black", label=<msppy_chen.sm_detail>, shape="box", style="solid"];
+"msppy_chen.solver_detail" [color="black", label=<msppy_chen.solver_detail>, shape="box", style="solid"];
+"msppy_chen.a_simpleMip" -> "msppy_chen.msm" [arrowhead="open", arrowtail="none"];
+"msppy_chen.a_simpleMip" -> "msppy_chen.solver_detail" [arrowhead="open", arrowtail="none"];
+"msppy_chen.air_conditioner" -> "msppy_chen.msm" [arrowhead="open", arrowtail="none"];
+"msppy_chen.air_conditioner" -> "msppy_chen.solver_detail" [arrowhead="open", arrowtail="none"];
+"msppy_chen.evaluation" -> "msppy_chen.msm" [arrowhead="open", arrowtail="none"];
+"msppy_chen.msm" -> "msppy_chen.sm_detail" [arrowhead="open", arrowtail="none"];
+"msppy_chen.news_vendor" -> "msppy_chen.msm" [arrowhead="open", arrowtail="none"];
+"msppy_chen.news_vendor" -> "msppy_chen.solver_detail" [arrowhead="open", arrowtail="none"];
+"msppy_chen.portfolio_optimization" -> "msppy_chen.evaluation" [arrowhead="open", arrowtail="none"];
+"msppy_chen.portfolio_optimization" -> "msppy_chen.msm" [arrowhead="open", arrowtail="none"];
+"msppy_chen.portfolio_optimization" -> "msppy_chen.solver_detail" [arrowhead="open", arrowtail="none"];
+"msppy_chen.solver_detail" -> "msppy_chen.evaluation" [arrowhead="open", arrowtail="none"];
+"msppy_chen.solver_detail" -> "msppy_chen.msm" [arrowhead="open", arrowtail="none"];
+"msppy_chen.solver_detail" -> "msppy_chen.sm_detail" [arrowhead="open", arrowtail="none"];
+}

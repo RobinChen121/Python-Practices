@@ -399,6 +399,24 @@ class StochasticModel:
             if var.varName not in states_name + local_copies_name
         ]
 
+    def relax(self):
+        """
+        Return the relaxed version of the stochastic MIP model.
+
+        Returns
+        -------
+        a new relaxed StochasticModel object
+
+        Notes
+        -----
+        If the model is already continuous, then this method produces the
+        same result as cloning the model.
+        """
+        # Gurobi model.relax(): Create the relaxation of a MIP model.
+        # Transforms integer variables into continuous variables,
+        # and removes SOS and general constraints (non-linear constraints).
+        return self.copy(self._model.relax())
+
     def sample_uncertainty(self, randomState_instance: any = None) -> None:
         """
             update the uncertainty for the true problem.
@@ -1253,6 +1271,7 @@ class StochasticModel:
                 pow(2, k) * list(local_copies)[k] for k in range(n_binaries[i])
             )
             # Assume bounds are the same over time!
+            # state variables and local copy variabls are all copied
             if x.vtype not in ["I", "B"]:
                 if transition == 0:
                     self.addConstr(
@@ -1280,16 +1299,12 @@ class StochasticModel:
                 self.n_states += n_binaries[i]
             self.local_copies += local_copies
 
-    def back_binarize(self, precision, n_binaries, transition: bool = 0):
+    def back_binarize(self, transition: bool = 0):
         """
-
+            de binarize the model.
         Args:
-            precision:
-            n_binaries:
-            transition:
-
-        Returns:
-
+            transition: whether transiting from binary to non-binary in
+                        some stage.
         """
         if not hasattr(self, "states_original_space"):
             return
@@ -1297,7 +1312,7 @@ class StochasticModel:
             zip(self.states_original_space, self.local_copies_original_space)
         ):
             # Binarized states don't exist at transition stage
-            if x.vtype not in ["B","I"]:
+            if x.vtype not in ["B", "I"]:
                 if transition == 0:
                     temp = self.getConstrByName("binarize_states_{}".format(i))
                     # Retrieve the list of variables that participate in a constraint,
@@ -1310,8 +1325,8 @@ class StochasticModel:
                         name = "back_binarize_states_lower"
                     )
                     self.addConstr(
-                        expr <= rhs + 0.99,
-                        name="back_binarize_states_upper"
+                        expr <= rhs + 0.99, # need test
+                        name = "back_binarize_states_upper"
                     )
                 temp = self.getConstrByName("binarize_local_copies_{}".format(i))
                 expr = self.getRow(temp)
@@ -1454,4 +1469,293 @@ class StochasticModel:
         )
 
 class StochasticModelLG(StochasticModel):
-    pass
+    def solveSB(self, gradLPScen: ArrayLike) -> list:
+        """
+
+        Args:
+            gradLPScen: the gradients from the benders LP models
+
+        Returns:
+            a list of objectives for all the samples
+        """
+        objSBScen = numpy.empty(self.n_samples)
+        for i in range(self.n_samples):
+            # setAttr() can Call it with 2 or
+            # three arguments (i.e., setAttr(attrname, objects, newvalues))
+            # to set attribute values for a list or
+            # dict of model objects (Var objects, Constr objects, etc.).
+
+            # change the coefficient in the objective function of some variables
+            self.setAttr("obj", self.local_copies, [-x for x in gradLPScen[i]])
+            self._update_uncertainty(i)
+            self.optimize()
+            objSBScen[i] = self.objBound
+        return objSBScen
+
+    def solvePrimal(self) -> list:
+        """
+            solve the original SDDiP stage model without relaxation
+        Returns:
+            a list of objective values of all samples
+        """
+        objVal_primal = [None for _ in range(self.n_samples)]
+        for i in range(self.n_samples):
+            self._update_uncertainty(i)
+            self.optimize()
+            objVal_primal[i] = self.objBound
+        return objVal_primal
+
+    def solveLG(
+            self,
+            gradLPScen,
+            given_bound,
+            objVal_primal,
+            flag_tight,
+            forward_solution,
+            step_size,
+            max_stable_iterations,
+            max_iterations,
+            max_time,
+            MIPGap,
+            tol):
+        n_local_copies = len(self.local_copies)
+        objLGScen = numpy.empty(self.n_samples)
+        gradLGScen = numpy.empty((self.n_samples, self.n_states))
+        for k in range(self.n_samples):
+            # Benchmark is objVal of primal problem if LG is tight, otherwise
+            # it is updated later as the objVal of cut problem
+            benchmark = objVal_primal[k]
+            self._update_uncertainty(k)
+            # Initialize the objVal_best_so_far objVal as the known bound and
+            # related objVal_best_so_far gradient as the solution of duals
+            objVal_best_so_far = given_bound
+            grad_best_so_far = gradLPScen[k]
+            # Initialize the current gradient as the solution of dual variables
+            grad_current = gradLPScen[k]
+            # Set up projection model
+            model_proj = gurobipy.Model()
+            model_proj.Params.outputFlag = 0
+            pi_proj = model_proj.addVars(
+                n_local_copies,
+                lb=-gurobipy.GRB.INFINITY,
+            ).values()
+            model_proj.update()
+            # the objective of projection model is \pi^2 - 2\pi\grad_best_so_far
+            model_proj.setObjective(gurobipy.quicksum(x * x for x in pi_proj))
+            # Set up cut model
+            if not flag_tight:
+                model_cut = gurobipy.Model()
+                model_cut.Params.outputFlag = 0
+                model_cut.modelsense = -self.modelsense
+                theta = model_cut.addVar(lb=-gurobipy.GRB.INFINITY, obj=1)
+                if self.modelSense == 1:
+                    theta.ub = objVal_primal[k]
+                else:
+                    theta.lb = objVal_primal[k]
+                pi_cut = model_cut.addVars(
+                    n_local_copies,
+                    lb=-gurobipy.GRB.INFINITY,
+                ).values()
+                model_cut.update()
+
+            stable_iterations = 0
+            iterations = 0
+            total_time = 0
+            while (
+                    stable_iterations < max_stable_iterations
+                    and total_time < max_time
+                    and iterations < max_iterations
+            ):
+                start = time.time()
+                # Solve the inner problem
+                self.setAttr(
+                    "obj", self.local_copies, [-x for x in grad_current]
+                )
+                self.Params.MIPGap = MIPGap
+                self.optimize()
+                if self.status not in [2, 11]:
+                    break
+                # get the current objVal and gradient for the outer problem
+                grad_outer = [
+                    forward_solution[i] - self.local_copies[i].X
+                    for i in range(n_local_copies)
+                ]
+                objVal_current = self.objBound
+                objVal_current += sum(
+                    x * y for x, y in zip(grad_current, forward_solution)
+                )
+                # Update cut model
+                if not flag_tight:
+                    cut_const = objVal_current - sum(
+                        x * y for x, y in zip(grad_current, grad_outer)
+                    )
+                    cut_expr = gurobipy.LinExpr(grad_outer, pi_cut)
+                    model_cut.addConstr(
+                        self.modelSense * (theta - cut_expr - cut_const) <= 0
+                    )
+                    model_cut.optimize()
+                    if model_cut.status not in [2, 11]:
+                        break
+                    benchmark = model_cut.objVal
+                # update outer problem best so far solution and optimal value
+                if self.modelsense * (objVal_current - objVal_best_so_far) > 0:
+                    objVal_best_so_far = objVal_current
+                    grad_best_so_far = grad_current
+                    stable_iterations = 0
+                else:
+                    stable_iterations += 1
+                # Update projection model
+
+                try:
+                    model_proj.setAttr(
+                        "obj", list(pi_proj), [-2 * x for x in grad_best_so_far]
+                    )
+                except Exception:
+                    pass
+
+                # determine the level
+                delta = benchmark - objVal_best_so_far
+                if abs(delta) <= tol * abs(benchmark):
+                    break
+                level = step_size * objVal_best_so_far + (1 - step_size) * benchmark
+                # current + gradient * (pi_proj - grad_current) >=(<=) level
+                temp1 = sum(x * y for x, y in zip(grad_outer, grad_current))
+                temp2 = gurobipy.LinExpr(grad_outer, pi_proj)
+                new_cut = model_proj.addConstr(
+                    self.modelsense * (objVal_current + temp2 - temp1 - level)
+                    >= 0
+                )
+                model_proj.optimize()
+                # Numerical issue may occur if closed to optimality
+                if model_proj.status not in [2, 11]:
+                    break
+                # Update gradient
+                grad_current = model_proj.getAttr("X", pi_proj)
+                iterations += 1
+                end = time.time()
+                total_time += end - start
+            # ! level iterations end
+            # objLGScen[k] = objVal_best_so_far
+            gradLGScen[k] = grad_best_so_far
+            self.setAttr(
+                "obj", self.local_copies, [-x for x in grad_best_so_far]
+            )
+            self.optimize()
+            objLGScen[k] = self.objBound
+        # ! scenario iterations end
+        return objLGScen, gradLGScen
+
+    def _binarize(self, precision, n_binaries, transition=0):
+        # Binarize StochasticModel. StochasticModel at transition stage keeps
+        # states in original space while binarzing local_copies
+        self.n_states_original_space = self.n_states
+        self.local_copies_original_space = self.local_copies
+        self.states_original_space = self.states
+        if transition == 0:
+            self.states = []
+            self.n_states = 0
+        self.local_copies = []
+        for i, (x, y) in enumerate(
+                zip(self.states_original_space, self.local_copies_original_space)
+        ):
+            if transition == 0:
+                states = self.addVars(
+                    n_binaries[i], vtype=gurobipy.GRB.BINARY, name=x.varName
+                ).values()
+            local_copies = self.addVars(
+                n_binaries[i], vtype=gurobipy.GRB.BINARY, name=y.varName
+            ).values()
+            self.update()
+            if transition == 0:
+
+                try:
+                    temp1 = gurobipy.quicksum(
+                        pow(2, k) * list(states)[k] for k in range(n_binaries[i])
+                    )
+                except Exception:
+                    pass
+
+            temp2 = gurobipy.quicksum(
+                pow(2, k) * list(local_copies)[k] for k in range(n_binaries[i])
+            )
+            # Assume bounds are the same over time!
+            if x.vtype not in ["I", "B"]:
+                if transition == 0:
+                    self.addConstr(
+                        temp1 == precision * (x - x.lb),
+                        name="binarize_states_{}".format(i),
+                    )
+                self.addConstr(
+                    temp2 == precision * (y - y.lb),
+                    name="binarize_local_copies_{}".format(i),
+                )
+            else:
+                x.lb = math.ceil(x.lb)
+                y.lb = math.ceil(y.lb)
+                if transition == 0:
+                    self.addConstr(
+                        temp1 == x - x.lb,
+                        name="binarize_states_{}".format(i),
+                    )
+                self.addConstr(
+                    temp2 == y - y.lb,
+                    name="binarize_local_copies_{}".format(i),
+                )
+            if transition == 0:
+                self.states += states
+                self.n_states += n_binaries[i]
+            self.local_copies += local_copies
+
+    def _back_binarize(self, precision, n_binaries, transition=0):
+        if not hasattr(self, "states_original_space"):
+            return
+        for i, (x, y) in enumerate(
+                zip(self.states_original_space, self.local_copies_original_space)
+        ):
+            # Binarized states don't exist at transition stage
+            if x.vtype not in ["B", "I"]:
+                if transition == 0:
+                    temp = self.getConstrByName("binarize_states_{}".format(i))
+                    expr = self.getRow(temp)
+                    rhs = temp.rhs
+                    self.remove(temp)
+                    self.addConstr(
+                        expr >= rhs,
+                        name="back_binarize_states_lower"
+                    )
+                    self.addConstr(
+                        expr <= rhs + 0.99,
+                        name="back_binarize_states_upper"
+                    )
+                temp = self.getConstrByName("binarize_local_copies_{}".format(i))
+                expr = self.getRow(temp)
+                rhs = temp.rhs
+                self.remove(temp)
+                self.addConstr(expr >= rhs)
+                self.addConstr(expr <= rhs + 0.99)
+
+        # Re-set-up states and local copies
+        self.states = self.states_original_space
+        self.local_copies = self.local_copies_original_space
+        self.n_states = len(self.states)
+        # Re-set-up linking constraints
+        for constr in self.link_constrs:
+            self.remove(constr)
+        self.link_constrs = []
+        self._model.update()
+
+    def copy(self, model):
+        result = super().copy(model)
+        if hasattr(self, "n_states_original_space"):
+            result.n_states_original_space = self.n_states_original_space
+        if hasattr(self, "states_original_space"):
+            result.states_original_space = [
+                result._model.getVarByName(x.varName)
+                for x in self.states_original_space
+            ]
+        if hasattr(self, "local_copies_original_space"):
+            result.local_copies_original_space = [
+                result._model.getVarByName(x.varName)
+                for x in self.local_copies_original_space
+            ]
+        return result
