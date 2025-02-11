@@ -4,6 +4,7 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/Python-Practices.iml" filepath="$PROJECT_DIR$/.idea/Python-Practices.iml" />
       <module fileurl="file://$PROJECT_DIR$/../msppy/.idea/msppy.iml" filepath="$PROJECT_DIR$/../msppy/.idea/msppy.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../sddp_overdraft/.idea/sddp_overdraft.iml" filepath="$PROJECT_DIR$/../sddp_overdraft/.idea/sddp_overdraft.iml" />
     </modules>
   </component>
 </project>
