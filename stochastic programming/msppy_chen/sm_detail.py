@@ -20,6 +20,8 @@ from numbers import Number
 import utils.copy as deepcopy
 from utils.measure import Expectation
 from utils.statistics import rand_int, check_random_state
+import time
+import math
 
 
 # noinspection PyUnresolvedReferences,PyRedeclaration
@@ -1231,120 +1233,6 @@ class StochasticModel:
 
         return result
 
-    def binarize(self, precision: int, n_binaries: list[int], transition: bool = 0):
-        """
-             Binarize StochasticModel. StochasticModel at transition stage keeps
-             states in original space while binarizing local_copies
-        Args:
-            precision: the number of decimal places of accuracy
-            n_binaries: the number of state variables that needs to be binarized
-            transition: whether this stage is the last binarization stage
-        """
-
-        self.n_states_original_space = self.n_states
-        self.local_copies_original_space = self.local_copies
-        self.states_original_space = self.states
-        if transition == 0:
-            self.states = []
-            self.n_states = 0
-        self.local_copies = []
-        for i, (x, y) in enumerate(
-            # The zip() function returns a zip object, which is an iterator of tuples where
-            # the first item in each passed iterator is paired together,
-            # and then the second item in each passed iterator are paired together etc.
-                zip(self.states_original_space, self.local_copies_original_space)
-        ): # x are state variables and y are local copy variables
-            states = None
-            if transition == 0:
-                states = self.addVars( # binary state variables
-                    n_binaries[i], vtype = gurobipy.GRB.BINARY, name = x.varName
-                ).values()
-            local_copies = self.addVars(
-                n_binaries[i], vtype = gurobipy.GRB.BINARY, name = y.varName
-            ).values()
-            self.update()
-
-            temp1 = gurobipy.quicksum(
-                    pow(2, k) * list(states)[k] for k in range(n_binaries[i])
-            )
-            temp2 = gurobipy.quicksum(
-                pow(2, k) * list(local_copies)[k] for k in range(n_binaries[i])
-            )
-            # Assume bounds are the same over time!
-            # state variables and local copy variabls are all copied
-            if x.vtype not in ["I", "B"]:
-                if transition == 0:
-                    self.addConstr(
-                        temp1 == precision * (x - x.lb), # constraint for binarization of state variables
-                        name = "binarize_states_{}".format(i),
-                    )
-                self.addConstr(
-                    temp2 == precision * (y - y.lb), # constraint for binarization of local copy variables
-                    name = "binarize_local_copies_{}".format(i),
-                )
-            else:
-                x.lb = math.ceil(x.lb)
-                y.lb = math.ceil(y.lb)
-                if transition == 0:
-                    self.addConstr(
-                        temp1 == x - x.lb,
-                        name = "binarize_states_{}".format(i),
-                    )
-                self.addConstr(
-                    temp2 == y - y.lb,
-                    name = "binarize_local_copies_{}".format(i),
-                )
-            if transition == 0:
-                self.states += states
-                self.n_states += n_binaries[i]
-            self.local_copies += local_copies
-
-    def back_binarize(self, transition: bool = 0):
-        """
-            de binarize the model.
-        Args:
-            transition: whether transiting from binary to non-binary in
-                        some stage.
-        """
-        if not hasattr(self, "states_original_space"):
-            return
-        for i, (x, y) in enumerate(
-            zip(self.states_original_space, self.local_copies_original_space)
-        ):
-            # Binarized states don't exist at transition stage
-            if x.vtype not in ["B", "I"]:
-                if transition == 0:
-                    temp = self.getConstrByName("binarize_states_{}".format(i))
-                    # Retrieve the list of variables that participate in a constraint,
-                    # and the associated coefficients. The result is returned as a LinExpr object.
-                    expr = self.getRow(temp)
-                    rhs = temp.rhs
-                    self.remove(temp)
-                    self.addConstr(
-                        expr >= rhs,
-                        name = "back_binarize_states_lower"
-                    )
-                    self.addConstr(
-                        expr <= rhs + 0.99, # need test
-                        name = "back_binarize_states_upper"
-                    )
-                temp = self.getConstrByName("binarize_local_copies_{}".format(i))
-                expr = self.getRow(temp)
-                rhs = temp.rhs
-                self.remove(temp)
-                self.addConstr(expr >= rhs)
-                self.addConstr(expr <= rhs + 0.99)
-
-        # Re-set-up states and local copies
-        self.states = self.states_original_space
-        self.local_copies = self.local_copies_original_space
-        self.n_states = len(self.states)
-        # Re-set-up linking constraints
-        for constr in self.link_constrs:
-            self.remove(constr)
-        self.link_constrs = []
-        self._model.update()
-
     def set_up_link_constrs(self)-> None:
         """
             set up the local copies-link constraints;
@@ -1469,11 +1357,11 @@ class StochasticModel:
         )
 
 class StochasticModelLG(StochasticModel):
-    def solveSB(self, gradLPScen: ArrayLike) -> list:
+    def solveSB(self, gradLPScen: ArrayLike) -> ArrayLike:
         """
 
         Args:
-            gradLPScen: the gradients from the benders LP models
+            gradLPScen: the gradients for all the samples at one stage from the benders LP models
 
         Returns:
             a list of objectives for all the samples
@@ -1494,7 +1382,8 @@ class StochasticModelLG(StochasticModel):
 
     def solvePrimal(self) -> list:
         """
-            solve the original SDDiP stage model without relaxation
+            solve the original SDDiP stage model without relaxation.
+            it is a mixed integer model
         Returns:
             a list of objective values of all samples
         """
@@ -1507,17 +1396,36 @@ class StochasticModelLG(StochasticModel):
 
     def solveLG(
             self,
-            gradLPScen,
-            given_bound,
-            objVal_primal,
-            flag_tight,
-            forward_solution,
-            step_size,
-            max_stable_iterations,
-            max_iterations,
-            max_time,
-            MIPGap,
-            tol):
+            gradLPScen: ArrayLike,
+            given_bound: float,
+            objVal_primal: ArrayLike,
+            flag_tight: bool,
+            forward_state_solution: ArrayLike,
+            step_size: float,
+            max_stable_iterations: int,
+            max_iterations: int,
+            max_time: float,
+            MIPGap: float,
+            tol: float) -> tuple:
+        """
+            solve the Lagrangian dual problem and get the
+            objective values and dual values
+        Args:
+            gradLPScen: gradient values form solving the benders models
+            given_bound: given problem bound
+            objVal_primal: objective values of the primal problems
+            flag_tight: whether the cut is tight (whether is binarized)
+            forward_state_solution: state solutions from the forward pass
+            step_size: step size for the level method
+            max_stable_iterations: max iteration to reach stable
+            max_iterations: iteration limit
+            max_time: time limit
+            MIPGap: given gap for terminating the mip solving
+            tol: tolerance for terminating the algorithm
+
+        Returns:
+            a tuple of objective values and dual values
+        """
         n_local_copies = len(self.local_copies)
         objLGScen = numpy.empty(self.n_samples)
         gradLGScen = numpy.empty((self.n_samples, self.n_states))
@@ -1533,28 +1441,32 @@ class StochasticModelLG(StochasticModel):
             # Initialize the current gradient as the solution of dual variables
             grad_current = gradLPScen[k]
             # Set up projection model
+            # the project model is to update the dual value of updating Lagrangian model
             model_proj = gurobipy.Model()
             model_proj.Params.outputFlag = 0
             pi_proj = model_proj.addVars(
                 n_local_copies,
-                lb=-gurobipy.GRB.INFINITY,
+                lb = -gurobipy.GRB.INFINITY,
             ).values()
             model_proj.update()
             # the objective of projection model is \pi^2 - 2\pi\grad_best_so_far
             model_proj.setObjective(gurobipy.quicksum(x * x for x in pi_proj))
             # Set up cut model
             if not flag_tight:
+                # model_cut is a maximization model to choose a best \pi
+                # to maximize all the linear cuts.
+                # it is actually all the lG cuts.
                 model_cut = gurobipy.Model()
                 model_cut.Params.outputFlag = 0
                 model_cut.modelsense = -self.modelsense
-                theta = model_cut.addVar(lb=-gurobipy.GRB.INFINITY, obj=1)
+                theta = model_cut.addVar(lb = -gurobipy.GRB.INFINITY, obj = 1)
                 if self.modelSense == 1:
-                    theta.ub = objVal_primal[k]
+                    theta.ub = objVal_primal[k] # primal(original mip) problem is upper bound if primal is minimizing
                 else:
                     theta.lb = objVal_primal[k]
                 pi_cut = model_cut.addVars(
                     n_local_copies,
-                    lb=-gurobipy.GRB.INFINITY,
+                    lb = -gurobipy.GRB.INFINITY,
                 ).values()
                 model_cut.update()
 
@@ -1568,21 +1480,25 @@ class StochasticModelLG(StochasticModel):
             ):
                 start = time.time()
                 # Solve the inner problem
+                # self is g(\pi) in the LG problem
                 self.setAttr(
                     "obj", self.local_copies, [-x for x in grad_current]
                 )
+                # The MIP solver will terminate (with an optimal result) when the gap between
+                # the lower and upper objective bound is less than MIPGap
+                # times the absolute value of the incumbent objective value.
                 self.Params.MIPGap = MIPGap
                 self.optimize()
                 if self.status not in [2, 11]:
                     break
                 # get the current objVal and gradient for the outer problem
                 grad_outer = [
-                    forward_solution[i] - self.local_copies[i].X
+                    forward_state_solution[i] - self.local_copies[i].X
                     for i in range(n_local_copies)
                 ]
                 objVal_current = self.objBound
                 objVal_current += sum(
-                    x * y for x, y in zip(grad_current, forward_solution)
+                    x * y for x, y in zip(grad_current, forward_state_solution)
                 )
                 # Update cut model
                 if not flag_tight:
@@ -1645,9 +1561,17 @@ class StochasticModelLG(StochasticModel):
         # ! scenario iterations end
         return objLGScen, gradLGScen
 
-    def _binarize(self, precision, n_binaries, transition=0):
-        # Binarize StochasticModel. StochasticModel at transition stage keeps
-        # states in original space while binarzing local_copies
+
+    def binarize(self, precision: int, n_binaries: list[int], transition: bool = 0):
+        """
+             Binarize StochasticModel. StochasticModel at transition stage keeps
+             states in original space while binarizing local_copies
+        Args:
+            precision: the number of decimal places of accuracy
+            n_binaries: the number of state variables that needs to be binarized
+            transition: whether this stage is the last binarization stage
+        """
+
         self.n_states_original_space = self.n_states
         self.local_copies_original_space = self.local_copies
         self.states_original_space = self.states
@@ -1656,38 +1580,38 @@ class StochasticModelLG(StochasticModel):
             self.n_states = 0
         self.local_copies = []
         for i, (x, y) in enumerate(
+            # The zip() function returns a zip object, which is an iterator of tuples where
+            # the first item in each passed iterator is paired together,
+            # and then the second item in each passed iterator are paired together etc.
                 zip(self.states_original_space, self.local_copies_original_space)
-        ):
+        ): # x are state variables and y are local copy variables
+            states = None
             if transition == 0:
-                states = self.addVars(
-                    n_binaries[i], vtype=gurobipy.GRB.BINARY, name=x.varName
+                states = self.addVars( # binary state variables
+                    n_binaries[i], vtype = gurobipy.GRB.BINARY, name = x.varName
                 ).values()
             local_copies = self.addVars(
-                n_binaries[i], vtype=gurobipy.GRB.BINARY, name=y.varName
+                n_binaries[i], vtype = gurobipy.GRB.BINARY, name = y.varName
             ).values()
             self.update()
-            if transition == 0:
 
-                try:
-                    temp1 = gurobipy.quicksum(
-                        pow(2, k) * list(states)[k] for k in range(n_binaries[i])
-                    )
-                except Exception:
-                    pass
-
+            temp1 = gurobipy.quicksum(
+                    pow(2, k) * list(states)[k] for k in range(n_binaries[i])
+            )
             temp2 = gurobipy.quicksum(
                 pow(2, k) * list(local_copies)[k] for k in range(n_binaries[i])
             )
             # Assume bounds are the same over time!
+            # state variables and local copy variables are all copied
             if x.vtype not in ["I", "B"]:
                 if transition == 0:
                     self.addConstr(
-                        temp1 == precision * (x - x.lb),
-                        name="binarize_states_{}".format(i),
+                        temp1 == precision * (x - x.lb), # constraint for binarization of state variables
+                        name = "binarize_states_{}".format(i),
                     )
                 self.addConstr(
-                    temp2 == precision * (y - y.lb),
-                    name="binarize_local_copies_{}".format(i),
+                    temp2 == precision * (y - y.lb), # constraint for binarization of local copy variables
+                    name = "binarize_local_copies_{}".format(i),
                 )
             else:
                 x.lb = math.ceil(x.lb)
@@ -1695,37 +1619,45 @@ class StochasticModelLG(StochasticModel):
                 if transition == 0:
                     self.addConstr(
                         temp1 == x - x.lb,
-                        name="binarize_states_{}".format(i),
+                        name = "binarize_states_{}".format(i),
                     )
                 self.addConstr(
                     temp2 == y - y.lb,
-                    name="binarize_local_copies_{}".format(i),
+                    name = "binarize_local_copies_{}".format(i),
                 )
             if transition == 0:
                 self.states += states
                 self.n_states += n_binaries[i]
             self.local_copies += local_copies
 
-    def _back_binarize(self, precision, n_binaries, transition=0):
+    def back_binarize(self, transition: bool = 0):
+        """
+            de binarize the model.
+        Args:
+            transition: whether transiting from binary to non-binary in
+                        some stage.
+        """
         if not hasattr(self, "states_original_space"):
             return
         for i, (x, y) in enumerate(
-                zip(self.states_original_space, self.local_copies_original_space)
+            zip(self.states_original_space, self.local_copies_original_space)
         ):
             # Binarized states don't exist at transition stage
             if x.vtype not in ["B", "I"]:
                 if transition == 0:
                     temp = self.getConstrByName("binarize_states_{}".format(i))
+                    # Retrieve the list of variables that participate in a constraint,
+                    # and the associated coefficients. The result is returned as a LinExpr object.
                     expr = self.getRow(temp)
                     rhs = temp.rhs
                     self.remove(temp)
                     self.addConstr(
                         expr >= rhs,
-                        name="back_binarize_states_lower"
+                        name = "back_binarize_states_lower"
                     )
                     self.addConstr(
-                        expr <= rhs + 0.99,
-                        name="back_binarize_states_upper"
+                        expr <= rhs + 0.99, # need test
+                        name = "back_binarize_states_upper"
                     )
                 temp = self.getConstrByName("binarize_local_copies_{}".format(i))
                 expr = self.getRow(temp)

@@ -29,8 +29,8 @@ def animate(i):
     y = np.abs(x)**(2/3) + 0.9*np.sqrt(3.3 - x**2)*np.sin(i*(np.pi)*x)
 
     PLOT.set_data(x,y)
-    return PLOT
+    return PLOT,
 
-ani = animation.FuncAnimation(fig, animate, init_func=init, frames=2000, interval=20, blit=True)
-
-plt.show()
+if __name__ == '__main__':
+    ani = animation.FuncAnimation(fig, animate, init_func=init, frames=2000, interval=20, blit=True)
+    plt.show()

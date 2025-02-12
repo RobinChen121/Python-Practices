@@ -20,12 +20,10 @@ s.t.
    y >= 0, integer
 
 h^T = (-2.8, -1.2) and (-2, -3) with equal probability 0.5.
+The original solution(-1.9) in the book may be wrong.
 
-Verified binarization precision being 2 gives an optimal solution
-x = (4, 5.2) and the optimal value -2.8 binarization precision
-being 1 gives an optimal solution x = (2, 1) and the optimal value is -2.6
 Using Extensive solver verifies the optimal value is -2.8. Thus, binarization
-precision being 1 is not enough in this problem.
+precision being 1 reach the same solution, so it is enough in this problem.
 
 """
 

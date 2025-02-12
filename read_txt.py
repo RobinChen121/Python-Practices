@@ -13,7 +13,10 @@ Description:
     
 """
 
-fo = open('test.txt', 'w+', encoding='utf-8')
-ls = ['唐诗\n', '宋词\n', '元曲\n']
-fo.writelines(ls)
-fo.close()
+def test():
+    print('hello')
+
+# fo = open('test.txt', 'w+', encoding='utf-8')
+# ls = ['唐诗\n', '宋词\n', '元曲\n']
+# fo.writelines(ls)
+# fo.close()

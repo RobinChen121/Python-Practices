@@ -1005,7 +1005,7 @@ class MSIP(MSLP):
                 else False
             )
             for m in M:
-                m.back_binarize(self.precision, self.n_binaries, transition)
+                m.back_binarize(self.precision)
         self._set_up_link_constrs()
         self.bin_stage = 0
         

@@ -1,0 +1,1 @@
+import sysimport os# 获取 `parent_directory` 路径parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))sys.path.insert(0, parent_dir)  # 插入 `parent_directory` 到 sys.pathfrom draw_pictures import draw_heartprint('hello')
