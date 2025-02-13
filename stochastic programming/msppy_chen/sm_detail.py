@@ -1181,7 +1181,7 @@ class StochasticModel:
             grad = gradLP_samples,
             p = p)
 
-    def copy(self):
+    def copy(self, model):
         """
         Create a deepcopy of a stochastic model.
         The deepcopy() in the copy module is not suitable.
@@ -1192,7 +1192,7 @@ class StochasticModel:
         cls = self.__class__ # get the class of the current instance
         result = cls.__new__(cls) # create a new instance of the given class, uninitialized
         # copy the internal Gurobi model
-        result._model = self._model.copy() # the vars () and constraints in the initial model will be copied
+        result._model = model.copy() # the vars () and constraints in the initial model will be copied
         for attribute, value in self.__dict__.items(): # __dict__ get all the attributes in the function of __init__()
             # for mutable data types like list, dict, set, should use deep copy
             if attribute == "_model":
@@ -1452,7 +1452,9 @@ class StochasticModelLG(StochasticModel):
             # the objective of projection model is \pi^2 - 2\pi\grad_best_so_far
             model_proj.setObjective(gurobipy.quicksum(x * x for x in pi_proj))
             # Set up cut model
-            if not flag_tight:
+            model_cut = None
+            theta = None
+            if not flag_tight: # meaning the model is binarized
                 # model_cut is a maximization model to choose a best \pi
                 # to maximize all the linear cuts.
                 # it is actually all the lG cuts.
@@ -1482,6 +1484,11 @@ class StochasticModelLG(StochasticModel):
                 # Solve the inner problem
                 # self is g(\pi) in the LG problem
                 self.setAttr(
+                    # chen: may be something wrong here
+                    # does the objective like this after
+                    # binarization approximation?
+                    # the objetive is revised later to add the constant
+                    # \pi^k*x_{t-1}
                     "obj", self.local_copies, [-x for x in grad_current]
                 )
                 # The MIP solver will terminate (with an optimal result) when the gap between
@@ -1493,20 +1500,26 @@ class StochasticModelLG(StochasticModel):
                     break
                 # get the current objVal and gradient for the outer problem
                 grad_outer = [
+                    # (x_{t-1} - z)
                     forward_state_solution[i] - self.local_copies[i].X
                     for i in range(n_local_copies)
                 ]
                 objVal_current = self.objBound
+                # g(\pi^k) + \pi^k*x_{t-1}
                 objVal_current += sum(
                     x * y for x, y in zip(grad_current, forward_state_solution)
                 )
                 # Update cut model
-                if not flag_tight:
+                if not flag_tight: # meaning the model is binarized
+                    # g(\pi) + \pi^k*x_{t-1}- \pi (x_{t-1} - z^k)
                     cut_const = objVal_current - sum(
                         x * y for x, y in zip(grad_current, grad_outer)
                     )
+                    # \pi*(x_{t-1}-z^k)
                     cut_expr = gurobipy.LinExpr(grad_outer, pi_cut)
                     model_cut.addConstr(
+                        # theta - \pi(x_{t-1} - z) - g(\pi^k) - \pi^k*x_{t-1}
+                        # + \pi^k (x_{t-1}-z^k) <= 0
                         self.modelSense * (theta - cut_expr - cut_const) <= 0
                     )
                     model_cut.optimize()
@@ -1523,6 +1536,8 @@ class StochasticModelLG(StochasticModel):
                 # Update projection model
 
                 try:
+                    # \pi_k^2 is neglected in the objetive since it
+                    # does not affect the optimization
                     model_proj.setAttr(
                         "obj", list(pi_proj), [-2 * x for x in grad_best_so_far]
                     )
@@ -1536,8 +1551,9 @@ class StochasticModelLG(StochasticModel):
                 level = step_size * objVal_best_so_far + (1 - step_size) * benchmark
                 # current + gradient * (pi_proj - grad_current) >=(<=) level
                 temp1 = sum(x * y for x, y in zip(grad_outer, grad_current))
+                # grad_outer = (x_{t-1} - z)
                 temp2 = gurobipy.LinExpr(grad_outer, pi_proj)
-                new_cut = model_proj.addConstr(
+                model_proj.addConstr(
                     self.modelsense * (objVal_current + temp2 - temp1 - level)
                     >= 0
                 )
@@ -1557,7 +1573,8 @@ class StochasticModelLG(StochasticModel):
                 "obj", self.local_copies, [-x for x in grad_best_so_far]
             )
             self.optimize()
-            objLGScen[k] = self.objBound
+            # can also be objLGScen[k] = self._model.objBound
+            objLGScen[k] = self.objBound # objBound is the attribute of gurobi model
         # ! scenario iterations end
         return objLGScen, gradLGScen
 

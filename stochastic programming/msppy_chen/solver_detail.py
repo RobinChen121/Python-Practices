@@ -1531,6 +1531,7 @@ class SDDiP(SDDP):
             objLGScen = numpy.empty((n_Markov_states, MSP.n_samples[t]))
             gradLGScen = numpy.empty((n_Markov_states, MSP.n_samples[t],
                 MSP.n_states[t]))
+            m = None # the model
             for k, model in enumerate(M):
                 if MSP.n_Markov_states != 1:
                     # add auxiliary constraint

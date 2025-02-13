@@ -8,135 +8,14 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="f99bd7d8-beb4-47cd-bc85-89bae93f688b" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/draw_pictures/joint chance/import_test.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/Python-Practices.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/Python-Practices.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/dictionaries/zhenchen.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dictionaries/zhenchen.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/junior_practices/debug_test.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/draw-pictures/.spyproject/codestyle.ini" beforeDir="false" afterPath="$PROJECT_DIR$/draw_pictures/.spyproject/codestyle.ini" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/draw-pictures/.spyproject/draw_pp.py" beforeDir="false" afterPath="$PROJECT_DIR$/draw_pictures/.spyproject/draw_pp.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/draw-pictures/.spyproject/encoding.ini" beforeDir="false" afterPath="$PROJECT_DIR$/draw_pictures/.spyproject/encoding.ini" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/draw-pictures/.spyproject/vcs.ini" beforeDir="false" afterPath="$PROJECT_DIR$/draw_pictures/.spyproject/vcs.ini" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/draw-pictures/.spyproject/workspace.ini" beforeDir="false" afterPath="$PROJECT_DIR$/draw_pictures/.spyproject/workspace.ini" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/draw-pictures/DrawAffine.py" beforeDir="false" afterPath="$PROJECT_DIR$/draw_pictures/DrawAffine.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/draw-pictures/DrawPiece2.py" beforeDir="false" afterPath="$PROJECT_DIR$/draw_pictures/DrawPiece2.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/draw-pictures/DrawSup.py" beforeDir="false" afterPath="$PROJECT_DIR$/draw_pictures/DrawSup.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/draw-pictures/__init__.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/draw-pictures/china_map.html" beforeDir="false" afterPath="$PROJECT_DIR$/draw_pictures/china_map.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/draw-pictures/chongqing.html" beforeDir="false" afterPath="$PROJECT_DIR$/draw_pictures/chongqing.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/draw-pictures/constraint_change_animation.gif" beforeDir="false" afterPath="$PROJECT_DIR$/draw_pictures/constraint_change_animation.gif" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/draw-pictures/deaw_contour.py" beforeDir="false" afterPath="$PROJECT_DIR$/draw_pictures/deaw_contour.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/draw-pictures/dota_radar.JPG" beforeDir="false" afterPath="$PROJECT_DIR$/draw_pictures/dota_radar.JPG" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/draw-pictures/draw_animation.py" beforeDir="false" afterPath="$PROJECT_DIR$/draw_pictures/draw_animation.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/draw-pictures/draw_bar.py" beforeDir="false" afterPath="$PROJECT_DIR$/draw_pictures/draw_bar.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/draw-pictures/draw_basemap_usage.py" beforeDir="false" afterPath="$PROJECT_DIR$/draw_pictures/draw_basemap_usage.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/draw-pictures/draw_binormial.py" beforeDir="false" afterPath="$PROJECT_DIR$/draw_pictures/draw_binormial.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/draw-pictures/draw_contour2.py" beforeDir="false" afterPath="$PROJECT_DIR$/draw_pictures/draw_contour2.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/draw-pictures/draw_exponential_smoothing.py" beforeDir="false" afterPath="$PROJECT_DIR$/draw_pictures/draw_exponential_smoothing.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/draw-pictures/draw_half_continuity.py" beforeDir="false" afterPath="$PROJECT_DIR$/draw_pictures/draw_half_continuity.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/draw-pictures/draw_heart.py" beforeDir="false" afterPath="$PROJECT_DIR$/draw_pictures/draw_heart.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/draw-pictures/draw_heart2.py" beforeDir="false" afterPath="$PROJECT_DIR$/draw_pictures/draw_heart2.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/draw-pictures/draw_heart3.py" beforeDir="false" afterPath="$PROJECT_DIR$/draw_pictures/draw_heart3.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/draw-pictures/draw_heatmap.py" beforeDir="false" afterPath="$PROJECT_DIR$/draw_pictures/draw_heatmap.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/draw-pictures/draw_lineprogramming.py" beforeDir="false" afterPath="$PROJECT_DIR$/draw_pictures/draw_lineprogramming.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/draw-pictures/draw_lineprogramming2.py" beforeDir="false" afterPath="$PROJECT_DIR$/draw_pictures/draw_lineprogramming2.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/draw-pictures/draw_lineprogramming3.py" beforeDir="false" afterPath="$PROJECT_DIR$/draw_pictures/draw_lineprogramming3.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/draw-pictures/draw_lineprogramming4.py" beforeDir="false" afterPath="$PROJECT_DIR$/draw_pictures/draw_lineprogramming4.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/draw-pictures/draw_math.py" beforeDir="false" afterPath="$PROJECT_DIR$/draw_pictures/draw_math.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/draw-pictures/draw_normal.py" beforeDir="false" afterPath="$PROJECT_DIR$/draw_pictures/draw_normal.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/draw-pictures/draw_piecewise.py" beforeDir="false" afterPath="$PROJECT_DIR$/draw_pictures/draw_piecewise.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/draw-pictures/draw_power_exponential.py" beforeDir="false" afterPath="$PROJECT_DIR$/draw_pictures/draw_power_exponential.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/draw-pictures/draw_ppqq.py" beforeDir="false" afterPath="$PROJECT_DIR$/draw_pictures/draw_ppqq.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/draw-pictures/draw_pyechartsMap2.py" beforeDir="false" afterPath="$PROJECT_DIR$/draw_pictures/draw_pyechartsMap2.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/draw-pictures/draw_pyecharts_useage.py" beforeDir="false" afterPath="$PROJECT_DIR$/draw_pictures/draw_pyecharts_useage.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/draw-pictures/draw_radar.py" beforeDir="false" afterPath="$PROJECT_DIR$/draw_pictures/draw_radar.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/draw-pictures/draw_saddle.py" beforeDir="false" afterPath="$PROJECT_DIR$/draw_pictures/draw_saddle.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/draw-pictures/draw_weibull.py" beforeDir="false" afterPath="$PROJECT_DIR$/draw_pictures/draw_weibull.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/draw-pictures/example.html" beforeDir="false" afterPath="$PROJECT_DIR$/draw_pictures/example.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/draw-pictures/generate_art_words.py" beforeDir="false" afterPath="$PROJECT_DIR$/draw_pictures/generate_art_words.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/draw-pictures/heart.gif" beforeDir="false" afterPath="$PROJECT_DIR$/draw_pictures/heart.gif" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/draw-pictures/joint chance/draw_box.py" beforeDir="false" afterPath="$PROJECT_DIR$/draw_pictures/joint chance/draw_box.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/draw-pictures/joint chance/draw_box2.py" beforeDir="false" afterPath="$PROJECT_DIR$/draw_pictures/joint chance/draw_box2.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/draw-pictures/joint chance/draw_box3.py" beforeDir="false" afterPath="$PROJECT_DIR$/draw_pictures/joint chance/draw_box3.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/draw-pictures/joint chance/draw_box4.py" beforeDir="false" afterPath="$PROJECT_DIR$/draw_pictures/joint chance/draw_box4.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/draw-pictures/joint chance/draw_box5.py" beforeDir="false" afterPath="$PROJECT_DIR$/draw_pictures/joint chance/draw_box5.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/draw-pictures/joint chance/draw_line.py" beforeDir="false" afterPath="$PROJECT_DIR$/draw_pictures/joint chance/draw_line.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/draw-pictures/joint chance/draw_line2.py" beforeDir="false" afterPath="$PROJECT_DIR$/draw_pictures/joint chance/draw_line2.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/draw-pictures/joint chance/draw_line3.py" beforeDir="false" afterPath="$PROJECT_DIR$/draw_pictures/joint chance/draw_line3.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/draw-pictures/joint chance/draw_line4.py" beforeDir="false" afterPath="$PROJECT_DIR$/draw_pictures/joint chance/draw_line4.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/draw-pictures/joint chance/draw_line5.py" beforeDir="false" afterPath="$PROJECT_DIR$/draw_pictures/joint chance/draw_line5.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/draw-pictures/joint chance/draw_rolling.py" beforeDir="false" afterPath="$PROJECT_DIR$/draw_pictures/joint chance/draw_rolling.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/draw-pictures/joint chance/draw_rolling2.py" beforeDir="false" afterPath="$PROJECT_DIR$/draw_pictures/joint chance/draw_rolling2.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/draw-pictures/joint chance/service_values0.5.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/draw-pictures/render.html" beforeDir="false" afterPath="$PROJECT_DIR$/draw_pictures/render.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/draw-pictures/resultTable.xls" beforeDir="false" afterPath="$PROJECT_DIR$/draw_pictures/resultTable.xls" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/draw-pictures/test.py" beforeDir="false" afterPath="$PROJECT_DIR$/draw_pictures/test.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/draw-pictures/testPyinstaller.py" beforeDir="false" afterPath="$PROJECT_DIR$/draw_pictures/testPyinstaller.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/draw-pictures/world_map.html" beforeDir="false" afterPath="$PROJECT_DIR$/draw_pictures/world_map.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/practices/.spyproject/codestyle.ini" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/practices/.spyproject/encoding.ini" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/practices/.spyproject/vcs.ini" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/practices/.spyproject/workspace.ini" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/practices/ClassExtentions.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/practices/ClassOperator.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/practices/IntegerPartionRecursion.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/practices/IntegerPartitionRecursion.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/practices/MemorizeTimeTesting.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/practices/app.log" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/practices/binomial_test.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/practices/compute_cronbach.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/practices/draw.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/practices/exceptionExample.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/practices/exponential_smoothing-1.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/practices/exponential_smoothing-2.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/practices/linear_regreesion.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/practices/logging_test.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/practices/multi-process/array-2process.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/practices/multi-process/fibnocci.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/practices/multi-process/multi-process-array.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/practices/multi-process/multiprocess-fork-spawn.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/practices/multi-process/multiprocess-lock.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/practices/multi-process/multiprocess-lock2.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/practices/multi-process/multiprocess-manager.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/practices/multi-process/multiprocess-pickle.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/practices/multi-process/multiprocess-pickle2.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/practices/multi-process/multiprocess-pipe.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/practices/multi-process/multiprocess-pool.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/practices/multi-process/multiprocess-process.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/practices/multi-process/multiprocess-process2.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/practices/multi-process/multiprocess-queue.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/practices/multi-process/multiprocess_class.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/practices/multi-process/multiprocess_class2.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/practices/new__test.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/practices/nonLocal_test.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/practices/partion_integer.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/practices/simulatePingPong.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/practices/subprocess_test.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/practices/useClass.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/practices/useClassOperatorOverload.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/read docs/record.xlsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/read files/ServiceRateTest.xls" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/read files/nita_N.xls" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/read files/outout_csv.py" beforeDir="false" afterPath="$PROJECT_DIR$/read_files/outout_csv.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/read files/read_excel.py" beforeDir="false" afterPath="$PROJECT_DIR$/read_files/read_excel.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/read files/read_excel2.py" beforeDir="false" afterPath="$PROJECT_DIR$/read_files/read_excel2.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/read files/read_excel3.py" beforeDir="false" afterPath="$PROJECT_DIR$/read_files/read_excel3.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/read files/read_test.py" beforeDir="false" afterPath="$PROJECT_DIR$/read_files/read_test.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/read files/rolling_output1.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/read files/rolling_output2.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/read files/rolling_output3.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/read files/rolling_output4.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/read_txt.py" beforeDir="false" afterPath="$PROJECT_DIR$/read_txt.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/stochastic programming/msppy_chen/a_simpleMip.py" beforeDir="false" afterPath="$PROJECT_DIR$/stochastic programming/msppy_chen/a_simpleMip.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/stochastic programming/msppy_chen/msm.py" beforeDir="false" afterPath="$PROJECT_DIR$/stochastic programming/msppy_chen/msm.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/stochastic programming/msppy_chen/sm_detail.py" beforeDir="false" afterPath="$PROJECT_DIR$/stochastic programming/msppy_chen/sm_detail.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/stochastic programming/msppy_chen/solver_detail.py" beforeDir="false" afterPath="$PROJECT_DIR$/stochastic programming/msppy_chen/solver_detail.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../msppy/msppy/solver.py" beforeDir="false" afterPath="$PROJECT_DIR$/../msppy/msppy/solver.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../msppy/msppy/sp.py" beforeDir="false" afterPath="$PROJECT_DIR$/../msppy/msppy/sp.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../msppy/quick_start/a_simple_MIP.py" beforeDir="false" afterPath="$PROJECT_DIR$/../msppy/quick_start/a_simple_MIP.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../sddp_overdraft/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/../sddp_overdraft/main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../sddp_overdraft/msp/__init__.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../sddp_overdraft/msp/module1.py" beforeDir="false" afterPath="$PROJECT_DIR$/../sddp_overdraft/msp/module1.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../sddp_overdraft/msp/module2.py" beforeDir="false" afterPath="$PROJECT_DIR$/../sddp_overdraft/msp/module2.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../sddp_overdraft/tests/test_module1.py" beforeDir="false" afterPath="$PROJECT_DIR$/../sddp_overdraft/tests/test_module1.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -152,7 +31,7 @@
   </component>
   <component name="Git.Settings">
     <option name="ADD_SUFFIX_TO_CHERRY_PICKS_OF_PUBLISHED_COMMITS" value="false" />
-    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/../msppy" />
     <option name="ROOT_SYNC" value="DONT_SYNC" />
     <option name="WARN_ABOUT_CRLF" value="false" />
     <option name="WARN_ABOUT_DETACHED_HEAD" value="false" />
@@ -171,11 +50,13 @@
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
     "Python tests.Doctest via pytest in solver_detail.py.executor": "Debug",
+    "Python tests.Doctest via pytest in sp.py.executor": "Run",
     "Python.MemorizeTimeTesting.executor": "Run",
     "Python.a_simpleMip.executor": "Debug",
-    "Python.a_simple_MIP.executor": "Run",
+    "Python.a_simple_MIP.executor": "Debug",
     "Python.air_conditioner.executor": "Run",
     "Python.array-2process.executor": "Run",
+    "Python.debug_test.executor": "Debug",
     "Python.determin_orderLoan.executor": "Run",
     "Python.draw_animation.executor": "Run",
     "Python.draw_binormial.executor": "Run",
@@ -239,35 +120,6 @@
       <recent name="D:\Users\chen_\git\Python-Practices\statistics book" />
       <recent name="D:\Users\chen_\git\Python-Practices\statistics book\draw_pics" />
     </key>
-  </component>
-  <component name="RunManager">
-    <configuration name="import_test" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
-      <module name="Python-Practices" />
-      <option name="ENV_FILES" value="" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/draw_pictures/joint chance" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/draw_pictures/joint chance/import_test.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
-    <recent_temporary>
-      <list>
-        <item itemvalue="Python.import_test" />
-      </list>
-    </recent_temporary>
   </component>
   <component name="SharedIndexes">
     <attachedChunks>
@@ -492,9 +344,49 @@
           <option name="timeStamp" value="252" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/../msppy/quick_start/a_simple_MIP.py</url>
+          <line>50</line>
+          <option name="timeStamp" value="257" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/stochastic programming/msppy_chen/sm_detail.py</url>
+          <line>1082</line>
+          <option name="timeStamp" value="267" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/stochastic programming/msppy_chen/sm_detail.py</url>
+          <line>560</line>
+          <option name="timeStamp" value="268" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/junior_practices/debug_test.py</url>
+          <line>16</line>
+          <option name="timeStamp" value="273" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/junior_practices/debug_test.py</url>
+          <line>19</line>
+          <option name="timeStamp" value="274" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/stochastic programming/msppy_chen/a_simpleMip.py</url>
-          <line>61</line>
-          <option name="timeStamp" value="254" />
+          <line>62</line>
+          <option name="timeStamp" value="277" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/../msppy/msppy/solver.py</url>
+          <line>993</line>
+          <option name="timeStamp" value="278" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/stochastic programming/msppy_chen/solver_detail.py</url>
+          <line>1573</line>
+          <option name="timeStamp" value="279" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/../msppy/msppy/solver.py</url>
+          <line>991</line>
+          <option name="timeStamp" value="280" />
         </line-breakpoint>
       </breakpoints>
       <default-breakpoints>

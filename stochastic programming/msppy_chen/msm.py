@@ -849,21 +849,11 @@ class MSLP:
         self.measure = "risk averse"
 
 class MSIP(MSLP):
+    n_binaries = []
+    precision = 0
+    bin_stage = 0
 
-    def __init__(self,
-                 T: int,
-                 bound: float = None,
-                 sense: int = 1,
-                 outputLogFlag: bool = False,
-                 discount: float = 1.0,
-                 flag_CTG: bool = False,
-                 **kwargs):
-        super().__init__(T, bound, sense, outputLogFlag, discount, flag_CTG, **kwargs)
-        self.n_binaries = []
-        self.precision = 0
-        self.bin_stage = 0
-
-    def _set_up_model(self):
+    def _set_model(self):
         self.models = [StochasticModelLG(name = str(t)) for t in range(self.T)]
 
     def _check_individual_stage_models(self):
