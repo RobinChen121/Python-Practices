@@ -1014,6 +1014,8 @@ class SDDP(object):
             rgl_norm: str = 'L2',
             rgl_a: float = 0,
             rgl_b: float = 0.95,
+            *args,
+            **kwargs
     ):
         """
         Solve the discretized problem.
@@ -1154,7 +1156,7 @@ class SDDP(object):
             ):
                 start = time.time()
 
-                # self._compute_cut_type() # this line is not used
+                self._compute_cut_type() # this line is used by SDDiP
                 if self.n_processes == 1:
                     policy_value = self._SDDP_single()
                 else:
@@ -1400,23 +1402,23 @@ class SDDP(object):
 class SDDiP(SDDP):
     __doc__ = SDDP.__doc__ # parent docstring is not inherited automatically
 
-    def __init__(self, msp: MSLP, biased_sampling = False):
-        """
-            detailed parameter meanings are in the solve() method
-        Args:
-            msp: the MSLP model
-            biased_sampling: whether biased sampling
-        """
-        
-        super().__init__(msp, biased_sampling)
-        self.level_tol = None
-        self.level_mip_gap = None
-        self.level_max_time = None
-        self.level_max_iterations = None
-        self.level_max_stable_iterations = None
-        self.level_step_size = None
-        self.cut_pattern = None
-        self.relax_stage_start_index = None
+    # def __init__(self, msp: MSLP, biased_sampling = False):
+    #     """
+    #         detailed parameter meanings are in the solve() method
+    #     Args:
+    #         msp: the MSLP model
+    #         biased_sampling: whether biased sampling
+    #     """
+    #
+    #     super().__init__(msp, biased_sampling)
+    level_tol = None
+    level_mip_gap = None
+    level_max_time = None
+    level_max_iterations = None
+    level_max_stable_iterations = None
+    level_step_size = None
+    cut_pattern = None
+    relax_stage_start_index = None
 
     def solve(
             self,
@@ -1504,14 +1506,14 @@ class SDDiP(SDDP):
         self.level_tol = level_tol
         super().solve(*args, **kwargs)
 
-    def _backward(self, state_solution: list[float],
+    def _backward(self, forward_state_solution: list[float],
                   j: int = None,
                   lock = None,
                   cuts: list[str] = None):
         """
             backward pass for SDDiP
         Args:
-            state_solution: the state solutions from forward computing
+            forward_state_solution: the state solutions from forward computing
             j:
             lock: whether there is lock for multiprocessing
             cuts: Entries of the list could be 'B','SB','LG':
@@ -1535,7 +1537,7 @@ class SDDiP(SDDP):
             for k, model in enumerate(M):
                 if MSP.n_Markov_states != 1:
                     # add auxiliary constraint
-                    model.update_link_constrs(state_solution[t-1])
+                    model.update_link_constrs(forward_state_solution[t-1])
                 model.update()
                 m = model.relax() if model.isMIP else model
                 # get benders cuts from the relaxed model
@@ -1560,7 +1562,7 @@ class SDDiP(SDDP):
                         given_bound = MSP.bound,
                         objVal_primal = objVal_primal,
                         flag_tight = flag_bin,
-                        state_solution = state_solution[t-1],
+                        forward_state_solution = forward_state_solution[t-1],
                         step_size = self.level_step_size,
                         max_stable_iterations = self.level_max_stable_iterations,
                         max_iterations = self.level_max_iterations,
@@ -1571,24 +1573,24 @@ class SDDiP(SDDP):
             #! Markov states iteration ends
             if "B" in self.cut_type_list[t-1]:
                 objLP, gradLP = self._compute_cuts(t, m, objLPScen, gradLPScen)
-                objLP -= numpy.matmul(gradLP, state_solution[t-1])
+                objLP -= numpy.matmul(gradLP, forward_state_solution[t-1])
                 self._add_and_store_cuts(t, objLP, gradLP, cuts, "B", j)
                 self._add_cuts_additional_procedure(t, objLP, gradLP, objLPScen,
-                    gradLPScen, state_solution[t-1], cuts, "B", j)
+                    gradLPScen, forward_state_solution[t-1], cuts, "B", j)
             if "SB" in self.cut_type_list[t-1]:
                 objSB, gradLP = self._compute_cuts(t, m, objSBScen, gradLPScen)
                 self._add_and_store_cuts(t, objSB, gradLP, cuts, "SB", j)
                 self._add_cuts_additional_procedure(t, objSB, gradLP, objSBScen,
-                    gradLPScen, state_solution[t-1], cuts, "SB", j)
+                    gradLPScen, forward_state_solution[t-1], cuts, "SB", j)
             if "LG" in self.cut_type_list[t-1]:
                 objLG, gradLG = self._compute_cuts(t, m, objLGScen, gradLGScen)
                 self._add_and_store_cuts(t, objLG, gradLG, cuts, "LG", j)
                 self._add_cuts_additional_procedure(t, objLG, gradLG, objLGScen,
-                    gradLGScen, state_solution[t-1], cuts, "LG", j)
+                    gradLGScen, forward_state_solution[t-1], cuts, "LG", j)
         #! Time iteration ends
 
     def _compute_cut_type_by_iteration(self):
-        if self.cut_pattern == None:
+        if self.cut_pattern is None:
             return list(self.cut_type)
         else:
             if "cycle" in self.cut_pattern.keys():
@@ -1610,14 +1612,14 @@ class SDDiP(SDDP):
                 return cut
 
     def _compute_cut_type_by_stage(self, t, cut_type):
-        if t > self.relax_stage_start_index or self.MSP.isMIP[t] != 1:
+        if t > self.relax_stage_start_index or self.msp.isMIP[t] != 1:
             cut_type = ["B"]
         return cut_type
 
     def _compute_cut_type(self):
         cut_type_list = [None] * self.cut_T
         cut_type_by_iteration = self._compute_cut_type_by_iteration()
-        for t in range(1, self.cut_T+1):
+        for t in range(1, self.cut_T + 1):
             cut_type_list[t-1] = self._compute_cut_type_by_stage(
                 t, cut_type_by_iteration)
         self.cut_type_list = cut_type_list

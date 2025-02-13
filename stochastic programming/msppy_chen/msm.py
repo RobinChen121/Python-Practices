@@ -684,8 +684,7 @@ class MSLP:
         self.check_state_and_continuous_discretized()
         self.check_markov_copy_models_update_nums()
 
-        if self.flag_CTG:
-            self._set_up_CTG()
+        self._set_up_CTG()
         self._set_up_link_constrs()
         self.check_markov_copy_models_update_nums()
         self.flag_updated = 1
@@ -975,7 +974,7 @@ class MSIP(MSLP):
             for m in M:
                 m.binarize(self.precision, self.n_binaries, transition)
 
-    def _update(self):
+    def update(self):
         self._check_MIP()
         super().update()
 

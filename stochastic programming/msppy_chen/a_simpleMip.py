@@ -58,7 +58,7 @@ for t in range(2):
             4*y[0] + 1*y[1] - chi_past[1] >= 0,
             uncertainty = {'rhs': [-1.2, -3]}
         )
-# print('extensive solver: ', Extensive(MIP).solve(outputFlag = 0))
+print('extensive solver: ', Extensive(MIP).solve(outputFlag = 0))
 MIP.binarize(bin_stage = 2, precision = precision)
 SDDiP(MIP).solve(cuts = ['LG'], max_iterations = 128) # LG means Lagrange
 # resultTrue = EvaluationTrue(MIP) # chen: there are some errors running multiprocessing simulation

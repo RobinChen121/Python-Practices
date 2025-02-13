@@ -417,7 +417,7 @@ class StochasticModel:
         # Gurobi model.relax(): Create the relaxation of a MIP model.
         # Transforms integer variables into continuous variables,
         # and removes SOS and general constraints (non-linear constraints).
-        return self.copy(self._model.relax())
+        return self._copy(self._model.relax())
 
     def sample_uncertainty(self, randomState_instance: any = None) -> None:
         """
@@ -1181,7 +1181,7 @@ class StochasticModel:
             grad = gradLP_samples,
             p = p)
 
-    def copy(self, model):
+    def _copy(self, model):
         """
         Create a deepcopy of a stochastic model.
         The deepcopy() in the copy module is not suitable.
@@ -1233,6 +1233,16 @@ class StochasticModel:
 
         return result
 
+    def copy(self):
+        """
+        Create a deepcopy of a stochastic model.
+
+        Returns
+        -------
+        The copied StochasticModel object.
+        """
+        return self._copy(self._model)
+
     def set_up_link_constrs(self)-> None:
         """
             set up the local copies-link constraints;
@@ -1261,7 +1271,7 @@ class StochasticModel:
         objLPScen = numpy.empty(self.n_samples)
         gradLPScen = numpy.empty((self.n_samples, self.n_states))
         for k in range(self.n_samples):
-            self._update_uncertainty(k)
+            self.update_uncertainty(k)
             self.optimize()
             if self._model.status not in [2,11]:
                 self.write_infeasible_model("backward_" + str(self._model.modelName))
@@ -1375,7 +1385,7 @@ class StochasticModelLG(StochasticModel):
 
             # change the coefficient in the objective function of some variables
             self.setAttr("obj", self.local_copies, [-x for x in gradLPScen[i]])
-            self._update_uncertainty(i)
+            self.update_uncertainty(i)
             self.optimize()
             objSBScen[i] = self.objBound
         return objSBScen
@@ -1389,7 +1399,7 @@ class StochasticModelLG(StochasticModel):
         """
         objVal_primal = [None for _ in range(self.n_samples)]
         for i in range(self.n_samples):
-            self._update_uncertainty(i)
+            self.update_uncertainty(i)
             self.optimize()
             objVal_primal[i] = self.objBound
         return objVal_primal
@@ -1433,7 +1443,7 @@ class StochasticModelLG(StochasticModel):
             # Benchmark is objVal of primal problem if LG is tight, otherwise
             # it is updated later as the objVal of cut problem
             benchmark = objVal_primal[k]
-            self._update_uncertainty(k)
+            self.update_uncertainty(k)
             # Initialize the objVal_best_so_far objVal as the known bound and
             # related objVal_best_so_far gradient as the solution of duals
             objVal_best_so_far = given_bound
@@ -1693,8 +1703,8 @@ class StochasticModelLG(StochasticModel):
         self.link_constrs = []
         self._model.update()
 
-    def copy(self, model):
-        result = super().copy(model)
+    def _copy(self, model):
+        result = super()._copy(model)
         if hasattr(self, "n_states_original_space"):
             result.n_states_original_space = self.n_states_original_space
         if hasattr(self, "states_original_space"):
