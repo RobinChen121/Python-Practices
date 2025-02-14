@@ -32,6 +32,8 @@ from solver_detail import Extensive,SDDiP
 from msppy.evaluation import EvaluationTrue
 import gurobipy
 import numpy
+
+
 precision = 1
 numpy.random.seed(2)
 MIP = MSIP(T = 2, bound = -10)

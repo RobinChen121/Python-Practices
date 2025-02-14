@@ -11,15 +11,17 @@ Created on Wed Nov 27 22:20:40 2024
     
 """
 
-from multiprocessing import Pool
 import time
+
+from multiprocessing import Pool
+
 
 def f(x):
     return x*x
 
 if __name__ == '__main__':
     
-    loop_nums = [10, 1000, 100000, 1000000, 4000000, 10000000]
+    loop_nums = [10, 1000, 100000, 1000000, 4000000]
     for loop_num in loop_nums:
         input_data = range(loop_num)
         
@@ -35,5 +37,3 @@ if __name__ == '__main__':
             f(input_data[i])
         end = time.process_time()
         print('running time without parallel computing is %.4fs\n' % (end - start))
-    
-    

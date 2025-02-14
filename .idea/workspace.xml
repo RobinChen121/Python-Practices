@@ -8,12 +8,15 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="f99bd7d8-beb4-47cd-bc85-89bae93f688b" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/junior_practices/logging2.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/junior_practices/multi-process/pool2.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/stochastic programming/msppy_chen/.log" beforeDir="false" afterPath="$PROJECT_DIR$/stochastic programming/msppy_chen/.log" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/junior_practices/app.log" beforeDir="false" afterPath="$PROJECT_DIR$/junior_practices/app.log" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/junior_practices/debug_test.py" beforeDir="false" afterPath="$PROJECT_DIR$/junior_practices/debug_test.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/junior_practices/logging_test.py" beforeDir="false" afterPath="$PROJECT_DIR$/junior_practices/logging_test.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/junior_practices/multi-process/multiprocess-pool.py" beforeDir="false" afterPath="$PROJECT_DIR$/junior_practices/multi-process/multiprocess-pool.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/stochastic programming/msppy_chen/a_simpleMip.py" beforeDir="false" afterPath="$PROJECT_DIR$/stochastic programming/msppy_chen/a_simpleMip.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/stochastic programming/msppy_chen/msm.py" beforeDir="false" afterPath="$PROJECT_DIR$/stochastic programming/msppy_chen/msm.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/stochastic programming/msppy_chen/sm_detail.py" beforeDir="false" afterPath="$PROJECT_DIR$/stochastic programming/msppy_chen/sm_detail.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/stochastic programming/msppy_chen/solver_detail.py" beforeDir="false" afterPath="$PROJECT_DIR$/stochastic programming/msppy_chen/solver_detail.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -65,7 +68,8 @@
     "Python.fibnocci.executor": "Run",
     "Python.generate_art_words.executor": "Run",
     "Python.import_test.executor": "Run",
-    "Python.logger.executor": "Debug",
+    "Python.logger.executor": "Run",
+    "Python.logging_test.executor": "Run",
     "Python.main.executor": "Run",
     "Python.module1.executor": "Run",
     "Python.multi-process-array.executor": "Debug",
@@ -75,6 +79,7 @@
     "Python.multiprocess-lock2.executor": "Run",
     "Python.multiprocess-pickle.executor": "Run",
     "Python.multiprocess-pickle2.executor": "Run",
+    "Python.multiprocess-pool.executor": "Run",
     "Python.multiprocess2.executor": "Run",
     "Python.multiprocess3.executor": "Run",
     "Python.multiprocess4.executor": "Run",
@@ -86,6 +91,7 @@
     "Python.multiprocess_class2.executor": "Run",
     "Python.news_vendor.executor": "Debug",
     "Python.newsvendor.executor": "Run",
+    "Python.pool2.executor": "Run",
     "Python.portfolio_optimization.executor": "Run",
     "Python.saa_orderLoan_LowerBounds.executor": "Run",
     "RunOnceActivity.ShowReadmeOnStart": "true",
@@ -348,17 +354,17 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/junior_practices/debug_test.py</url>
-          <line>16</line>
+          <line>17</line>
           <option name="timeStamp" value="273" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/junior_practices/debug_test.py</url>
-          <line>19</line>
+          <line>20</line>
           <option name="timeStamp" value="274" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/stochastic programming/msppy_chen/a_simpleMip.py</url>
-          <line>62</line>
+          <line>64</line>
           <option name="timeStamp" value="277" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">

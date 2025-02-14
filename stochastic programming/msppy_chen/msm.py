@@ -12,7 +12,6 @@ Created on Mon Jan  6 15:49:14 2025
     
 """
 import math
-
 from sm_detail import StochasticModel, StochasticModelLG
 from utils.statistics import check_Markov_states_and_transition_matrix
 from utils.statistics import check_Markov_callable_uncertainty, check_random_state
