@@ -125,7 +125,7 @@ MM = len(prices)
 unit_salvages = [0.5* vari_costs[m] for m in range(MM)]
 overhead_cost = [100 for t in range(T)]
 
-r0 = 0  # when it is 0.01, can largely slow the compuational speed
+r0 = 0  # when it is 0.01, can largely slow the computational speed
 r1 = 0.1
 r2 = 2 # penalty interest rate for overdraft exceeding the limit, does not affect computation time
 U = 500 # overdraft limit
