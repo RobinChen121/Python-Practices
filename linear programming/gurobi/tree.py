@@ -48,13 +48,13 @@ def generate_samples_normal(sample_num, trunQuantile, mean, sigma):
     random.shuffle(samples)
     return samples
 
-def generate_samples_discrete(sample_num, xk, pk):
-    samples = [0 for i in range(sample_num)]
+def generate_samples_discrete(self, sample_num, xk, pk):
+    samples =  [[0.0 for _ in range(sample_num)] for t in self.T]
     for i in range(sample_num):
         # np.random.seed(10000)
         rand_p = np.random.uniform(i/sample_num, (i+1)/sample_num)
         dist = st.rv_discrete(values=(xk, pk))
-        samples[i] = dist.ppf(rand_p)
+        samples[t][i] = dist.ppf(rand_p)
     random.shuffle(samples)
     return samples
 
@@ -87,7 +87,7 @@ def generate_scenarios2(scenario_num, sample_num, sample_details):
             
     return scenarios
 
-# generate for possion distribution
+# generate for Possion distribution
 def generate_scenarios(scenario_num, trunQuantile, mus):
     T = len(mus)
     samples = [[0 for t in range(T)] for i in range(scenario_num)]
