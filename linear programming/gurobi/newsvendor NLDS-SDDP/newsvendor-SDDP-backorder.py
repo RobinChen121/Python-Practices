@@ -77,15 +77,12 @@ for t in range(T):
 iter = 0
 iter_num = 10
 N = 10 # sampled number of scenarios for forward computing
-
 theta_iniValue = 0 # initial theta values (profit) in each period
 m = Model() # linear model in the first stage
 # decision variable in the first stage model
 q = m.addVar(vtype = GRB.CONTINUOUS, name = 'q_1')
 theta = m.addVar(lb = theta_iniValue*T, vtype = GRB.CONTINUOUS, name = 'theta_2')
 m.setObjective(vari_cost*q + theta, GRB.MINIMIZE)
-q_value = 0
-theta_value = 0
 
 # cuts
 slope1_stage = []
