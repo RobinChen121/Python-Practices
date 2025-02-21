@@ -6,7 +6,7 @@
 
 @Python version: 3.6
 
-@descprition: an example about extention of classes in python
+@description: an example about extension of classes in python
     
 """
 

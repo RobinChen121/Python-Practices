@@ -6,7 +6,7 @@
 
 @Python version: 3.6
 
-@descprition: an example about class operator in python
+@description: an example about class operator in python
     
 """
 

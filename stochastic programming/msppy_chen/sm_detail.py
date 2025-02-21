@@ -893,6 +893,7 @@ class StochasticModel:
 
         return var
 
+    # addVars is useful in the extensive model
     def addVars(
             self,
             *indices: int,

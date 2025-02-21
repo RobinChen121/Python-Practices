@@ -6,10 +6,6 @@ Created on Tue Aug 23 18:11:35 2022
 @author: chen
 """
 
-import sys
-sys.path.append("..")
-
-from Python_Practices import read_txt
 import scipy.stats as st
 
 for y in range(0, 130):
