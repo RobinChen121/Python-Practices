@@ -20,40 +20,42 @@ from msm import MSLP
 from solver_detail import Extensive, SDDP
 import gurobipy
 
-
 T = 4
 PurchasePrice = [5.0, 8.0]
 Demand = [[10.0, 15.0], [12.0, 20.0], [8.0, 20.0]]
 RetailPrice = 7.0
 
-newsVendor = MSLP(T = T, sense = 1, bound = -1000)
+newsVendor = MSLP(T=T, sense=1, bound=-1000)
 newsVendor.add_MC_uncertainty_discrete(
-    Markov_states = [
+    Markov_states=[
         [[5.0]],
         [[5.0]],
-        [[5.0],[8.0]],
-        [[5.0],[8.0]]
+        [[5.0], [8.0]],
+        [[5.0], [8.0]]
     ],
-    transition_matrix = [
+    transition_matrix=[
         [[1]],
         [[1]],
-        [[0.6,0.4]],
-        [[0.3,0.7],[0.3,0.7]]
+        [[0.6, 0.4]],
+        [[0.3, 0.7], [0.3, 0.7]]
     ]
 )
 for t in range(T):
     m = newsVendor[t]
-    now, past = m.addStateVar(ub = 100, name = "stock")
+    now, past = m.addStateVar(ub=100, name="stock")
     if t > 0:
-        buy = m.addVar(name = "buy", uncertainty_dependent = 0)
-        sell = m.addVar(name = "sell", obj = -RetailPrice)
-        m.addConstr(now == past + buy - sell)
-        random = m.addVar(lb = -gurobipy.GRB.INFINITY, ub = gurobipy.GRB.INFINITY, name = "demand")
-        m.addConstr(random == 20, uncertainty = {'rhs': Demand[t - 1]})
+        # uncertainty_dependent means uncertainty is in the objective coefficient
+        buy = m.addVar(name="buy", uncertainty_dependent=0)  # purchase quantity
+        sell = m.addVar(name="sell", obj=-RetailPrice)
+        m.addConstr(now == past + buy - sell)  # inventory flow
+        random = m.addVar(lb=-gurobipy.GRB.INFINITY, ub=gurobipy.GRB.INFINITY,
+                          name="demand")  # random variable is a decision variable in the model
+        m.addConstr(random == 20, uncertainty={'rhs': Demand[t - 1]})
         m.addConstr(sell <= random)
         m.addConstr(sell >= 0.5 * random)
     if t == 0:
         m.addConstr(now == 5.0)
-Extensive(newsVendor).solve() # no need for non-anticipative constraints since all the variables are indexed by sample paths
-newsVendor.set_AVaR(a = 0.6, l = 0.5)
-SDDP(newsVendor).solve(n_processes = 2, n_steps = 2, max_iterations = 100)
+Extensive(
+    newsVendor).solve()  # no need for non-anticipative constraints since all the variables are indexed by sample paths
+newsVendor.set_AVaR(a=0.6, l=0.5)
+SDDP(newsVendor).solve(n_processes=2, n_steps=2, max_iterations=100)
