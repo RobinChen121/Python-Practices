@@ -10,10 +10,11 @@
     
 """
 
+
 # 类定义
-class people:
+class People:
     # 定义基本属性
-    name = ''
+    name = ""
     age = 0
     # 定义私有属性,私有属性在类外部无法直接进行访问
     __weight = 0
@@ -29,12 +30,12 @@ class people:
 
 
 # 单继承示例
-class student(people):
-    grade = ''
+class Student(People):
+    grade = ""
 
     def __init__(self, n, a, w, g):
         # 调用父类的构函
-        people.__init__(self, n, a, w)
+        People.__init__(self, n, a, w)
         self.grade = g
 
     # 覆写父类的方法
@@ -43,9 +44,9 @@ class student(people):
 
 
 # 另一个类，多重继承之前的准备
-class speaker():
-    topic = ''
-    name = ''
+class Speaker:
+    topic = ""
+    name = ""
 
     def __init__(self, n, t):
         self.name = n
@@ -56,13 +57,13 @@ class speaker():
 
 
 # 多重继承
-class sample(speaker, student):
-    a = ''
+class Sample(Speaker, Student):
+    a = ""
 
     def __init__(self, n, a, w, g, t):
-        student.__init__(self, n, a, w, g)
-        speaker.__init__(self, n, t)
+        Student.__init__(self, n, a, w, g)
+        Speaker.__init__(self, n, t)
 
 
-test = sample("Tim", 25, 80, 4, "Python")
+test = Sample("Tim", 25, 80, 4, "Python")
 test.speak()  # 方法名同，默认调用的是在括号中排在前面父类的方法

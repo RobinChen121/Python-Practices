@@ -1,6 +1,6 @@
-#!/usr/bin/python
+#!/usr/bin/env python3.11
 
-# Copyright 2019, Gurobi Optimization, LLC
+# Copyright 2025, Gurobi Optimization, LLC
 
 #   This example reads a model from a file, sets up a callback that
 #   monitors optimization progress and implements a custom
@@ -19,11 +19,29 @@
 #   termination criterion.
 
 import sys
-from gurobipy import *
+from functools import partial
 
-# Define my callback function
+import gurobipy as gp
+from gurobipy import GRB
 
-def mycallback(model, where):
+
+class CallbackData:
+    def __init__(self, modelvars):
+        self.modelvars = modelvars
+        self.lastiter = -GRB.INFINITY
+        self.lastnode = -GRB.INFINITY
+
+
+def mycallback(model, where, *, cbdata, logfile):
+    """
+    Callback function. 'model' and 'where' arguments are passed by gurobipy
+    when the callback is invoked. The other arguments must be provided via
+    functools.partial:
+      1) 'cbdata' is an instance of CallbackData, which holds the model
+         variables and tracks state information across calls to the callback.
+      2) 'logfile' is a writeable file handle.
+    """
+
     if where == GRB.Callback.POLLING:
         # Ignore polling callback
         pass
@@ -32,56 +50,60 @@ def mycallback(model, where):
         cdels = model.cbGet(GRB.Callback.PRE_COLDEL)
         rdels = model.cbGet(GRB.Callback.PRE_ROWDEL)
         if cdels or rdels:
-            print('%d columns and %d rows are removed' % (cdels, rdels))
+            print(f"{cdels} columns and {rdels} rows are removed")
     elif where == GRB.Callback.SIMPLEX:
         # Simplex callback
         itcnt = model.cbGet(GRB.Callback.SPX_ITRCNT)
-        if itcnt - model._lastiter >= 100:
-            model._lastiter = itcnt
+        if itcnt - cbdata.lastiter >= 100:
+            cbdata.lastiter = itcnt
             obj = model.cbGet(GRB.Callback.SPX_OBJVAL)
             ispert = model.cbGet(GRB.Callback.SPX_ISPERT)
             pinf = model.cbGet(GRB.Callback.SPX_PRIMINF)
             dinf = model.cbGet(GRB.Callback.SPX_DUALINF)
             if ispert == 0:
-                ch = ' '
+                ch = " "
             elif ispert == 1:
-                ch = 'S'
+                ch = "S"
             else:
-                ch = 'P'
-            print('%d %g%s %g %g' % (int(itcnt), obj, ch, pinf, dinf))
+                ch = "P"
+            print(f"{int(itcnt)} {obj:g}{ch} {pinf:g} {dinf:g}")
     elif where == GRB.Callback.MIP:
         # General MIP callback
         nodecnt = model.cbGet(GRB.Callback.MIP_NODCNT)
         objbst = model.cbGet(GRB.Callback.MIP_OBJBST)
         objbnd = model.cbGet(GRB.Callback.MIP_OBJBND)
         solcnt = model.cbGet(GRB.Callback.MIP_SOLCNT)
-        if nodecnt - model._lastnode >= 100:
-            model._lastnode = nodecnt
+        if nodecnt - cbdata.lastnode >= 100:
+            cbdata.lastnode = nodecnt
             actnodes = model.cbGet(GRB.Callback.MIP_NODLFT)
             itcnt = model.cbGet(GRB.Callback.MIP_ITRCNT)
             cutcnt = model.cbGet(GRB.Callback.MIP_CUTCNT)
-            print('%d %d %d %g %g %d %d' % (nodecnt, actnodes, \
-                  itcnt, objbst, objbnd, solcnt, cutcnt))
+            print(
+                f"{nodecnt:.0f} {actnodes:.0f} {itcnt:.0f} {objbst:g} "
+                f"{objbnd:g} {solcnt} {cutcnt}"
+            )
         if abs(objbst - objbnd) < 0.1 * (1.0 + abs(objbst)):
-            print('Stop early - 10% gap achieved')
+            print("Stop early - 10% gap achieved")
             model.terminate()
         if nodecnt >= 10000 and solcnt:
-            print('Stop early - 10000 nodes explored')
+            print("Stop early - 10000 nodes explored")
             model.terminate()
     elif where == GRB.Callback.MIPSOL:
         # MIP solution callback
         nodecnt = model.cbGet(GRB.Callback.MIPSOL_NODCNT)
         obj = model.cbGet(GRB.Callback.MIPSOL_OBJ)
         solcnt = model.cbGet(GRB.Callback.MIPSOL_SOLCNT)
-        x = model.cbGetSolution(model._vars)
-        print('**** New solution at node %d, obj %g, sol %d, ' \
-              'x[0] = %g ****' % (nodecnt, obj, solcnt, x[0]))
+        x = model.cbGetSolution(cbdata.modelvars)
+        print(
+            f"**** New solution at node {nodecnt:.0f}, obj {obj:g}, "
+            f"sol {solcnt:.0f}, x[0] = {x[0]:g} ****"
+        )
     elif where == GRB.Callback.MIPNODE:
         # MIP node callback
-        print('**** New node ****')
-        if model.cbGet(GRB.Callback.MIPNODE_STATUS) == GRB.Status.OPTIMAL:
-            x = model.cbGetNodeRel(model._vars)
-            model.cbSetSolution(model.getVars(), x)
+        print("**** New node ****")
+        if model.cbGet(GRB.Callback.MIPNODE_STATUS) == GRB.OPTIMAL:
+            x = model.cbGetNodeRel(cbdata.modelvars)
+            model.cbSetSolution(cbdata.modelvars, x)
     elif where == GRB.Callback.BARRIER:
         # Barrier callback
         itcnt = model.cbGet(GRB.Callback.BARRIER_ITRCNT)
@@ -90,52 +112,42 @@ def mycallback(model, where):
         priminf = model.cbGet(GRB.Callback.BARRIER_PRIMINF)
         dualinf = model.cbGet(GRB.Callback.BARRIER_DUALINF)
         cmpl = model.cbGet(GRB.Callback.BARRIER_COMPL)
-        print('%d %g %g %g %g %g' % (itcnt, primobj, dualobj, \
-              priminf, dualinf, cmpl))
+        print(f"{itcnt:.0f} {primobj:g} {dualobj:g} {priminf:g} {dualinf:g} {cmpl:g}")
     elif where == GRB.Callback.MESSAGE:
         # Message callback
         msg = model.cbGet(GRB.Callback.MSG_STRING)
-        model._logfile.write(msg)
+        logfile.write(msg)
 
 
+# Parse arguments
 if len(sys.argv) < 2:
-    print('Usage: callback.py filename')
-    quit()
+    print("Usage: callback.py filename")
+    sys.exit(0)
+model_file = sys.argv[1]
 
-# Turn off display and heuristics
+# This context block manages several resources to ensure they are properly
+# closed at the end of the program:
+#   1) A Gurobi environment, with console output and heuristics disabled.
+#   2) A Gurobi model, read from a file provided by the user.
+#   3) A Python file handle which the callback will write to.
 
-setParam('OutputFlag', 0)
-setParam('Heuristics', 0)
+with gp.Env(params={"OutputFlag": 0, "Heuristics": 0}) as env, gp.read(
+    model_file, env=env
+) as model, open("cb.log", "w") as logfile:
 
-# Read model from file
+    # Set up callback function with required arguments
+    callback_data = CallbackData(model.getVars())
+    callback_func = partial(mycallback, cbdata=callback_data, logfile=logfile)
 
-model = read(sys.argv[1])
+    # Solve model and print solution information
+    model.optimize(callback_func)
 
-# Open log file
-
-logfile = open('cb.log', 'w')
-
-# Pass data into my callback function
-
-model._lastiter = -GRB.INFINITY
-model._lastnode = -GRB.INFINITY
-model._logfile = logfile
-model._vars = model.getVars()
-
-# Solve model and capture solution information
-
-model.optimize(mycallback)
-
-print('')
-print('Optimization complete')
-if model.SolCount == 0:
-    print('No solution found, optimization status = %d' % model.Status)
-else:
-    print('Solution found, objective = %g' % model.ObjVal)
-    for v in model.getVars():
-        if v.X != 0.0:
-            print('%s %g' % (v.VarName, v.X))
-
-# Close log file
-
-logfile.close()
+    print("")
+    print("Optimization complete")
+    if model.SolCount == 0:
+        print(f"No solution found, optimization status = {model.Status}")
+    else:
+        print(f"Solution found, objective = {model.ObjVal:g}")
+        for v in model.getVars():
+            if v.X != 0.0:
+                print(f"{v.VarName} {v.X:g}")

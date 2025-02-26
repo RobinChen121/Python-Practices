@@ -10,31 +10,27 @@
     
 """
 
+
 class Vector:
     def __init__(self, a, b):
         self.a = a
         self.b = b
 
     def __str__(self):
-        return 'Vector (%d, %d)' % (self.a, self.b)
+        return "Vector (%d, %d)" % (self.a, self.b)
 
     # other operators are sub, mul, truediv, floordiv  mod
     def __add__(self, other):
         return Vector(self.a + other.a, self.b + other.b)
-    
+
     def __mul__(self, other):
         return Vector(self.a * other.a, self.b * other.b)
-    
+
     def __truediv__(self, other):
         return Vector(self.a / other.a, self.b / other.b)
-    
+
     def __mod__(self, other):
         return Vector(self.a % other.a, self.b % other.b)
-    
-    def setvalue(self):
-        self.values = [11, 12]
-    
-
 
 
 v1 = Vector(2, 10)
@@ -43,5 +39,3 @@ print(v1 + v2)
 print(v1 * v2)
 print(v1 / v2)
 print(v1 % v2)
-
-print(v2.values)

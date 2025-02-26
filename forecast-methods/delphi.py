@@ -28,6 +28,7 @@ def delphi(expert_data):
     # return forecast_data, lower_q, upper_q
     return forecast_data
 
+
 # expert_values = [28, 29, 24, 25, 27]
 # forecast_value = delphi(expert_values)
 # print('德尔菲法的预测值为： %.2f' % forecast_value)

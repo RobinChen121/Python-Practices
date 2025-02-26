@@ -1,6 +1,6 @@
-#!/usr/bin/python
+#!/usr/bin/env python3.11
 
-# Copyright 2019, Gurobi Optimization, LLC
+# Copyright 2025, Gurobi Optimization, LLC
 
 # This example formulates and solves the following simple MIP model:
 #  maximize
@@ -10,15 +10,15 @@
 #        x +   y       >= 1
 #        x, y, z binary
 
-from gurobipy import *
+import gurobipy as gp
+from gurobipy import GRB
 
 try:
-
     # Create a new model
-    m = Model("mip1")
+    m = gp.Model("mip1")
 
     # Create variables
-    x = m.addVar(vtype=GRB.BINARY, name="x") # default bounds for continuous type is [0, infinite]
+    x = m.addVar(vtype=GRB.BINARY, name="x")
     y = m.addVar(vtype=GRB.BINARY, name="y")
     z = m.addVar(vtype=GRB.BINARY, name="z")
 
@@ -31,15 +31,16 @@ try:
     # Add constraint: x + y >= 1
     m.addConstr(x + y >= 1, "c1")
 
+    # Optimize model
     m.optimize()
 
     for v in m.getVars():
-        print('%s %g' % (v.varName, v.x))
+        print(f"{v.VarName} {v.X:g}")
 
-    print('Obj: %g' % m.objVal)
+    print(f"Obj: {m.ObjVal:g}")
 
-except GurobiError as e:
-    print('Error code ' + str(e.errno) + ": " + str(e))
+except gp.GurobiError as e:
+    print(f"Error code {e.errno}: {e}")
 
 except AttributeError:
-    print('Encountered an attribute error')
+    print("Encountered an attribute error")

@@ -1,6 +1,6 @@
-#!/usr/bin/python
+#!/usr/bin/env python3.11
 
-# Copyright 2019, Gurobi Optimization, LLC
+# Copyright 2025, Gurobi Optimization, LLC
 
 # This example reads an LP model from a file and solves it.
 # If the model is infeasible or unbounded, the example turns off
@@ -9,36 +9,37 @@
 # and writes it to a file
 
 import sys
-from gurobipy import *
+import gurobipy as gp
+from gurobipy import GRB
 
 if len(sys.argv) < 2:
-    print('Usage: lp.py filename')
-    quit()
+    print("Usage: lp.py filename")
+    sys.exit(0)
 
 # Read and solve model
 
-model = read(sys.argv[1])
+model = gp.read(sys.argv[1])
 model.optimize()
 
-if model.status == GRB.Status.INF_OR_UNBD:
+if model.Status == GRB.INF_OR_UNBD:
     # Turn presolve off to determine whether model is infeasible
     # or unbounded
     model.setParam(GRB.Param.Presolve, 0)
     model.optimize()
 
-if model.status == GRB.Status.OPTIMAL:
-    print('Optimal objective: %g' % model.objVal)
-    model.write('model.sol')
-    exit(0)
-elif model.status != GRB.Status.INFEASIBLE:
-    print('Optimization was stopped with status %d' % model.status)
-    exit(0)
+if model.Status == GRB.OPTIMAL:
+    print(f"Optimal objective: {model.ObjVal:g}")
+    model.write("model.sol")
+    sys.exit(0)
+elif model.Status != GRB.INFEASIBLE:
+    print(f"Optimization was stopped with status {model.Status}")
+    sys.exit(0)
 
 
 # Model is infeasible - compute an Irreducible Inconsistent Subsystem (IIS)
 
-print('')
-print('Model is infeasible')
+print("")
+print("Model is infeasible")
 model.computeIIS()
 model.write("model.ilp")
 print("IIS written to file 'model.ilp'")

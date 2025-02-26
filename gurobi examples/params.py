@@ -1,6 +1,6 @@
-#!/usr/bin/python
+#!/usr/bin/env python3.11
 
-# Copyright 2019, Gurobi Optimization, LLC
+# Copyright 2025, Gurobi Optimization, LLC
 
 # Use parameters that are associated with a model.
 #
@@ -9,21 +9,22 @@
 # is resumed until the optimal solution is found.
 
 import sys
-from gurobipy import *
+import gurobipy as gp
+
 
 if len(sys.argv) < 2:
-    print('Usage: params.py filename')
-    quit()
+    print("Usage: params.py filename")
+    sys.exit(0)
 
 
 # Read model and verify that it is a MIP
-m = read(sys.argv[1])
-if m.isMIP == 0:
-    print('The model is not an integer program')
-    exit(1)
+m = gp.read(sys.argv[1])
+if m.IsMIP == 0:
+    print("The model is not an integer program")
+    sys.exit(1)
 
 # Set a 2 second time limit
-m.Params.timeLimit = 2
+m.Params.TimeLimit = 2
 
 # Now solve the model with different values of MIPFocus
 bestModel = m.copy()
@@ -33,11 +34,11 @@ for i in range(1, 4):
     m.Params.MIPFocus = i
     m.optimize()
     if bestModel.MIPGap > m.MIPGap:
-        bestModel, m = m, bestModel # swap models
+        bestModel, m = m, bestModel  # swap models
 
 # Finally, delete the extra model, reset the time limit and
 # continue to solve the best model to optimality
 del m
-bestModel.Params.timeLimit = "default"
+bestModel.Params.TimeLimit = float("inf")
 bestModel.optimize()
-print('Solved with MIPFocus: %d' % bestModel.Params.MIPFocus)
+print(f"Solved with MIPFocus: {bestModel.Params.MIPFocus}")

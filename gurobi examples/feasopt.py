@@ -1,6 +1,6 @@
-#!/usr/bin/python
+#!/usr/bin/env python3.11
 
-# Copyright 2019, Gurobi Optimization, LLC
+# Copyright 2025, Gurobi Optimization, LLC
 
 # This example reads a MIP model from a file, adds artificial
 # variables to each constraint, and then minimizes the sum of the
@@ -13,15 +13,15 @@
 # solutions that minimize the sum of the artificial variables.
 
 import sys
-from gurobipy import *
+import gurobipy as gp
 
 if len(sys.argv) < 2:
-    print('Usage: feasopt.py filename')
-    quit()
+    print("Usage: feasopt.py filename")
+    sys.exit(0)
 
-feasmodel = gurobi.read(sys.argv[1])
+feasmodel = gp.read(sys.argv[1])
 
-#create a copy to use FeasRelax feature later
+# create a copy to use FeasRelax feature later
 
 feasmodel1 = feasmodel.copy()
 
@@ -32,24 +32,26 @@ feasmodel.setObjective(0.0)
 # add slack variables
 
 for c in feasmodel.getConstrs():
-    sense = c.sense
-    if sense != '>':
-        feasmodel.addVar(obj=1.0, name="ArtN_" + c.constrName,
-                         column=Column([-1], [c]))
-    if sense != '<':
-        feasmodel.addVar(obj=1.0, name="ArtP_" + c.constrName,
-                         column=Column([1], [c]))
+    sense = c.Sense
+    if sense != ">":
+        feasmodel.addVar(
+            obj=1.0, name=f"ArtN_{c.ConstrName}", column=gp.Column([-1], [c])
+        )
+    if sense != "<":
+        feasmodel.addVar(
+            obj=1.0, name=f"ArtP_{c.ConstrName}", column=gp.Column([1], [c])
+        )
 
 # optimize modified model
 
 feasmodel.optimize()
 
-feasmodel.write('feasopt.lp')
+feasmodel.write("feasopt.lp")
 
 # use FeasRelax feature
 
-feasmodel1.feasRelaxS(0, True, False, True);
+feasmodel1.feasRelaxS(0, True, False, True)
 
-feasmodel1.write("feasopt1.lp");
+feasmodel1.write("feasopt1.lp")
 
-feasmodel1.optimize();
+feasmodel1.optimize()
