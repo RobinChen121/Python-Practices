@@ -1,60 +1,56 @@
-#!/usr/bin/python
+#!/usr/bin/env python3.11
 
-# Copyright 2018, Gurobi Optimization, LLC
+# Copyright 2025, Gurobi Optimization, LLC
 
-# Read diet model data from an Excel spreadsheet (diet.xls).
+# Read diet model data from an Excel spreadsheet (diet.xlsx).
 # Pass the imported data into the diet model (dietmodel.py).
 #
-# Note that this example reads an external data file (..\data\diet.xls).
+# Note that this example reads an external data file (..\data\diet.xlsx).
 # As a result, it must be run from the Gurobi examples/python directory.
 #
-# This example requires Python package 'xlrd', which isn't included
-# in most Python distributions.  You can obtain it from
-# http://pypi.python.org/pypi/xlrd.
+# This example uses Python package 'openpyxl', which isn't included
+# in most Python distributions.  You can install it with
+# 'pip install openpyxl'.
 
 import os
-import xlrd
+import openpyxl
+import dietmodel
 
-book = xlrd.open_workbook(os.path.join("..", "data", "diet.xls"))
+# Open 'diet.xlsx'
+book = openpyxl.load_workbook(os.path.join("..", "data", "diet.xlsx"))
 
-sh = book.sheet_by_name("Categories")
+# Read min/max nutrition info from 'Categories' sheet
+sheet = book["Categories"]
 categories = []
 minNutrition = {}
 maxNutrition = {}
-i = 1
-while True:
-    try:
-        c = sh.cell_value(i, 0)
-        categories.append(c)
-        minNutrition[c] = sh.cell_value(i,1)
-        maxNutrition[c] = sh.cell_value(i,2)
-        i = i + 1
-    except IndexError:
-        break
+for row in sheet.iter_rows():
+    category = row[0].value
+    if category != "Categories":
+        categories.append(category)
+        minNutrition[category] = row[1].value
+        maxNutrition[category] = row[2].value
 
-sh = book.sheet_by_name("Foods")
+# Read food costs from 'Foods' sheet
+sheet = book["Foods"]
 foods = []
 cost = {}
-i = 1
-while True:
-    try:
-        f = sh.cell_value(i, 0)
-        foods.append(f)
-        cost[f] = sh.cell_value(i,1)
-        i = i + 1
-    except IndexError:
-        break
+for row in sheet.iter_rows():
+    food = row[0].value
+    if food != "Foods":
+        foods.append(food)
+        cost[food] = row[1].value
 
-sh = book.sheet_by_name("Nutrition")
+# Read food nutrition info from 'Nutrition' sheet
+sheet = book["Nutrition"]
 nutritionValues = {}
-i = 1
-for food in foods:
-    j = 1
-    for cat in categories:
-        nutritionValues[food,cat] = sh.cell_value(i,j)
-        j += 1
-    i += 1
+for row in sheet.iter_rows():
+    if row[0].value == None:  # column labels - categories
+        cats = [v.value for v in row]
+    else:  # nutrition values
+        food = row[0].value
+        for col in range(1, len(row)):
+            nutritionValues[food, cats[col]] = row[col].value
 
-import dietmodel
-dietmodel.solve(categories, minNutrition, maxNutrition,
-                foods, cost, nutritionValues)
+
+dietmodel.solve(categories, minNutrition, maxNutrition, foods, cost, nutritionValues)

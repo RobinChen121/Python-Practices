@@ -1,18 +1,18 @@
-#!/usr/bin/python
+#!/usr/bin/env python3.11
 
-# Copyright 2018, Gurobi Optimization, LLC
+# Copyright 2025, Gurobi Optimization, LLC
 
 # This example creates a very simple Special Ordered Set (SOS) model.
 # The model consists of 3 continuous variables, no linear constraints,
 # and a pair of SOS constraints of type 1.
 
-from gurobipy import *
+import gurobipy as gp
+from gurobipy import GRB
 
 try:
-
     # Create a new model
 
-    model = Model("sos")
+    model = gp.Model("sos")
 
     # Create variables
 
@@ -32,12 +32,12 @@ try:
     model.optimize()
 
     for v in model.getVars():
-        print('%s %g' % (v.varName, v.x))
+        print(f"{v.VarName} {v.X:g}")
 
-    print('Obj: %g' % model.objVal)
+    print(f"Obj: {model.ObjVal:g}")
 
-except GurobiError as e:
-    print('Error code ' + str(e.errno) + ": " + str(e))
+except gp.GurobiError as e:
+    print(f"Error code {e.errno}: {e}")
 
 except AttributeError:
-    print('Encountered an attribute error')
+    print("Encountered an attribute error")

@@ -1,5 +1,5 @@
 #
-# Copyright 2018, Gurobi Optimization, LLC
+# Copyright 2019, Gurobi Optimization, LLC
 #
 # Interactive shell customization example
 #

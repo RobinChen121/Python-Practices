@@ -13,6 +13,9 @@ import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 from scipy.optimize import linprog
 
+import matplotlib
+matplotlib.use('TkAgg')
+
 # 定义优化问题
 c = [-2, -3]
 A = [[2, 1], [1, 2]]

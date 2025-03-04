@@ -14,7 +14,8 @@ import time
 
 
 # Create a new model
-m = Model()
+env = Env(params={"OutputFlag": 0})
+m = Model(env=env)
 m.params.OutputFlag = 0
 
 # Create variables
@@ -47,8 +48,6 @@ def solve_process(queue_, rhs_):
     m.setAttr("RHS", m.getConstrs()[0], rhs_)
     m.optimize()
     queue_.put(m.ObjVal)
-    # print(rhs_)
-    # queue_.put(rhs_)
 
 
 def solve_lock(queue_, lock_, rhs_):
@@ -64,43 +63,24 @@ if __name__ == "__main__":
     N = 10
     rhs = np.arange(1, N + 1)
 
-    # lock = multiprocessing.Lock()
-    # queue = multiprocessing.Queue()
-    # processes = []
-    # for i in range(10):
-    #     p = multiprocessing.Process(target=solve_lock, args=(queue, lock, i))
-    #     p.start()
-    #     processes.append(p)
-    #
-    # for p in processes:
-    #     p.join()
-    # for i in range(10):
-    #     print(queue.get())
-
-    # multiprocessing.set_start_method("forkserver")  #("spawn")  # 或 "forkserver"
-    q = multiprocessing.Queue()
-    processes = []
-    for i in range(10): # the range can affect multiprocessing, very weired
-        p = multiprocessing.Process(target=solve_process, args=(q, 5))
-        p.start()
-        processes.append(p)
-    for p in processes:
-        p.join()
-    result = [q.get() for _ in range(10)]
-    print(result)
-
-    time_start = time.time()
-    results = []
-    for item in rhs:
-        solve_pool(item)
-        results.append(solve_pool(item))
-    time_end = time.time()
-    print(f"Time cost for sequential :{time_end - time_start:.4f}s\n" )
-    # print(results)
-
+    # works well using pool
     time_start = time.time()
     with multiprocessing.Pool() as pool:
         result = pool.map(solve_pool, rhs)
     time_end = time.time()
     print(f"Time cost for parallel :{time_end - time_start:.4f}s\n")
-    # print(result)
+    print(result)
+
+    # using Process has some issue
+    q = multiprocessing.Queue()
+    processes = []
+    for i in range(1, N + 1):
+        p = multiprocessing.Process(target=solve_process, args=(q, i))
+        p.start()
+        processes.append(p)
+
+    for p in processes:
+        p.join()
+    result = [q.get() for _ in range(1, N + 1)]  # issue happens here when the number of q.get() is not consistent with
+                                                 # the number of processes
+    print(result)

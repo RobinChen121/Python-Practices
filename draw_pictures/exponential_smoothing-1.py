@@ -9,8 +9,11 @@ Created on 2025/1/22, 10:45
 
 """
 import numpy as np
+import matplotlib
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
+
+matplotlib.use('TkAgg')  # 强制使用 Tkinter 窗口
 
 # Parameters
 n_points = 50  # Number of data points
@@ -29,7 +32,7 @@ ax.set_ylabel("Value")
 ax.set_title(r"Exponential Smoothing with Changing $\alpha$")
 
 # Plot the original data
-original_line, = ax.plot(time, data, 'o-', label="Original Data", alpha=0.5)
+original_line, = ax.plot(time, data, 'o-', label="Original Data", alpha=0.5)  # 因为 ax.plot() 返回一个线列表，即使只有一条线
 
 # Plot the smoothed data
 smoothed_line, = ax.plot([], [], 'r-', label="Smoothed Data")

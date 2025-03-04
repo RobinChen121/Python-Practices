@@ -177,7 +177,7 @@ while iter < iter_limit:
     
     # forward
     if iter > 0:        
-        m.addConstr(theta >= slope1_stage[-1][0]*(ini_I) + slope1_stage[-1][1]*(ini_cash-vari_cost*q-r1*W1+r0*W0-r2*W2) + slope1_stage[-1][2]*q + intercept1_stage[-1])        
+        m.addConstr(theta >= slope1_stage[-1][0] * ini_I + slope1_stage[-1][1] * (ini_cash - vari_cost * q - r1 * W1 + r0 * W0 - r2 * W2) + slope1_stage[-1][2] * q + intercept1_stage[-1])
         m.update()
     m.Params.LogToConsole = 0
     m.optimize()

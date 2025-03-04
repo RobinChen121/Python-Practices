@@ -1,6 +1,6 @@
-#!/usr/bin/python
+#!/usr/bin/env python3.11
 
-# Copyright 2018, Gurobi Optimization, LLC
+# Copyright 2025, Gurobi Optimization, LLC
 
 # Use a SQLite database with the diet model (dietmodel.py).  The database
 # (diet.db) can be recreated using the included SQL script (diet.sql).
@@ -10,26 +10,27 @@
 
 import os
 import sqlite3
-from gurobipy import *
+import dietmodel
+import gurobipy as gp
 
-con = sqlite3.connect(os.path.join('..', 'data', 'diet.db'))
+
+con = sqlite3.connect(os.path.join("..", "data", "diet.db"))
 cur = con.cursor()
 
-cur.execute('select category,minnutrition,maxnutrition from categories')
+cur.execute("select category,minnutrition,maxnutrition from categories")
 result = cur.fetchall()
-categories, minNutrition, maxNutrition = multidict(
-    (cat,[minv,maxv]) for cat,minv,maxv in result)
+categories, minNutrition, maxNutrition = gp.multidict(
+    (cat, [minv, maxv]) for cat, minv, maxv in result
+)
 
-cur.execute('select food,cost from foods')
+cur.execute("select food,cost from foods")
 result = cur.fetchall()
-foods, cost = multidict(result)
+foods, cost = gp.multidict(result)
 
-cur.execute('select food,category,value from nutrition')
+cur.execute("select food,category,value from nutrition")
 result = cur.fetchall()
-nutritionValues = dict(((f,c),v) for f,c,v in result)
+nutritionValues = dict(((f, c), v) for f, c, v in result)
 
 con.close()
 
-import dietmodel
-dietmodel.solve(categories, minNutrition, maxNutrition,
-                foods, cost, nutritionValues)
+dietmodel.solve(categories, minNutrition, maxNutrition, foods, cost, nutritionValues)

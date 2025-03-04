@@ -1,6 +1,6 @@
-#!/usr/bin/python
+#!/usr/bin/env python3.11
 
-# Copyright 2018, Gurobi Optimization, LLC
+# Copyright 2025, Gurobi Optimization, LLC
 
 # This example considers the following separable, convex problem:
 #
@@ -15,29 +15,31 @@
 # into a MIP by negating the approximation for f, which corresponds
 # to a non-convex piecewise-linear function, and solves it again.
 
-from gurobipy import *
+import gurobipy as gp
 from math import exp
+
 
 def f(u):
     return exp(-u)
 
+
 def g(u):
     return 2 * u * u - 4 * u
 
-try:
 
+try:
     # Create a new model
 
-    m = Model()
+    m = gp.Model()
 
     # Create variables
 
     lb = 0.0
     ub = 1.0
 
-    x = m.addVar(lb, ub, name='x')
-    y = m.addVar(lb, ub, name='y')
-    z = m.addVar(lb, ub, name='z')
+    x = m.addVar(lb, ub, name="x")
+    y = m.addVar(lb, ub, name="y")
+    z = m.addVar(lb, ub, name="z")
 
     # Set objective for y
 
@@ -60,21 +62,21 @@ try:
 
     # Add constraint: x + 2 y + 3 z <= 4
 
-    m.addConstr(x + 2 * y + 3 * z <= 4, 'c0')
+    m.addConstr(x + 2 * y + 3 * z <= 4, "c0")
 
     # Add constraint: x + y >= 1
 
-    m.addConstr(x + y >= 1, 'c1')
+    m.addConstr(x + y >= 1, "c1")
 
     # Optimize model as an LP
 
     m.optimize()
 
-    print('IsMIP: %d' % m.IsMIP)
+    print(f"IsMIP: {m.IsMIP}")
     for v in m.getVars():
-        print('%s %g' % (v.VarName, v.X))
-    print('Obj: %g' % m.ObjVal)
-    print('')
+        print(f"{v.VarName} {v.X:g}")
+    print(f"Obj: {m.ObjVal:g}")
+    print("")
 
     # Negate piecewise-linear objective function for x
 
@@ -87,13 +89,13 @@ try:
 
     m.optimize()
 
-    print('IsMIP: %d' % m.IsMIP)
+    print(f"IsMIP: {m.IsMIP}")
     for v in m.getVars():
-        print('%s %g' % (v.VarName, v.X))
-    print('Obj: %g' % m.ObjVal)
+        print(f"{v.VarName} {v.X:g}")
+    print(f"Obj: {m.ObjVal:g}")
 
-except GurobiError as e:
-    print('Error code ' + str(e.errno) + ": " + str(e))
+except gp.GurobiError as e:
+    print(f"Error code {e.errno}: {e}")
 
 except AttributeError:
-    print('Encountered an attribute error')
+    print("Encountered an attribute error")
