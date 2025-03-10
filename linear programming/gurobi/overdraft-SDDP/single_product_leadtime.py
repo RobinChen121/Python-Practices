@@ -79,11 +79,11 @@ import itertools
 import random
 import time
 import numpy as np
-import os
 import sys
-current_dir = os.getcwd()
-parent_dir = os.path.dirname(current_dir)
-sys.path.append(parent_dir)
+import os
+# 获取 `parent_directory` 路径
+parent_dir = os.path.abspath(os.path.join(os.getcwd(), ".."))  # .. represents the parent directory
+sys.path.insert(0, parent_dir)  # 插入 `parent_directory` 到 sys.path
 from tree import *
 from write_to_file import write_to_csv
 
@@ -103,7 +103,7 @@ if T == 4:
 else:
     opt = 26.68
  
-sample_num = 10 # change 1
+sample_num = 2 # change 1
 sample_nums = [sample_num for t in range(T)] 
 overhead_cost = [50 for t in range(T)]
 
@@ -113,7 +113,7 @@ r2 = 2 # penalty interest rate for overdraft exceeding the limit
 U = 500 # overdraft limit
 iter_limit = 30
 time_limit = 120 # time limit
-N = 10 # sampled number of scenarios for forward computing    # change 2
+N = 8 # sampled number of scenarios for forward computing    # change 2
 cut_select_num = N
 
 trunQuantile = 0.9999 # affective to the final ordering quantity
@@ -126,7 +126,7 @@ for i in sample_nums:
 sample_details = [[0 for i in range(sample_nums[t])] for t in range(T)] 
 for t in range(T):
     sample_details[t] = generate_samples(sample_nums[t], trunQuantile, mean_demands[t])
-# sample_details = [[5, 15], [5, 15], [5, 15]]  # change 3
+sample_details = [[5, 15], [5, 15], [5, 15]]  # change 3
 scenarios_full = list(itertools.product(*sample_details)) 
 
 iter = 0
@@ -134,12 +134,12 @@ theta_iniValue = -500 # initial theta values (profit) in each period
 m = Model() # linear model in the first stage
 # decision variable in the first stage model
 q = m.addVar(vtype = GRB.CONTINUOUS, name = 'q_1')
-W0 = m.addVar(vtype = GRB.CONTINUOUS, name = 'w_1^0')
-W1 = m.addVar(vtype = GRB.CONTINUOUS, name = 'w_1^1')
-W2 = m.addVar(vtype = GRB.CONTINUOUS, name = 'w_1^2')
+W0 = m.addVar(vtype = GRB.CONTINUOUS, name = 'w0_1')
+W1 = m.addVar(vtype = GRB.CONTINUOUS, name = 'w1_1')
+W2 = m.addVar(vtype = GRB.CONTINUOUS, name = 'w2_1')
 theta = m.addVar(lb = -GRB.INFINITY, vtype = GRB.CONTINUOUS, name = 'theta_2')
 m.setObjective(overhead_cost[0] + vari_cost*q  + r2*W2 + r1*W1 - r0*W0 + theta, GRB.MINIMIZE)
-m.addConstr(theta >= theta_iniValue*(T))
+m.addConstr(theta >= theta_iniValue*(T-1))
 m.addConstr(W1 <= U)
 m.addConstr(-vari_cost*q - W0 + W1 + W2 == overhead_cost[0] - ini_cash)
 theta_value = 0 
@@ -172,7 +172,7 @@ while iter < iter_limit:
     #  random.seed(10000)
     # sample_scenarios = generate_scenarios2(N, sample_num, sample_details) # random choose already generated samples
     sample_scenarios = generate_scenarios(N, trunQuantile, mean_demands) # actually regenerate some samples in the forward computing
-    # sample_scenarios = [[5, 5, 5], [5, 5, 15], [5, 15, 5], [15,5,5], [15,15,5], [15,5, 15], [5,15,15],[15,15,15]] # change 4
+    sample_scenarios = [[5, 5, 5], [5, 5, 15], [5, 15, 5], [15,5,5], [15,15,5], [15,5, 15], [5,15,15],[15,15,15]] # change 4
     # sample_scenarios.sort() # sort to make same numbers together
     
     # forward
@@ -182,11 +182,9 @@ while iter < iter_limit:
     m.Params.LogToConsole = 0
     m.optimize()
     
-    q_values[-1][0] = [q.x for n in range(N)]  
-    # if iter == 14:
-    #     m.write('iter' + str(iter+1) + '_main.lp')    
-    #     m.write('iter' + str(iter+1) + '_main.sol')
-    #     pass
+    q_values[-1][0] = [q.x for n in range(N)]
+    m.write('iter' + str(iter+1) + '_main.lp')
+    m.write('iter' + str(iter+1) + '_main.sol')
     
     W0_values.append(W0.x)
     W1_values.append(W1.x)
@@ -248,7 +246,7 @@ while iter < iter_limit:
                 m_forward[t][n].addConstr(cash_forward[t][n] - vari_cost*q_forward[t][n] - W0_forward[t][n]\
                                           + W1_forward[t][n] + W2_forward[t][n] == overhead_cost[t+1])
                    
-                m_forward[t][n].addConstr(theta_forward[t][n] >= theta_iniValue*(T-1-t))                  
+                m_forward[t][n].addConstr(theta_forward[t][n] >= theta_iniValue*(T-2-t))
             
             # put those cuts in the back
             if iter > 0 and t < T - 1:
@@ -265,17 +263,17 @@ while iter < iter_limit:
             m_forward[t][n].optimize()
             I_forward_values[t][n] = I_forward[t][n].x 
             
-            if t < T - 1: # for computing cnofidence interval
+            if t < T - 1: # for computing confidence interval
                 z_values[n][t+1] = m_forward[t][n].objVal - theta_forward[t][n].x
             else:
                 z_values[n][t+1] = m_forward[t][n].objVal
                            
             B_forward_values[t][n] = B_forward[t][n].x  
             cash_forward_values[t][n] = cash_forward[t][n].x 
-            # if iter == 1 and t == 0:
-            #     m_forward[t][n].write('iter' + str(iter+1) + '_sub_' + str(t+1) + '^' + str(n+1) + '.lp') 
-            #     m_forward[t][n].write('iter' + str(iter+1) + '_sub_' + str(t+1) + '^' + str(n+1) + '.sol') 
-            #     pass
+            if iter == 0 and t == 0:
+                m_forward[t][n].write('iter' + str(iter+1) + '_sub_' + str(t+1) + '^' + str(n+1) + '.lp')
+                m_forward[t][n].write('iter' + str(iter+1) + '_sub_' + str(t+1) + '^' + str(n+1) + '.sol')
+                pass
             if t < T - 1:
                 q_values[-1][t+1][n] = q_forward[t][n].x
                 qpre_values[-1][t][n] = q_pre_forward[t][n].x
@@ -417,10 +415,10 @@ final_value = -z
 Q1 = q_values[iter-1][0][0]
 print('after %d iteration: ' % iter)
 print('final expected total costs is %.2f' % final_value)
-print('ordering Q in the first peiod is %.2f' % Q1)
+print('ordering Q in the first period is %.2f' % Q1)
 print('cpu time is %.3f s' % cpu_time)        
 gap = (-opt + final_value)/opt               
-print('optimaility gap is %.2f%%' % (100*gap))  
+print('optimality gap is %.2f%%' % (100*gap))
 z_lb, z_ub, z_mean = compute_ub(z_values) # for computing confidence interval
 lb = -np.mean(np.sum(z_values, axis=1))
 print('expected lower bound gap is %.2f' % lb)  
