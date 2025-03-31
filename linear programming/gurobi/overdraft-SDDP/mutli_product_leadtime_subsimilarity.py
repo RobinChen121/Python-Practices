@@ -158,7 +158,7 @@ MM = len(prices)
 unit_salvages = [0.5* vari_costs[m] for m in range(MM)]
 overhead_cost = [100 for t in range(T)]
 
-r0 = 0  # when it is 0.01, can largely slow the compuational speed
+r0 = 0  # when it is 0.01, can largely slow the computational speed
 r1 = 0.1
 r2 = 2 # penalty interest rate for overdraft exceeding the limit, does not affect computation time
 U = 500 # overdraft limit
@@ -209,7 +209,7 @@ m.addConstr(-vari_costs[0]*q1 - vari_costs[1]*q2- W0 + W1 + W2 == overhead_cost[
 # m.addConstr(q2 <= 100)
 
 # cuts recording arrays
-iter_limit = 500
+iter_limit = 50
 time_limit = 3600
 N = 5 # sampled number of scenarios in forward computing, change 3
 slope_stage1_1 = []

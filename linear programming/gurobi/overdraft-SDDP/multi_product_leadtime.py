@@ -54,7 +54,7 @@ no enhancement
 sample numer is 5 and scenario number is 5 
 planning horizon length is T = 3 
 final expected total profits after 100 iteration is 69.84
-ordering Q1 and Q2 in the first peiod is 20.00 and 20.00
+ordering Q1 and Q2 in the first period is 20.00 and 20.00
 cpu time is 60.263 s
 expected lower bound gap is 66.20
 lower bound and upper bound gap is 5.21%
@@ -179,7 +179,7 @@ m.addConstr(-vari_costs[0]*q1 - vari_costs[1]*q2- W0 + W1 + W2 == overhead_cost[
 # cuts recording arrays
 iter_limit = 100
 time_limit = 360
-N = 5 # sampled number of scenarios in forward computing, change 3
+N = 10 # sampled number of scenarios in forward computing, change 3
 slope_stage1_1 = []
 slope_stage1_2 = []
 slope_stage1_3 = []

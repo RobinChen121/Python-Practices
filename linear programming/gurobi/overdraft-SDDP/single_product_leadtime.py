@@ -67,8 +67,8 @@ SDDP is 137.89, time is 49.04s; (N=1, iter_num=15)
 mean_demands = [10, 10, 10, 10]
 SDP optimal result is 26.68;
 mean_demands = [15, 15, 15, 15]
-SDP optimal result is 167.31, java running time is 39s;
-for 4 periods [10, 20, 10, 20], solution 215.48, python running more than 4 hours and can't get a solution, while java 31s; 
+SDP optimal result is 167.31, java running time is 39s, SDDP running time is 195s for N=20, iter_num 30
+for 4 periods [10, 20, 10, 20], solution 215.48, python sdp running more than 4 hours and can't get a solution, while java 31s;
 
 the lower and upper bound seems to be affected by the iter limit or scenario number much;
 
@@ -103,7 +103,8 @@ if T == 4:
 else:
     opt = 26.68
  
-sample_num = 2 # change 1
+sample_num = 2;  # change 1
+T = 3 # change 2
 sample_nums = [sample_num for t in range(T)] 
 overhead_cost = [50 for t in range(T)]
 
@@ -111,9 +112,9 @@ r0 = 0
 r1 = 0.1
 r2 = 2 # penalty interest rate for overdraft exceeding the limit
 U = 500 # overdraft limit
-iter_limit = 30
-time_limit = 120 # time limit
-N = 8 # sampled number of scenarios for forward computing    # change 2
+iter_limit = 10
+time_limit = 1200 # time limit
+N = 8 # sampled number of scenarios for forward computing    # change 3
 cut_select_num = N
 
 trunQuantile = 0.9999 # affective to the final ordering quantity
@@ -126,7 +127,7 @@ for i in sample_nums:
 sample_details = [[0 for i in range(sample_nums[t])] for t in range(T)] 
 for t in range(T):
     sample_details[t] = generate_samples(sample_nums[t], trunQuantile, mean_demands[t])
-sample_details = [[5, 15], [5, 15], [5, 15]]  # change 3
+sample_details = [[5, 15], [5, 15], [5, 15]]  # change 4
 scenarios_full = list(itertools.product(*sample_details)) 
 
 iter = 0
@@ -139,7 +140,7 @@ W1 = m.addVar(vtype = GRB.CONTINUOUS, name = 'w1_1')
 W2 = m.addVar(vtype = GRB.CONTINUOUS, name = 'w2_1')
 theta = m.addVar(lb = -GRB.INFINITY, vtype = GRB.CONTINUOUS, name = 'theta_2')
 m.setObjective(overhead_cost[0] + vari_cost*q  + r2*W2 + r1*W1 - r0*W0 + theta, GRB.MINIMIZE)
-m.addConstr(theta >= theta_iniValue*(T-1))
+m.addConstr(theta >= theta_iniValue * T)
 m.addConstr(W1 <= U)
 m.addConstr(-vari_cost*q - W0 + W1 + W2 == overhead_cost[0] - ini_cash)
 theta_value = 0 
@@ -183,8 +184,10 @@ while iter < iter_limit:
     m.optimize()
     
     q_values[-1][0] = [q.x for n in range(N)]
-    m.write('iter' + str(iter+1) + '_main.lp')
-    m.write('iter' + str(iter+1) + '_main.sol')
+    if iter >= 0:
+        m.write('iter' + str(iter+1) + '_main.lp')
+        m.write('iter' + str(iter+1) + '_main.sol')
+        pass
     
     W0_values.append(W0.x)
     W1_values.append(W1.x)
@@ -246,7 +249,7 @@ while iter < iter_limit:
                 m_forward[t][n].addConstr(cash_forward[t][n] - vari_cost*q_forward[t][n] - W0_forward[t][n]\
                                           + W1_forward[t][n] + W2_forward[t][n] == overhead_cost[t+1])
                    
-                m_forward[t][n].addConstr(theta_forward[t][n] >= theta_iniValue*(T-2-t))
+                m_forward[t][n].addConstr(theta_forward[t][n] >= theta_iniValue*(T-1-t))
             
             # put those cuts in the back
             if iter > 0 and t < T - 1:
@@ -270,10 +273,10 @@ while iter < iter_limit:
                            
             B_forward_values[t][n] = B_forward[t][n].x  
             cash_forward_values[t][n] = cash_forward[t][n].x 
-            if iter == 0 and t == 0:
-                m_forward[t][n].write('iter' + str(iter+1) + '_sub_' + str(t+1) + '^' + str(n+1) + '.lp')
-                m_forward[t][n].write('iter' + str(iter+1) + '_sub_' + str(t+1) + '^' + str(n+1) + '.sol')
-                pass
+            # if iter == 0 and t == 0:
+            #     m_forward[t][n].write('iter' + str(iter+1) + '_sub_' + str(t+1) + '^' + str(n+1) + '.lp')
+            #     m_forward[t][n].write('iter' + str(iter+1) + '_sub_' + str(t+1) + '^' + str(n+1) + '.sol')
+            #     pass
             if t < T - 1:
                 q_values[-1][t+1][n] = q_forward[t][n].x
                 qpre_values[-1][t][n] = q_pre_forward[t][n].x
@@ -369,16 +372,16 @@ while iter < iter_limit:
                 slope2_values[t][n][s] = pi[1]
                 if t < T -1:
                     slope3_values[t][n][s] = pi[2]
-                # if iter == 3 and t == 2 and n == 0:
-                #     a_test = intercept_values[t][n][s]
-                #     m_backward[t][n][s].write('iter' + str(iter+1) + '_sub_' + str(t+1) + '^' + str(n+1) + '-' + str(s+1) +'back.lp')
-                #     m_backward[t][n][s].write('iter' + str(iter+1) + '_sub_' + str(t+1) + '^' + str(n+1) + '-' + str(s+1) +'back.sol')
-                #     filename = 'iter' + str(iter+1) + '_sub_' + str(t+1) + '^' + str(n+1) + '-' + str(s+1) + '.txt'
-                #     with open(filename, 'w') as f:
-                #         f.write('demand=' +str(demand)+'\n')
-                #         f.write(str(pi)+'\n')  
-                #         f.write(str(rhs))
-                #     pass
+                if iter == 0 and t == 0 and n == 0:
+                    a_test = intercept_values[t][n][s]
+                    m_backward[t][n][s].write('iter' + str(iter+1) + '_sub_' + str(t+1) + '^' + str(n+1) + '_' + str(s+1) +'back.lp')
+                    m_backward[t][n][s].write('iter' + str(iter+1) + '_sub_' + str(t+1) + '^' + str(n+1) + '_' + str(s+1) +'back.sol')
+                    filename = 'iter' + str(iter+1) + '_sub_' + str(t+1) + '^' + str(n+1) + '_' + str(s+1) + '.txt'
+                    with open(filename, 'w') as f:
+                        f.write('demand=' +str(demand)+'\n')
+                        f.write(str(pi)+'\n')
+                        f.write(str(rhs))
+                    pass
             
             avg_intercept = sum(intercept_values[t][n]) / S
             avg_slope1 = sum(slope1_values[t][n]) / S
@@ -414,7 +417,7 @@ print('********************************************')
 final_value = -z
 Q1 = q_values[iter-1][0][0]
 print('after %d iteration: ' % iter)
-print('final expected total costs is %.2f' % final_value)
+print('final expected cash balance is %.2f' % final_value)
 print('ordering Q in the first period is %.2f' % Q1)
 print('cpu time is %.3f s' % cpu_time)        
 gap = (-opt + final_value)/opt               

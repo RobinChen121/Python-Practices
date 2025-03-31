@@ -12,7 +12,7 @@ import gurobipy as gp
 from gurobipy import GRB
 
 if len(sys.argv) < 2:
-    print("Usage: mip2.py filename")
+    print("Usage: mip2.py filename") # example: mip2.py mip1.lp
     sys.exit(0)
 
 # Read and solve model
@@ -40,7 +40,7 @@ else:
     print(f"Optimization ended with status {model.Status}")
     sys.exit(0)
 
-# Iterate over the solutions and compute the objectives
+# Iterate over the solutions and compute the goals
 model.Params.OutputFlag = 0
 print("")
 for k in range(model.SolCount):
@@ -66,4 +66,4 @@ if abs(diff) > 1e-6 * (1.0 + abs(model.ObjVal)):
 # Print values of nonzero variables
 for v in fixed.getVars():
     if v.X != 0:
-        print(f"{v.VarName} {v.X:g}")
+        print(f"{v.VarName} {v.X:g}") # :g 会 自动选择 普通小数 或 科学计数法

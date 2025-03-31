@@ -48,15 +48,22 @@ def generate_samples_normal(sample_num, trunQuantile, mean, sigma):
     random.shuffle(samples)
     return samples
 
-def generate_samples_discrete(self, sample_num, xk, pk):
-    samples =  [[0.0 for _ in range(sample_num)] for t in self.T]
+def generate_samples_discrete(sample_num, xk, pk):
+    samples = [0 for i in range(sample_num)]
     for i in range(sample_num):
-        # np.random.seed(10000)
-        rand_p = np.random.uniform(i/sample_num, (i+1)/sample_num)
+        rand_p = np.random.uniform(i / sample_num, (i + 1) / sample_num)
         dist = st.rv_discrete(values=(xk, pk))
-        samples[t][i] = dist.ppf(rand_p)
-    random.shuffle(samples)
+        samples[i] = dist.ppf(rand_p);
     return samples
+
+    # samples =  [[0.0 for _ in range(sample_num)] for t in T]
+    # for i in range(sample_num):
+    #     # np.random.seed(10000)
+    #     rand_p = np.random.uniform(i/sample_num, (i+1)/sample_num)
+    #     dist = st.rv_discrete(values=(xk, pk))
+    #     samples[t][i] = dist.ppf(rand_p)
+    # random.shuffle(samples)
+    # return samples
 
 
 # get the number of elements in a list of lists
@@ -109,7 +116,8 @@ def generate_scenarios_discrete(sample_num, xk, pk, T):
             rand_p = np.random.uniform(i/sample_num, (i+1)/sample_num)
             dist = st.rv_discrete(values=(xk, pk))
             samples[i][t] = dist.ppf(rand_p)
-        random.shuffle(samples[i])
+        # random.shuffle(samples[i])
+        pass
     return samples
 
 def generate_scenarios_gamma(sample_num, trunQuantile, mean, beta, T):

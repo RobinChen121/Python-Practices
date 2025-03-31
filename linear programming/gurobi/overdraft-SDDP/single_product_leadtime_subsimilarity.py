@@ -43,7 +43,7 @@ if T == 4:
 elif T == 3:
     opt = 26.68
 
-sample_num = 10    
+sample_num = 10
 sample_nums = [sample_num for t in range(T)]
 overhead_cost = [50 for t in range(T)]
 
@@ -53,7 +53,7 @@ r2 = 2 # penalty interest rate for overdraft exceeding the limit
 U = 500 # overdraft limit
 iter_limit = 30
 time_limit = 120 # time limit
-N = 10 # sampled number of scenarios for forward computing
+N = 20 # sampled number of scenarios for forward computing
 cut_select_num = N
 
 trunQuantile = 0.9999 # affective to the final ordering quantity
@@ -67,7 +67,7 @@ sample_detail = [[0 for i in range(sample_nums[t])] for t in range(T)]
 for t in range(T):
     sample_detail[t] = generate_samples(sample_nums[t], trunQuantile, mean_demands[t])
 # sample_detail = [[5, 15], [5, 15], [5, 15]]
-scenarios_full = list(itertools.product(*sample_detail)) 
+# scenarios_full = list(itertools.product(*sample_detail))
 
 iter = 0
 theta_iniValue = -500 # initial theta values (profit) in each period
@@ -204,7 +204,7 @@ while iter < iter_limit:
             m_forward[t][n].optimize()
             I_forward_values[t][n] = I_forward[t][n].x 
             
-            if t < T - 1: # for computing cnofidence interval
+            if t < T - 1: # for computing confidence interval
                 z_values[n][t+1] = m_forward[t][n].objVal - theta_forward[t][n].x
             else:
                 z_values[n][t+1] = m_forward[t][n].objVal
