@@ -5,7 +5,9 @@ Created on Sat Mar  2 19:18:39 2024
 
 @author: zhenchen
 
-@disp:  business overdraft for lead time in 2 product problem;
+@disp:  In the backward, sample details are individual sample details for each product.
+
+business overdraft for lead time in 2 product problem;
 may run several times to get a more stable result;
 
 6 periods gurobi can not generate results when r0 is 0.01;
@@ -130,7 +132,7 @@ r1 = 0.1
 r2 = 2 # penalty interest rate for overdraft exceeding the limit, does not affect computation time
 U = 500 # overdraft limit
 
-sample_num = 5 # change 1
+sample_num = 10 # change 1
 
 
 # for gamma demand
@@ -177,9 +179,9 @@ m.addConstr(-vari_costs[0]*q1 - vari_costs[1]*q2- W0 + W1 + W2 == overhead_cost[
 
 
 # cuts recording arrays
-iter_limit = 100
+iter_limit = 30
 time_limit = 360
-N = 10 # sampled number of scenarios in forward computing, change 3
+N = 5 # sampled number of scenarios in forward computing, change 3
 slope_stage1_1 = []
 slope_stage1_2 = []
 slope_stage1_3 = []
@@ -221,7 +223,7 @@ while iter < iter_limit: # time_pass < time_limit:   # or
      
     # sample_scenarios1 = [[10, 10, 10], [10,10, 30], [10, 30, 10], [10,30, 30],[30,10,10],[30,10,30],[30,30,10],[30,30,30]] # change 4
     # sample_scenarios2 = [[5, 5, 5], [5, 5, 15], [5, 15, 5], [5,15,15],[15,5,5], [15,5, 15], [15,15,5], [15,15,15]]
-    
+    #
     # forward
     if iter > 0:        
         m.addConstr(theta >= slope_stage1_1[-1][0]*(ini_Is[0]) + slope_stage1_1[-1][1]*(ini_Is[1])\
@@ -376,16 +378,16 @@ while iter < iter_limit: # time_pass < time_limit:   # or
     slope3_values = [[[[0 for m in range(MM)] for s in range(sample_num)] for n in range(N)] for t in range(T)]
     
     for t in range(T-1, -1, -1):  
-        demand_temp = [sample_details1[t], sample_details2[t]]
-        demand_all = list(itertools.product(*demand_temp))
+        # demand_temp = [sample_details1[t], sample_details2[t]]
+        # demand_all = list(itertools.product(*demand_temp))
         # demand_all2 = [[demand_all[s][0], demand_all[s][1]] for s in range(sample_num)]
         for n in range(N):      
             S = sample_num # should revise, should be S^2
             for s in range(S):
-                demand1 = demand_all[s][0] # sample_details1[t][s]  # 
-                demand2 = demand_all[s][1] # sample_details2[t][s]  # 
-                # demand1 = sample_details1[t][s]  
-                # demand2 = sample_details2[t][s]  
+            #     demand1 = demand_all[s][0] # sample_details1[t][s]  #
+            #     demand2 = demand_all[s][1] # sample_details2[t][s]  #
+                demand1 = sample_details1[t][s]
+                demand2 = sample_details2[t][s]
                 
                 if t == T - 1:                   
                     m_backward[t][n][s].setObjective(-prices[0]*(demand1 - B1_backward[t][n][s])-prices[1]*(demand2 - B2_backward[t][n][s])\

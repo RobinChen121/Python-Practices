@@ -28,7 +28,7 @@ from tree import *
 # beta = 1 / scale
 # shape = demand * beta
 # variance = demand / beta
-mean_demands1 =[30, 30, 30, 30, 30] # higher average demand vs lower average demand
+mean_demands1 =[30, 30, 30] # higher average demand vs lower average demand
 mean_demands2 = [i*0.5 for i in mean_demands1] # higher average demand vs lower average demand
 # betas = [2, 0.25] # lower variance vs higher variance
 # T = len(mean_demands1)
@@ -52,7 +52,7 @@ MM = len(prices)
 unit_salvages = [0.5* vari_costs[m] for m in range(MM)]
 overhead_cost = [100 for t in range(T)]
 
-r0 = 0  # when it is 0.01, can largely slow the compuational speed
+r0 = 0  # when it is 0.01, can largely slow the computational speed
 r1 = 0.1
 r2 = 2 # penalty interest rate for overdraft exceeding the limit, does not affect computation time
 U = 500 # overdraft limit
@@ -78,10 +78,10 @@ for t in range(T):
     # sample_details2[t] = generate_samples_gamma(sample_num, trunQuantile, mean_demands2[t], betas[1])
     # sample_details1[t] = generate_samples(sample_num, trunQuantile, mean_demands1[t])
     # sample_details2[t] = generate_samples(sample_num, trunQuantile, mean_demands2[t])
-    sample_details1[t] = generate_samples_normal(sample_num, trunQuantile, mean_demands1[t], sigmas1[t])
-    sample_details2[t] = generate_samples_normal(sample_num, trunQuantile, mean_demands2[t], sigmas2[t])
-    # sample_details1[t] = generate_samples_discrete(sample_num, xk1, pk1)
-    # sample_details2[t] = generate_samples_discrete(sample_num, xk2, pk2)
+    # sample_details1[t] = generate_samples_normal(sample_num, trunQuantile, mean_demands1[t], sigmas1[t])
+    # sample_details2[t] = generate_samples_normal(sample_num, trunQuantile, mean_demands2[t], sigmas2[t])
+    sample_details1[t] = generate_samples_discrete(sample_num, xk1, pk1)
+    sample_details2[t] = generate_samples_discrete(sample_num, xk2, pk2)
 
 # sample_details1 = [[10, 30], [10, 30], [10, 30]] # change 2
 # sample_details2 = [[5, 15], [5, 15], [5, 15]]
@@ -147,11 +147,11 @@ while iter < iter_limit: # time_pass < time_limit:   # or
     # sample_scenarios1 = generate_scenario_samples_gamma(N, trunQuantile, mean_demands[0], betas[0], T)
     # sample_scenarios2 = generate_scenario_samples_gamma(N, trunQuantile, mean_demands[1], betas[1], T)
     
-    sample_scenarios1 = generate_scenarios2(N, sample_num, sample_details1)
-    sample_scenarios2 = generate_scenarios2(N, sample_num, sample_details2)
-    
-    # sample_scenarios1 = generate_scenarios_discrete(N, xk1, pk1, T)
-    # sample_scenarios2 = generate_scenarios_discrete(N, xk2, pk2, T)
+    # sample_scenarios1 = generate_scenarios2(N, sample_num, sample_details1)
+    # sample_scenarios2 = generate_scenarios2(N, sample_num, sample_details2)
+    #
+    sample_scenarios1 = generate_scenarios_discrete(N, xk1, pk1, T)
+    sample_scenarios2 = generate_scenarios_discrete(N, xk2, pk2, T)
     
     # sample_scenarios1 = generate_scenarios_normal(N, trunQuantile, mean_demands1, sigmas1)
     # sample_scenarios2 = generate_scenarios_normal(N, trunQuantile, mean_demands2, sigmas2)

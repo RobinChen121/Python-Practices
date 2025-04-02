@@ -112,10 +112,12 @@ def generate_scenarios_discrete(sample_num, xk, pk, T):
     samples = [[0 for t in range(T)] for i in range(sample_num)]
     for i in range(sample_num):
         # np.random.seed(10000)
-        for t in range(T):
-            rand_p = np.random.uniform(i/sample_num, (i+1)/sample_num)
-            dist = st.rv_discrete(values=(xk, pk))
-            samples[i][t] = dist.ppf(rand_p)
+        # for t in range(T):
+            # rand_p = np.random.uniform(i/sample_num, (i+1)/sample_num)
+            # dist = st.rv_discrete(values=(xk, pk))
+            # samples[i][t] = dist.ppf(rand_p)
+        samples[i] = np.random.choice(xk, T, pk)
+
         # random.shuffle(samples[i])
         pass
     return samples
