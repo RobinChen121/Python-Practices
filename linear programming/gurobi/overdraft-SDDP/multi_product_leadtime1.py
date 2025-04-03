@@ -47,6 +47,7 @@ mean_demands2 = [
 ]
 Possion distribution.
 sample number is 10 and scenario number is 10
+iter_limit = 30
 planning horizon length is T = 3
 final expected total profits after 30 iterations is 94.72
 ordering Q1 and Q2 in the first period is 66.67 and 12.73
