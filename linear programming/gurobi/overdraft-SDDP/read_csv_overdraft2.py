@@ -20,7 +20,7 @@ import pandas as pd
 # df1['demand_pattern'] = df1['demand_pattern'].astype(int)
 # df_out1 = df1.groupby('demand_pattern').mean(numeric_only = True) 
 
-df2 = pd.read_csv('/Users/zhenchen/Library/CloudStorage/OneDrive-BrunelUniversityLondon/Numerical-tests/overdraft/multiproduct_cutselection_tests.csv')
+df2 = pd.read_csv('/Users/zhenchen/Library/CloudStorage/OneDrive-BrunelUniversityLondon/Numerical-tests/overdraft/python/multiproduct_cutselection_tests.csv')
 df2 = df2.drop_duplicates(keep=False, ignore_index=True)
 df2['overdraft_interest_rate'] = df2['overdraft_interest_rate'].astype(float)
 df2['overdraft_limit'] = df2['overdraft_limit'].astype(int)
@@ -105,6 +105,7 @@ dff['lower bound4'] = df_out3_4['lower bound']
 # df_p1 = dff['lower bound2']
 # df_p1 = df_p1.to_frame()
 
+# something weired below for computing the gaps
 df_p1 = pd.DataFrame()
 df_p1['gap1'] = (dff['lower bound0'] - dff['lower bound2'])/abs(dff['lower bound2'])
 df_p1['gap2'] = (dff['lower bound1'] - dff['lower bound2'])/abs(dff['lower bound2'])
@@ -120,3 +121,4 @@ df_p2['gap4'] = (df['lower bound3'] - df['lower bound2'])/abs(df['lower bound2']
 df_p2['gap5'] = (df['lower bound4'] - df['lower bound2'])/abs(df['lower bound2'])
 
 df_final = df_p1.merge(df_p2, on = 'demand_pattern')
+pass

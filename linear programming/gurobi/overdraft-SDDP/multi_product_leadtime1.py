@@ -51,7 +51,12 @@ iter_limit = 30
 planning horizon length is T = 3
 final expected total profits after 30 iterations is 94.72
 ordering Q1 and Q2 in the first period is 66.67 and 12.73
-cpu time is 431.233 s
+cpu time is 431.233 s;
+
+4 period possion,
+final expected total profits after 30 iterations is 224.52
+ordering Q1 and Q2 in the first period is 52.91 and 36.37
+cpu time is 609.174 s
 
 """
 
@@ -72,7 +77,7 @@ from tree import *
 # beta = 1 / scale
 # shape = demand * beta
 # variance = demand / beta
-mean_demands1 = [30, 30, 30]  # higher average demand vs lower average demand
+mean_demands1 = [30, 30, 30, 30]  # higher average demand vs lower average demand
 mean_demands2 = [
     i * 0.5 for i in mean_demands1
 ]  # higher average demand vs lower average demand
@@ -84,10 +89,10 @@ T = len(mean_demands1)
 # xk1 = [mean_demands1[0] - 10, mean_demands1[0], mean_demands1[0] + 10]
 # xk2 = [mean_demands2[0] - 5, mean_demands2[0], mean_demands2[0] + 5]
 
-cov1 = 0.25  # lower variance vs higher variance
-cov2 = 0.5
-sigmas1 = [cov1 * i for i in mean_demands1]
-sigmas2 = [cov2 * i for i in mean_demands2]
+# cov1 = 0.25  # lower variance vs higher variance
+# cov2 = 0.5
+# sigmas1 = [cov1 * i for i in mean_demands1]
+# sigmas2 = [cov2 * i for i in mean_demands2]
 T = len(mean_demands1)
 
 ini_Is = [0, 0]
@@ -246,7 +251,7 @@ while iter < iter_limit:  # time_pass < time_limit:   # or
             + intercept_stage1[-1]
         )
     m.update()
-    m.Params.LogToConsole = 0
+    m.Params.OutputFlag = 0
     m.optimize()
 
     # if iter >= 0:
@@ -517,7 +522,7 @@ while iter < iter_limit:  # time_pass < time_limit:   # or
                         )
 
             # optimize
-            m_forward[t][n].Params.LogToConsole = 0
+            m_forward[t][n].Params.OutputFlag = 0
             m_forward[t][n].optimize()
             # if iter == 0 and t == 0:
             #     m_forward[t][n].write('iter' + str(iter) + '_sub_' + str(t+1) + '^' + str(n+1) + '-1.lp')
@@ -856,7 +861,7 @@ while iter < iter_limit:  # time_pass < time_limit:   # or
                             )
 
                 # optimize
-                m_backward[t][n][s].Params.LogToConsole = 0
+                m_backward[t][n][s].Params.OutputFlag = 0
                 m_backward[t][n][s].optimize()
 
                 pi = m_backward[t][n][s].getAttr(GRB.Attr.Pi)
@@ -950,6 +955,7 @@ while iter < iter_limit:  # time_pass < time_limit:   # or
                 slopes3[-1][t - 1][n] = avg_slope3
                 intercepts[-1][t - 1][n] = avg_intercept
 
+    print(f"iteration {iter}, obj is {-m.objVal:.2f}")
     iter += 1
     time_pass = time.process_time() - start
 

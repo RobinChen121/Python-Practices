@@ -3,7 +3,7 @@ Python version: 3.12.7
 Author: Zhen Chen, chen.zhen5526@gmail.com
 Date: 2025/3/26 10:18
 Description: 
-    
+    read the csv of student's attendance files.
 
 """
 
