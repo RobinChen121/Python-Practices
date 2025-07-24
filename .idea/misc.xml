@@ -4,5 +4,5 @@
     <option name="pathToExecutable" value="D:\ProgramData\anaconda3\Scripts\black.exe" />
     <option name="sdkName" value="Python 3.10" />
   </component>
-  <component name="ProjectRootManager" version="2" project-jdk-name="$USER_HOME$/anaconda3" project-jdk-type="Python SDK" />
+  <component name="ProjectRootManager" version="2" project-jdk-name="Python 3.12" project-jdk-type="Python SDK" />
 </project>
