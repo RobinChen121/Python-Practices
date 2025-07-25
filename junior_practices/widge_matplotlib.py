@@ -1,3 +1,12 @@
+"""
+@Python version : 3.12
+@Author  : Zhen Chen
+@Email   : chen.zhen5526@gmail.com
+@Time    : 2025/7/24, 20:26
+@Desc    :
+
+"""
+
 import numpy as np
 import matplotlib.pyplot as plt
 from ipywidgets import interact, FloatSlider
