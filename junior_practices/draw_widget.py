@@ -14,8 +14,8 @@ matplotlib.use('TkAgg')  # 或 'Qt5Agg'，取决于系统支持
 import mpl_interactions.ipyplot as iplt
 
 x = np.linspace(0, np.pi, 100)
-tau = np.linspace(1, 10, 100)
-beta = np.linspace(0.001, 1)
+tau = np.linspace(1, 10, 10)
+beta = np.linspace(0.001, 1, 10)
 
 
 def f(x, tau, beta):
