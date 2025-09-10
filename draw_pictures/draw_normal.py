@@ -51,4 +51,5 @@ plt.xlim(2000, 18000)
 
 # 显示图形
 plt.grid(True, linestyle='--', alpha=0.7)
+
 plt.show()

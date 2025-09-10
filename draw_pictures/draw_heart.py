@@ -22,4 +22,4 @@ plt.plot(x, y1, 'r')
 plt.plot(x, y2, 'r')
 plt.fill_between(x, y1, y2, color='r')
 
-plt.show()
+plt.show(block=True)

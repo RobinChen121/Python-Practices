@@ -9,6 +9,8 @@ Created on Wed Nov  8 12:02:16 2023
     
     
 """
+import matplotlib
+matplotlib.use("TkAgg")   # 或者 "Qt5Agg"，具体取决于你环境中装了哪个
 
 import numpy as np
 import matplotlib.pyplot as plt
