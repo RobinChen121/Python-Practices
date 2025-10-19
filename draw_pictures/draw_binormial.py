@@ -5,9 +5,12 @@ Created on Mon Jul 11 16:31:16 2022
 @author: chen
 """
 
+import matplotlib
+matplotlib.use("TkAgg")   # 或者 "Qt5Agg"，具体取决于你环境中装了哪个
 import numpy as np
 import matplotlib.pyplot as plt
 import scipy.stats as st
+
 
 def draw():
     n = 50
@@ -19,7 +22,7 @@ def draw():
     plt.legend()
 
     y1 = [st.norm.pdf(i, n*p, np.sqrt(n*p*(1-p))) for i in x]
-    plt.plot(x, y1, 'b', label='norm, mu=np, sigma^2=np(1-p)')
+    plt.plot(x, y1, 'b', label=r'norm, $\mu$=np, $\sigma^2=np(1-p)$')
     plt.legend(fontsize=5)
 
 
@@ -33,7 +36,7 @@ def draw():
     plt.legend()
 
     y1 = [st.norm.pdf(i, n*p, np.sqrt(n*p*(1-p))) for i in x]
-    plt.plot(x, y1, 'b', label='norm, mu=np, sigma^2=np(1-p)')
+    plt.plot(x, y1, 'b', label=r'norm, $\mu$=np, $\sigma^2=np(1-p)$')
     plt.legend(fontsize=5)
     plt.show()
 
