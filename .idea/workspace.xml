@@ -8,8 +8,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="f99bd7d8-beb4-47cd-bc85-89bae93f688b" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/junior_practices/convolution.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/anaconda_projects/db/project_filebrowser.db" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../msppy/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../msppy/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../msppy/.idea/modules.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../msppy/.idea/modules.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../msppy/.idea/msppy.iml" beforeDir="false" afterPath="$PROJECT_DIR$/../msppy/.idea/msppy.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../msppy/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../msppy/.idea/vcs.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -71,6 +74,7 @@
     "Python.array-2process.executor": "Run",
     "Python.binomial_test.executor": "Run",
     "Python.convolution.executor": "Run",
+    "Python.deaw_contour.executor": "Run",
     "Python.debug_test.executor": "Debug",
     "Python.determin_orderLoan.executor": "Run",
     "Python.draw_animation.executor": "Run",
@@ -78,7 +82,10 @@
     "Python.draw_heart3.executor": "Run",
     "Python.draw_lineprogramming.executor": "Run",
     "Python.draw_lineprogramming2.executor": "Run",
+    "Python.draw_sigmoid.executor": "Run",
     "Python.draw_widget.executor": "Run",
+    "Python.e20.1.executor": "Run",
+    "Python.e21.executor": "Run",
     "Python.evaluation.executor": "Run",
     "Python.fibnocci.executor": "Run",
     "Python.generate_art_words.executor": "Run",
@@ -150,6 +157,29 @@
     </key>
   </component>
   <component name="RunManager">
+    <configuration name="deaw_contour" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
+      <module name="Python-Practices" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/draw_pictures" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/draw_pictures/deaw_contour.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
     <configuration default="true" type="tests" factoryName="py.test">
       <module name="sddp_overdraft" />
       <option name="ENV_FILES" value="" />
@@ -172,8 +202,8 @@
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-js-predefined-d6986cc7102b-1632447f56bf-JavaScript-PY-243.26053.29" />
-        <option value="bundled-python-sdk-b1dbf8ef85a6-4df51de95216-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-243.26053.29" />
+        <option value="bundled-js-predefined-d6986cc7102b-76f8388c3a79-JavaScript-PY-243.24978.54" />
+        <option value="bundled-python-sdk-91e3b7efe1d4-466328ff949b-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-243.24978.54" />
       </set>
     </attachedChunks>
   </component>
@@ -192,6 +222,7 @@
       <workItem from="1753395657788" duration="2081000" />
       <workItem from="1753439007368" duration="1629000" />
       <workItem from="1753614646090" duration="7245000" />
+      <workItem from="1760987513891" duration="1237000" />
     </task>
     <servers />
   </component>
@@ -437,8 +468,11 @@
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/Python_Practices$draw_widget.coverage" NAME="draw_widget Coverage Results" MODIFIED="1753615390481" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/junior_practices" />
+    <SUITE FILE_PATH="coverage/Python_Practices$binomial_test.coverage" NAME="binomial_test Coverage Results" MODIFIED="1753396413757" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/junior_practices" />
     <SUITE FILE_PATH="coverage/Python_Practices$widge_matplotlib.coverage" NAME="widge_matplotlib Coverage Results" MODIFIED="1753396536406" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/junior_practices" />
     <SUITE FILE_PATH="coverage/Python_Practices$convolution.coverage" NAME="convolution Coverage Results" MODIFIED="1753627292221" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/junior_practices" />
-    <SUITE FILE_PATH="coverage/Python_Practices$binomial_test.coverage" NAME="binomial_test Coverage Results" MODIFIED="1753396413757" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/junior_practices" />
+    <SUITE FILE_PATH="coverage/Python_Practices$e20_1.coverage" NAME="e20.1 Coverage Results" MODIFIED="1760988641095" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/crawler" />
+    <SUITE FILE_PATH="coverage/Python_Practices$e21.coverage" NAME="e21 Coverage Results" MODIFIED="1760988690678" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/crawler" />
+    <SUITE FILE_PATH="coverage/Python_Practices$draw_sigmoid.coverage" NAME="draw_sigmoid Coverage Results" MODIFIED="1760987942317" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/draw_pictures" />
   </component>
 </project>
