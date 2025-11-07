@@ -44,7 +44,7 @@ y = torch.tensor(y, dtype=torch.float32).unsqueeze(-1)
 # 定义 LSTM
 # -------------------------------
 class LSTMModel(nn.Module):
-    def __init__(self, input_size=1, hidden_size=50, num_layers=1, output_size=1):
+    def __init__(self, input_size=1, hidden_size=10, num_layers=1, output_size=1):
         super(LSTMModel, self).__init__()
         self.lstm = nn.LSTM(input_size, hidden_size, num_layers, batch_first=True)
         self.linear = nn.Linear(hidden_size, output_size)
@@ -89,12 +89,12 @@ mae = np.mean(np.abs(y_pred - y_true))
 # 总绝对误差 SAE（sum of absolute errors）
 sae = np.sum(np.abs(y_pred - y_true))
 
-# （可选）均方误差 MSE
-mse = np.mean((y_pred - y_true)**2)
+# （可选）均方根误差 RMSE
+rmse = np.sqrt(np.mean((y_pred - y_true)**2))
 
 print(f"平均绝对误差 (MAE): {mae:.6f}")
 print(f"总绝对误差 (SAE): {sae:.6f}")
-print(f"均方误差 (MSE): {mse:.6f}")
+print(f"均方跟误差 (RMSE): {rmse:.6f}")
 
 import matplotlib
 matplotlib.use("TkAgg")   # 或者 "Qt5Agg"，具体取决于你环境中装了哪个
