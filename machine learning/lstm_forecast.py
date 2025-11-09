@@ -97,7 +97,7 @@ print(f"总绝对误差 (SAE): {sae:.6f}")
 print(f"均方跟误差 (RMSE): {rmse:.6f}")
 
 import matplotlib
-matplotlib.use("TkAgg")   # 或者 "Qt5Agg"，具体取决于你环境中装了哪个
+matplotlib.use("TkAgg")   # 或者 "Qt5Agg"，具体取决于环境中装了哪个
 import matplotlib.pyplot as plt
 plt.plot(range(len(data)), data, label='True')
 plt.plot(range(seq_length, len(data)), pred, label='Predicted')
