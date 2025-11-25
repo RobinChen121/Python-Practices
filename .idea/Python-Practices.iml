@@ -5,8 +5,8 @@
       <sourceFolder url="file://$MODULE_DIR$/linear programming/gurobi" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/.venv" />
       <excludeFolder url="file://$MODULE_DIR$/.venv1" />
+      <excludeFolder url="file://$MODULE_DIR$" />
     </content>
-    <orderEntry type="jdk" jdkName="/opt/anaconda3" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module" module-name="msppy" />
   </component>
