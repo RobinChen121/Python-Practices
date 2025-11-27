@@ -7,8 +7,10 @@
       <excludeFolder url="file://$MODULE_DIR$/.venv1" />
       <excludeFolder url="file://$MODULE_DIR$" />
     </content>
+    <orderEntry type="jdk" jdkName="Python 3.12" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module" module-name="msppy" />
+    <orderEntry type="module" module-name="qr_forcaster" />
   </component>
   <component name="PackageRequirementsSettings">
     <option name="requirementsPath" value="" />
