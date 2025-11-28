@@ -8,15 +8,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="f99bd7d8-beb4-47cd-bc85-89bae93f688b" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/Python-Practices.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/Python-Practices.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/time_series_forecaster/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/time_series_forecaster/mlqr_forcaster/main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../qr_forcaster/dataloaders/test_dl.pkl" beforeDir="false" afterPath="$PROJECT_DIR$/../qr_forcaster/dataloaders/test_dl.pkl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../qr_forcaster/dataloaders/train_dl.pkl" beforeDir="false" afterPath="$PROJECT_DIR$/../qr_forcaster/dataloaders/train_dl.pkl" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../qr_forcaster/train.py" beforeDir="false" afterPath="$PROJECT_DIR$/../qr_forcaster/train.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../msppy/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../msppy/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../msppy/.idea/modules.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../msppy/.idea/modules.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../msppy/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../msppy/.idea/vcs.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -145,7 +141,7 @@
     "RunOnceActivity.git.unshallow": "true",
     "SHARE_PROJECT_CONFIGURATION_FILES": "true",
     "git-widget-placeholder": "master",
-    "last_opened_file_path": "D:/chenzhen/qr_forcaster",
+    "last_opened_file_path": "/Users/zhenchen/Documents/Python-Practices",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
@@ -186,7 +182,6 @@
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
       <option name="SDK_HOME" value="" />
-      <option name="SDK_NAME" value="Python 3.12" />
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/time_series_forecaster" />
       <option name="IS_MODULE_SDK" value="false" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
@@ -223,8 +218,8 @@
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-js-predefined-d6986cc7102b-1632447f56bf-JavaScript-PY-243.26053.29" />
-        <option value="bundled-python-sdk-b1dbf8ef85a6-4df51de95216-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-243.26053.29" />
+        <option value="bundled-js-predefined-d6986cc7102b-76f8388c3a79-JavaScript-PY-243.24978.54" />
+        <option value="bundled-python-sdk-91e3b7efe1d4-466328ff949b-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-243.24978.54" />
       </set>
     </attachedChunks>
   </component>
@@ -250,6 +245,8 @@
       <workItem from="1764113567669" duration="54000" />
       <workItem from="1764177100666" duration="16063000" />
       <workItem from="1764236556810" duration="10427000" />
+      <workItem from="1764328660875" duration="43000" />
+      <workItem from="1764328735927" duration="2000" />
     </task>
     <servers />
   </component>
