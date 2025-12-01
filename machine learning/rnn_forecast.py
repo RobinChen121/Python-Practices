@@ -6,6 +6,7 @@
 @Desc    : vanilla rnn
 
 """
+
 import torch
 import torch.nn as nn
 import numpy as np
@@ -15,6 +16,7 @@ from sklearn.metrics import mean_squared_error
 # --------------------------
 # 1. 数据准备
 # --------------------------
+# fmt: off
 raw_data = np.array([
     112, 118, 132, 129, 121, 135, 148, 148, 136, 119, 104, 118,
     115, 126, 141, 135, 125, 149, 170, 170, 158, 133, 114, 140,
@@ -29,6 +31,7 @@ raw_data = np.array([
     360, 342, 406, 396, 420, 472, 548, 559, 463, 407, 362, 405,
     417, 391, 419, 461, 472, 535, 622, 606, 508, 461, 390, 432
 ], dtype=float)
+# fmt: on
 
 data_min = raw_data.min()
 data_max = raw_data.max()
@@ -42,7 +45,7 @@ data = torch.FloatTensor(data).unsqueeze(1)  # shape (144,1)
 def create_sequences(data, seq_len):
     xs, ys = [], []
     for i in range(len(data) - seq_len):
-        x = data[i:i + seq_len]
+        x = data[i : i + seq_len]
         y = data[i + seq_len]
         xs.append(x)
         ys.append(y)
@@ -124,7 +127,7 @@ pred_total = np.concatenate((pred_train, pred_test))
 # 计算整个数据集的 MSE
 mse_total = mean_squared_error(y_total, pred_total)
 mse = 0
-for (a, b) in zip(y_train_real, pred_train):
+for a, b in zip(y_train_real, pred_train):
     print(a, b)
     mse += (a.item() - b.item()) ** 2
 # for (a, b) in zip(y_test_real, pred_test):
@@ -137,22 +140,34 @@ print(f"总 RMSE: {np.sqrt(mse_total):.4f}")
 # 9. 可视化
 # --------------------------
 import matplotlib
+
 matplotlib.use("TkAgg")  # 或者 "Qt5Agg"，具体取决于你环境中装了哪个
 plt.figure()
-plt.plot(range(len(raw_data)), raw_data, label='Actual', color='blue')
+plt.plot(range(len(raw_data)), raw_data, label="Actual", color="blue")
 
 # 绘制训练集预测（对应前 80%）
-plt.plot(range(seq_len, seq_len + len(pred_train)), pred_train, label='Predicted (Train)', color='green')
+plt.plot(
+    range(seq_len, seq_len + len(pred_train)),
+    pred_train,
+    label="Predicted (Train)",
+    color="green",
+)
 
 # 绘制测试集预测（对应后 20%）
-plt.plot(range(seq_len + split_idx, seq_len + split_idx + len(pred_test)), pred_test, label='Predicted (Test)',
-         color='red')
+plt.plot(
+    range(seq_len + split_idx, seq_len + split_idx + len(pred_test)),
+    pred_test,
+    label="Predicted (Test)",
+    color="red",
+)
 
 # 分割线
-plt.axvline(x=seq_len + split_idx, color='gray', linestyle='--', label='Train/Test Split')
+plt.axvline(
+    x=seq_len + split_idx, color="gray", linestyle="--", label="Train/Test Split"
+)
 
-plt.xlabel('Month Index')
-plt.ylabel('Passengers')
-plt.title('AirPassengers Prediction using Simple RNN (Train + Test)')
+plt.xlabel("Month Index")
+plt.ylabel("Passengers")
+plt.title("AirPassengers Prediction using Simple RNN (Train + Test)")
 plt.legend()
 plt.show()
