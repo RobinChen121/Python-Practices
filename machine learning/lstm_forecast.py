@@ -85,7 +85,9 @@ for epoch in range(epochs):
 # 预测
 # -------------------------------
 model.eval()  # 切换到评估模式
-pred = model(X).detach().numpy()  # detach 分离张量
+pred = model(X) # 得到模型输出（带梯度）
+pred = pred.detach() # 返回一个共享相同数据但不需要梯度的新张量
+pred = pred.numpy()  # 转化为 numpy
 
 # -------------------------------
 # 计算预测误差
