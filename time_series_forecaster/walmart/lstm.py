@@ -25,7 +25,8 @@ sales = ts["Weekly_Sales"].values.astype(np.float32)
 # 需要标准化
 from sklearn.preprocessing import MinMaxScaler
 
-sales_scaled = MinMaxScaler().fit_transform(sales.reshape(-1, 1))
+scaler = MinMaxScaler()
+sales_scaled = scaler.fit_transform(sales.reshape(-1, 1))
 
 # formulate a sequence
 seq_len = 12  # 使用过去 12 周预测下一周
@@ -71,10 +72,11 @@ optimizer = torch.optim.Adam(model.parameters(), lr=0.01)
 epochs = 30
 for epoch in range(epochs):
     for batch_x, batch_y in loader:
+        # 这个循环 loader 里面的数据一个一个传进去
         optimizer.zero_grad()
         # lstm 的输入数据维度是 (batch_size, seq_size, input_size)
         pred = model(batch_x)
-        loss = criterion(pred.squeeze(), batch_y)
+        loss = criterion(pred, batch_y)
         loss.backward()
         optimizer.step()
 
@@ -83,11 +85,20 @@ for epoch in range(epochs):
 model.eval()
 with torch.no_grad():
     pred = model(X)
-    loss = criterion(pred.squeeze(), y)
+    # squeeze 减少一个维度
+    loss = criterion(pred, y)
+    real_y = scaler.inverse_transform(y)
+    real_pred = scaler.inverse_transform(pred)
+    real_loss = criterion(torch.tensor(real_pred), torch.tensor(real_y))
 print(f"MAE: {loss.item():.4f}")
+print(f"real MAE: {real_loss.item():.4f}")
 
+import matplotlib
+
+matplotlib.use("Qt5Agg")  # 或者 "Qt5Agg"，具体取决于环境中装了哪个: conda install pyqt
 import matplotlib.pyplot as plt
 
-plt.plot(sales)
-plt.plot(pred.squeeze().detach().numpy())
+plt.plot(sales, label="real sales")
+plt.plot(np.concatenate((np.array(sales[:seq_len]), real_pred.flatten())), label="predicted sales")
+plt.legend()
 plt.show()
