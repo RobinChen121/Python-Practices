@@ -74,94 +74,94 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;Python tests.Doctest via pytest in solver_detail.py.executor&quot;: &quot;Debug&quot;,
-    &quot;Python tests.Doctest via pytest in sp.py.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.Python tests for test_sampling.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.Python tests for test_sampling.test_generate_sample.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.Python tests in test_get_distribution.py.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.Python tests in test_module1.py.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.Python tests in test_sampling.py.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.Python tests in test_utils.py.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.pdb pytest.executor&quot;: &quot;Run&quot;,
-    &quot;Python tests.pytest in /.executor&quot;: &quot;Run&quot;,
-    &quot;Python.MemorizeTimeTesting.executor&quot;: &quot;Run&quot;,
-    &quot;Python.a_simpleMip.executor&quot;: &quot;Run&quot;,
-    &quot;Python.a_simple_MIP.executor&quot;: &quot;Debug&quot;,
-    &quot;Python.air_conditioner.executor&quot;: &quot;Run&quot;,
-    &quot;Python.array-2process.executor&quot;: &quot;Run&quot;,
-    &quot;Python.binomial_test.executor&quot;: &quot;Run&quot;,
-    &quot;Python.bp.executor&quot;: &quot;Run&quot;,
-    &quot;Python.bp2.executor&quot;: &quot;Run&quot;,
-    &quot;Python.bp3.executor&quot;: &quot;Run&quot;,
-    &quot;Python.bp4.executor&quot;: &quot;Run&quot;,
-    &quot;Python.convolution.executor&quot;: &quot;Run&quot;,
-    &quot;Python.deaw_contour.executor&quot;: &quot;Run&quot;,
-    &quot;Python.debug_test.executor&quot;: &quot;Debug&quot;,
-    &quot;Python.determin_orderLoan.executor&quot;: &quot;Run&quot;,
-    &quot;Python.draw_animation.executor&quot;: &quot;Run&quot;,
-    &quot;Python.draw_binormial.executor&quot;: &quot;Run&quot;,
-    &quot;Python.draw_heart3.executor&quot;: &quot;Run&quot;,
-    &quot;Python.draw_lineprogramming.executor&quot;: &quot;Run&quot;,
-    &quot;Python.draw_lineprogramming2.executor&quot;: &quot;Run&quot;,
-    &quot;Python.draw_sigmoid.executor&quot;: &quot;Run&quot;,
-    &quot;Python.draw_widget.executor&quot;: &quot;Run&quot;,
-    &quot;Python.e20.1.executor&quot;: &quot;Run&quot;,
-    &quot;Python.e21.executor&quot;: &quot;Run&quot;,
-    &quot;Python.evaluation.executor&quot;: &quot;Run&quot;,
-    &quot;Python.fibnocci.executor&quot;: &quot;Run&quot;,
-    &quot;Python.generate_art_words.executor&quot;: &quot;Run&quot;,
-    &quot;Python.import_test.executor&quot;: &quot;Run&quot;,
-    &quot;Python.logger.executor&quot;: &quot;Run&quot;,
-    &quot;Python.logging_test.executor&quot;: &quot;Run&quot;,
-    &quot;Python.lstm.executor&quot;: &quot;Run&quot;,
-    &quot;Python.lstm_forecast.executor&quot;: &quot;Run&quot;,
-    &quot;Python.main.executor&quot;: &quot;Run&quot;,
-    &quot;Python.module1.executor&quot;: &quot;Run&quot;,
-    &quot;Python.multi-process-array.executor&quot;: &quot;Debug&quot;,
-    &quot;Python.multiprocess-class.executor&quot;: &quot;Run&quot;,
-    &quot;Python.multiprocess-fork-spawn.executor&quot;: &quot;Run&quot;,
-    &quot;Python.multiprocess-lock.executor&quot;: &quot;Run&quot;,
-    &quot;Python.multiprocess-lock2.executor&quot;: &quot;Run&quot;,
-    &quot;Python.multiprocess-pickle.executor&quot;: &quot;Run&quot;,
-    &quot;Python.multiprocess-pickle2.executor&quot;: &quot;Run&quot;,
-    &quot;Python.multiprocess-pool.executor&quot;: &quot;Run&quot;,
-    &quot;Python.multiprocess2.executor&quot;: &quot;Run&quot;,
-    &quot;Python.multiprocess3.executor&quot;: &quot;Run&quot;,
-    &quot;Python.multiprocess4.executor&quot;: &quot;Run&quot;,
-    &quot;Python.multiprocess5.executor&quot;: &quot;Run&quot;,
-    &quot;Python.multiprocess6.executor&quot;: &quot;Run&quot;,
-    &quot;Python.multiprocess7.executor&quot;: &quot;Run&quot;,
-    &quot;Python.multiprocess8.executor&quot;: &quot;Run&quot;,
-    &quot;Python.multiprocess_class.executor&quot;: &quot;Run&quot;,
-    &quot;Python.multiprocess_class2.executor&quot;: &quot;Run&quot;,
-    &quot;Python.news_vendor.executor&quot;: &quot;Debug&quot;,
-    &quot;Python.newsvendor.executor&quot;: &quot;Run&quot;,
-    &quot;Python.normal run.executor&quot;: &quot;Run&quot;,
-    &quot;Python.pool2.executor&quot;: &quot;Run&quot;,
-    &quot;Python.portfolio_optimization.executor&quot;: &quot;Run&quot;,
-    &quot;Python.saa_orderLoan_LowerBounds.executor&quot;: &quot;Run&quot;,
-    &quot;Python.sampling.executor&quot;: &quot;Run&quot;,
-    &quot;Python.test.executor&quot;: &quot;Debug&quot;,
-    &quot;Python.test_get_distribution.executor&quot;: &quot;Run&quot;,
-    &quot;Python.train.executor&quot;: &quot;Debug&quot;,
-    &quot;Python.walmart_seq2seq.executor&quot;: &quot;Debug&quot;,
-    &quot;Python.widge_matplotlib.executor&quot;: &quot;Run&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
-    &quot;last_opened_file_path&quot;: &quot;D:/chenzhen/python-practices/machine learning/lstm_forecast.py&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Python tests.Doctest via pytest in solver_detail.py.executor": "Debug",
+    "Python tests.Doctest via pytest in sp.py.executor": "Run",
+    "Python tests.Python tests for test_sampling.executor": "Run",
+    "Python tests.Python tests for test_sampling.test_generate_sample.executor": "Run",
+    "Python tests.Python tests in test_get_distribution.py.executor": "Run",
+    "Python tests.Python tests in test_module1.py.executor": "Run",
+    "Python tests.Python tests in test_sampling.py.executor": "Run",
+    "Python tests.Python tests in test_utils.py.executor": "Run",
+    "Python tests.pdb pytest.executor": "Run",
+    "Python tests.pytest in /.executor": "Run",
+    "Python.MemorizeTimeTesting.executor": "Run",
+    "Python.a_simpleMip.executor": "Run",
+    "Python.a_simple_MIP.executor": "Debug",
+    "Python.air_conditioner.executor": "Run",
+    "Python.array-2process.executor": "Run",
+    "Python.binomial_test.executor": "Run",
+    "Python.bp.executor": "Run",
+    "Python.bp2.executor": "Run",
+    "Python.bp3.executor": "Run",
+    "Python.bp4.executor": "Run",
+    "Python.convolution.executor": "Run",
+    "Python.deaw_contour.executor": "Run",
+    "Python.debug_test.executor": "Debug",
+    "Python.determin_orderLoan.executor": "Run",
+    "Python.draw_animation.executor": "Run",
+    "Python.draw_binormial.executor": "Run",
+    "Python.draw_heart3.executor": "Run",
+    "Python.draw_lineprogramming.executor": "Run",
+    "Python.draw_lineprogramming2.executor": "Run",
+    "Python.draw_sigmoid.executor": "Run",
+    "Python.draw_widget.executor": "Run",
+    "Python.e20.1.executor": "Run",
+    "Python.e21.executor": "Run",
+    "Python.evaluation.executor": "Run",
+    "Python.fibnocci.executor": "Run",
+    "Python.generate_art_words.executor": "Run",
+    "Python.import_test.executor": "Run",
+    "Python.logger.executor": "Run",
+    "Python.logging_test.executor": "Run",
+    "Python.lstm.executor": "Debug",
+    "Python.lstm_forecast.executor": "Run",
+    "Python.main.executor": "Debug",
+    "Python.module1.executor": "Run",
+    "Python.multi-process-array.executor": "Debug",
+    "Python.multiprocess-class.executor": "Run",
+    "Python.multiprocess-fork-spawn.executor": "Run",
+    "Python.multiprocess-lock.executor": "Run",
+    "Python.multiprocess-lock2.executor": "Run",
+    "Python.multiprocess-pickle.executor": "Run",
+    "Python.multiprocess-pickle2.executor": "Run",
+    "Python.multiprocess-pool.executor": "Run",
+    "Python.multiprocess2.executor": "Run",
+    "Python.multiprocess3.executor": "Run",
+    "Python.multiprocess4.executor": "Run",
+    "Python.multiprocess5.executor": "Run",
+    "Python.multiprocess6.executor": "Run",
+    "Python.multiprocess7.executor": "Run",
+    "Python.multiprocess8.executor": "Run",
+    "Python.multiprocess_class.executor": "Run",
+    "Python.multiprocess_class2.executor": "Run",
+    "Python.news_vendor.executor": "Debug",
+    "Python.newsvendor.executor": "Run",
+    "Python.normal run.executor": "Run",
+    "Python.pool2.executor": "Run",
+    "Python.portfolio_optimization.executor": "Run",
+    "Python.saa_orderLoan_LowerBounds.executor": "Run",
+    "Python.sampling.executor": "Run",
+    "Python.test.executor": "Debug",
+    "Python.test_get_distribution.executor": "Run",
+    "Python.train.executor": "Debug",
+    "Python.walmart_seq2seq.executor": "Debug",
+    "Python.widge_matplotlib.executor": "Run",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "git-widget-placeholder": "master",
+    "last_opened_file_path": "D:/chenzhen/python-practices/machine learning/lstm_forecast.py",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "settings.editor.selected.configurable": "com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
   <component name="PyConsoleOptionsProvider">
     <option name="myPythonConsoleState">
       <console-settings module-name="Python-Practices" is-module-sdk="true">
@@ -183,7 +183,7 @@
       <recent name="$PROJECT_DIR$/stochastic programming" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.main">
+  <component name="RunManager">
     <configuration default="true" type="PythonConfigurationType" factoryName="Python">
       <module name="Python-Practices" />
       <option name="ENV_FILES" value="" />
@@ -322,6 +322,9 @@
       <workItem from="1764408847400" duration="15223000" />
       <workItem from="1764496892129" duration="22494000" />
       <workItem from="1764583521221" duration="17802000" />
+      <workItem from="1764780180288" duration="15422000" />
+      <workItem from="1764843312243" duration="1656000" />
+      <workItem from="1764844992997" duration="1699000" />
     </task>
     <servers />
   </component>
@@ -569,12 +572,12 @@
           <option name="timeStamp" value="315" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/time_series_forecaster/seq2seq/walmart_seq2seq.py</url>
+          <url>file://$PROJECT_DIR$/time_series_forecaster/walmart/walmart_seq2seq.py</url>
           <line>97</line>
           <option name="timeStamp" value="316" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/time_series_forecaster/seq2seq/walmart_seq2seq.py</url>
+          <url>file://$PROJECT_DIR$/time_series_forecaster/walmart/walmart_seq2seq.py</url>
           <line>133</line>
           <option name="timeStamp" value="318" />
         </line-breakpoint>
@@ -598,6 +601,31 @@
           <line>11</line>
           <option name="timeStamp" value="327" />
         </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/time_series_forecaster/walmart/walmart_seq2seq.py</url>
+          <line>15</line>
+          <option name="timeStamp" value="328" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/machine learning/lstm_forecast.py</url>
+          <line>60</line>
+          <option name="timeStamp" value="329" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/time_series_forecaster/walmart/lstm.py</url>
+          <line>86</line>
+          <option name="timeStamp" value="337" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/time_series_forecaster/walmart/lstm.py</url>
+          <line>75</line>
+          <option name="timeStamp" value="345" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/time_series_forecaster/walmart/lstm.py</url>
+          <line>44</line>
+          <option name="timeStamp" value="346" />
+        </line-breakpoint>
       </breakpoints>
       <default-breakpoints>
         <breakpoint type="python-exception">
@@ -609,18 +637,18 @@
     </breakpoint-manager>
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/python_practices$main.coverage" NAME="main Coverage Results" MODIFIED="1764410944357" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/time_series_forecaster" />
+    <SUITE FILE_PATH="coverage/python_practices$main.coverage" NAME="main Coverage Results" MODIFIED="1764845001329" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/time_series_forecaster" />
     <SUITE FILE_PATH="coverage/Python_Practices$convolution.coverage" NAME="convolution Coverage Results" MODIFIED="1753627292221" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/junior_practices" />
     <SUITE FILE_PATH="coverage/python_practices$train.coverage" NAME="train Coverage Results" MODIFIED="1764530144573" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/../qr_forcaster" />
     <SUITE FILE_PATH="coverage/Python_Practices$e21.coverage" NAME="e21 Coverage Results" MODIFIED="1760988690678" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/crawler" />
     <SUITE FILE_PATH="coverage/python_practices$bp2.coverage" NAME="bp2 Coverage Results" MODIFIED="1764516365471" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/machine learning" />
-    <SUITE FILE_PATH="coverage/python_practices$lstm.coverage" NAME="lstm Coverage Results" MODIFIED="1764410863615" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="" />
+    <SUITE FILE_PATH="coverage/python_practices$lstm.coverage" NAME="lstm Coverage Results" MODIFIED="1764846362770" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/time_series_forecaster/walmart" />
     <SUITE FILE_PATH="coverage/Python_Practices$draw_sigmoid.coverage" NAME="draw_sigmoid Coverage Results" MODIFIED="1760987942317" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/draw_pictures" />
-    <SUITE FILE_PATH="coverage/python_practices$walmart_seq2seq.coverage" NAME="walmart_seq2seq Coverage Results" MODIFIED="1764358490931" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/time_series_forecaster/seq2seq" />
+    <SUITE FILE_PATH="coverage/python_practices$walmart_seq2seq.coverage" NAME="walmart_seq2seq Coverage Results" MODIFIED="1764783089038" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/time_series_forecaster/walmart" />
     <SUITE FILE_PATH="coverage/python_practices$bp3.coverage" NAME="bp3 Coverage Results" MODIFIED="1764516401211" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/machine learning" />
     <SUITE FILE_PATH="coverage/Python_Practices$draw_widget.coverage" NAME="draw_widget Coverage Results" MODIFIED="1753615390481" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/junior_practices" />
     <SUITE FILE_PATH="coverage/Python_Practices$widge_matplotlib.coverage" NAME="widge_matplotlib Coverage Results" MODIFIED="1753396536406" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/junior_practices" />
-    <SUITE FILE_PATH="coverage/python_practices$lstm_forecast.coverage" NAME="lstm_forecast Coverage Results" MODIFIED="1764412894632" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/machine learning" />
+    <SUITE FILE_PATH="coverage/python_practices$lstm_forecast.coverage" NAME="lstm_forecast Coverage Results" MODIFIED="1764787506513" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/machine learning" />
     <SUITE FILE_PATH="coverage/Python_Practices$e20_1.coverage" NAME="e20.1 Coverage Results" MODIFIED="1760988641095" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/crawler" />
     <SUITE FILE_PATH="coverage/python_practices$bp4.coverage" NAME="bp4 Coverage Results" MODIFIED="1764511837804" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/machine learning" />
     <SUITE FILE_PATH="coverage/python_practices$bp.coverage" NAME="bp Coverage Results" MODIFIED="1764516356621" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/machine learning" />

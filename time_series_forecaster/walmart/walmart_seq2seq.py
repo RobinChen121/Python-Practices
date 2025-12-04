@@ -7,27 +7,10 @@
 
 """
 
-import pandas as pd
 import numpy as np
-import os
-import sys
+from read_data import read_data
 
-file_path = ""
-if sys.platform != "win32":
-    file_path = "/Users/zhenchen/Documents/machine learning data/walmart-recruiting-store-sales-forecasting"
-else:
-    file_path = "D:/chenzhen/data/walmart-recruiting-store-sales-forecasting/"
-# 读取数据
-sales = pd.read_csv(os.path.join(file_path, "train.csv"), parse_dates=["Date"])
-features = pd.read_csv(os.path.join(file_path, "features.csv"), parse_dates=["Date"])
-stores = pd.read_csv(os.path.join(file_path, "stores.csv"))
-
-# 合并数据
-df = pd.merge(sales, features, on=["Store", "Date", "IsHoliday"])
-df = pd.merge(df, stores, on="Store")
-
-# 按时间排序
-df = df.sort_values(["Store", "Dept", "Date"])
+df = read_data()
 
 # 提取时间特征
 df["weekofyear"] = df["Date"].dt.isocalendar().week

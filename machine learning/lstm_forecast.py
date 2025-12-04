@@ -55,6 +55,7 @@ class LSTMModel(nn.Module):
         self.linear = nn.Linear(hidden_size, output_size)  # 线性输出
 
     def forward(self, x):
+        # 类中有 __call__() 函数，所以类可以直接调用
         out, _ = self.lstm(x)
         # out 的维度 (batch_size, seq_length, hidden_size)
         out = out[:, -1, :]
@@ -85,8 +86,8 @@ for epoch in range(epochs):
 # 预测
 # -------------------------------
 model.eval()  # 切换到评估模式
-pred = model(X) # 得到模型输出（带梯度）
-pred = pred.detach() # 返回一个共享相同数据但不需要梯度的新张量
+pred = model(X)  # 得到模型输出（带梯度）
+pred = pred.detach()  # 返回一个共享相同数据但不需要梯度的新张量
 pred = pred.numpy()  # 转化为 numpy
 
 # -------------------------------
