@@ -115,7 +115,8 @@
     "Python.import_test.executor": "Run",
     "Python.logger.executor": "Run",
     "Python.logging_test.executor": "Run",
-    "Python.lstm.executor": "Debug",
+    "Python.lstm.executor": "Run",
+    "Python.lstm2.executor": "Run",
     "Python.lstm_forecast.executor": "Run",
     "Python.main.executor": "Debug",
     "Python.module1.executor": "Run",
@@ -141,6 +142,7 @@
     "Python.normal run.executor": "Run",
     "Python.pool2.executor": "Run",
     "Python.portfolio_optimization.executor": "Run",
+    "Python.read_data.executor": "Debug",
     "Python.saa_orderLoan_LowerBounds.executor": "Run",
     "Python.sampling.executor": "Run",
     "Python.test.executor": "Debug",
@@ -152,7 +154,7 @@
     "RunOnceActivity.git.unshallow": "true",
     "SHARE_PROJECT_CONFIGURATION_FILES": "true",
     "git-widget-placeholder": "master",
-    "last_opened_file_path": "D:/chenzhen/python-practices/machine learning/lstm_forecast.py",
+    "last_opened_file_path": "D:/chenzhen/python-practices/time_series_forecaster/walmart",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
@@ -172,6 +174,7 @@
   </component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="D:\chenzhen\python-practices\time_series_forecaster\walmart" />
       <recent name="$PROJECT_DIR$/practices/multi-process" />
       <recent name="D:\Users\chen_\git\Python-Practices\Chonqqing Power Grid" />
     </key>
@@ -325,6 +328,7 @@
       <workItem from="1764780180288" duration="15422000" />
       <workItem from="1764843312243" duration="1656000" />
       <workItem from="1764844992997" duration="1699000" />
+      <workItem from="1764883320948" duration="10364000" />
     </task>
     <servers />
   </component>
@@ -613,18 +617,13 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/time_series_forecaster/walmart/lstm.py</url>
-          <line>86</line>
-          <option name="timeStamp" value="337" />
+          <line>80</line>
+          <option name="timeStamp" value="355" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/time_series_forecaster/walmart/lstm.py</url>
-          <line>75</line>
-          <option name="timeStamp" value="345" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/time_series_forecaster/walmart/lstm.py</url>
-          <line>44</line>
-          <option name="timeStamp" value="346" />
+          <line>51</line>
+          <option name="timeStamp" value="358" />
         </line-breakpoint>
       </breakpoints>
       <default-breakpoints>
@@ -642,16 +641,18 @@
     <SUITE FILE_PATH="coverage/python_practices$train.coverage" NAME="train Coverage Results" MODIFIED="1764530144573" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/../qr_forcaster" />
     <SUITE FILE_PATH="coverage/Python_Practices$e21.coverage" NAME="e21 Coverage Results" MODIFIED="1760988690678" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/crawler" />
     <SUITE FILE_PATH="coverage/python_practices$bp2.coverage" NAME="bp2 Coverage Results" MODIFIED="1764516365471" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/machine learning" />
-    <SUITE FILE_PATH="coverage/python_practices$lstm.coverage" NAME="lstm Coverage Results" MODIFIED="1764846362770" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/time_series_forecaster/walmart" />
+    <SUITE FILE_PATH="coverage/python_practices$lstm.coverage" NAME="lstm Coverage Results" MODIFIED="1764894491168" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/time_series_forecaster/walmart" />
     <SUITE FILE_PATH="coverage/Python_Practices$draw_sigmoid.coverage" NAME="draw_sigmoid Coverage Results" MODIFIED="1760987942317" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/draw_pictures" />
     <SUITE FILE_PATH="coverage/python_practices$walmart_seq2seq.coverage" NAME="walmart_seq2seq Coverage Results" MODIFIED="1764783089038" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/time_series_forecaster/walmart" />
     <SUITE FILE_PATH="coverage/python_practices$bp3.coverage" NAME="bp3 Coverage Results" MODIFIED="1764516401211" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/machine learning" />
     <SUITE FILE_PATH="coverage/Python_Practices$draw_widget.coverage" NAME="draw_widget Coverage Results" MODIFIED="1753615390481" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/junior_practices" />
     <SUITE FILE_PATH="coverage/Python_Practices$widge_matplotlib.coverage" NAME="widge_matplotlib Coverage Results" MODIFIED="1753396536406" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/junior_practices" />
+    <SUITE FILE_PATH="coverage/python_practices$read_data.coverage" NAME="read_data Coverage Results" MODIFIED="1764892591380" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/time_series_forecaster/walmart" />
     <SUITE FILE_PATH="coverage/python_practices$lstm_forecast.coverage" NAME="lstm_forecast Coverage Results" MODIFIED="1764787506513" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/machine learning" />
     <SUITE FILE_PATH="coverage/Python_Practices$e20_1.coverage" NAME="e20.1 Coverage Results" MODIFIED="1760988641095" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/crawler" />
     <SUITE FILE_PATH="coverage/python_practices$bp4.coverage" NAME="bp4 Coverage Results" MODIFIED="1764511837804" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/machine learning" />
     <SUITE FILE_PATH="coverage/python_practices$bp.coverage" NAME="bp Coverage Results" MODIFIED="1764516356621" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/machine learning" />
     <SUITE FILE_PATH="coverage/Python_Practices$binomial_test.coverage" NAME="binomial_test Coverage Results" MODIFIED="1753396413757" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/junior_practices" />
+    <SUITE FILE_PATH="coverage/python_practices$lstm2.coverage" NAME="lstm2 Coverage Results" MODIFIED="1764894600945" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/time_series_forecaster/walmart" />
   </component>
 </project>

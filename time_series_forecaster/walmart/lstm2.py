@@ -38,24 +38,24 @@ def create_sequences(data, seq_len):
     xs, ys = [], []
     for i in range(len(data) - seq_len):
         x = data[i : i + seq_len]
-        y = data[i + seq_len]
+        y = data[i + seq_len][0]
         xs.append(x)
         ys.append(y)
     return np.array(xs), np.array(ys)
 
 
-# data = np.column_stack((sales_scaled, is_holiday))
-X, y = create_sequences(sales_scaled, seq_len)
-X = torch.tensor(X)  # (batch, seq, feature)
-y = torch.tensor(y)
+data = np.column_stack((sales_scaled, is_holiday))
+X, y = create_sequences(data, seq_len)
+X = torch.tensor(X, dtype=torch.float32)  # (batch, seq, feature)
+y = torch.tensor(y, dtype=torch.float32).unsqueeze(-1)
 
 dataset = torch.utils.data.TensorDataset(X, y)
-loader = DataLoader(dataset, batch_size=10, shuffle=False)
+loader = DataLoader(dataset, batch_size=1, shuffle=False)
 
 
 # define the LSTM model
 class LSTMModel(nn.Module):
-    def __init__(self, input_size=1, hidden_size=20, num_layers=1):
+    def __init__(self, input_size=2, hidden_size=20, num_layers=1):
         super().__init__()
         self.lstm = nn.LSTM(input_size, hidden_size, num_layers, batch_first=True)
         self.fc = nn.Linear(hidden_size, 1)
@@ -68,11 +68,11 @@ class LSTMModel(nn.Module):
 
 
 model = LSTMModel()
-criterion = nn.L1Loss()
+criterion = nn.MSELoss()
 optimizer = torch.optim.Adam(model.parameters(), lr=0.01)
 
 
-epochs = 100
+epochs = 30
 for epoch in range(epochs):
     for batch_x, batch_y in loader:
         # 这个循环 loader 里面的数据一个一个传进去
