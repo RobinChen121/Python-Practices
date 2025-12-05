@@ -2,7 +2,7 @@
 
 # Copyright 2025, Gurobi Optimization, LLC
 
-# Want to cover four different sets but subject to a common budget of
+# Want to cover four different sets but subject to a utils budget of
 # elements allowed to be used. However, the sets have different priorities to
 # be covered; and we tackle this by using multi-objective optimization.
 

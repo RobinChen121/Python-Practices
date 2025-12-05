@@ -21,9 +21,9 @@ import requests
 
 
 # soup = BeautifulSoup(open('E:\\爬虫练习\\天眼查\\a.html', encoding='UTF-8'), 'lxml')
-# state_list = soup.find_all('div', class_ = 'tag-common -normal-bg')
+# state_list = soup.find_all('div', class_ = 'tag-utils -normal-bg')
 # boss_list = soup.find_all('div', class_ = 'title -wider text-ellipsis')
 # capital_list = soup.find_all('div', class_ = 'title -narrow text-ellipsis')
 # name_list = soup.find_all('div', class_ = 'logo -w88')
-# soup.select('.tag-common -normal-bg')
+# soup.select('.tag-utils -normal-bg')
 

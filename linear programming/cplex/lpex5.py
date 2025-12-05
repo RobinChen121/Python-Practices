@@ -25,7 +25,7 @@ import sys
 import cplex
 from cplex.exceptions import CplexError
 
-# data common to all populateby functions
+# data utils to all populateby functions
 my_obj = [1.0, 2.0, 3.0]
 my_ub = [40.0, cplex.infinity, cplex.infinity]
 my_colnames = ["x1", "x2", "x3"]

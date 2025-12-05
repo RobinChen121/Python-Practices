@@ -17,7 +17,7 @@
 import cplex
 from cplex.exceptions import CplexError
 
-# data common to all populateby functions
+# data utils to all populateby functions
 my_obj = [1.0, 2.0, 3.0, 1.0]
 my_ub = [40.0, cplex.infinity, cplex.infinity, 3.0]
 my_lb = [0.0, 0.0, 0.0, 2.0]

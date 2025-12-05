@@ -1,0 +1,80 @@
+date: 2025-12-05 16:47:26
+file name: lstm.py
+system: Darwin
+cpu: arm
+Python version: 3.12.8
+best hyperparameters:
+{'hidden_size': 16, 'num_layers': 2, 'bidirectional': True, 'learning_rate': 0.0032604099333165245, 'batch_size': 1}
+real MAE: 2296.9588200978746
+====================================================================================================
+date: 2025-12-05 17:39:10
+file name: lstm.py
+system: Darwin
+machine: arm64
+processor: Apple M1 Pro
+cpu_cores_physical: 8
+cpu_cores_logical: 8
+memory_total_GB: 16.0
+GPU: True
+Python version: 3.12.8
+best hyperparameters:
+{'hidden_size': 64, 'num_layers': 3, 'bidirectional': True, 'learning_rate': 0.0012202114445074553, 'batch_size': 1}
+real MAE: 2294.668727289995
+====================================================================================================
+date: 2025-12-05 17:47:52
+file name: lstm.py
+system: Darwin
+machine: arm64
+processor: Apple M1 Pro
+cpu_cores_physical: 8
+cpu_cores_logical: 8
+memory_total_GB: 16.0
+GPU: True
+Python version: 3.12.8
+best hyperparameters:
+{'hidden_size': 16, 'num_layers': 3, 'bidirectional': True, 'learning_rate': 0.0022947052898242303, 'batch_size': 1}
+real MAE: 2581.984548452831
+====================================================================================================
+date: 2025-12-05 17:54:06
+file name: lstm.py
+system: Darwin
+machine: arm64
+processor: Apple M1 Pro
+cpu_cores_physical: 8
+cpu_cores_logical: 8
+memory_total_GB: 16.0
+GPU: True
+Python version: 3.12.8
+best hyperparameters:
+{'hidden_size': 16, 'num_layers': 3, 'bidirectional': False, 'learning_rate': 0.0022783927026718454, 'batch_size': 1}
+real MAE: 2353.616412758594
+====================================================================================================
+date: 2025-12-05 18:04:43
+file name: lstm.py
+system: Darwin
+machine: arm64
+processor: Apple M1 Pro
+cpu_cores_physical: 8
+cpu_cores_logical: 8
+memory_total_GB: 16.0
+GPU: True
+Python version: 3.12.8
+best hyperparameters:
+{'hidden_size': 64, 'num_layers': 1, 'learning_rate': 0.0051277491283623355, 'batch_size': 16}
+real MAE: 2682.972269668798
+====================================================================================================
+
+date: 2025-12-05 18:08:11
+file name: lstm.py
+system: Darwin
+machine: arm64
+processor: Apple M1 Pro
+cpu_cores_physical: 8
+cpu_cores_logical: 8
+memory_total_GB: 16.0
+GPU: True
+Python version: 3.12.8
+best hyperparameters:
+{'hidden_size': 32, 'num_layers': 2, 'bidirectional': False, 'learning_rate': 0.0007511872028364831, 'batch_size': 1}
+real MAE: 2515.0970863025764
+====================================================================================================

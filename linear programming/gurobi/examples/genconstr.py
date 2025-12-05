@@ -3,7 +3,7 @@
 # Copyright 2025, Gurobi Optimization, LLC
 
 # In this example we show the use of general constraints for modeling
-# some common expressions. We use as an example a SAT-problem where we
+# some utils expressions. We use as an example a SAT-problem where we
 # want to see if it is possible to satisfy at least four (or all) clauses
 # of the logical form
 #
