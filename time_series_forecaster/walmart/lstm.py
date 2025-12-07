@@ -14,6 +14,7 @@ from torch.utils.data import DataLoader, Dataset
 from torch import nn
 import optuna
 from utils.get_pc_info import get_info
+from sklearn.model_selection import train_test_split
 
 df = read_data()
 
@@ -39,7 +40,7 @@ seq_len = 12  # 使用过去 12 周预测下一周
 def create_sequences(data, seq_len):
     xs, ys = [], []
     for i in range(len(data) - seq_len):
-        x = data[i: i + seq_len]
+        x = data[i : i + seq_len]
         y = data[i + seq_len]
         xs.append(x)
         ys.append(y)
@@ -51,15 +52,23 @@ X, y = create_sequences(sales_scaled, seq_len)
 X = torch.tensor(X)  # (batch, seq, feature)
 y = torch.tensor(y)
 
-dataset = torch.utils.data.TensorDataset(X, y)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, shuffle=False)
+
+train_set = torch.utils.data.TensorDataset(X_train, y_train)
+eval_set = torch.utils.data.TensorDataset(X_test, y_test)
 
 
 # define the LSTM model
 class LSTMModel(nn.Module):
     def __init__(self, input_size, hidden_size, num_layers, bidirectional):
         super().__init__()
-        self.lstm = nn.LSTM(input_size=input_size, hidden_size=hidden_size, num_layers=num_layers,
-                            bidirectional=bidirectional, batch_first=True)
+        self.lstm = nn.LSTM(
+            input_size=input_size,
+            hidden_size=hidden_size,
+            num_layers=num_layers,
+            bidirectional=bidirectional,
+            batch_first=True,
+        )
         self.fc = nn.Linear(hidden_size * (2 if bidirectional else 1), 1)
 
     def forward(self, x):
@@ -69,10 +78,18 @@ class LSTMModel(nn.Module):
         return out
 
 
-def run_model(batch_size, hidden_size, num_layers, bidirectional = False, learning_rate = 0.001):
-    loader = DataLoader(dataset, batch_size=batch_size, shuffle=False)
-    model = LSTMModel(input_size=X.shape[2], hidden_size=hidden_size, num_layers=num_layers,
-                      bidirectional=bidirectional)
+def run_model(
+    batch_size, hidden_size, num_layers, bidirectional=False, learning_rate=0.001
+):
+    train_loader = DataLoader(train_set, batch_size=batch_size, shuffle=False)
+    eval_loader = DataLoader(eval_set, batch_size=batch_size, shuffle=False)
+
+    model = LSTMModel(
+        input_size=X.shape[2],
+        hidden_size=hidden_size,
+        num_layers=num_layers,
+        bidirectional=bidirectional,
+    )
     optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
     criterion = nn.L1Loss()  # 对于剧烈波动的数据，用 L1Loss 好
 
@@ -87,7 +104,7 @@ def run_model(batch_size, hidden_size, num_layers, bidirectional = False, learni
 
     epochs = 30
     for epoch in range(epochs):
-        for batch_x, batch_y in loader:
+        for batch_x, batch_y in train_loader:
             batch_x = batch_x.to(device)  # 必须将输入数据和模型放在同一个 device
             batch_y = batch_y.to(device)
             # 这个循环 loader 里面的数据一个一个传进去
@@ -101,14 +118,17 @@ def run_model(batch_size, hidden_size, num_layers, bidirectional = False, learni
         # print(f"Epoch {epoch + 1}/{epochs} - Loss: {loss.item():.4f}")
 
     model.eval()
+    real_pred = []
     with torch.no_grad():
-        X_device = X.to(device)
-        y_device = y.to(device)
-        pred = model(X_device)
-        loss = criterion(pred, y_device)
-        real_y = scaler.inverse_transform(y)
-        real_pred = scaler.inverse_transform(pred.cpu().numpy())
-        real_loss = criterion(torch.tensor(real_pred), torch.tensor(real_y))
+        for batch_x, batch_y in eval_loader:
+            batch_x = batch_x.to(device)  # 必须将输入数据和模型放在同一个 device
+            batch_y = batch_y.to(device)
+            pred = model(batch_x)
+            loss = criterion(pred, batch_y)
+            real_y = scaler.inverse_transform(batch_y.cpu().numpy())
+            this_pred = scaler.inverse_transform(pred.cpu().numpy())
+            real_loss = criterion(torch.tensor(this_pred), torch.tensor(real_y))
+            real_pred.append(np.mean(this_pred))
     print(f"MAE: {loss.item():.4f}")
     print(f"real MAE: {real_loss.item():.4f}")
     return real_loss.item(), real_pred
@@ -116,19 +136,23 @@ def run_model(batch_size, hidden_size, num_layers, bidirectional = False, learni
 
 def objective(trial):
     # 超参数采样
-    hidden_size = trial.suggest_categorical('hidden_size', [16, 32, 64])
-    num_layers = trial.suggest_int('num_layers', 1, 3)  # sample from 1 to 3
+    hidden_size = trial.suggest_categorical("hidden_size", [16, 32, 64])
+    num_layers = trial.suggest_int("num_layers", 1, 3)  # sample from 1 to 3
     # dropoutΩpout = trial.suggest_float('dropout', 0.0, 0.5)
-    bidirectional = trial.suggest_categorical('bidirectional', [False])
-    learning_rate = trial.suggest_float('learning_rate', 1e-4, 1e-2, log=True)  # 1e-4 到 1e-2 的范围内用对数采样学习率
-    batch_size = trial.suggest_categorical('batch_size', [1, 16, 32, 64])
+    bidirectional = trial.suggest_categorical("bidirectional", [False])
+    learning_rate = trial.suggest_float(
+        "learning_rate", 1e-4, 1e-2, log=True
+    )  # 1e-4 到 1e-2 的范围内用对数采样学习率
+    batch_size = trial.suggest_categorical("batch_size", [1])
 
-    loss, _ = run_model(batch_size, hidden_size, num_layers, bidirectional, learning_rate)
+    loss, _ = run_model(
+        batch_size, hidden_size, num_layers, bidirectional, learning_rate
+    )
     return loss
 
 
 # 创建优化器
-study = optuna.create_study(direction='minimize')
+study = optuna.create_study(direction="minimize")
 study.optimize(objective, n_trials=20)  # 20次尝试
 
 print("best hyperparameters:", study.best_params)
@@ -137,13 +161,12 @@ import os
 
 file_name = os.path.basename(__file__)
 text_name = file_name.split(".py")[0]
-text_name += '_record.txt'
+text_name += "_record.txt"
 with open(text_name, "a") as f:
     import platform
     import time
 
     formatted_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
-    f.write("\n")
     f.write(f"date: {formatted_time}\n")
     f.write(f"file name: {file_name}\n")
 
@@ -167,8 +190,11 @@ matplotlib.use("Qt5Agg")  # 或者 "Qt5Agg"，具体取决于环境中装了哪�
 import matplotlib.pyplot as plt
 
 plt.plot(sales, label="real sales")
+test_size = int(X_test.shape[0])
 plt.plot(
-    np.concatenate((np.array(sales[:seq_len]), real_pred.flatten())),
+    np.arange(len(sales) - test_size, len(sales)),
+    np.array(real_pred),
+    # np.concatenate((np.array(sales[:seq_len]), real_pred.flatten())),
     label="predicted sales",
 )
 plt.legend()
