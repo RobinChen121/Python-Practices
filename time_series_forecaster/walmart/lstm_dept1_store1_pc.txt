@@ -1,0 +1,456 @@
+date: 2025-12-08 22:09:28
+file name: lstm.py
+system: Darwin
+machine: arm64
+processor: Apple M1 Pro
+cpu_cores_physical: 8
+cpu_cores_logical: 8
+memory_total_GB: 16.0
+GPU: True
+Python version: 3.12.8
+best hyperparameters:
+{'hidden_size': 16, 'num_layers': 2, 'bidirectional': False, 'learning_rate': 0.0007765600318716409, 'batch_size': 1}
+real MAE: 205.837890625
+====================================================================================================
+date: 2025-12-09 15:00:52
+file name: lstm_dept1_store1_record
+system: Darwin
+machine: arm64
+processor: Apple M1 Pro
+cpu_cores_physical: 8
+cpu_cores_logical: 8
+memory_total_GB: 16.0
+GPU: True
+Python version: 3.12.8
+best hyperparameters:
+{'hidden_size': 64, 'num_layers': 3, 'bidirectional': False, 'learning_rate': 0.002345709596132618, 'batch_size': 4}
+real MAE: 1175.5592041015625
+====================================================================================================
+date: 2025-12-09 15:36:01
+file name: lstm_dept1_store1_pc
+system: Darwin
+machine: arm64
+processor: Apple M1 Pro
+cpu_cores_physical: 8
+cpu_cores_logical: 8
+memory_total_GB: 16.0
+GPU: True
+Python version: 3.12.8
+best hyperparameters:
+{'hidden_size': 16, 'num_layers': 2, 'bidirectional': False, 'learning_rate': 0.000116274108078761, 'batch_size': 1}
+real MAE: 8461.890625
+====================================================================================================
+date: 2025-12-09 15:38:17
+file name: lstm_dept1_store1_pc
+system: Darwin
+machine: arm64
+processor: Apple M1 Pro
+cpu_cores_physical: 8
+cpu_cores_logical: 8
+memory_total_GB: 16.0
+GPU: True
+Python version: 3.12.8
+best hyperparameters:
+{'hidden_size': 32, 'num_layers': 1, 'bidirectional': False, 'learning_rate': 0.003149339859571867, 'batch_size': 2}
+real MAE: 2453.89453125
+====================================================================================================
+date: 2025-12-09 15:43:45
+file name: lstm_dept1_store1
+system: Darwin
+machine: arm64
+processor: Apple M1 Pro
+cpu_cores_physical: 8
+cpu_cores_logical: 8
+memory_total_GB: 16.0
+GPU: True
+Python version: 3.12.8
+best hyperparameters:
+{'hidden_size': 16, 'num_layers': 3, 'bidirectional': False, 'learning_rate': 0.00012703024663266116, 'batch_size': 1}
+real MAE: 8383.498046875
+====================================================================================================
+date: 2025-12-09 15:48:00
+file name: lstm_dept1_store1
+system: Darwin
+machine: arm64
+processor: Apple M1 Pro
+cpu_cores_physical: 8
+cpu_cores_logical: 8
+memory_total_GB: 16.0
+GPU: True
+Python version: 3.12.8
+best hyperparameters:
+{'hidden_size': 64, 'num_layers': 2, 'bidirectional': False, 'learning_rate': 0.0020663616224083268, 'batch_size': 2}
+real MAE: 1117.69921875
+====================================================================================================
+date: 2025-12-09 15:49:45
+file name: lstm_dept1_store1
+system: Darwin
+machine: arm64
+processor: Apple M1 Pro
+cpu_cores_physical: 8
+cpu_cores_logical: 8
+memory_total_GB: 16.0
+GPU: True
+Python version: 3.12.8
+best hyperparameters:
+{'hidden_size': 64, 'num_layers': 3, 'bidirectional': False, 'learning_rate': 0.0009608422880963058, 'batch_size': 1}
+real MAE: 4651.248046875
+====================================================================================================
+date: 2025-12-09 15:52:11
+file name: lstm_dept1_store1
+system: Darwin
+machine: arm64
+processor: Apple M1 Pro
+cpu_cores_physical: 8
+cpu_cores_logical: 8
+memory_total_GB: 16.0
+GPU: True
+Python version: 3.12.8
+best hyperparameters:
+{'hidden_size': 16, 'num_layers': 3, 'bidirectional': False, 'learning_rate': 0.0011441740887939169, 'batch_size': 1}
+real MAE: 732.1171875
+====================================================================================================
+date: 2025-12-09 15:59:39
+file name: lstm_dept1_store1
+system: Darwin
+machine: arm64
+processor: Apple M1 Pro
+cpu_cores_physical: 8
+cpu_cores_logical: 8
+memory_total_GB: 16.0
+GPU: True
+Python version: 3.12.8
+best hyperparameters:
+{'hidden_size': 32, 'num_layers': 1, 'bidirectional': False, 'learning_rate': 0.0007815871121817799, 'batch_size': 1}
+real MAE: 333.240234375
+====================================================================================================
+date: 2025-12-09 16:37:46
+file name: lstm_dept1_store1
+system: Darwin
+machine: arm64
+processor: Apple M1 Pro
+cpu_cores_physical: 8
+cpu_cores_logical: 8
+memory_total_GB: 16.0
+GPU: True
+Python version: 3.12.8
+best hyperparameters:
+{'hidden_size': 32, 'num_layers': 1, 'bidirectional': False, 'learning_rate': 0.0023049810864310878, 'batch_size': 2}
+real MAE: 523.603515625
+historical best MAE: 523.603515625
+====================================================================================================
+date: 2025-12-09 16:45:20
+file name: lstm_dept1_store1
+system: Darwin
+machine: arm64
+processor: Apple M1 Pro
+cpu_cores_physical: 8
+cpu_cores_logical: 8
+memory_total_GB: 16.0
+GPU: True
+Python version: 3.12.8
+best hyperparameters:
+{'hidden_size': 64, 'num_layers': 2, 'bidirectional': False, 'learning_rate': 0.000804327672174346, 'batch_size': 2}
+real MAE: 241.6171875
+historical best MAE: 241.6171875
+====================================================================================================
+date: 2025-12-09 16:57:09
+file name: lstm_dept1_store1
+system: Darwin
+machine: arm64
+processor: Apple M1 Pro
+cpu_cores_physical: 8
+cpu_cores_logical: 8
+memory_total_GB: 16.0
+GPU: True
+Python version: 3.12.8
+best hyperparameters:
+{'hidden_size': 64, 'num_layers': 2, 'bidirectional': False, 'learning_rate': 0.0006136801333222761, 'batch_size': 1}
+real MAE: 351.52734375
+historical best MAE: 351.52734375
+====================================================================================================
+date: 2025-12-09 17:17:57
+file name: lstm_dept1_store1
+system: Darwin
+machine: arm64
+processor: Apple M1 Pro
+cpu_cores_physical: 8
+cpu_cores_logical: 8
+memory_total_GB: 16.0
+GPU: True
+Python version: 3.12.8
+best hyperparameters:
+{'hidden_size': 64, 'num_layers': 3, 'bidirectional': False, 'learning_rate': 0.000482351054866387, 'batch_size': 2}
+real MAE: 142.7578125
+historical best MAE: 142.7578125
+====================================================================================================
+date: 2025-12-09 17:26:05
+file name: lstm_dept1_store1
+system: Darwin
+machine: arm64
+processor: Apple M1 Pro
+cpu_cores_physical: 8
+cpu_cores_logical: 8
+memory_total_GB: 16.0
+GPU: True
+Python version: 3.12.8
+best hyperparameters:
+{'hidden_size': 64, 'num_layers': 3, 'bidirectional': False, 'learning_rate': 0.0010581606774112784, 'batch_size': 2}
+real MAE: 1165.061314174107
+historical best MAE: 1165.061314174107
+====================================================================================================
+date: 2025-12-09 18:01:17
+file name: lstm_dept1_store1
+system: Darwin
+machine: arm64
+processor: Apple M1 Pro
+cpu_cores_physical: 8
+cpu_cores_logical: 8
+memory_total_GB: 16.0
+GPU: True
+Python version: 3.12.8
+best hyperparameters:
+{'hidden_size': 32, 'num_layers': 1, 'bidirectional': False, 'learning_rate': 0.004337856012006004, 'batch_size': 1}
+real MAE: 3053.590458622685
+historical best MAE: 3053.590458622685
+====================================================================================================
+date: 2025-12-09 18:02:57
+file name: lstm_dept1_store1
+system: Darwin
+machine: arm64
+processor: Apple M1 Pro
+cpu_cores_physical: 8
+cpu_cores_logical: 8
+memory_total_GB: 16.0
+GPU: True
+Python version: 3.12.8
+best hyperparameters:
+{'hidden_size': 16, 'num_layers': 2, 'bidirectional': False, 'learning_rate': 0.006648323839334729, 'batch_size': 2}
+real MAE: 948.97265625
+historical best MAE: 948.97265625
+====================================================================================================
+date: 2025-12-09 18:11:54
+file name: lstm_dept1_store1
+system: Darwin
+machine: arm64
+processor: Apple M1 Pro
+cpu_cores_physical: 8
+cpu_cores_logical: 8
+memory_total_GB: 16.0
+GPU: True
+Python version: 3.12.8
+best hyperparameters:
+{'hidden_size': 64, 'num_layers': 1, 'bidirectional': False, 'learning_rate': 0.0016831436037630131, 'batch_size': 2}
+real MAE: 1001.5849260602679
+historical best MAE: 1001.5849260602679
+====================================================================================================
+date: 2025-12-09 18:30:20
+file name: lstm_dept1_store1
+system: Darwin
+machine: arm64
+processor: Apple M1 Pro
+cpu_cores_physical: 8
+cpu_cores_logical: 8
+memory_total_GB: 16.0
+GPU: True
+Python version: 3.12.8
+best hyperparameters:
+{'hidden_size': 64, 'num_layers': 3, 'bidirectional': False, 'learning_rate': 0.0005854122064177009, 'batch_size': 2}
+real MAE: 1111.6185128348213
+historical best MAE: 1111.6185128348213
+====================================================================================================
+date: 2025-12-09 18:38:24
+file name: lstm_dept1_store1
+system: Darwin
+machine: arm64
+processor: Apple M1 Pro
+cpu_cores_physical: 8
+cpu_cores_logical: 8
+memory_total_GB: 16.0
+GPU: True
+Python version: 3.12.8
+best hyperparameters:
+{'hidden_size': 16, 'num_layers': 1, 'bidirectional': False, 'learning_rate': 0.0013184365837672486, 'batch_size': 2}
+real MAE: 467.9084201388889
+historical best MAE: 467.9084201388889
+====================================================================================================
+date: 2025-12-09 19:51:33
+file name: lstm_dept1_store1
+system: Darwin
+machine: arm64
+processor: Apple M1 Pro
+cpu_cores_physical: 8
+cpu_cores_logical: 8
+memory_total_GB: 16.0
+GPU: True
+Python version: 3.12.8
+best hyperparameters:
+{'hidden_size': 32, 'num_layers': 2, 'bidirectional': False, 'learning_rate': 0.00020786558892966966, 'batch_size': 2}
+real MAE: 1204.5564959490741
+historical best MAE: 1204.5564959490741
+====================================================================================================
+date: 2025-12-09 19:58:16
+file name: lstm_dept1_store1
+system: Darwin
+machine: arm64
+processor: Apple M1 Pro
+cpu_cores_physical: 8
+cpu_cores_logical: 8
+memory_total_GB: 16.0
+GPU: True
+Python version: 3.12.8
+best hyperparameters:
+{'hidden_size': 64, 'num_layers': 3, 'bidirectional': False, 'learning_rate': 0.0032812119167284753, 'batch_size': 2}
+real MAE: 656.031882957176
+historical best MAE: 656.031882957176
+====================================================================================================
+date: 2025-12-09 20:03:19
+file name: lstm_dept1_store1
+system: Darwin
+machine: arm64
+processor: Apple M1 Pro
+cpu_cores_physical: 8
+cpu_cores_logical: 8
+memory_total_GB: 16.0
+GPU: True
+Python version: 3.12.8
+best hyperparameters:
+{'hidden_size': 32, 'num_layers': 3, 'bidirectional': False, 'learning_rate': 0.0006219830044394533, 'batch_size': 2}
+real MAE: 662.3885091145834
+historical best MAE: 662.3885091145834
+====================================================================================================
+date: 2025-12-09 20:08:13
+file name: lstm_dept1_store1
+system: Darwin
+machine: arm64
+processor: Apple M1 Pro
+cpu_cores_physical: 8
+cpu_cores_logical: 8
+memory_total_GB: 16.0
+GPU: True
+Python version: 3.12.8
+best hyperparameters:
+{'hidden_size': 64, 'num_layers': 2, 'bidirectional': False, 'learning_rate': 0.008598709794136128, 'batch_size': 2}
+real MAE: 832.1954933449074
+historical best MAE: 832.1954933449074
+====================================================================================================
+date: 2025-12-09 20:26:20
+file name: lstm_dept1_store1
+system: Darwin
+machine: arm64
+processor: Apple M1 Pro
+cpu_cores_physical: 8
+cpu_cores_logical: 8
+memory_total_GB: 16.0
+GPU: True
+Python version: 3.12.8
+best hyperparameters:
+{'hidden_size': 16, 'num_layers': 3, 'bidirectional': False, 'learning_rate': 0.0005150329517351011, 'batch_size': 1}
+real MAE: 4417.65234375
+historical best MAE: 4417.65234375
+====================================================================================================
+date: 2025-12-09 20:32:19
+file name: lstm_dept1_store1
+system: Darwin
+machine: arm64
+processor: Apple M1 Pro
+cpu_cores_physical: 8
+cpu_cores_logical: 8
+memory_total_GB: 16.0
+GPU: True
+Python version: 3.12.8
+best hyperparameters:
+{'hidden_size': 16, 'num_layers': 3, 'bidirectional': False, 'learning_rate': 0.0015231930890193504, 'batch_size': 1}
+real MAE: 1155.6021728515625
+historical best MAE: 1155.6021728515625
+====================================================================================================
+date: 2025-12-09 20:37:44
+file name: lstm_dept1_store1
+system: Darwin
+machine: arm64
+processor: Apple M1 Pro
+cpu_cores_physical: 8
+cpu_cores_logical: 8
+memory_total_GB: 16.0
+GPU: True
+Python version: 3.12.8
+best hyperparameters:
+{'hidden_size': 64, 'num_layers': 2, 'bidirectional': False, 'learning_rate': 0.0018864968748969354, 'batch_size': 1}
+real MAE: 1213.0233154296875
+historical best MAE: 1213.0233154296875
+====================================================================================================
+date: 2025-12-09 20:43:41
+file name: lstm_dept1_store1
+system: Darwin
+machine: arm64
+processor: Apple M1 Pro
+cpu_cores_physical: 8
+cpu_cores_logical: 8
+memory_total_GB: 16.0
+GPU: True
+Python version: 3.12.8
+best hyperparameters:
+{'hidden_size': 64, 'num_layers': 1, 'bidirectional': False, 'learning_rate': 0.00044639361968888723, 'batch_size': 1}
+real MAE: 1448.9793701171875
+historical best MAE: 1213.0233154296875
+====================================================================================================
+date: 2025-12-09 20:46:37
+file name: lstm_dept1_store1
+system: Darwin
+machine: arm64
+processor: Apple M1 Pro
+cpu_cores_physical: 8
+cpu_cores_logical: 8
+memory_total_GB: 16.0
+GPU: True
+Python version: 3.12.8
+best hyperparameters:
+{'hidden_size': 64, 'num_layers': 3, 'bidirectional': False, 'learning_rate': 0.0011075989514118408, 'batch_size': 2}
+real MAE: 1141.893310546875
+historical best MAE: 1141.893310546875
+====================================================================================================
+date: 2025-12-09 20:49:10
+file name: lstm_dept1_store1
+system: Darwin
+machine: arm64
+processor: Apple M1 Pro
+cpu_cores_physical: 8
+cpu_cores_logical: 8
+memory_total_GB: 16.0
+GPU: True
+Python version: 3.12.8
+best hyperparameters:
+{'hidden_size': 64, 'num_layers': 2, 'bidirectional': False, 'learning_rate': 0.00256057790903233, 'batch_size': 1}
+real MAE: 1575.000244140625
+historical best MAE: 1141.893310546875
+====================================================================================================
+date: 2025-12-09 20:56:33
+file name: lstm_dept1_store1
+system: Darwin
+machine: arm64
+processor: Apple M1 Pro
+cpu_cores_physical: 8
+cpu_cores_logical: 8
+memory_total_GB: 16.0
+GPU: True
+Python version: 3.12.8
+best hyperparameters:
+{'hidden_size': 64, 'num_layers': 3, 'bidirectional': False, 'learning_rate': 0.0008381979004520282, 'batch_size': 1}
+real MAE: 1469.8961181640625
+historical best MAE: 1141.893310546875
+====================================================================================================
+date: 2025-12-09 21:47:23
+file name: lstm_dept1_store1
+system: Darwin
+machine: arm64
+processor: Apple M1 Pro
+cpu_cores_physical: 8
+cpu_cores_logical: 8
+memory_total_GB: 16.0
+GPU: True
+Python version: 3.12.8
+best hyperparameters:
+{'hidden_size': 16, 'num_layers': 3, 'bidirectional': False, 'learning_rate': 0.0005242337487595786, 'batch_size': 1}
+real MAE: 1285.725830078125
+historical best MAE: 1141.893310546875
+====================================================================================================

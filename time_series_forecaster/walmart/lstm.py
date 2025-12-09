@@ -8,15 +8,17 @@
 """
 
 import numpy as np
-from read_data import read_data
 import torch
-from torch.utils.data import DataLoader, Dataset
-from torch import nn
+import os
+
 import optuna
 from utils.get_pc_info import get_info
-from sklearn.model_selection import train_test_split
+from read_data import read_data
+from lstm_model import run_lstm
 
 df = read_data()
+
+tune_trial = 20 # number of hyperparameter tuning
 
 # 选择一个 store+dept
 store_id = 1
@@ -33,6 +35,11 @@ from sklearn.preprocessing import MinMaxScaler
 scaler = MinMaxScaler()
 sales_scaled = scaler.fit_transform(sales.reshape(-1, 1))
 
+# file name in recording
+file_name = os.path.basename(__file__)
+file_name = file_name.split(".py")[0]
+file_name += "_dept" + str(dept_id) + "_store" + str(store_id)
+
 # formulate a sequence
 seq_len = 12  # 使用过去 12 周预测下一周
 
@@ -40,7 +47,7 @@ seq_len = 12  # 使用过去 12 周预测下一周
 def create_sequences(data, seq_len):
     xs, ys = [], []
     for i in range(len(data) - seq_len):
-        x = data[i : i + seq_len]
+        x = data[i: i + seq_len]
         y = data[i + seq_len]
         xs.append(x)
         ys.append(y)
@@ -52,86 +59,11 @@ X, y = create_sequences(sales_scaled, seq_len)
 X = torch.tensor(X)  # (batch, seq, feature)
 y = torch.tensor(y)
 
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, shuffle=False)
-
-train_set = torch.utils.data.TensorDataset(X_train, y_train)
-eval_set = torch.utils.data.TensorDataset(X_test, y_test)
-
-
-# define the LSTM model
-class LSTMModel(nn.Module):
-    def __init__(self, input_size, hidden_size, num_layers, bidirectional):
-        super().__init__()
-        self.lstm = nn.LSTM(
-            input_size=input_size,
-            hidden_size=hidden_size,
-            num_layers=num_layers,
-            bidirectional=bidirectional,
-            batch_first=True,
-        )
-        self.fc = nn.Linear(hidden_size * (2 if bidirectional else 1), 1)
-
-    def forward(self, x):
-        out, _ = self.lstm(x)
-        out = out[:, -1, :]  # 取最后一个时间步
-        out = self.fc(out)
-        return out
-
-
-def run_model(
-    batch_size, hidden_size, num_layers, bidirectional=False, learning_rate=0.001
-):
-    train_loader = DataLoader(train_set, batch_size=batch_size, shuffle=False)
-    eval_loader = DataLoader(eval_set, batch_size=batch_size, shuffle=False)
-
-    model = LSTMModel(
-        input_size=X.shape[2],
-        hidden_size=hidden_size,
-        num_layers=num_layers,
-        bidirectional=bidirectional,
-    )
-    optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
-    criterion = nn.L1Loss()  # 对于剧烈波动的数据，用 L1Loss 好
-
-    # priority using GPU
-    if torch.cuda.is_available():
-        device = torch.device("cuda")
-    elif torch.backends.mps.is_available():
-        device = torch.device("mps")  # mac gpu
-    else:
-        device = torch.device("cpu")
-    model.to(device)
-
-    epochs = 30
-    for epoch in range(epochs):
-        for batch_x, batch_y in train_loader:
-            batch_x = batch_x.to(device)  # 必须将输入数据和模型放在同一个 device
-            batch_y = batch_y.to(device)
-            # 这个循环 loader 里面的数据一个一个传进去
-            optimizer.zero_grad()
-            # lstm 的输入数据维度是 (batch_size, seq_size, input_size)
-            pred = model(batch_x)
-            loss = criterion(pred, batch_y)
-            loss.backward()
-            optimizer.step()
-
-        # print(f"Epoch {epoch + 1}/{epochs} - Loss: {loss.item():.4f}")
-
-    model.eval()
-    real_pred = []
-    with torch.no_grad():
-        for batch_x, batch_y in eval_loader:
-            batch_x = batch_x.to(device)  # 必须将输入数据和模型放在同一个 device
-            batch_y = batch_y.to(device)
-            pred = model(batch_x)
-            loss = criterion(pred, batch_y)
-            real_y = scaler.inverse_transform(batch_y.cpu().numpy())
-            this_pred = scaler.inverse_transform(pred.cpu().numpy())
-            real_loss = criterion(torch.tensor(this_pred), torch.tensor(real_y))
-            real_pred.append(np.mean(this_pred))
-    print(f"MAE: {loss.item():.4f}")
-    print(f"real MAE: {real_loss.item():.4f}")
-    return real_loss.item(), real_pred
+if os.path.exists(file_name + "_hyperparameter.pth"):
+    para_read = torch.load(file_name + "_hyperparameter.pth")
+    best_loss = para_read["best_MAE"]
+else:
+    best_loss = float("inf")
 
 
 def objective(trial):
@@ -145,23 +77,32 @@ def objective(trial):
     )  # 1e-4 到 1e-2 的范围内用对数采样学习率
     batch_size = trial.suggest_categorical("batch_size", [1])
 
-    loss, _ = run_model(
-        batch_size, hidden_size, num_layers, bidirectional, learning_rate
+    loss, _, _ = run_lstm(
+        X, y, scaler, file_name, best_loss, batch_size, hidden_size, num_layers, bidirectional, learning_rate,
+        for_tuning=False
     )
     return loss
 
 
 # 创建优化器
 study = optuna.create_study(direction="minimize")
-study.optimize(objective, n_trials=20)  # 20次尝试
+study.optimize(objective, n_trials=tune_trial)  # 20次尝试
 
 print("best hyperparameters:", study.best_params)
 
-import os
+# 保存 checkpoint
+if study.best_value < best_loss:
+    best_loss = study.best_value
+    torch.save({
+        "best_MAE": study.best_value,
+        "hidden size": study.best_params["hidden_size"],
+        "num_layers": study.best_params["num_layers"],
+        "bidirectional": study.best_params["bidirectional"],
+        "learning_rate": study.best_params["learning_rate"],
+        "batch_size": study.best_params["batch_size"],
+    }, file_name + "_hyperparameter" + ".pth")
 
-file_name = os.path.basename(__file__)
-text_name = file_name.split(".py")[0]
-text_name += "_record.txt"
+text_name = file_name + "_pc" + ".txt"
 with open(text_name, "a") as f:
     import platform
     import time
@@ -180,22 +121,31 @@ with open(text_name, "a") as f:
     f.write(f"Python version: {platform.python_version()}\n")
     f.write(f"best hyperparameters:\n{str(study.best_params)}\n")
     f.write(f"real MAE: {str(study.best_value)}\n")
+    f.write(f"historical best MAE: {str(best_loss)}\n")
     equals = "==" * 50
     f.write(f"{equals}\n")
 
-_, real_pred = run_model(**study.best_params)
+_, real_pred_train, real_pred_eval = run_lstm(X, y, scaler, file_name, best_loss, **study.best_params, for_tuning=True)
 import matplotlib
 
 matplotlib.use("Qt5Agg")  # 或者 "Qt5Agg"，具体取决于环境中装了哪个: conda install pyqt
 import matplotlib.pyplot as plt
 
 plt.plot(sales, label="real sales")
-test_size = int(X_test.shape[0])
+train_size = int(X.shape[0] * 0.8)
+
 plt.plot(
-    np.arange(len(sales) - test_size, len(sales)),
-    np.array(real_pred),
+np.arange(train_size + seq_len),
+np.concatenate((np.array(sales[:seq_len]), real_pred_train)),
+# np.concatenate((np.array(sales[:seq_len]), real_pred.flatten())),
+label = "predicted sales train",
+)
+
+plt.plot(
+    np.arange(len(sales) - len(real_pred_eval), len(sales)),
+    np.array(real_pred_eval),
     # np.concatenate((np.array(sales[:seq_len]), real_pred.flatten())),
-    label="predicted sales",
+    label="predicted sales evaluation",
 )
 plt.legend()
 plt.show()
