@@ -10,13 +10,15 @@
 import numpy as np
 from read_data import read_data
 import torch
-from torch.utils.data import DataLoader, Dataset
-from torch import nn
+from draw_pic import draw
+from hyper_tuning import HyperTuning
+import os
+from lstm_model import run_lstm
 
 df = read_data()
 
 # 选择一个 store+dept
-store_id = 1
+store_id = 5
 dept_id = 1
 ts = df[(df.Store == store_id) & (df.Dept == dept_id)]
 
@@ -30,9 +32,15 @@ from sklearn.preprocessing import MinMaxScaler
 scaler = MinMaxScaler()
 sales_scaled = scaler.fit_transform(sales.reshape(-1, 1))
 
+# file name in recording
+file_name = os.path.basename(__file__)
+file_name = file_name.split(".py")[0]
+file_name = "records/" + file_name
+file_name += "_dept" + str(dept_id) + "_store" + str(store_id)
+
 # formulate a sequence
 seq_len = 12  # 使用过去 12 周预测下一周
-
+tune_trial = 20
 
 def create_sequences(data, seq_len):
     xs, ys = [], []
@@ -49,62 +57,16 @@ X, y = create_sequences(data, seq_len)
 X = torch.tensor(X, dtype=torch.float32)  # (batch, seq, feature)
 y = torch.tensor(y, dtype=torch.float32).unsqueeze(-1)
 
-dataset = torch.utils.data.TensorDataset(X, y)
-loader = DataLoader(dataset, batch_size=1, shuffle=False)
+if os.path.exists(file_name + "_hyperparameter.pth"):
+    para_read = torch.load(file_name + "_hyperparameter.pth")
+    best_loss = para_read["best_MAE"]
+else:
+    best_loss = float("inf")
 
 
-# define the LSTM model
-class LSTMModel(nn.Module):
-    def __init__(self, input_size=2, hidden_size=20, num_layers=1):
-        super().__init__()
-        self.lstm = nn.LSTM(input_size, hidden_size, num_layers, batch_first=True)
-        self.fc = nn.Linear(hidden_size, 1)
+tuner = HyperTuning(X, y, scaler, file_name, best_loss)
+best_params = tuner.tune(tune_trial)
 
-    def forward(self, x):
-        out, _ = self.lstm(x)
-        out = out[:, -1, :]  # 取最后一个时间步
-        out = self.fc(out)
-        return out
+_, real_pred_train, real_pred_eval = run_lstm(X, y, scaler, file_name, best_loss, **best_params)
 
-
-model = LSTMModel()
-criterion = nn.MSELoss()
-optimizer = torch.optim.Adam(model.parameters(), lr=0.01)
-
-
-epochs = 30
-for epoch in range(epochs):
-    for batch_x, batch_y in loader:
-        # 这个循环 loader 里面的数据一个一个传进去
-        optimizer.zero_grad()
-        # lstm 的输入数据维度是 (batch_size, seq_size, input_size)
-        pred = model(batch_x)
-        loss = criterion(pred, batch_y)
-        loss.backward()
-        optimizer.step()
-
-    print(f"Epoch {epoch+1}/{epochs} - Loss: {loss.item():.4f}")
-
-model.eval()
-with torch.no_grad():
-    pred = model(X)
-    # squeeze 减少一个维度
-    loss = criterion(pred, y)
-    real_y = scaler.inverse_transform(y)
-    real_pred = scaler.inverse_transform(pred)
-    real_loss = criterion(torch.tensor(real_pred), torch.tensor(real_y))
-print(f"MAE: {loss.item():.4f}")
-print(f"real MAE: {real_loss.item():.4f}")
-
-import matplotlib
-
-matplotlib.use("TkAgg")  # 或者 "Qt5Agg"，具体取决于环境中装了哪个: conda install pyqt
-import matplotlib.pyplot as plt
-
-plt.plot(sales, label="real sales")
-plt.plot(
-    np.concatenate((np.array(sales[:seq_len]), real_pred.flatten())),
-    label="predicted sales",
-)
-plt.legend()
-plt.show()
+draw(sales, seq_len, X, real_pred_train, real_pred_eval)

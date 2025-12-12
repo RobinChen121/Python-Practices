@@ -15,12 +15,8 @@ import numpy as np
 # define the LSTM model
 class LSTMModel(nn.Module):
 
-    def __init__(self, X, y, scaler, file_name, best_loss, input_size, hidden_size, num_layers, bidirectional):
+    def __init__(self, input_size, hidden_size, num_layers, bidirectional):
         super().__init__()
-        self.X, self.y = X, y
-        self.scaler = scaler
-        self.file_name = file_name
-        self.best_loss = best_loss
 
         self.lstm = nn.LSTM(
             input_size=input_size,
@@ -40,8 +36,7 @@ class LSTMModel(nn.Module):
 
 def run_lstm(
         X, y, scaler, file_name, best_loss, batch_size, hidden_size, num_layers, bidirectional=False,
-        learning_rate=0.001,
-        for_tuning=False
+        learning_rate=0.001
 ):
     # --- 在这里进行 split ---
     X_train, X_test, y_train, y_test = train_test_split(
@@ -56,11 +51,6 @@ def run_lstm(
     eval_loader = DataLoader(eval_set, batch_size=batch_size, shuffle=False)
 
     model = LSTMModel(
-        X=X,
-        y=y,
-        scaler=scaler,
-        file_name=file_name,
-        best_loss=best_loss,
         input_size=X.shape[2],
         hidden_size=hidden_size,
         num_layers=num_layers,

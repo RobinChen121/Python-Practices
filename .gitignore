@@ -9,4 +9,6 @@ draw_pictures/joint chance/np.txt
 draw_pictures/joint chance/test.txt
 *.lp
 *.sol
+*.pth
 linear programming/gurobi/overdraft-SDDP/tests_single_product_leadtime_testing.csv
+time_series_forecaster/walmart/records/*.txt
