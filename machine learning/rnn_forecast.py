@@ -1,5 +1,5 @@
 """
-@Python version : 3.12
+@Python version : 3.10
 @Author  : Zhen Chen
 @Email   : chen.zhen5526@gmail.com
 @Time    : 25/10/2025, 14:01
@@ -12,6 +12,7 @@ import torch.nn as nn
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.metrics import mean_squared_error
+from torch.utils.data import TensorDataset, DataLoader
 
 # --------------------------
 # 1. 数据准备
@@ -36,7 +37,9 @@ raw_data = np.array([
 data_min = raw_data.min()
 data_max = raw_data.max()
 data = -1 + 2 * (raw_data - data_min) / (data_max - data_min)
-data = torch.FloatTensor(data).unsqueeze(1)  # shape (144,1)
+data = torch.FloatTensor(data)  # 直接转化为 float tensor
+data = data.unsqueeze(1)  # shape (144,1), unsqueeze 增加一个维度
+# unsqueeze(dim) 的作用是：在指定位置 dim，新增一个 size = 1 的维度
 
 
 # --------------------------
@@ -53,6 +56,7 @@ def create_sequences(data, seq_len):
 
 
 seq_len = 12
+batch_size = 48  # 可以改成 2 / 4 / 16 对比效果
 X_all, y_all = create_sequences(data, seq_len)
 
 # --------------------------
@@ -62,6 +66,18 @@ split_idx = int(len(X_all) * 0.8)
 X_train, X_test = X_all[:split_idx], X_all[split_idx:]
 y_train, y_test = y_all[:split_idx], y_all[split_idx:]
 
+# 使用 batch size
+# 若不使用，相当于 full batch
+train_dataset = TensorDataset(X_train, y_train)
+test_dataset = TensorDataset(X_test, y_test)
+train_loader = DataLoader(
+    train_dataset,
+    batch_size=batch_size,
+    shuffle=False,  # 训练集通常 shuffle，但时间序列数据除外
+    drop_last=False,
+)
+test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
+
 print(f"Train samples: {len(X_train)}, Test samples: {len(X_test)}")
 
 
@@ -69,14 +85,20 @@ print(f"Train samples: {len(X_train)}, Test samples: {len(X_test)}")
 # 4. 定义原生 RNN 模型
 # --------------------------
 class SimpleRNN(nn.Module):
+    # input_size：输入数据的特征维度
+    # output_size: 输出数据的特征维度
     def __init__(self, input_size, hidden_size, output_size):
-        super(SimpleRNN, self).__init__()
-        self.rnn = nn.RNN(input_size, hidden_size, batch_first=True)
-        self.fc = nn.Linear(hidden_size, output_size)
+        super().__init__()  # 调用父类 的构造函数
+        self.rnn = nn.RNN(
+            input_size, hidden_size, batch_first=True
+        )  # 输入数据的结构 (batch_size, seq_len, input_size)
+        self.fc = nn.Linear(
+            hidden_size, output_size
+        )  # self.fc 改为 self.linear 是一样的
 
     def forward(self, x):
-        out, _ = self.rnn(x)
-        out = out[:, -1, :]
+        out, _ = self.rnn(x)  # 返回所有时间步的隐藏状态及最后一个时间步的隐藏状态
+        out = out[:, -1, :]  # out.shape = (batch_size, seq_len, hidden_size)
         out = self.fc(out)
         return out
 
@@ -95,13 +117,31 @@ optimizer = torch.optim.Adam(model.parameters(), lr=0.01)
 epochs = 300
 for epoch in range(epochs):
     model.train()
-    optimizer.zero_grad()
-    output = model(X_train)
-    loss = criterion(output, y_train)
-    loss.backward()
-    optimizer.step()
+
+    # batch training
+    epoch_loss = 0.0
+    for X_batch, y_batch in train_loader:
+        optimizer.zero_grad()
+        output = model(X_batch)
+        loss = criterion(output, y_batch)  # 这个loss 是 batch 的平均 loss
+        loss.backward()  # 计算梯度
+        optimizer.step()  # 根据梯度更新权重
+        epoch_loss += (
+            loss.item()
+        )  # .item() 的核心作用：把单元素张量转换成普通 Python 数字
+    epoch_loss /= len(train_loader)  # 平均每个 batch 的 loss
     if (epoch + 1) % 100 == 0:
-        print(f"Epoch {epoch + 1}/{epochs}, Train Loss: {loss.item():.6f}")
+        print(f"Epoch {epoch + 1}/{epochs}, Train Loss: {epoch_loss:.6f}")
+
+    # non batch training
+    # optimizer.zero_grad()
+    # output = model(X_train)
+    # loss = criterion(output, y_train)
+    # loss.backward()  # backward is here
+    # optimizer.step()
+    # if (epoch + 1) % 100 == 0:
+    #     print(f"Epoch {epoch + 1}/{epochs}, Train Loss: {loss.item():.6f}")
+
 
 # --------------------------
 # 7. 预测（训练集 + 测试集）
@@ -128,7 +168,7 @@ pred_total = np.concatenate((pred_train, pred_test))
 mse_total = mean_squared_error(y_total, pred_total)
 mse = 0
 for a, b in zip(y_train_real, pred_train):
-    print(a, b)
+    # print(a, b)
     mse += (a.item() - b.item()) ** 2
 # for (a, b) in zip(y_test_real, pred_test):
 #     print(a, b)

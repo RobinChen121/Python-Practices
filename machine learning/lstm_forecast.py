@@ -56,7 +56,9 @@ class LSTMModel(nn.Module):
 
     def forward(self, x):
         # 类中有 __call__() 函数，所以类可以直接调用
-        out, _ = self.lstm(x)
+        out, _ = self.lstm(
+            x
+        )  # # 返回所有时间步的隐藏状态及最后一个时间步的（h_n, c_m）
         # out 的维度 (batch_size, seq_length, hidden_size)
         out = out[:, -1, :]
         out = self.linear(out)
