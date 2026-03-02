@@ -2,15 +2,17 @@
 Python version: 3.12.7
 Author: Zhen Chen, chen.zhen5526@gmail.com
 Date: 2025/12/8 22:53
-Description: 
-    
+Description:
+
 
 """
+
 from torch.utils.data import DataLoader
 from torch import nn
 import torch
 from sklearn.model_selection import train_test_split
 import numpy as np
+
 
 # define the LSTM model
 class LSTMModel(nn.Module):
@@ -35,8 +37,16 @@ class LSTMModel(nn.Module):
 
 
 def run_lstm(
-        X, y, scaler, file_name, best_loss, batch_size, hidden_size, num_layers, bidirectional=False,
-        learning_rate=0.001
+    X,
+    y,
+    scaler,
+    file_name,
+    best_loss,
+    batch_size,
+    hidden_size,
+    num_layers,
+    bidirectional=False,
+    learning_rate=0.001,
 ):
     # --- 在这里进行 split ---
     X_train, X_test, y_train, y_test = train_test_split(
@@ -116,5 +126,5 @@ def run_lstm(
     print(f"real MAE: {real_loss:.4f}")
     if real_loss < best_loss:
         text_name = file_name + "_weights" + ".pth"
-        torch.save(model.state_dict(), text_name)
+        torch.save(model.to("cpu").state_dict(), text_name)  # 保存到 cpu， 为了跨平台
     return real_loss, real_pred_train, real_pred_eval

@@ -4,7 +4,7 @@
 @Email: chen.zhen5526@gmail.com
 @Time: 29/11/2025, 19:40
 @Desc: vanilla neuro network: batch and adam can increase the accuracy rate.
-
+使用 CrossEntropyLoss() 最为多分类损失函数，就不用将输入数据转化为 one hot了
 """
 
 import torch
@@ -97,16 +97,16 @@ for epoch in range(epochs):
         loss.backward()
         optimizer.step()
         total_loss += loss.item()
-    if epoch % 100 == 0:
+    if epoch % 10 == 0:
         print(f"Epoch {epoch+1}, Loss = {total_loss:.4f}")
 
 
 # 9. 测试集准确率
-model.eval()
+model.eval()  # 切换到评估模式
 correct = 0
 total = 0
 
-with torch.no_grad():
+with torch.no_grad():  # 关闭梯度计算
     for Xb, yb in test_loader:
         output = model(Xb)
         pred = torch.argmax(output, dim=1)

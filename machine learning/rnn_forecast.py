@@ -36,6 +36,7 @@ raw_data = np.array([
 data_min = raw_data.min()
 data_max = raw_data.max()
 data = -1 + 2 * (raw_data - data_min) / (data_max - data_min)
+# data = (raw_data - data_min) / (data_max - data_min)
 data = torch.FloatTensor(data).unsqueeze(1)  # shape (144,1)
 
 
@@ -114,6 +115,11 @@ with torch.no_grad():
     pred_test = (pred_test_norm.numpy() + 1) * (data_max - data_min) / 2 + data_min
     y_train_real = (y_train.numpy() + 1) * (data_max - data_min) / 2 + data_min
     y_test_real = (y_test.numpy() + 1) * (data_max - data_min) / 2 + data_min
+
+    # pred_train = (pred_train_norm.numpy()) * (data_max - data_min) + data_min
+    # pred_test = (pred_test_norm.numpy()) * (data_max - data_min) + data_min
+    # y_train_real = (y_train.numpy()) * (data_max - data_min) + data_min
+    # y_test_real = (y_test.numpy()) * (data_max - data_min) + data_min
 
 # --------------------------
 # 8. 计算 MSE

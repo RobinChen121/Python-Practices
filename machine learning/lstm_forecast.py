@@ -7,7 +7,6 @@ Description: lstm, criteria L1Loss() is better than MSELoss()
 
 """
 
-import pandas as pd
 import torch
 import torch.nn as nn
 import numpy as np
@@ -24,6 +23,7 @@ raw_data = dataset["value"].values.astype(float)
 data_min = raw_data.min()
 data_max = raw_data.max()
 data = (raw_data - data_min) / (data_max - data_min)
+# data = -1 + 2 * (raw_data - data_min) / (data_max - data_min)
 
 
 # -------------------------------
@@ -44,6 +44,13 @@ X, y = create_sequences(data, seq_length)
 X = torch.tensor(X, dtype=torch.float32).unsqueeze(-1)  # 对于一维数据，增加维度
 y = torch.tensor(y, dtype=torch.float32).unsqueeze(-1)
 
+# 对于这种时间序列数据，不能随机打乱划分训练数据
+train_size = int(len(X) * 0.8)
+X_train = X[:train_size]
+X_test = X[train_size:]
+y_train = y[:train_size]
+y_test = y[train_size:]
+
 
 # -------------------------------
 # 定义 LSTM
@@ -56,7 +63,7 @@ class LSTMModel(nn.Module):
 
     def forward(self, x):
         # 类中有 __call__() 函数，所以类可以直接调用
-        out, _ = self.lstm(x)
+        out, _ = self.lstm(x)  # out 为所有时间步的隐藏状态
         # out 的维度 (batch_size, seq_length, hidden_size)
         out = out[:, -1, :]
         out = self.linear(out)
@@ -64,7 +71,7 @@ class LSTMModel(nn.Module):
 
 
 model = LSTMModel()
-criterion = nn.L1Loss()  # nn.MSELoss()  #
+criterion = nn.L1Loss()  # nn.MSELoss()
 # model.parameters() 包含模型训练的各项权重与偏置
 optimizer = torch.optim.Adam(model.parameters(), lr=0.01)
 
@@ -74,27 +81,34 @@ optimizer = torch.optim.Adam(model.parameters(), lr=0.01)
 epochs = 300
 for epoch in range(epochs):
     optimizer.zero_grad()  # 每次循环时梯度清零，不累加；模拟大 batch 时累加
-    output = model(X)
+    output = model(X_train)
 
-    loss = criterion(output, y)
+    loss = criterion(output, y_train)
     loss.backward()
     optimizer.step()  # 更新参数
-    if (epoch + 1) % 50 == 0:
+    if (epoch + 1) % 10 == 0:
         print(f"Epoch {epoch+1}/{epochs}, Loss: {loss.item():.6f}")
 
 # -------------------------------
 # 预测
 # -------------------------------
 model.eval()  # 切换到评估模式
-pred = model(X)  # 得到模型输出（带梯度）
+pred = model(X_test)  # 得到模型输出（带梯度）
 pred = pred.detach()  # 返回一个共享相同数据但不需要梯度的新张量
 pred = pred.numpy()  # 转化为 numpy
+pred_train = model(X_train)  # 得到模型输出（带梯度）
+pred_train = pred_train.detach()  # 返回一个共享相同数据但不需要梯度的新张量
+pred_train = pred_train.numpy()  # 转化为 numpy
 
 # -------------------------------
 # 计算预测误差
 # -------------------------------
-y_true = y.detach().numpy() * (data_max - data_min) + data_min
+y_true = y_test.detach().numpy() * (data_max - data_min) + data_min
 y_pred = pred * (data_max - data_min) + data_min
+y_pred_train = pred_train * (data_max - data_min) + data_min
+# y_true = (y_test.detach().numpy() + 1) * (data_max - data_min) / 2 + data_min
+# y_pred = (pred + 1) * (data_max - data_min) / 2 + data_min
+# y_pred_train = (pred_train + 1) * (data_max - data_min) / 2 + data_min
 
 # 平均绝对误差 MAE
 mae = np.mean(np.abs(y_pred - y_true))
@@ -114,7 +128,12 @@ import matplotlib
 matplotlib.use("TkAgg")  # 或者 "Qt5Agg"，具体取决于环境中装了哪个
 import matplotlib.pyplot as plt
 
-plt.plot(range(len(data)), data, label="True")
-plt.plot(range(seq_length, len(data)), pred, label="Predicted")
+plt.plot(range(len(data)), raw_data, label="True")
+plt.plot(
+    range(seq_length + 1, seq_length + len(y_pred_train) + 1),
+    y_pred_train,
+    label="Predicted_train",
+)
+plt.plot(range(len(data) - len(pred), len(data)), y_pred, label="Predicted")
 plt.legend()
 plt.show()

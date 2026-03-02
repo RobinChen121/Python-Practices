@@ -3,7 +3,7 @@
 @Author: Zhen Chen
 @Email: chen.zhen5526@gmail.com
 @Time: 30/11/2025, 13:30
-@Desc: not use softmax;
+@Desc: 使用 MSE 最为多分类损失函数，需要将输入数据转化为 one hot
 
 """
 

@@ -454,3 +454,18 @@ best hyperparameters:
 real MAE: 1285.725830078125
 historical best MAE: 1141.893310546875
 ====================================================================================================
+date: 2026-01-20 14:55:10
+file name: records/lstm_dept1_store1
+system: Windows
+machine: AMD64
+processor: 13th Gen Intel(R) Core(TM) i5-1335U
+cpu_cores_physical: 10
+cpu_cores_logical: 12
+memory_total_GB: 15.38
+GPU: False
+Python version: 3.12.3
+best hyperparameters:
+{'hidden_size': 64, 'num_layers': 2, 'bidirectional': False, 'learning_rate': 0.0022290961218771506, 'batch_size': 1}
+real MAE: 4112.556640625
+historical best MAE: 1141.893310546875
+====================================================================================================
