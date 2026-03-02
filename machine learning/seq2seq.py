@@ -8,10 +8,8 @@ Description:
 """
 
 import numpy as np
-import pandas as pd
 import torch
 from sklearn.preprocessing import MinMaxScaler
-import matplotlib.pyplot as plt
 
 # 读取 AirPassengers 数据
 from statsmodels.datasets import get_rdataset
@@ -35,6 +33,9 @@ def create_sequences(data, input_len=12, output_len=1):
 
 input_len = 12
 output_len = 1
+batch_size = 1
+# output_len 预测未来多少个时间点
+# output_dim 每一个时间点输出几个数
 
 X, y = create_sequences(ts_scaled, input_len, output_len)
 
@@ -63,10 +64,13 @@ class Encoder(nn.Module):
         return h, c
 
 
+# output_len 预测未来多少个时间点
+# output_dim 每一个时间点输出几个数
 class Decoder(nn.Module):
     def __init__(self, output_len=1, hidden_dim=64, output_dim=1, num_layers=1):
         super().__init__()
         self.output_len = output_len
+        self.output_dim = output_dim
         self.lstm = nn.LSTM(output_dim, hidden_dim, num_layers, batch_first=True)
         self.fc = nn.Linear(
             hidden_dim, output_dim
@@ -80,7 +84,7 @@ class Decoder(nn.Module):
         # PyTorch 的 LSTM 输入必须是 3 维张量，格式是：
         # [batch_size, seq_len, input_size]
         decoder_input = torch.zeros(
-            (h.size(1), 1, output_len)  # 中间是 1 表示为 1 个时间步
+            (h.size(1), 1, self.output_dim)  # 中间是 1 表示为 1 个时间步
         )  # [batch, seq=1, feature=1]
 
         outputs = []
@@ -147,6 +151,8 @@ rmse = np.sqrt(np.mean((prediction - y_test_true) ** 2))
 print(f"平均绝对误差 (MAE): {mae:.6f}")
 print(f"总绝对误差 (SAE): {sae:.6f}")
 print(f"均方根误差 (RMSE): {rmse:.6f}")
+
+import matplotlib.pyplot as plt
 
 plt.figure(figsize=(10, 5))
 plt.plot(ts, label="real")
