@@ -3,9 +3,10 @@ Python version: 3.12.7
 Author: Zhen Chen, chen.zhen5526@gmail.com
 Date: 2025/12/11 13:56
 Description: this is to run the network weights
-    
+
 
 """
+
 from sklearn.model_selection import train_test_split
 from torch import nn
 from torch.utils.data import DataLoader
@@ -19,7 +20,7 @@ from lstm_model import LSTMModel
 df = read_data()
 
 # 选择一个 store+dept
-store_id = 5
+store_id = 1
 dept_id = 1
 ts = df[(df.Store == store_id) & (df.Dept == dept_id)]
 
@@ -40,10 +41,11 @@ file_name += "_dept" + str(dept_id) + "_store" + str(store_id)
 # formulate a sequence
 seq_len = 12  # 使用过去 12 周预测下一周
 
+
 def create_sequences(data, seq_len):
     xs, ys = [], []
     for i in range(len(data) - seq_len):
-        x = data[i: i + seq_len]
+        x = data[i : i + seq_len]
         y = data[i + seq_len]
         xs.append(x)
         ys.append(y)
@@ -68,7 +70,7 @@ if os.path.exists(file_name + "_hyperparameter.pth"):
     para_read = torch.load(file_name + "_hyperparameter.pth")
     best_loss = para_read["best_MAE"]
     batch_size = para_read["batch_size"]
-    hidden_size = para_read["hidden_size"]
+    hidden_size = para_read["hidden size"]
     num_layers = para_read["num_layers"]
     bidirectional = para_read["bidirectional"]
 
@@ -92,7 +94,9 @@ if os.path.exists(file_name + "_hyperparameter.pth"):
     model.to(device)
     criterion = nn.L1Loss()  # 对于剧烈波动的数据，用 L1Loss 好
 
-    model.load_state_dict(torch.load(file_name + "_weights" + ".pth"))
+    model.load_state_dict(
+        torch.load(file_name + "_weights" + ".pth"), map_location="cpu"
+    )
     model.eval()
     real_pred_eval = []
     real_loss = 0.0
@@ -121,7 +125,9 @@ if os.path.exists(file_name + "_hyperparameter.pth"):
 
     import matplotlib
 
-    matplotlib.use("Qt5Agg")  # 或者 "Qt5Agg"，具体取决于环境中装了哪个: conda install pyqt
+    matplotlib.use(
+        "Qt5Agg"
+    )  # 或者 "Qt5Agg"，具体取决于环境中装了哪个: conda install pyqt
     import matplotlib.pyplot as plt
 
     plt.plot(sales, label="real sales")

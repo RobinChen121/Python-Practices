@@ -18,10 +18,10 @@ from lstm_model import run_lstm
 
 df = read_data()
 
-tune_trial = 20 # number of hyperparameter tuning
+tune_trial = 20  # number of hyperparameter tuning
 
 # 选择一个 store+dept
-store_id = 9
+store_id = 1
 dept_id = 1
 ts = df[(df.Store == store_id) & (df.Dept == dept_id)]
 
@@ -48,10 +48,10 @@ seq_len = 12  # 使用过去 12 周预测下一周
 def create_sequences(data, seq_len):
     xs, ys = [], []
     for i in range(len(data) - seq_len):
-        x = data[i: i + seq_len]
-        y = data[i + seq_len]
-        xs.append(x)
-        ys.append(y)
+        x_ = data[i : i + seq_len]
+        y_ = data[i + seq_len]
+        xs.append(x_)
+        ys.append(y_)
     return np.array(xs), np.array(ys)
 
 
@@ -70,6 +70,8 @@ else:
 tuner = HyperTuning(X, y, scaler, file_name, best_loss)
 best_params = tuner.tune(tune_trial)
 
-_, real_pred_train, real_pred_eval = run_lstm(X, y, scaler, file_name, best_loss, **best_params)
+_, real_pred_train, real_pred_eval = run_lstm(
+    X, y, scaler, file_name, best_loss, **best_params
+)
 
 draw(sales, seq_len, X, real_pred_train, real_pred_eval)
