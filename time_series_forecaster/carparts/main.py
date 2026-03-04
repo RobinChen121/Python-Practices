@@ -14,4 +14,4 @@ learning_rate = 0.001
 layer_num = 3
 node_num = 40
 
-raw_data = get_data()
+raw_data = get_raw_data()

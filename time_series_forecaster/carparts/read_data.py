@@ -11,6 +11,8 @@ import os
 import pandas
 import pyreadr
 import pandas as pd
+import torch.nn as nn
+import torch
 
 
 def get_raw_data():
@@ -34,17 +36,37 @@ def get_raw_data():
     return df2
 
 
-def create_sequence(raw_data: pandas.DataFrame):
+def create_sequence(
+    raw_data: pandas.DataFrame, sequence_length: int, embedding_layers=None
+):
     month_num, item_num = raw_data.shape
 
     # scaling
     raw_data = raw_data / raw_data.mean()
 
-    return
+    y_sequence = []
+    x_sequence = []
+    for j in range(item_num):
+        for i in range(month_num - 2 * sequence_length):
+            y = raw_data.iloc[i + sequence_length : i + 2 * sequence_length, j].values
+            x = raw_data.iloc[i : i + sequence_length, j].values
+            age = i
+            month = raw_data.index[i].month
+
+            covariate = [age, month, embedding_layers[j]]
+            x_sequence.append(covariate)
+            y_sequence.append(y)
+    return torch.tensor(y_sequence, dtype=torch.float32), torch.tensor(
+        x_sequence, dtype=torch.float32
+    )
 
 
 if __name__ == "__main__":
     df_ = get_raw_data()
-    create_sequence(df_)
+    month_num, item_num = df_.shape
+    sequence_length = 8
+    embedding_dim = 32
+    create_sequence(df_, sequence_length)
+    embedding_layers = nn.Embedding(item_num, embedding_dim)
     print(df_.head())
     print(df_.shape)
