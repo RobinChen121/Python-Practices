@@ -14,6 +14,10 @@ import os
 folder_address = ""
 if sys.platform == "darwin":
     folder_address = "/Users/zhenchen/Library/CloudStorage/OneDrive-BrunelUniversityLondon/others/ezgi_data"
+else:
+    folder_address = (
+        "C:/Users/Administrator/OneDrive - Brunel University London/others/ezgi_data"
+    )
 file_name = "survey24_JP.csv"
 data_address = os.path.join(folder_address, file_name)
 
