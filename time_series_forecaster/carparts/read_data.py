@@ -15,6 +15,12 @@ import torch.nn as nn
 import torch
 
 
+def z_score(x: torch.Tensor, dim=0, eps=1e-8):
+    mean = x.mean(dim=dim, keepdim=True)
+    std = x.std(dim=dim, keepdim=True)
+    return (x - mean) / (std + eps)  # 避免除零
+
+
 def get_raw_data():
     file_path = os.path.dirname(os.getcwd())
     file_path = os.path.join(file_path, "data", "carparts.rda")
@@ -42,23 +48,36 @@ def create_sequence(
     month_num, item_num = raw_data.shape
 
     # scaling
-    raw_data = raw_data / raw_data.mean()
+    scaled_raw_data = raw_data / raw_data.mean()
+
+    # float() will transform the data to torch.float32 by default
+    ages = torch.arange(0, month_num).unsqueeze(1).repeat(1, item_num).float()
+    months = (
+        torch.tensor([raw_data.index[i].month for i in range(month_num)])
+        .unsqueeze(1)
+        .repeat(item_num, 1)
+        .float()
+    )
+    scaled_ages = z_score(ages)
+    scaled_months = z_score(months)
 
     y_sequence = []
     x_sequence = []
     for j in range(item_num):
+        # 获取该 item 的 embedding，必须用 tensor 索引访问
+        item_emb = embedding_layers(torch.tensor(j))
         for i in range(month_num - 2 * sequence_length):
-            y = raw_data.iloc[i + sequence_length : i + 2 * sequence_length, j].values
-            x = raw_data.iloc[i : i + sequence_length, j].values
-            age = i
-            month = raw_data.index[i].month
+            y = torch.tensor(
+                scaled_raw_data.iloc[i + sequence_length : i + 2 * sequence_length, j]
+            )
+            x = torch.tensor(scaled_raw_data.iloc[i : i + sequence_length, j])
+            age = scaled_ages[i, j].flatten()  # 用 flatten() 才有维度
+            month = scaled_months[i, j].flatten()
 
-            covariate = [age, month, embedding_layers[j]]
-            x_sequence.append(covariate)
+            covariate = torch.cat([age, month, item_emb], dim=0)  # 必须有维度才能拼接
+            x_sequence.append(torch.cat([x, covariate], dim=0))
             y_sequence.append(y)
-    return torch.tensor(y_sequence, dtype=torch.float32), torch.tensor(
-        x_sequence, dtype=torch.float32
-    )
+    return x_sequence, y_sequence
 
 
 if __name__ == "__main__":
@@ -66,7 +85,8 @@ if __name__ == "__main__":
     month_num, item_num = df_.shape
     sequence_length = 8
     embedding_dim = 32
-    create_sequence(df_, sequence_length)
+
     embedding_layers = nn.Embedding(item_num, embedding_dim)
+    create_sequence(df_, sequence_length, embedding_layers)
     print(df_.head())
     print(df_.shape)
