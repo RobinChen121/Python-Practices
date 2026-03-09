@@ -51,7 +51,7 @@ df2["marital_status"] = df2["marital_status"].map(
 )
 df2["marital_status"] = df2["marital_status"].astype("category")
 model2 = smf.ols(
-    formula="trust_ai_6 ~ C(marital_status, Treatment(reference='Never married')) + trust_ai_3 + mean_ai",
+    formula="trust_ai_6 ~ C(marital_status, Treatment(reference='Married')) + trust_ai_3 + mean_ai",
     data=df2,
 ).fit()
 print(model2.summary())
@@ -76,8 +76,10 @@ model3 = smf.ols(
 ).fit()
 print(model3.summary())
 
-df4 = df_raw.dropna(subset="children_in_HH").copy()
-df4["children_in_HH"] = df4["children_in_HH"].map(
+df_raw.rename(columns={"children_in_HH": "household_children"}, inplace=True)
+df4 = df_raw.dropna(subset="household_children").copy()
+df4 = df4[~df4["household_children"].isin([7.0, 8.0])]
+df4["household_children"] = df4["household_children"].map(
     {
         1.0: "0",
         2.0: "1",
@@ -85,18 +87,18 @@ df4["children_in_HH"] = df4["children_in_HH"].map(
         4.0: "3",
         5.0: "4",
         6.0: ">=5",
-        7.0: "Don't know",
-        8.0: "Prefer not to say",
     }
 )
-df4["children_in_HH"] = df4["children_in_HH"].astype("category")
+
+df4["household_children"] = df4["household_children"].astype("category")
 model4 = smf.ols(
-    formula="trust_ai_6 ~ C(children_in_HH, Treatment(reference='0')) + trust_ai_3 + mean_ai",
+    formula="trust_ai_6 ~ C(household_children, Treatment(reference='0')) + trust_ai_3 + mean_ai",
     data=df4,
 ).fit()
 print(model4.summary())
 
 df5 = df_raw.dropna(subset="household_size").copy()
+df5 = df5[~df5["household_size"].isin([9.0, 10.0])]
 df5["household_size"] = df5["household_size"].map(
     {
         1.0: "1",
@@ -107,8 +109,6 @@ df5["household_size"] = df5["household_size"].map(
         6.0: "6",
         7.0: "7",
         8.0: "8 or more",
-        9.0: "Don't know",
-        10.0: "Prefer not to say",
     }
 )
 df5["household_size"] = df5["household_size"].astype("category")
@@ -122,35 +122,35 @@ df_raw.rename(columns={"urban/rural": "urban_rural"}, inplace=True)
 df6 = df_raw.dropna(subset="urban_rural").copy()
 df6["urban_rural"] = df6["urban_rural"].map(
     {
-        1.0: "Tokyo or designated cities",
-        2.0: "Other cities",
-        6.0: "Towns and villages",
+        1.0: "Cities",
+        2.0: "Cities",
+        6.0: "Others",
     }
 )
 df6["urban_rural"] = df6["urban_rural"].astype("category")
 model6 = smf.ols(
-    formula="trust_ai_6 ~ C(urban_rural, Treatment(reference='Towns and villages')) + trust_ai_3 + mean_ai",
+    formula="trust_ai_6 ~ C(urban_rural, Treatment(reference='Others')) + trust_ai_3 + mean_ai",
     data=df6,
 ).fit()
 print(model6.summary())
 
 df_raw.rename(columns={"education level": "education_level"}, inplace=True)
 df7 = df_raw.dropna(subset="education_level").copy()
+df7 = df7[~df7["household_size"].isin([8.0])]
 df7["education_level"] = df7["education_level"].map(
     {
-        1.0: "Elementary or junior high",
-        2.0: "High school",
-        3.0: "Vocational/junior/training college",
-        4.0: "University(4 years)",
-        5.0: "University(6 years)",
-        6.0: "Graduate school",
-        7.0: "Other",
-        8.0: "Prefer not to answer",
+        1.0: "Others",
+        2.0: "Others",
+        3.0: "Others",
+        4.0: "University degree",
+        5.0: "University degree",
+        6.0: "Others",
+        7.0: "Others",
     }
 )
 df7["education_level"] = df7["education_level"].astype("category")
 model7 = smf.ols(
-    formula="trust_ai_6 ~ C(education_level, Treatment(reference='University(4 years)')) + trust_ai_3 + mean_ai",
+    formula="trust_ai_6 ~ C(education_level, Treatment(reference='Others')) + trust_ai_3 + mean_ai",
     data=df7,
 ).fit()
 print(model7.summary())
@@ -174,7 +174,7 @@ df8["work_industry"] = df8["work_industry"].map(
 )
 df8["work_industry"] = df8["work_industry"].astype("category")
 model8 = smf.ols(
-    formula="trust_ai_6 ~ C(work_industry, Treatment(reference='Not working')) + trust_ai_3 + mean_ai",
+    formula="trust_ai_6 ~ C(work_industry, Treatment(reference='Public services')) + trust_ai_3 + mean_ai",
     data=df8,
 ).fit()
 print(model8.summary())
@@ -189,7 +189,7 @@ df9["social_media_usage_15"] = df9["social_media_usage_15"].map(
 )
 df9["social_media_usage_15"] = df9["social_media_usage_15"].astype("category")
 model9 = smf.ols(
-    formula="trust_ai_6 ~ C(social_media_usage_15, Treatment(reference='Yes')) + trust_ai_3 + mean_ai",
+    formula="trust_ai_6 ~ C(social_media_usage_15, Treatment(reference='No')) + trust_ai_3 + mean_ai",
     data=df9,
 ).fit()
 print(model9.summary())
@@ -210,9 +210,10 @@ print(model10.summary())
 
 df_raw.rename(columns={"gross_HH_income": "household_income"}, inplace=True)
 df11 = df_raw.dropna(subset="household_income").copy()
+df11 = df11[~df11["household_income"].isin([18.0, 19.0])]
 df11["household_income"] = df11["household_income"].map(
     {
-        1.0: "Under 2m",
+        1.0: "Under 2m Yen",
         2.0: "2m~3m",
         3.0: "3m~4m",
         4.0: "4m~5m",
@@ -225,13 +226,11 @@ df11["household_income"] = df11["household_income"].map(
         11.0: "12m~14m",
         12.0: "14m~16m",
         13.0: "Over 16m",
-        18.0: "Do not know",
-        19.0: "Prefer not to answer",
     }
 )
 df11["household_income"] = df11["household_income"].astype("category")
 model11 = smf.ols(
-    formula="trust_ai_6 ~ C(household_income, Treatment(reference='Under 2m')) + trust_ai_3 + mean_ai",
+    formula="trust_ai_6 ~ C(household_income, Treatment(reference='Under 2m Yen')) + trust_ai_3 + mean_ai",
     data=df11,
 ).fit()
 print(model11.summary())
@@ -273,5 +272,5 @@ stargazer.title("Regression Results")
 stargazer.significance_levels([0.1, 0.05, 0.01])
 html = stargazer.render_html()
 
-with open("regression.html", "w", encoding="utf-8") as f:
+with open("regression_jp.html", "w", encoding="utf-8") as f:
     f.write(html)

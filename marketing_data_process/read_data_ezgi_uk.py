@@ -40,7 +40,9 @@ needed_columns = [
     "profile_education_level",
     "work_sector",
     # "social_media_usage_15",
+    "social_media_activemember_97",
     "profile_gross_household",
+    "profile_gross_personal",
     "profile_gender",
     "age",
 ]
@@ -68,7 +70,9 @@ df_linear_regression = df_raw2[
         "profile_education_level",
         "work_sector",
         # "social_media_usage_15",
+        "social_media_activemember_97",
         "profile_gross_household",
+        "profile_gross_personal",
         "profile_gender",
         "age",
     ]

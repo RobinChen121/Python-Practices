@@ -117,9 +117,8 @@ optimizer = torch.optim.Adam(model.parameters(), lr=0.01)
 
 epochs = 300
 
+model.train()  # 告诉模型处于训练模式
 for epoch in range(epochs):
-    model.train()
-
     optimizer.zero_grad()
     output = model(X_train)
     loss = criterion(output, y_train)

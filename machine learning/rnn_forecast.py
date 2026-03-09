@@ -34,6 +34,7 @@ raw_data = np.array([
 ], dtype=float)
 # fmt: on
 
+# 标准化
 data_min = raw_data.min()
 data_max = raw_data.max()
 data = -1 + 2 * (raw_data - data_min) / (data_max - data_min)
@@ -74,7 +75,7 @@ train_loader = DataLoader(
     train_dataset,
     batch_size=batch_size,
     shuffle=False,  # 训练集通常 shuffle，但时间序列数据除外
-    drop_last=False,
+    drop_last=False,  # 如果最后一个 batch 的样本数量不足 batch_size，就直接丢掉
 )
 test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
 
@@ -92,14 +93,17 @@ class SimpleRNN(nn.Module):
         self.rnn = nn.RNN(
             input_size, hidden_size, batch_first=True
         )  # 输入数据的结构 (batch_size, seq_len, input_size)
-        self.fc = nn.Linear(
+        # 每个时间步 h_t 形状 [num_layers, batch, hidden_size]
+        # 用最后那个 layer 的h_t 参与下面的映射
+        self.linear = nn.Linear(
             hidden_size, output_size
-        )  # self.fc 改为 self.linear 是一样的
+        )  # self.fc 改为 self.linear 是一样的,输出维度 [batch, output_size]
 
     def forward(self, x):
+        # out 的形状是 (batch_size, seq_size, hidden_size)
         out, _ = self.rnn(x)  # 返回所有时间步的隐藏状态及最后一个时间步的隐藏状态
         out = out[:, -1, :]  # out.shape = (batch_size, seq_len, hidden_size)
-        out = self.fc(out)
+        out = self.linear(out)
         return out
 
 
@@ -115,9 +119,8 @@ optimizer = torch.optim.Adam(model.parameters(), lr=0.01)
 # 6. 训练
 # --------------------------
 epochs = 300
+model.train()  # 告诉模型处于训练模式
 for epoch in range(epochs):
-    model.train()
-
     # batch training
     epoch_loss = 0.0
     for X_batch, y_batch in train_loader:
