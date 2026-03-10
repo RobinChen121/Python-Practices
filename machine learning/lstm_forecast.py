@@ -19,16 +19,33 @@ from sklearn.preprocessing import MinMaxScaler
 # -------------------------------
 # 加载数据
 # -------------------------------
+# # fmt: off
+# raw_data = np.array([
+#     112, 118, 132, 129, 121, 135, 148, 148, 136, 119, 104, 118,
+#     115, 126, 141, 135, 125, 149, 170, 170, 158, 133, 114, 140,
+#     145, 150, 178, 163, 172, 178, 199, 199, 184, 162, 146, 166,
+#     171, 180, 193, 181, 183, 218, 230, 242, 209, 191, 172, 194,
+#     196, 196, 236, 235, 229, 243, 264, 272, 237, 211, 180, 201,
+#     204, 188, 235, 227, 234, 264, 302, 293, 259, 229, 203, 229,
+#     242, 233, 267, 269, 270, 315, 364, 347, 312, 274, 237, 278,
+#     284, 277, 317, 313, 318, 374, 413, 405, 355, 306, 271, 306,
+#     315, 301, 356, 348, 355, 422, 465, 467, 404, 347, 305, 336,
+#     340, 318, 362, 348, 363, 435, 491, 505, 404, 359, 310, 337,
+#     360, 342, 406, 396, 420, 472, 548, 559, 463, 407, 362, 405,
+#     417, 391, 419, 461, 472, 535, 622, 606, 508, 461, 390, 432
+# ], dtype=float)
+# #fmt on
+
 dataset = get_rdataset("AirPassengers").data
-raw_data = dataset["value"].values.astype(float)
+raw_data = dataset["value"]
 
 # 归一化
 # data_min = raw_data.min()
 # data_max = raw_data.max()
 # data = -1 + 2 * (raw_data - data_min) / (data_max - data_min)
-scaler = MinMaxScaler(feature_range=(0, 1))
-data = scaler.fit_transform(raw_data)
-
+scaler = MinMaxScaler(feature_range=(-1, 1))
+data = scaler.fit_transform(raw_data.to_numpy().reshape(-1, 1)) # scaler 只接受二维数组
+data = data.flatten()
 
 # -------------------------------
 # 创建序列
@@ -46,7 +63,7 @@ def create_sequences(data, seq_length):
 seq_length = 12  # 用过去一年数据预测下一月
 batch_size = 24
 X, y = create_sequences(data, seq_length)
-X = torch.tensor(X, dtype=torch.float32).unsqueeze(-1)  # 对于一维数据，增加维度
+X = torch.tensor(X, dtype=torch.float32).unsqueeze(-1)
 y = torch.tensor(y, dtype=torch.float32).unsqueeze(-1)
 
 # 按时间切分 80/20
@@ -125,15 +142,10 @@ model.eval()  # 切换到评估模式
 with torch.no_grad():
     pred_train_norm = model(X_train)
     pred_test_norm = model(X_test)
-    pred_train = (
-        scaler.inverse_transform(pred_train_norm)(pred_train_norm.numpy() + 1)
-        * (data_max - data_min)
-        / 2
-        + data_min
-    )
-    pred_test = (pred_test_norm.numpy() + 1) * (data_max - data_min) / 2 + data_min
-    y_train_real = (y_train.numpy() + 1) * (data_max - data_min) / 2 + data_min
-    y_test_real = (y_test.numpy() + 1) * (data_max - data_min) / 2 + data_min
+    pred_train = scaler.inverse_transform(pred_train_norm.numpy())
+    pred_test = scaler.inverse_transform(pred_test_norm.numpy())
+    y_train_real = scaler.inverse_transform(y_train.numpy())
+    y_test_real = scaler.inverse_transform(y_test.numpy())
 
 
 # -------------------------------

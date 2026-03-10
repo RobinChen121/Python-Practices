@@ -12,6 +12,7 @@ import torch.nn as nn
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.metrics import mean_squared_error
+from sklearn.preprocessing import MinMaxScaler
 from torch.utils.data import TensorDataset, DataLoader
 
 # --------------------------
@@ -41,6 +42,9 @@ data = -1 + 2 * (raw_data - data_min) / (data_max - data_min)
 data = torch.FloatTensor(data)  # 直接转化为 float tensor
 data = data.unsqueeze(1)  # shape (144,1), unsqueeze 增加一个维度
 # unsqueeze(dim) 的作用是：在指定位置 dim，新增一个 size = 1 的维度
+
+scaler = MinMaxScaler(feature_range=(0, 1))
+data = scaler.fit_transform(raw_data.reshape(-1, 1))
 
 
 # --------------------------
