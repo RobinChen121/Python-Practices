@@ -45,7 +45,7 @@ data = data.unsqueeze(1)  # shape (144,1), unsqueeze 增加一个维度
 
 scaler = MinMaxScaler(feature_range=(0, 1))
 data = scaler.fit_transform(raw_data.reshape(-1, 1))
-
+data = torch.tensor(data, dtype=torch.float32)
 
 # --------------------------
 # 2. 构建序列
@@ -61,7 +61,8 @@ def create_sequences(data, seq_len):
 
 
 seq_len = 12
-batch_size = 48  # 可以改成 2 / 4 / 16 对比效果
+batch_size = 24 # 可以改成 2 / 4 / 16 对比效果
+# 输入维度 [batch, seq_len, input_size]
 X_all, y_all = create_sequences(data, seq_len)
 
 # --------------------------
@@ -157,10 +158,10 @@ model.eval()
 with torch.no_grad():
     pred_train_norm = model(X_train)
     pred_test_norm = model(X_test)
-    pred_train = (pred_train_norm.numpy() + 1) * (data_max - data_min) / 2 + data_min
-    pred_test = (pred_test_norm.numpy() + 1) * (data_max - data_min) / 2 + data_min
-    y_train_real = (y_train.numpy() + 1) * (data_max - data_min) / 2 + data_min
-    y_test_real = (y_test.numpy() + 1) * (data_max - data_min) / 2 + data_min
+    pred_train = scaler.inverse_transform(pred_train_norm)
+    pred_test = scaler.inverse_transform(pred_test_norm)
+    y_train_real = scaler.inverse_transform(y_train)
+    y_test_real = scaler.inverse_transform(y_test)
 
 # --------------------------
 # 8. 计算 MSE

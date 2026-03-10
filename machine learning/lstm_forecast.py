@@ -63,6 +63,7 @@ def create_sequences(data, seq_length):
 seq_length = 12  # 用过去一年数据预测下一月
 batch_size = 24
 X, y = create_sequences(data, seq_length)
+# 输入维度 [batch, seq_len, input_size]
 X = torch.tensor(X, dtype=torch.float32).unsqueeze(-1)
 y = torch.tensor(y, dtype=torch.float32).unsqueeze(-1)
 
