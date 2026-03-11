@@ -95,6 +95,7 @@ class LSTMModel(nn.Module):
         self.lstm = nn.LSTM(input_size, hidden_size, num_layers, batch_first=True)
         # 把 LSTM 的 hidden state 映射到输出空间
         # 每个时间步 h_t 形状 [num_layers, batch, hidden_size]
+        # 用最后那个 layer 的h_t 参与下面的映射
         self.linear = nn.Linear(
             hidden_size, output_size
         )  # 线性输出,输出维度 [batch, output_size]

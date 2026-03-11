@@ -171,7 +171,7 @@
     "node.js.selected.package.eslint": "(autodetect)",
     "node.js.selected.package.tslint": "(autodetect)",
     "nodejs_package_manager_path": "npm",
-    "settings.editor.selected.configurable": "preferences.pluginManager",
+    "settings.editor.selected.configurable": "com.jetbrains.python.black.configuration.BlackFormatterConfigurable",
     "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
@@ -311,6 +311,7 @@
       <workItem from="1772960463527" duration="9074000" />
       <workItem from="1773132213954" duration="5934000" />
       <workItem from="1773163456752" duration="2156000" />
+      <workItem from="1773248911667" duration="2323000" />
     </task>
     <servers />
   </component>
@@ -613,18 +614,18 @@
           <option name="timeStamp" value="392" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/time_series_forecaster/carparts/data_cleaning.py</url>
+          <url>file://$PROJECT_DIR$/time_series_forecaster/deep_ar/data_cleaning.py</url>
           <line>125</line>
           <option name="timeStamp" value="400" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/machine learning/lstm_forecast.py</url>
-          <line>154</line>
+          <line>155</line>
           <option name="timeStamp" value="407" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/machine learning/lstm_forecast.py</url>
-          <line>155</line>
+          <line>156</line>
           <option name="timeStamp" value="408" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
