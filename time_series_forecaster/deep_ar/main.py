@@ -10,6 +10,7 @@
 from data_cleaning import get_raw_data, create_sequence
 import torch.nn as nn
 from torch.utils.data import TensorDataset, DataLoader
+from deep_ar_class import DeepARLSTM
 
 batch_size = 64
 learning_rate = 0.001
@@ -42,17 +43,6 @@ test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
 
 
 # LSTM model
-class LSTMModel(nn.Module):
-    def __init__(self, input_size, hidden_size, layer_num_, output_size):
-        super(LSTMModel, self).__init__()
-        self.lstm = nn.LSTM(input_size, hidden_size, layer_num_, batch_first=True)
-        # 每个时间步 h_t 形状 [num_layers, batch, hidden_size]
-        # 用每个时间步最后那个 layer 的h_t 参与下面的映射
-        self.linear = nn.Linear(hidden_size, output_size) # 线性输出,输出维度 [batch, output_size]
-
-    def forward(self, x):
-        # 返回所有时间步的隐藏状态及最后一个时间步的（h_n, c_m）
-        # out 的形状是 (batch_size, seq_size, hidden_size)
-        out, _ = self.lstm(x)
-        out = self.linear(out)
-        return out
+input_size = x_train.shape[2]
+output_size = y_train.shape[2]
+model = DeepARLSTM(input_size = encoder_length, output_size = decoder_length, hidden_size=node_num,layer_num=layer_num)

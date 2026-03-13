@@ -72,10 +72,10 @@ def create_sequence(
     for j in range(item_num):
         # 获取该 item 的 embedding，必须用 tensor 索引访问
         item_emb = embedding_layers(torch.tensor(j))
-        for i in range(train_length - encoder_length - decoder_length):
+        for i in range(train_length - encoder_length - decoder_length + 1):
             y = torch.tensor(
                 scaled_raw_data.iloc[
-                    i + encoder_length : i + 2 * encoder_length, j
+                    i + encoder_length : i + encoder_length + decoder_length, j
                 ].values
             ).unsqueeze(1)
             x = torch.tensor(
@@ -110,7 +110,7 @@ def create_sequence(
             scaled_raw_data.iloc[train_length:month_num, j].values
         ).unsqueeze(1)
         y_test.append(y)
-    return x_train, y_train, x_test, y_test
+    return torch.stack(x_train), torch.stack(y_train), torch.stack(x_test), torch.stack(y_test)
 
 
 if __name__ == "__main__":
