@@ -69,18 +69,26 @@ def create_sequence(
     x_train = []
     y_test = []
     x_test = []
+    data_np = scaled_raw_data.values  # 比频繁调用 pandas iloc 快多倍
     for j in range(item_num):
         # 获取该 item 的 embedding，必须用 tensor 索引访问
-        item_emb = embedding_layers(torch.tensor(j))
+        device = embedding_layers.weight.device
+        item_emb = embedding_layers(torch.tensor([j], device=device))
         for i in range(train_length - encoder_length - decoder_length + 1):
-            y = torch.tensor(
-                scaled_raw_data.iloc[
-                    i + encoder_length : i + encoder_length + decoder_length, j
-                ].values
-            ).unsqueeze(1)
-            x = torch.tensor(
-                scaled_raw_data.iloc[i : i + encoder_length, j].values
-            ).unsqueeze(1)
+            # from_numpy 比 torch.tensor 快
+            x = (
+                torch.from_numpy(data_np[i : i + encoder_length, j])
+                .float()
+                .unsqueeze(1)
+            )
+            y = (
+                torch.from_numpy(
+                    data_np[i + encoder_length : i + encoder_length + decoder_length, j]
+                )
+                .float()
+                .unsqueeze(1)
+            )
+
             age = scaled_ages[i : i + encoder_length, j].unsqueeze(
                 1
             )  # 用 flatten() 才有维度
@@ -91,12 +99,16 @@ def create_sequence(
             x_train.append(torch.cat([x, age, month, emb], dim=1))  # 必须有维度才能拼接
             y_train.append(y)
 
-        x = torch.tensor(
-            scaled_raw_data.iloc[
-                train_length - encoder_length : train_length,
-                j,
-            ].values
-        ).unsqueeze(1)
+        x = (
+            torch.from_numpy(
+                data_np[
+                    train_length - encoder_length : train_length,
+                    j,
+                ]
+            )
+            .float()
+            .unsqueeze(1)
+        )
         age = scaled_ages[train_length - encoder_length : train_length, j].unsqueeze(
             1
         )  # 用 flatten() 才有维度
@@ -106,11 +118,14 @@ def create_sequence(
         emb = item_emb.repeat(encoder_length, 1)
         x_test.append(torch.cat([x, age, month, emb], dim=1))
 
-        y = torch.tensor(
-            scaled_raw_data.iloc[train_length:month_num, j].values
-        ).unsqueeze(1)
+        y = torch.from_numpy(data_np[train_length:month_num, j]).float().unsqueeze(1)
         y_test.append(y)
-    return torch.stack(x_train), torch.stack(y_train), torch.stack(x_test), torch.stack(y_test)
+    return (
+        torch.stack(x_train),
+        torch.stack(y_train),
+        torch.stack(x_test),
+        torch.stack(y_test),
+    )
 
 
 if __name__ == "__main__":
