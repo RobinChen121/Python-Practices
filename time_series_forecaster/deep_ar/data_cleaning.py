@@ -13,6 +13,7 @@ import pyreadr
 import pandas as pd
 import torch.nn as nn
 import torch
+import numpy as np
 
 
 def z_score(x: torch.Tensor, dim=0, eps=1e-8):
@@ -52,7 +53,7 @@ def create_sequence(
     month_num, item_num = raw_data.shape
 
     # scaling
-    scaled_raw_data = (raw_data / raw_data.mean()).astype("float32")
+    # scaled_raw_data = (raw_data / raw_data.mean()).astype("float32")
 
     # float() will transform the data to torch.float32 by default
     ages = torch.arange(0, month_num).unsqueeze(1).repeat(1, item_num).float()
@@ -69,29 +70,29 @@ def create_sequence(
     x_train = []
     y_test = []
     x_test = []
-    data_np = scaled_raw_data.values  # 比频繁调用 pandas iloc 快多倍
+    data_np = raw_data.values  # 比频繁调用 pandas iloc 快多倍
     for j in range(item_num):
         # 获取该 item 的 embedding，必须用 tensor 索引访问
         device = embedding_layers.weight.device
         item_emb = embedding_layers(torch.tensor([j], device=device))
         for i in range(train_length - encoder_length - decoder_length + 1):
             # from_numpy 比 torch.tensor 快
+            v = 1 + np.mean(data_np[i : i + encoder_length, j])
             x = (
-                torch.from_numpy(data_np[i : i + encoder_length, j])
+                torch.from_numpy(data_np[i : i + encoder_length, j] / v)
                 .float()
                 .unsqueeze(1)
             )
             y = (
                 torch.from_numpy(
                     data_np[i + encoder_length : i + encoder_length + decoder_length, j]
+                    / v
                 )
                 .float()
                 .unsqueeze(1)
             )
 
-            age = scaled_ages[i : i + encoder_length, j].unsqueeze(
-                1
-            )  # 用 flatten() 才有维度
+            age = scaled_ages[i : i + encoder_length, j].unsqueeze(1)
             month = scaled_months[i : i + encoder_length, j].unsqueeze(1)
             emb = item_emb.repeat(encoder_length, 1)
 

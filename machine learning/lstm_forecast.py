@@ -121,6 +121,7 @@ optimizer = torch.optim.Adam(model.parameters(), lr=0.01)
 # 训练
 # -------------------------------
 epochs = 300
+model.train()  # 告诉模型处于训练模式
 for epoch in range(epochs):
     # batch training
     epoch_loss = 0.0

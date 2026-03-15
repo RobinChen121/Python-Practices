@@ -100,7 +100,7 @@ for epoch in range(epochs):
 
     # batch training
     for Xb, yb in train_loader:
-        optimizer.zero_grad()
+        optimizer.zero_grad()  # 每次传播时清空梯度，不然会累加
         output = model(Xb)
         loss = criterion(output, yb)  # 这个loss 是 batch 的平均 loss
         loss.backward()  # 计算梯度
