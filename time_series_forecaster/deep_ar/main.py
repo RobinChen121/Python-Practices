@@ -93,3 +93,4 @@ for epoch in range(max_epochs):
 model.eval()  # 切换到评估模式
 with torch.no_grad():
     prediction = model(x_test)
+    pass

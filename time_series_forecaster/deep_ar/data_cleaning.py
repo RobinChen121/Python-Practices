@@ -70,7 +70,7 @@ def create_sequence(
     x_train = []
     y_test = []
     x_test = []
-    data_np = raw_data.values  # 比频繁调用 pandas iloc 快多倍
+    data_np = raw_data.to_numpy(dtype=np.float32)  # 比频繁调用 pandas iloc 快多倍
     for j in range(item_num):
         # 获取该 item 的 embedding，必须用 tensor 索引访问
         device = embedding_layers.weight.device

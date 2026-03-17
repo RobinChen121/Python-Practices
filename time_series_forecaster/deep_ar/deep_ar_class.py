@@ -9,7 +9,7 @@ Description:
 
 import torch.nn as nn
 import torch
-import torch.distributions as Dist
+import torch.distributions as distribution
 
 
 class DeepARLSTM(nn.Module):
@@ -54,10 +54,15 @@ class DeepARLSTM(nn.Module):
         sigma_or_alpha = torch.nn.functional.softplus(sigma_or_alpha) + 1e-6
 
         if self.dist != "negative-binomial":
-            dist = Dist.normal(mu, sigma_or_alpha)
+            dist = distribution.normal.Normal(mu, sigma_or_alpha)
         else:
-            prob = mu / sigma_or_alpha
-            num = mu * prob / (1 - prob)
-            dist = Dist.negative_binomial(num, prob)
+            # 负二项分布用 shape parameter 和均值拟合
+            var = mu + sigma_or_alpha * (mu**2)
+            p = mu / var
+            p = torch.clamp(p, min=1e-6, max=1.0 - 1e-6)  # 让数值稳定，防止极端值
+            r = mu * p / (1 - p)
+            dist = distribution.negative_binomial.NegativeBinomial(
+                total_count=r, probs=p
+            )
 
         return dist
