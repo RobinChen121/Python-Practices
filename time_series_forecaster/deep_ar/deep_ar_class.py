@@ -40,7 +40,7 @@ class DeepARLSTM(nn.Module):
         # 用每个时间步最后那个 layer 的h_t 参与下面的映射
         self.linear = nn.Linear(hidden_size, 2 * output_size)
 
-    def forward(self, x):
+    def forward(self, x, v):
         # 返回所有时间步的隐藏状态及最后一个时间步的（h_n, c_m）
         # out 的形状是 (batch_size, seq_size, hidden_size)
         out, _ = self.lstm(x)  # out.shape = [batch, seq_len, 2*output_size]
@@ -52,6 +52,15 @@ class DeepARLSTM(nn.Module):
                 torch.nn.functional.softplus(mu) + 1e-6
             )  # 加上 1e-6 是防止出现 0 的情况
         sigma_or_alpha = torch.nn.functional.softplus(sigma_or_alpha) + 1e-6
+
+        # ---- 原始尺度还原 ----
+        if v is not None:
+            mu = mu * v
+            if self.dist == "negative-binomial":
+                sigma_or_alpha = sigma_or_alpha * v
+            # 负二项 alpha 不乘 v，要除以 sqrt(v)
+            else:
+                sigma_or_alpha = sigma_or_alpha / torch.sqrt(v)
 
         if self.dist != "negative-binomial":
             dist = distribution.normal.Normal(mu, sigma_or_alpha)

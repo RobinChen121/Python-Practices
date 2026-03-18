@@ -127,7 +127,7 @@ for epoch in range(epochs):
     epoch_loss = 0.0
     for X_batch, y_batch in train_loader:
         optimizer.zero_grad()
-        output = model(X_batch)
+        output = model(X_batch) # 相当于调用了里面的forward函数
         loss = criterion(output, y_batch)  # 这个loss 是 batch 的平均 loss
         loss.backward()  # 计算梯度
         optimizer.step()  # 根据梯度更新权重

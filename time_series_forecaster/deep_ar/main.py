@@ -26,7 +26,7 @@ embedding_dim = 32
 raw_data = get_raw_data()
 month_num, item_num = raw_data.shape
 embedding_layers = nn.Embedding(item_num, embedding_dim)
-x_train, y_train, x_test, y_test = create_sequence(
+x_train, y_train, x_test, y_test, v_train, v_test = create_sequence(
     raw_data, embedding_layers, train_length, encoder_length, decoder_length
 )
 
@@ -92,5 +92,5 @@ for epoch in range(max_epochs):
 # 预测
 model.eval()  # 切换到评估模式
 with torch.no_grad():
-    prediction = model(x_test)
+    prediction = model(x_test, v_test)  # 自动调用里面的 forward 函数
     pass

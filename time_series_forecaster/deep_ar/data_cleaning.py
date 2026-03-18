@@ -70,6 +70,8 @@ def create_sequence(
     x_train = []
     y_test = []
     x_test = []
+    v_train = []
+    v_test = []
     data_np = raw_data.to_numpy(dtype=np.float32)  # 比频繁调用 pandas iloc 快多倍
     for j in range(item_num):
         # 获取该 item 的 embedding，必须用 tensor 索引访问
@@ -78,6 +80,8 @@ def create_sequence(
         for i in range(train_length - encoder_length - decoder_length + 1):
             # from_numpy 比 torch.tensor 快
             v = 1 + np.mean(data_np[i : i + encoder_length, j])
+            v_window = torch.full((encoder_length, 1), float(v), dtype=torch.float32)
+            v_train.append(v_window)
             x = (
                 torch.from_numpy(data_np[i : i + encoder_length, j] / v)
                 .float()
@@ -100,12 +104,12 @@ def create_sequence(
             x_train.append(torch.cat([x, age, month, emb], dim=1))  # 必须有维度才能拼接
             y_train.append(y)
 
+        v = 1 + np.mean(data_np[train_length - encoder_length : train_length, j])
+        v_window = torch.full((encoder_length, 1), float(v), dtype=torch.float32)
+        v_test.append(v_window)
         x = (
             torch.from_numpy(
-                data_np[
-                    train_length - encoder_length : train_length,
-                    j,
-                ]
+                data_np[train_length - encoder_length : train_length, j] / v
             )
             .float()
             .unsqueeze(1)
@@ -126,6 +130,8 @@ def create_sequence(
         torch.stack(y_train),
         torch.stack(x_test),
         torch.stack(y_test),
+        torch.stack(v_train),
+        torch.stack(v_test),
     )
 
 
@@ -136,7 +142,7 @@ if __name__ == "__main__":
     embedding_dim = 32
 
     embedding_layers_ = nn.Embedding(item_num_, embedding_dim)
-    x_train_, y_train_, x_test_, y_test_ = create_sequence(
+    x_train_, y_train_, x_test_, y_test_, _, _ = create_sequence(
         df_, embedding_layers_, train_length=43, encoder_length=8, decoder_length=8
     )
     print(df_.head())
