@@ -86,7 +86,7 @@ def create_sequence(
             y = (
                 torch.from_numpy(
                     data_np[i + encoder_length : i + encoder_length + decoder_length, j]
-                    / v
+                    # / v # 因为是负二项分布，y必须是整数，不能标准化
                 )
                 .float()
                 .unsqueeze(1)
