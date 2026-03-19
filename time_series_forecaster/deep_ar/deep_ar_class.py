@@ -57,9 +57,7 @@ class DeepARLSTM(nn.Module):
         if v is not None:
             mu = mu * v
             if self.dist == "negative-binomial":
-                sigma_or_alpha = sigma_or_alpha * v
-            # 负二项 alpha 不乘 v，要除以 sqrt(v)
-            else:
+                # 负二项 alpha 不乘 v，要除以 sqrt(v)
                 sigma_or_alpha = sigma_or_alpha / torch.sqrt(v)
 
         if self.dist != "negative-binomial":

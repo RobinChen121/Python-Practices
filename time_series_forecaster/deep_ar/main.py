@@ -32,8 +32,8 @@ x_train, y_train, x_test, y_test, v_train, v_test = create_sequence(
 
 # DataLoader
 # 使用 batch size, 若不使用，相当于 full batch
-train_dataset = TensorDataset(x_train, y_train)
-test_dataset = TensorDataset(x_test, y_test)
+train_dataset = TensorDataset(x_train, y_train, v_train)
+test_dataset = TensorDataset(x_test, y_test, v_test)
 train_loader = DataLoader(
     train_dataset,
     batch_size=batch_size,
@@ -69,9 +69,9 @@ best_loss = float("inf")
 counter = 0
 for epoch in range(max_epochs):
     epoch_loss = 0.0
-    for X_batch, y_batch in train_loader:
+    for X_batch, y_batch, v_batch in train_loader:
         optimizer.zero_grad()  # 每次传播时清空梯度，不然会累加
-        dist = model(X_batch)
+        dist = model(X_batch, v_batch)
         loss = -dist.log_prob(y_batch)
         loss.backward()
         optimizer.step()
