@@ -69,10 +69,12 @@ best_loss = float("inf")
 counter = 0
 for epoch in range(max_epochs):
     epoch_loss = 0.0
-    for X_batch, y_batch, v_batch in train_loader:
+    for x_batch, y_batch, v_batch in train_loader:
         optimizer.zero_grad()  # 每次传播时清空梯度，不然会累加
-        dist = model(X_batch, v_batch)
+        dist = model(x_batch, v_batch)
         loss = -dist.log_prob(y_batch)
+        loss = loss.squeeze(-1)
+        loss = loss.mean()  # loss 得平均
         loss.backward()
         optimizer.step()
         epoch_loss += loss.item()

@@ -43,6 +43,7 @@ def get_raw_data():
     return df2
 
 
+# embedding 应该放到模型的 forward 函数里
 def create_sequence(
     raw_data: pandas.DataFrame,
     embedding_layers: torch.nn.Embedding,
@@ -76,7 +77,7 @@ def create_sequence(
     for j in range(item_num):
         # 获取该 item 的 embedding，必须用 tensor 索引访问
         device = embedding_layers.weight.device
-        item_emb = embedding_layers(torch.tensor([j], device=device))
+        item_emb = embedding_layers(torch.tensor([j], device=device)).detach()
         for i in range(train_length - encoder_length - decoder_length + 1):
             # from_numpy 比 torch.tensor 快
             v = 1 + np.mean(data_np[i : i + encoder_length, j])
