@@ -46,7 +46,7 @@ def get_raw_data():
 # embedding 应该放到模型的 forward 函数里
 def create_sequence(
     raw_data: pandas.DataFrame,
-    embedding_layers: torch.nn.Embedding,
+    # embedding_layers: torch.nn.Embedding,
     train_length: int,
     encoder_length: int,
     decoder_length: int,
@@ -73,11 +73,15 @@ def create_sequence(
     x_test = []
     v_train = []
     v_test = []
+    emb_train = []
+    emb_test = []
     data_np = raw_data.to_numpy(dtype=np.float32)  # 比频繁调用 pandas iloc 快多倍
     for j in range(item_num):
         # 获取该 item 的 embedding，必须用 tensor 索引访问
-        device = embedding_layers.weight.device
-        item_emb = embedding_layers(torch.tensor([j], device=device)).detach()
+        # device = embedding_layers.weight.device
+        # item_emb = embedding_layers(torch.tensor([j], device=device)).detach()
+        # torch.long 是 int64 整数型
+        item_id = torch.tensor(j, dtype=torch.long)
         for i in range(train_length - encoder_length - decoder_length + 1):
             # from_numpy 比 torch.tensor 快
             v = 1 + np.mean(data_np[i : i + encoder_length, j])
@@ -99,11 +103,12 @@ def create_sequence(
 
             age = scaled_ages[i : i + encoder_length, j].unsqueeze(1)
             month = scaled_months[i : i + encoder_length, j].unsqueeze(1)
-            emb = item_emb.repeat(encoder_length, 1)
+            # emb = item_emb.repeat(encoder_length, 1)
 
             # dim=0 按行拼接，dim=1 按列拼接
-            x_train.append(torch.cat([x, age, month, emb], dim=1))  # 必须有维度才能拼接
+            x_train.append(torch.cat([x, age, month], dim=1))  # 必须有维度才能拼接
             y_train.append(y)
+            emb_train.append(item_id)
 
         v = 1 + np.mean(data_np[train_length - encoder_length : train_length, j])
         v_window = torch.full((encoder_length, 1), float(v), dtype=torch.float32)
@@ -121,11 +126,12 @@ def create_sequence(
         month = scaled_months[
             train_length - encoder_length : train_length, j
         ].unsqueeze(1)
-        emb = item_emb.repeat(encoder_length, 1)
-        x_test.append(torch.cat([x, age, month, emb], dim=1))
+        # emb = item_emb.repeat(encoder_length, 1)
+        x_test.append(torch.cat([x, age, month], dim=1))
 
         y = torch.from_numpy(data_np[train_length:month_num, j]).float().unsqueeze(1)
         y_test.append(y)
+        emb_test.append(item_id)
     return (
         torch.stack(x_train),
         torch.stack(y_train),
@@ -133,6 +139,8 @@ def create_sequence(
         torch.stack(y_test),
         torch.stack(v_train),
         torch.stack(v_test),
+        torch.stack(emb_train),
+        torch.stack(emb_test),
     )
 
 
@@ -142,9 +150,9 @@ if __name__ == "__main__":
     sequence_length_ = 8
     embedding_dim = 32
 
-    embedding_layers_ = nn.Embedding(item_num_, embedding_dim)
+    # embedding_layers_ = nn.Embedding(item_num_, embedding_dim)
     x_train_, y_train_, x_test_, y_test_, _, _ = create_sequence(
-        df_, embedding_layers_, train_length=43, encoder_length=8, decoder_length=8
+        df_, train_length=43, encoder_length=8, decoder_length=8
     )
     print(df_.head())
     print(df_.shape)

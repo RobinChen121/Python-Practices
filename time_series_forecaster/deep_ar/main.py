@@ -25,15 +25,14 @@ embedding_dim = 32
 # create data sequence
 raw_data = get_raw_data()
 month_num, item_num = raw_data.shape
-embedding_layers = nn.Embedding(item_num, embedding_dim)
-x_train, y_train, x_test, y_test, v_train, v_test = create_sequence(
-    raw_data, embedding_layers, train_length, encoder_length, decoder_length
+x_train, y_train, x_test, y_test, v_train, v_test, emb_train, emb_test = (
+    create_sequence(raw_data, train_length, encoder_length, decoder_length)
 )
 
 # DataLoader
 # 使用 batch size, 若不使用，相当于 full batch
-train_dataset = TensorDataset(x_train, y_train, v_train)
-test_dataset = TensorDataset(x_test, y_test, v_test)
+train_dataset = TensorDataset(x_train, y_train, v_train, emb_train)
+test_dataset = TensorDataset(x_test, y_test, v_test, emb_test)
 train_loader = DataLoader(
     train_dataset,
     batch_size=batch_size,
@@ -51,6 +50,8 @@ model = DeepARLSTM(
     output_size=output_size,
     hidden_size=node_num,
     layer_num=layer_num,
+    item_num=item_num,
+    embedding_dim=embedding_dim,
 )
 # set forget bias 初始值 = 1
 # 一开始忘掉一半记忆
@@ -69,9 +70,9 @@ best_loss = float("inf")
 counter = 0
 for epoch in range(max_epochs):
     epoch_loss = 0.0
-    for x_batch, y_batch, v_batch in train_loader:
+    for x_batch, y_batch, v_batch, emb_batch in train_loader:
         optimizer.zero_grad()  # 每次传播时清空梯度，不然会累加
-        dist = model(x_batch, v_batch)
+        dist = model(x_batch, v_batch, emb_batch)
         loss = -dist.log_prob(y_batch)
         loss = loss.squeeze(-1)
         loss = loss.mean()  # loss 得平均
