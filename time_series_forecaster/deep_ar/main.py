@@ -43,7 +43,7 @@ test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
 
 
 # LSTM model
-input_size = x_train.shape[-1]
+input_size = x_train.shape[-1] + embedding_dim
 output_size = y_train.shape[-1]
 model = DeepARLSTM(
     input_size=input_size,
@@ -75,7 +75,7 @@ for epoch in range(max_epochs):
         dist = model(x_batch, v_batch, emb_batch)
         loss = -dist.log_prob(y_batch)
         loss = loss.squeeze(-1)
-        loss = loss.mean()  # loss 得平均
+        loss = loss.mean()  # loss 对所有值取平均
         loss.backward()
         optimizer.step()
         epoch_loss += loss.item()

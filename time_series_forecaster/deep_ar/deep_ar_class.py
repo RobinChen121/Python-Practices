@@ -44,20 +44,22 @@ class DeepARLSTM(nn.Module):
         # 用每个时间步最后那个 layer 的h_t 参与下面的映射
         self.linear = nn.Linear(hidden_size, 2 * output_size)
 
-    def forward(self, x, emb, v):
+    def forward(self, x, v, emb):
         # 返回所有时间步的隐藏状态及最后一个时间步的（h_n, c_m）
         # out 的形状是 (batch_size, seq_size, hidden_size)
+        # embedding（输入必须是 long）
+        # emb = emb.long()  # 建议加上，防御性写法
         item_emb = self.embedding_layers(emb)  # shape = [batch, embed_dim]
         # 扩展到时间维度
-        emb = emb.unsqueeze(1)  # shape: [batch, 1, embedding_dim]
+        item_emb = item_emb.unsqueeze(1)  # shape: [batch, 1, embedding_dim]
         # expand的本质不会真的复制数据
         # 它创建一个“视图”（view），让同一块内存看起来被重复了
         # 第一维不变，最后一维不变，第二维扩展
-        emb = emb.expand(-1, x.size(1), -1)
+        item_emb = item_emb.expand(-1, x.size(1), -1)
 
         # x 的 shape 是 [batch, seq_size, input_size]
         # -1 表示在最后一维 input_size(feature) 拼接
-        x = torch.cat([x, emb], dim=-1)  # dim=0 按batch拼接，dim=1 按seq_size拼接
+        x = torch.cat([x, item_emb], dim=-1)  # dim=0 按batch拼接，dim=1 按seq_size拼接
         out, _ = self.lstm(x)  # out.shape = [batch, seq_len, 2*output_size]
         parameters = self.linear(out)
         mu = parameters[..., : self.output_size]  # tensor 的切片, 不论前面的维度是什么
