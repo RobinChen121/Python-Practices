@@ -142,7 +142,7 @@ for epoch in range(epochs):
 # 预测
 # -------------------------------
 model.eval()  # 切换到评估模式
-with torch.no_grad():
+with torch.no_grad(): # 告诉 PyTorch，“接下来的计算不需要记录梯度（Gradients）”
     pred_train_norm = model(X_train)
     pred_test_norm = model(X_test)
     pred_train = scaler.inverse_transform(pred_train_norm.numpy())

@@ -118,7 +118,7 @@ model.eval()
 correct = 0
 total = 0
 
-with torch.no_grad():
+with torch.no_grad(): # 告诉 PyTorch，“接下来的计算不需要记录梯度（Gradients）”
     for Xb, yb in test_loader:
         output = model(Xb)
         pred = torch.argmax(output, dim=1)

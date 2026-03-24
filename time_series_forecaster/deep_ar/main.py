@@ -21,6 +21,7 @@ encoder_length = 8
 decoder_length = 8
 train_length = 43
 embedding_dim = 32
+num_scenarios = 100 # the number of predicted scenarios
 
 # create data sequence
 raw_data = get_raw_data()
@@ -72,8 +73,8 @@ for epoch in range(max_epochs):
     epoch_loss = 0.0
     for x_batch, y_batch, v_batch, emb_batch in train_loader:
         optimizer.zero_grad()  # 每次传播时清空梯度，不然会累加
-        dist = model(x_batch, v_batch, emb_batch)
-        loss = -dist.log_prob(y_batch)
+        dist, _ = model(x_batch, v_batch, emb_batch)
+        loss = -dist.log_prob(y_batch) # 极大似然
         loss = loss.squeeze(-1)
         loss = loss.mean()  # loss 对所有值取平均
         loss.backward()
@@ -94,6 +95,8 @@ for epoch in range(max_epochs):
 
 # 预测
 model.eval()  # 切换到评估模式
-with torch.no_grad():
+scenarios = []
+with torch.no_grad(): # 告诉 PyTorch，“接下来的计算不需要记录梯度（Gradients）”
     prediction = model(x_test, v_test)  # 自动调用里面的 forward 函数
-    pass
+    for _ in range(num_scenarios):
+        pass
