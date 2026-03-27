@@ -94,18 +94,28 @@ class SimpleRNN(nn.Module):
     # input_size：输入数据的特征维度
     # output_size: 输出数据的特征维度
     def __init__(self, input_size, hidden_size, output_size):
-        super().__init__()  # 调用父类 的构造函数
+        super().__init__()  # 调用父类的构造函数
+        # input_size: the number of expected features in the input x
+        # hidden_size: the number of features in the hidden stage h
+        # num_layers: number of recurrent layers
+        # 若 batch_first=True, RNN 输入数据的形状为 (N, L, H_in)，即 (batch_size, seq_length, input_size)
+        # 否则，输入形状为 (seq_length, batch_size, input_size)
         self.rnn = nn.RNN(
             input_size, hidden_size, batch_first=True
-        )  # 输入数据的结构 (batch_size, seq_len, input_size)
-        # 每个时间步 h_t 形状 [num_layers, batch, hidden_size]
-        # 用最后那个 layer 的h_t 参与下面的映射
+        )
+        # D=2 if bidirectional otherwise =1
+        # 若 batch_first=true, 每个时间步 h_t 形状 [num_layers * D, batch_size, hidden_size]
+        # 若 batch_first=false, h_t 形状为 [num_layers * D, hidden_size]，即去掉 batch_size
+        # 用最后那个 layer 的 h_t 参与下面的映射
         self.linear = nn.Linear(
             hidden_size, output_size
-        )  # self.fc 改为 self.linear 是一样的,输出维度 [batch, output_size]
+        )  # self.fc 改为 self.linear 是一样的,输出维度 [batch_size, output_size]
 
     def forward(self, x):
-        # out 的形状是 (batch_size, seq_size, hidden_size)
+        # 若 batch_first=true,
+        # out 的形状是 (batch_size, seq_size, hidden_size*D)
+        # D=2 if bidirectional otherwise =1
+        # 另一个输出 h_n 的形状是 (num_layers*D, batch_size, hidden_size)
         out, _ = self.rnn(x)  # 返回所有时间步的隐藏状态及最后一个时间步的隐藏状态
         out = out[:, -1, :]  # out.shape = (batch_size, seq_len, hidden_size)
         out = self.linear(out)
@@ -137,7 +147,7 @@ for epoch in range(epochs):
         epoch_loss += (
             loss.item()
         )  # .item() 的核心作用：把单元素张量转换成普通 Python 数字
-    epoch_loss /= len(train_loader)  # 平均每个 batch 的 loss
+    epoch_loss /= len(train_loader)  # 平均 loss
     if (epoch + 1) % 100 == 0:
         print(f"Epoch {epoch + 1}/{epochs}, Train Loss: {epoch_loss:.6f}")
 

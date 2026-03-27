@@ -92,9 +92,17 @@ test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
 class LSTMModel(nn.Module):
     def __init__(self, input_size=1, hidden_size=10, num_layers=1, output_size=1):
         super().__init__()
+        # input_size: the number of expected features in the input x
+        # hidden_size: the number of features in the hidden stage h
+        # num_layers: number of recurrent layers
+        # 若 batch_first=True, lstm 输入数据的形状为 (N, L, H_in)，即 (batch_size, seq_length, input_size)
+        # 否则，输入形状为 (seq_length, batch_size, input_size)
         self.lstm = nn.LSTM(input_size, hidden_size, num_layers, batch_first=True)
-        # 把 LSTM 的 hidden state 映射到输出空间
-        # 每个时间步 h_t 形状 [num_layers, batch, hidden_size]
+        # D=2 if bidirectional otherwise =1
+        # 若 batch_first=true, 每个时间步 h_t 形状一般(不考虑 proj_size)是 [num_layers * D, batch_size, hidden_size]
+        # 若 batch_first=false, h_t 形状一般为 [num_layers * D, hidden_size]，即去掉 batch_size
+        # 若 batch_first=true, 每个时间步 c_t 形状 [num_layers * D, batch_size, hidden_size]
+
         # 用最后那个 layer 的h_t 参与下面的映射
         self.linear = nn.Linear(
             hidden_size, output_size
@@ -102,7 +110,10 @@ class LSTMModel(nn.Module):
 
     def forward(self, x):
         # 类中有 __call__() 函数，所以类可以直接调用
-        # out 的形状是 (batch_size, seq_size, hidden_size)
+        # out 的形状一般(不考虑 proj_size)是 (batch_size, seq_size, hidden_size)
+        # D=2 if bidirectional otherwise =1
+        # 另一个输出 h_n 的形状是 (num_layers*D, batch_size, hidden_size)
+        # 另一个输出 c_n 的形状是 (num_layers*D, batch_size, hidden_size)
         out, _ = self.lstm(
             x
         )  # # 返回所有时间步的隐藏状态及最后一个时间步的（h_n, c_m）
@@ -134,7 +145,7 @@ for epoch in range(epochs):
         epoch_loss += (
             loss.item()
         )  # .item() 的核心作用：把单元素张量转换成普通 Python 数字
-    epoch_loss /= len(train_loader)  # 平均每个 batch 的 loss
+    epoch_loss /= len(train_loader)  # 平均loss
     if (epoch + 1) % 100 == 0:
         print(f"Epoch {epoch + 1}/{epochs}, Train Loss: {epoch_loss:.6f}")
 

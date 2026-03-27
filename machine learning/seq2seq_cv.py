@@ -2,7 +2,7 @@
 Python version: 3.12.7
 Author: Zhen Chen, chen.zhen5526@gmail.com
 Date: 2025/12/2 12:58
-Description:
+Description: implement seq2seq, adding month as the covariates
 
 
 """
@@ -21,6 +21,15 @@ from statsmodels.datasets import get_rdataset
 data = get_rdataset("AirPassengers").data
 raw_data = data["value"]
 
+# 添加月份信息
+time_idx = np.arange(len(data))
+month = time_idx % 12
+month_sin = np.sin(2 * np.pi * month / 12)
+month_cos = np.cos(2 * np.pi * month / 12)
+# concatenate保持维度数量不变，指定维度变长
+# stack 增加一个新的维度
+covariates = np.stack([month_sin, month_cos], axis=1)
+
 # 归一化
 scaler = MinMaxScaler(feature_range=(-1, 1))
 data = scaler.fit_transform(raw_data.to_numpy().reshape(-1, 1)) # scaler 只接受二维数组
@@ -30,13 +39,20 @@ data = data.flatten()
 # shape 分别是
 # X   = [N, encoder_length]
 # y   = [N, decoder_length]
-def create_sequences(data, encoder_length=12, decoder_length=1):
+# cov = [N, encoder_length + decoder_length, cov_dim]
+def create_sequences(data, covariates, encoder_length=12, decoder_length=1):
     X, y, cov = [], [], []
     for i in range(len(data) - encoder_length - decoder_length + 1):
         X.append(data[i : i + encoder_length])
         y.append(data[i + encoder_length : i + encoder_length + decoder_length])
 
-    return np.array(X), np.array(y)
+        # covariates（关键：包含未来！）
+        cov.append(
+            covariates[
+                i : i + encoder_length + decoder_length, :
+            ]
+        )
+    return np.array(X), np.array(y), np.array(cov)
 
 
 encoder_length = 12   # 用多少历史
@@ -44,22 +60,22 @@ decoder_length = 1    # 预测多少未来
 batch_size = 12
 hidden_dim = 32
 
-X, y= create_sequences(data, encoder_length, decoder_length)
+X, y, cov = create_sequences(data, covariates, encoder_length, decoder_length)
 X = torch.tensor(X, dtype=torch.float32).unsqueeze(-1)
 y = torch.tensor(y, dtype=torch.float32).unsqueeze(-1)
-
-
+cov = torch.tensor(cov, dtype=torch.float32)
 
 # 按时间切分 80/20
 # --------------------------
 split_idx = int(len(X) * 0.8)
 X_train, X_test = X[:split_idx], X[split_idx:]
 y_train, y_test = y[:split_idx], y[split_idx:]
+cov_train, cov_test = cov[:split_idx], cov[split_idx:]
 
 # 使用 batch size
 # 若不使用，相当于 full batch
-train_dataset = TensorDataset(X_train, y_train)
-test_dataset = TensorDataset(X_test, y_test)
+train_dataset = TensorDataset(X_train, y_train, cov_train)
+test_dataset = TensorDataset(X_test, y_test, cov_test)
 train_loader = DataLoader(
     train_dataset,
     batch_size=batch_size,
@@ -68,26 +84,17 @@ train_loader = DataLoader(
 )
 test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
 
-
-# # PyTorch 训练时，输入数据类型一般都是 torch.float32 类型
-# # 多分类数据时才是 torch.long 类型
-# X = torch.tensor(X, dtype=torch.float32)  # [N, 12, 1]
-# y = torch.tensor(y, dtype=torch.float32)  # [N, 12, 1]
-#
-# # 对于这种时间序列数据，不能随机打乱划分训练数据
-# train_size = int(len(X) * 0.8)
-# X_train = X[:train_size]
-# X_test = X[train_size:]
-# y_train = y[:train_size]
-# y_test = y[train_size:]
-
-
 class Encoder(nn.Module):
     def __init__(self, input_dim=1, hidden_dim=hidden_dim, num_layers=1):
         super().__init__()
-        self.lstm = nn.LSTM(input_dim, hidden_dim, num_layers, batch_first=True)
+        cov_dim = 2 # 月份维度
+        self.lstm = nn.LSTM(input_dim + cov_dim, hidden_dim, num_layers, batch_first=True)
 
-    def forward(self, x):
+    def forward(self, x, cov):
+        # 只取 encoder 部分 cov
+        # 在 pytorch 中 size() 与 shape() 等价
+        cov_enc = cov[:, :x.size(1), :]
+        x = torch.cat([x, cov_enc], dim=-1)
         outputs, (h, c) = self.lstm(x)  # outputs 为每个所有时间步的隐藏状态
         return h, c
 
@@ -99,38 +106,44 @@ class Decoder(nn.Module):
         super().__init__()
         self.decoder_length = decoder_length
         self.output_dim = output_dim
-        self.lstm = nn.LSTM(output_dim, hidden_dim, num_layers, batch_first=True)
+        cov_dim = 2 # 月份维度
+        self.lstm = nn.LSTM(output_dim + cov_dim, hidden_dim, num_layers, batch_first=True)
         self.fc = nn.Linear(
             hidden_dim, output_dim
         )  # nn.Linear 对输入张量的最后一维做线性变换，hidden_dim, output_dim 分别是输入数据
         # 和输出数据的最后一个维度
         # 改为 self.linear 也可以，则下面 forward 中也得叫 self.linear
 
-    def forward(self, h, c):
+    def forward(self, h, c, cov):
         # decoder 输入初始化：用 0 向量作为起点
         # h 的形状: [num_layers * num_directions, batch_size, hidden_dim]
         # PyTorch 的 LSTM 输入必须是 3 维张量，格式是：
         # [batch_size, encoder_length, input_size]
         # input_size 是 the number of expected features in the input x
         # autoregressive 滚动
-        # 在 pytorch 中 size() 与 shape() 等价
-        decoder_input = torch.zeros(
-            (h.size(1), 1, self.output_dim),  # 中间是 1 表示预测未来 1 个时间步
-            device=h.device
-        )  # [batch, seq=1, feature=1]
+        batch_size = h.size(1)
+        decoder_input = torch.zeros(batch_size, 1, 1, device=h.device) # 中间是 1 表示预测未来 1 个时间步
 
         outputs = []
-        for _ in range(self.decoder_length):
-            # 第一个输入为 decoder_input
-            # 返回所有时间步的隐藏状态及最后一个时间步的（h_n, c_m）
-            out, (h, c) = self.lstm(decoder_input, (h, c))
-            pred = self.fc(out)  #
-            outputs.append(pred)
-            decoder_input = pred  # 下一个时间步用前一步预测
+        for t in range(self.decoder_length):
+            # 取未来 covariate
+            cov_t = cov[:, -(self.decoder_length) + t : -(self.decoder_length) + t + 1, :]
+            lstm_input = torch.cat([decoder_input, cov_t], dim=-1)
+            out, (h, c) = self.lstm(lstm_input, (h, c))
+            pred = self.fc(out)
 
-        # 将这个list的元素拼接，维度为 [batch, decoder_length, 1]
-        # concatenate保持维度数量不变，指定维度变长
-        # stack 增加一个新的维度
+            outputs.append(pred)
+            decoder_input = pred # 下一个时间步用前一步预测
+
+        # for _ in range(self.decoder_length):
+        #     # 第一个输入为 decoder_input
+        #     out, (h, c) = self.lstm(decoder_input, (h, c))
+        #     pred = self.fc(out)  #
+        #     outputs.append(pred)
+        #     decoder_input = pred  # 下一个时间步用前一步预测
+
+        # 将这个list的元素拼接，不增加新的维度，维度为 [batch, decoder_length, 1]
+        # 与 stack 不一样，stack 会增加维度
         outputs = torch.cat(outputs, dim=1)
         return outputs
 
@@ -141,15 +154,15 @@ class Seq2Seq(nn.Module):
         self.encoder = Encoder()
         self.decoder = Decoder(decoder_length=decoder_length)
 
-    def forward(self, x):
-        h, c = self.encoder(x)
-        out = self.decoder(h, c)
+    def forward(self, x, cov):
+        h, c = self.encoder(x, cov)
+        out = self.decoder(h, c, cov)
         return out
 
 
 model = Seq2Seq()
 criterion = nn.MSELoss()
-optimizer = torch.optim.Adam(model.parameters(), lr=0.01)
+optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
 
 epochs = 300
 
@@ -157,9 +170,9 @@ model.train()  # 告诉模型处于训练模式
 for epoch in range(epochs):
     # batch training
     epoch_loss = 0.0
-    for X_batch, y_batch in train_loader:
+    for X_batch, y_batch, cov_batch in train_loader:
         optimizer.zero_grad()
-        output = model(X_batch) # 相当于调用了里面的forward函数
+        output = model(X_batch, cov_batch) # 相当于调用了里面的forward函数
         loss = criterion(output, y_batch)  # 这个loss 是 batch 的平均 loss
         loss.backward()  # 计算梯度
         optimizer.step()  # 根据梯度更新权重
@@ -172,8 +185,8 @@ for epoch in range(epochs):
 
 model.eval()  # 切换到评估模式
 with torch.no_grad(): # 告诉 PyTorch，“接下来的计算不需要记录梯度（Gradients）”
-    pred_train_norm = model(X_train)
-    pred_test_norm = model(X_test)
+    pred_train_norm = model(X_train, cov_train)
+    pred_test_norm = model(X_test, cov_test)
     pred_train_np = pred_train_norm.squeeze(-1).numpy()   # [N, decoder_length]
     pred_test_np = pred_test_norm.squeeze(-1).numpy()
 

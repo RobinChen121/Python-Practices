@@ -67,6 +67,7 @@ test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=True)
 class IrisNet(nn.Module):
     def __init__(self, input_size=4, hidden_size=10, output_size=3):
         super().__init__()
+        # 三层神经网络：输入层，（一个激活函数），一个隐含层，输出层
         self.net = nn.Sequential(
             nn.Linear(input_size, hidden_size),
             nn.Sigmoid(),
@@ -108,7 +109,7 @@ for epoch in range(epochs):
         total_loss += (
             loss.item()
         )  # .item() 的核心作用：把单元素张量转换成普通 Python 数字
-    total_loss /= len(train_loader)  # 平均每个 batch 的 loss
+    total_loss /= len(train_loader)  # 平均loss
     if epoch % 100 == 0:
         print(f"Epoch {epoch+1}, Loss = {total_loss:.4f}")
 
