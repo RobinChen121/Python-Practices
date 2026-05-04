@@ -25,7 +25,17 @@ data_address = os.path.join(folder_address, file_name)
 
 df_raw = pd.read_csv(data_address)
 
-model0 = smf.ols(formula="trust_ai_6 ~ trust_ai_3 + mean_ai + age", data=df_raw).fit()
+# mean_ai as IV
+# trust_ai_6 as DV
+# 2 model: trust_ai_3 as DV
+# mean_ai as DV
+DV = "trust_ai_3"
+IV = " + mean_ai + trust_ai_6"
+# DV = "trust_ai_6"
+# IV = " + mean_ai + trust_ai_3"
+# DV = "mean_ai"
+# IV = " + trust_ai_3 + trust_ai_6"
+model0 = smf.ols(formula=DV + " ~ age" + IV, data=df_raw).fit()
 print(model0.summary())
 
 df_raw.rename(columns={"profile_education_level": "education_level"}, inplace=True)
@@ -53,7 +63,9 @@ df1["education_level"] = df1["education_level"].map(
 )
 df1["education_level"] = df1["education_level"].astype("category")
 model1 = smf.ols(
-    formula="trust_ai_6 ~ C(education_level, Treatment(reference='No university degree')) + trust_ai_3 + mean_ai + age",
+    formula=DV
+    + " ~ C(education_level, Treatment(reference='No university degree')) + age"
+    + IV,
     data=df1,
 ).fit()
 print(model1.summary())
@@ -76,7 +88,9 @@ df2["household_children"] = df2["household_children"].map(
 )
 df2["household_children"] = df2["household_children"].astype("category")
 model2 = smf.ols(
-    formula="trust_ai_6 ~ C(household_children, Treatment(reference='No children')) + trust_ai_3 + mean_ai + age",
+    formula=DV
+    + " ~ C(household_children, Treatment(reference='No children')) + age"
+    + IV,
     data=df2,
 ).fit()
 print(model2.summary())
@@ -104,7 +118,9 @@ df3["household_income"] = df3["household_income"].map(
 )
 df3["household_income"] = df3["household_income"].astype("category")
 model3 = smf.ols(
-    formula="trust_ai_6 ~ C(household_income, Treatment(reference='Under 25k pounds')) + trust_ai_3 + mean_ai + age",
+    formula=DV
+    + " ~ C(household_income, Treatment(reference='Under 25k pounds')) + age"
+    + IV,
     data=df3,
 ).fit()
 print(model3.summary())
@@ -124,7 +140,9 @@ df4["marital_status"] = df4["marital_status"].map(
 )
 df4["marital_status"] = df4["marital_status"].astype("category")
 model4 = smf.ols(
-    formula="trust_ai_6 ~ C(marital_status, Treatment(reference='Never married')) + trust_ai_3 + mean_ai + age",
+    formula=DV
+    + " ~ C(marital_status, Treatment(reference='Never married')) + age"
+    + IV,
     data=df4,
 ).fit()
 print(model4.summary())
@@ -138,8 +156,8 @@ df5["sex"] = df5["sex"].map(
     }
 )
 df5["sex"] = df5["sex"].astype("category")
-model5= smf.ols(
-    formula="trust_ai_6 ~ C(sex, Treatment(reference='Male')) + trust_ai_3 + mean_ai + age",
+model5 = smf.ols(
+    formula=DV + " ~ C(sex, Treatment(reference='Male')) + age" + IV,
     data=df5,
 ).fit()
 print(model5.summary())
@@ -155,7 +173,9 @@ df6["social_media_activemember_97"] = df6["social_media_activemember_97"].astype
     "category"
 )
 model6 = smf.ols(
-    formula="trust_ai_6 ~ C(social_media_activemember_97, Treatment(reference='No')) + trust_ai_3 + mean_ai + age",
+    formula=DV
+    + " ~ C(social_media_activemember_97, Treatment(reference='No')) + age"
+    + IV,
     data=df6,
 ).fit()
 print(model6.summary())
@@ -171,7 +191,7 @@ df7["urban_rural"] = df7["urban_rural"].map(
 )
 df7["urban_rural"] = df7["urban_rural"].astype("category")
 model7 = smf.ols(
-    formula="trust_ai_6 ~ C(urban_rural, Treatment(reference='Others')) + trust_ai_3 + mean_ai + age",
+    formula=DV + " ~ C(urban_rural, Treatment(reference='Others')) + age" + IV,
     data=df7,
 ).fit()
 print(model7.summary())
@@ -180,7 +200,7 @@ df8 = df_raw.dropna(subset="used_ai").copy()
 df8["used_ai"] = df8["used_ai"].map({1.0: "No", 2.0: "Yes"})
 df8["used_ai"] = df8["used_ai"].astype("category")
 model8 = smf.ols(
-    formula="trust_ai_6 ~ C(used_ai, Treatment(reference='No')) + trust_ai_3 + mean_ai + age",
+    formula=DV + " ~ C(used_ai, Treatment(reference='No')) + age" + IV,
     data=df8,
 ).fit()
 print(model8.summary())
@@ -203,7 +223,7 @@ print(model8.summary())
 # )
 # df5["household_size"] = df5["household_size"].astype("category")
 # model5 = smf.ols(
-#     formula="trust_ai_6 ~ C(household_size, Treatment(reference='1')) + trust_ai_3 + mean_ai",
+#     formula=DV + " ~ C(household_size, Treatment(reference='1')) + trust_ai_3 + mean_ai",
 #     data=df5,
 # ).fit()
 # print(model5.summary())
@@ -220,7 +240,7 @@ df9["work_industry"] = df9["work_industry"].map(
 )
 df9["work_industry"] = df9["work_industry"].astype("category")
 model9 = smf.ols(
-    formula="trust_ai_6 ~ C(work_industry, Treatment(reference='Public sector')) + trust_ai_3 + mean_ai + age",
+    formula=DV + " ~ C(work_industry, Treatment(reference='Public sector')) + age" + IV,
     data=df9,
 ).fit()
 print(model9.summary())
@@ -259,5 +279,6 @@ stargazer.title("Regression Results")
 stargazer.significance_levels([0.1, 0.05, 0.01])
 html = stargazer.render_html()
 
-with open("regression_uk.html", "w", encoding="utf-8") as f:
+out_name = "DV" + "-" + DV + "-regression_uk.html"
+with open(out_name, "w", encoding="utf-8") as f:
     f.write(html)

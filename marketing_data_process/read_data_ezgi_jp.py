@@ -54,7 +54,7 @@ mean_columns = [
     "trust_ai_8",
     "trust_ai_9",
 ]
-df_raw2["mean_ai"] = df_raw2[mean_columns].mean(axis=1, skipna=False)
+df_raw2["mean_ai"] = 7 - df_raw2[mean_columns].mean(axis=1, skipna=False) # 7 - mean
 df_linear_regression = df_raw2[
     [
         "trust_ai_6",
