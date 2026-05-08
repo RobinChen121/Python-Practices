@@ -21,12 +21,11 @@ encoder_length = 8
 decoder_length = 8
 train_length = 43
 embedding_dim = 32
-num_scenarios = 100 # the number of predicted scenarios
+num_scenarios = 100  # the number of predicted scenarios
 
 # create data sequence
 raw_data = get_raw_data()
-month_num, item_num = raw_data.shape
-x_train, y_train, x_test, y_test, v_train, v_test, emb_train, emb_test = (
+x_train, x_test, y_train, y_test, v_train, v_test, emb_train, emb_test = (
     create_sequence(raw_data, train_length, encoder_length, decoder_length)
 )
 
@@ -55,10 +54,12 @@ model = DeepARLSTM(
     embedding_dim=embedding_dim,
 )
 # set forget bias 初始值 = 1
-# 一开始忘掉一半记忆
+# 保持记忆
 for name, param in model.named_parameters():
     if "bias" in name:
         n = param.size(0)
+        # PyTorch 的 LSTM 偏置向量将四个门的偏置拼接在一起
+        # 分别是：输入门，遗忘门，候选门，输出门
         param.data[n // 4 : n // 2].fill_(1.0)
 optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
 
@@ -74,7 +75,7 @@ for epoch in range(max_epochs):
     for x_batch, y_batch, v_batch, emb_batch in train_loader:
         optimizer.zero_grad()  # 每次传播时清空梯度，不然会累加
         dist, _ = model(x_batch, v_batch, emb_batch)
-        loss = -dist.log_prob(y_batch) # 极大似然
+        loss = -dist.log_prob(y_batch)  # 极大似然
         loss = loss.squeeze(-1)
         loss = loss.mean()  # loss 对所有值取平均
         loss.backward()
@@ -96,7 +97,7 @@ for epoch in range(max_epochs):
 # 预测
 model.eval()  # 切换到评估模式
 scenarios = []
-with torch.no_grad(): # 告诉 PyTorch，“接下来的计算不需要记录梯度（Gradients）”
+with torch.no_grad():  # 告诉 PyTorch，“接下来的计算不需要记录梯度（Gradients）”
     prediction = model(x_test, v_test)  # 自动调用里面的 forward 函数
     for _ in range(num_scenarios):
         pass

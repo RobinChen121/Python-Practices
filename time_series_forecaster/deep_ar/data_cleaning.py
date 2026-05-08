@@ -134,8 +134,8 @@ def create_sequence(
         emb_test.append(item_id)
     return (
         torch.stack(x_train),
-        torch.stack(y_train),
         torch.stack(x_test),
+        torch.stack(y_train),
         torch.stack(y_test),
         torch.stack(v_train),
         torch.stack(v_test),
