@@ -17,6 +17,8 @@ import numpy as np
 
 
 def z_score(x: torch.Tensor, dim=0, eps=1e-8):
+    # dim=0 表示沿第 0 维求平均，0维表示行，即对列求平均
+    # keepdim=true 表示保留维度，不然会把那个指定的dim删除
     mean = x.mean(dim=dim, keepdim=True)
     std = x.std(dim=dim, keepdim=True)
     return (x - mean) / (std + eps)  # 避免除零
@@ -57,15 +59,14 @@ def create_sequence(
     # scaled_raw_data = (raw_data / raw_data.mean()).astype("float32")
 
     # float() will transform the data to torch.float32 by default
-    ages = torch.arange(0, month_num).unsqueeze(1).repeat(1, item_num).float()
-    months = (
-        torch.tensor([raw_data.index[i].month for i in range(month_num)])
-        .unsqueeze(1)
-        .repeat(1, item_num)
-        .float()
-    )
-    scaled_ages = z_score(ages)
-    scaled_months = z_score(months)
+    ages = torch.arange(0, month_num).unsqueeze(1).float()
+    m = torch.tensor([raw_data.index[i].month for i in range(month_num)]).float()
+
+    # scaled_ages = z_score(ages) # 到底是否需要对age, month 进行z标准化，存疑
+    # scaled_months = z_score(months)
+
+    scaled_ages = ages / (month_num - 1)
+    scaled_months = (torch.sin(2 * torch.pi * m), torch.cos(2 * torch.pi * m))
 
     y_train = []
     x_train = []
@@ -85,6 +86,7 @@ def create_sequence(
         for i in range(train_length - encoder_length - decoder_length + 1):
             # from_numpy 比 torch.tensor 快
             v = 1 + np.mean(data_np[i : i + encoder_length, j])
+            # torch.full 与 repeat 功能类似，只不过作用于单个值
             v_window = torch.full((encoder_length, 1), float(v), dtype=torch.float32)
             v_train.append(v_window)
             x = (
@@ -101,7 +103,7 @@ def create_sequence(
                 .unsqueeze(1)
             )
 
-            age = scaled_ages[i : i + encoder_length, j].unsqueeze(1)
+            age = scaled_ages[i : i + encoder_length].unsqueeze(1)
             month = scaled_months[i : i + encoder_length, j].unsqueeze(1)
             # emb = item_emb.repeat(encoder_length, 1)
 
@@ -133,6 +135,8 @@ def create_sequence(
         y_test.append(y)
         emb_test.append(item_id)
     return (
+        # pytorch 中，第0维为行，即数据最外面（最左边）的维度
+        # stack 在指定 dim上堆叠，默认 dim = 0
         torch.stack(x_train),
         torch.stack(x_test),
         torch.stack(y_train),

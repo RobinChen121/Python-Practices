@@ -45,6 +45,7 @@ test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
 # LSTM model
 input_size = x_train.shape[-1] + embedding_dim
 output_size = y_train.shape[-1]
+item_num = len(raw_data[0])
 model = DeepARLSTM(
     input_size=input_size,
     output_size=output_size,
