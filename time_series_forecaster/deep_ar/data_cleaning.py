@@ -84,27 +84,18 @@ def create_sequence(
         # torch.long 是 int64 整数型
         item_id = torch.tensor(j, dtype=torch.long)
         for i in range(train_length - encoder_length - decoder_length + 1):
-            # from_numpy 比 torch.tensor 快
+            # from_numpy 比 torch.tensor 快，浅拷贝，但是必须让numpy数组首先可写
             v = 1 + np.mean(data_np[i : i + encoder_length, j])
             # torch.full 与 repeat 功能类似，只不过作用于单个值
-            v_window = torch.full((encoder_length, 1), float(v), dtype=torch.float32)
+            v_window = torch.full((encoder_length, 1), float(v))
             v_train.append(v_window)
-            x = (
-                torch.from_numpy(data_np[i : i + encoder_length, j] / v)
-                .float()
-                .unsqueeze(1)
-            )
-            y = (
-                torch.from_numpy(
-                    data_np[i + encoder_length : i + encoder_length + decoder_length, j]
-                    # / v # 因为是负二项分布，y必须是整数，不能标准化
-                )
-                .float()
-                .unsqueeze(1)
-            )
+            x = torch.tensor(data_np[i : i + encoder_length, j] / v).unsqueeze(1)
+            y = torch.tensor(
+                data_np[i + encoder_length : i + encoder_length + decoder_length, j]
+            ).unsqueeze(
+                1
+            )  # y 要拟合负二项分布，为整数，不需要标准化
 
-            age = scaled_ages[i : i + encoder_length].unsqueeze(1)
-            month = scaled_months[i : i + encoder_length, j].unsqueeze(1)
             # emb = item_emb.repeat(encoder_length, 1)
 
             # dim=0 按行拼接，dim=1 按列拼接
