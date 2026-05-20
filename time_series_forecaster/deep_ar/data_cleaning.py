@@ -61,12 +61,12 @@ def create_sequence(
     # float() will transform the data to torch.float32 by default
     ages = torch.arange(0, month_num).unsqueeze(1).float()
     m = torch.tensor([raw_data.index[i].month for i in range(month_num)]).float()
-
+    m = torch.unsqueeze(m, 1)
     # scaled_ages = z_score(ages) # 到底是否需要对age, month 进行z标准化，存疑
     # scaled_months = z_score(months)
 
     scaled_ages = ages / (month_num - 1)
-    scaled_months = (torch.sin(2 * torch.pi * m), torch.cos(2 * torch.pi * m))
+    scaled_months = torch.cat([torch.sin(2 * torch.pi * m), torch.cos(2 * torch.pi * m)], 1)
 
     y_train = []
     x_train = []
@@ -81,7 +81,7 @@ def create_sequence(
         # 获取该 item 的 embedding，必须用 tensor 索引访问
         # device = embedding_layers.weight.device
         # item_emb = embedding_layers(torch.tensor([j], device=device)).detach()
-        # torch.long 是 int64 整数型
+        # torch.long 是 int64 整数型, pytorch 中embedding的索引输入必须是int64 整型
         item_id = torch.tensor(j, dtype=torch.long)
         for i in range(train_length - encoder_length - decoder_length + 1):
             # from_numpy 比 torch.tensor 快，浅拷贝，但是必须让numpy数组首先可写
@@ -98,8 +98,10 @@ def create_sequence(
 
             # emb = item_emb.repeat(encoder_length, 1)
 
+            age_window = scaled_ages[i: i + encoder_length]
+            month_window = scaled_months[i: i + encoder_length]
             # dim=0 按行拼接，dim=1 按列拼接
-            x_train.append(torch.cat([x, age, month], dim=1))  # 必须有维度才能拼接
+            x_train.append(torch.cat([x, age_window, month_window], dim=1))  # 必须有维度1才能在维度1拼接
             y_train.append(y)
             emb_train.append(item_id)
 
@@ -113,15 +115,7 @@ def create_sequence(
             .float()
             .unsqueeze(1)
         )
-        age = scaled_ages[train_length - encoder_length : train_length, j].unsqueeze(
-            1
-        )  # 用 flatten() 才有维度
-        month = scaled_months[
-            train_length - encoder_length : train_length, j
-        ].unsqueeze(1)
-        # emb = item_emb.repeat(encoder_length, 1)
-        x_test.append(torch.cat([x, age, month], dim=1))
-
+        x_test.append(torch.cat([x, scaled_ages, scaled_months], dim=1))  # 必须有维度1才能在维度1拼接
         y = torch.from_numpy(data_np[train_length:month_num, j]).float().unsqueeze(1)
         y_test.append(y)
         emb_test.append(item_id)
