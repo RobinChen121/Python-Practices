@@ -38,8 +38,7 @@ import numpy as np
 
 import sys
 sys.path.append("..") 
-from tree import generate_sample, generate_scenario_samples, compute_ub
-
+from tree import generate_samples, generate_scenarios, compute_ub
 
 
 start = time.process_time()
@@ -63,7 +62,7 @@ for i in sample_nums:
 # detailed samples in each period
 sample_detail = [[0 for i in range(sample_nums[t])] for t in range(T)] 
 for t in range(T):
-    sample_detail[t] = generate_sample(sample_nums[t], trunQuantile, mean_demands[t])
+    sample_detail[t] = generate_samples(sample_nums[t], trunQuantile, mean_demands[t])
 # sample_detail = [[5, 15], [5, 15], [15, 5], [15, 15]]
 scenarios_full = list(itertools.product(*sample_detail)) 
 
@@ -97,7 +96,7 @@ while iter < iter_num:
     
     # sample a numer of scenarios from the full scenario tree
     # random.seed(10000)
-    sample_scenarios = generate_scenario_samples(N, trunQuantile, mean_demands)
+    sample_scenarios = generate_scenarios(N, trunQuantile, mean_demands)
     # sample_scenarios = [[5, 5], [5, 15], [15, 5], [15, 15]]
     # sample_scenarios = [[5, 5, 5], [5, 5, 15], [5, 15, 5], [15,5,5], [15,15,5], [15,5, 15], [5,15,15],[15,15,15]]
     sample_scenarios.sort() # sort to make same numbers together
@@ -108,10 +107,10 @@ while iter < iter_num:
     m.update()
     m.Params.LogToConsole = 0
     m.optimize()
-    if iter == 2:
-        m.write('iter' + str(iter+1) + '_main2.lp') 
-        m.write('iter' + str(iter+1) + '_main2.sol')        
-        pass
+    # if iter == 2:
+    #     m.write('iter' + str(iter+1) + '_main2.lp')
+    #     m.write('iter' + str(iter+1) + '_main2.sol')
+    #     pass
 
     
     q_values[iter] = q.x
@@ -277,7 +276,7 @@ end = time.process_time()
 print('********************************************')
 final_cash = -z
 print('final expected cash increment is %.2f' % final_cash)
-print('ordering Q in the first peiod is %.2f' % q.x)
+print('ordering Q in the first period is %.2f' % q.x)
 cpu_time = end - start
 print('cpu time is %.3f s' % cpu_time)
 

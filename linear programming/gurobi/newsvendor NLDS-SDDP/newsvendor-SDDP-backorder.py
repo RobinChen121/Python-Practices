@@ -58,6 +58,7 @@ ini_I = 0
 vari_cost = 1
 unit_back_cost = 10
 unit_hold_cost = 2
+# mean_demands = [20 for _ in range(10)]
 mean_demands = [10, 20, 10, 20, 10, 20, 10, 20]
 T = len(mean_demands)
 sample_num = 10
@@ -91,7 +92,7 @@ slope1_stage = []
 intercept1_stage = []
 slopes = [[ [] for n in range(N)] for t in range(T-1)]
 intercepts = [[ [] for n in range(N)] for t in range(T-1)]
-q_values = [0 for iter in range(iter_num)]
+q_values = [0 for _ in range(iter_num)]
 q_sub_values = [[[0 for n in range(N)] for t in range(T-1)] for iter in range(iter_num)]
 
 start = time.process_time()
@@ -110,8 +111,8 @@ while iter < iter_num:
     m.update()
     m.Params.OutputFlag = 0
     m.optimize()
-    m.write('iter' + str(iter) + '_main1.lp')
-    m.write('iter' + str(iter) + '_main1.sol')
+    # m.write('iter' + str(iter) + '_main1.lp')
+    # m.write('iter' + str(iter) + '_main1.sol')
 
     q_values[iter] = q.x
     theta_value = theta.x
@@ -233,7 +234,7 @@ while iter < iter_num:
 end = time.process_time()
 print('********************************************')
 print('final expected total costs is %.2f' % z)
-print('ordering Q in the first peiod is %.2f' % q_values[iter-1])
+print('ordering Q in the first period is %.2f' % q_values[iter-1])
 cpu_time = end - start
 print('cpu time is %.3f s' % cpu_time)
 
