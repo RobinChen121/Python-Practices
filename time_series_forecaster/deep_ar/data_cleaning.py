@@ -45,7 +45,7 @@ def get_raw_data():
     return df2
 
 
-# embedding 应该放到模型的 forward 函数里
+# embedding should be inside the forward function
 def create_sequence(
     raw_data: pandas.DataFrame,
     # embedding_layers: torch.nn.Embedding,
@@ -66,7 +66,9 @@ def create_sequence(
     # scaled_months = z_score(months)
 
     scaled_ages = ages / (month_num - 1)
-    scaled_months = torch.cat([torch.sin(2 * torch.pi * m), torch.cos(2 * torch.pi * m)], 1)
+    scaled_months = torch.cat(
+        [torch.sin(2 * torch.pi * m), torch.cos(2 * torch.pi * m)], 1
+    )
 
     y_train = []
     x_train = []
@@ -98,10 +100,12 @@ def create_sequence(
 
             # emb = item_emb.repeat(encoder_length, 1)
 
-            age_window = scaled_ages[i: i + encoder_length]
-            month_window = scaled_months[i: i + encoder_length]
+            age_window = scaled_ages[i : i + encoder_length]
+            month_window = scaled_months[i : i + encoder_length]
             # dim=0 按行拼接，dim=1 按列拼接
-            x_train.append(torch.cat([x, age_window, month_window], dim=1))  # 必须有维度1才能在维度1拼接
+            x_train.append(
+                torch.cat([x, age_window, month_window], dim=1)
+            )  # 必须有维度1才能在维度1拼接
             y_train.append(y)
             emb_train.append(item_id)
 
@@ -115,7 +119,9 @@ def create_sequence(
             .float()
             .unsqueeze(1)
         )
-        x_test.append(torch.cat([x, scaled_ages, scaled_months], dim=1))  # 必须有维度1才能在维度1拼接
+        x_test.append(
+            torch.cat([x, scaled_ages, scaled_months], dim=1)
+        )  # 必须有维度1才能在维度1拼接
         y = torch.from_numpy(data_np[train_length:month_num, j]).float().unsqueeze(1)
         y_test.append(y)
         emb_test.append(item_id)
