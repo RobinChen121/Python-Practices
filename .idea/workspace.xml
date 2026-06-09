@@ -126,7 +126,7 @@
     "Python.lstm.executor": "Run",
     "Python.lstm2.executor": "Run",
     "Python.lstm_forecast.executor": "Debug",
-    "Python.main.executor": "Debug",
+    "Python.main.executor": "Run",
     "Python.module1.executor": "Run",
     "Python.multi-process-array.executor": "Debug",
     "Python.multiprocess-class.executor": "Run",
@@ -179,7 +179,7 @@
     "node.js.selected.package.eslint": "(autodetect)",
     "node.js.selected.package.tslint": "(autodetect)",
     "nodejs_package_manager_path": "npm",
-    "settings.editor.selected.configurable": "com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable",
+    "settings.editor.selected.configurable": "preferences.pluginManager",
     "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
@@ -224,30 +224,6 @@
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
       <option name="SCRIPT_NAME" value="" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
-    <configuration name="main" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
-      <module name="Python-Practices" />
-      <option name="ENV_FILES" value="" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-        <env name="KMP_DUPLICATE_LIB_OK" value="TRUE" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/time_series_forecaster/deep_ar" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/time_series_forecaster/deep_ar/main.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -377,6 +353,9 @@
       <workItem from="1779173229677" duration="4665000" />
       <workItem from="1779217062528" duration="11151000" />
       <workItem from="1780593285838" duration="7652000" />
+      <workItem from="1780927682816" duration="3583000" />
+      <workItem from="1780938974300" duration="725000" />
+      <workItem from="1780946427669" duration="7608000" />
     </task>
     <servers />
   </component>
@@ -733,6 +712,11 @@
           <line>115</line>
           <option name="timeStamp" value="459" />
         </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/linear programming/gurobi/newsvendor NLDS-SDDP/newsvendor-SDDP-backorder.py</url>
+          <line>136</line>
+          <option name="timeStamp" value="460" />
+        </line-breakpoint>
       </breakpoints>
       <default-breakpoints>
         <breakpoint type="python-exception">
@@ -751,7 +735,7 @@
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/draw_heart2_py$liner_regression_ezgi_jp.coverage" NAME="liner_regression_ezgi_jp Coverage Results" MODIFIED="1777892568559" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/marketing_data_process" />
-    <SUITE FILE_PATH="coverage/draw_heart2_py$newsvendor_SDDP_backorder.coverage" NAME="newsvendor-SDDP-backorder Coverage Results" MODIFIED="1780596065259" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/linear programming/gurobi/newsvendor NLDS-SDDP" />
+    <SUITE FILE_PATH="coverage/draw_heart2_py$newsvendor_SDDP_backorder.coverage" NAME="newsvendor-SDDP-backorder Coverage Results" MODIFIED="1780959769984" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/linear programming/gurobi/newsvendor NLDS-SDDP" />
     <SUITE FILE_PATH="coverage/Python_Practices$convolution.coverage" NAME="convolution Coverage Results" MODIFIED="1753627292221" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/junior_practices" />
     <SUITE FILE_PATH="coverage/Python_Practices$seq2seq.coverage" NAME="seq2seq Coverage Results" MODIFIED="1774637242801" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/machine learning" />
     <SUITE FILE_PATH="coverage/python_practices$lstm.coverage" NAME="lstm Coverage Results" MODIFIED="1768920525579" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/time_series_forecaster/walmart" />
@@ -777,7 +761,7 @@
     <SUITE FILE_PATH="coverage/python_practices$embedding.coverage" NAME="embedding Coverage Results" MODIFIED="1772463433197" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/junior_practices" />
     <SUITE FILE_PATH="coverage/python_practices$bp2.coverage" NAME="bp2 Coverage Results" MODIFIED="1764516365471" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/machine learning" />
     <SUITE FILE_PATH="coverage/draw_heart2_py$liner_regression_ezgi_uk.coverage" NAME="liner_regression_ezgi_uk Coverage Results" MODIFIED="1777892881426" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/marketing_data_process" />
-    <SUITE FILE_PATH="coverage/draw_heart2_py$main.coverage" NAME="main Coverage Results" MODIFIED="1779221978748" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/time_series_forecaster/deep_ar" />
+    <SUITE FILE_PATH="coverage/draw_heart2_py$main.coverage" NAME="main Coverage Results" MODIFIED="1780927717214" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/time_series_forecaster/deep_ar" />
     <SUITE FILE_PATH="coverage/python_practices$draw_animation.coverage" NAME="draw_animation Coverage Results" MODIFIED="1772388455029" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/draw_pictures" />
     <SUITE FILE_PATH="coverage/python_practices$run_weights.coverage" NAME="run_weights Coverage Results" MODIFIED="1768926386866" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/time_series_forecaster/walmart" />
     <SUITE FILE_PATH="coverage/Python_Practices$seq2seq_cv.coverage" NAME="seq2seq_cv Coverage Results" MODIFIED="1774636792169" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/machine learning" />
