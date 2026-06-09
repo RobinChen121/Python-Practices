@@ -108,7 +108,7 @@ print(model2.summary())
 
 df_raw.rename(columns={"gross_HH_income": "household_income"}, inplace=True)
 df3 = df_raw.dropna(subset="household_income").copy()
-df3 = df3[~df3["household_income"].isin([18.0, 19.0])]
+df3 = df3[~df3["household_income"].isin([18.0, 19.0])]  # 删除值为18或19的行
 df3["household_income"] = df3["household_income"].map(
     {
         1.0: "Under 5m Yen",
