@@ -63,7 +63,7 @@ print(model1.summary())
 
 df_raw.rename(columns={"children_in_HH": "household_children"}, inplace=True)
 df2 = df_raw.dropna(subset="household_children").copy()
-df2 = df2[~df2["household_children"].isin([7.0, 8.0])]
+df2 = df2[~df2["household_children"].isin([7.0, 8.0])] # do not know or prefer not to say
 df2["household_children"] = df2["household_children"].map(
     {
         0.0: "No children",
