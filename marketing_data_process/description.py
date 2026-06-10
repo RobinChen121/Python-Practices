@@ -231,14 +231,23 @@ target_cols = [
     "work_industry",
 ]
 
-frames = [df1.groupby(by=col).size() for col in target_cols]
-result_df = pd.concat(frames, keys=target_cols).reset_index()
-frames2 = [df2.groupby(by=col).size() for col in target_cols]
-result_df2 = pd.concat(frames2, keys=target_cols).reset_index()
-result_df.to_csv("jp.csv")
-result_df2.to_csv("uk.csv")
+# frames = [df1.groupby(by=col).size() for col in target_cols]
+# result_df = pd.concat(frames, keys=target_cols).reset_index()
+# frames2 = [df2.groupby(by=col).size() for col in target_cols]
+# result_df2 = pd.concat(frames2, keys=target_cols).reset_index()
+# result_df.to_csv("jp.csv")
+# result_df2.to_csv("uk.csv")
 
 ## t test
+from scipy import stats
+print(df1['age'].mean(), df2['age'].mean())
+print(stats.ttest_ind(df1['age'], df2['age']), end='\n\n')
 
+print(df1['mean_ai'].mean(), df2['mean_ai'].mean())
+print(stats.ttest_ind(df1['mean_ai'], df2['mean_ai']), end='\n\n')
 
-pass
+print(df1['trust_ai_3'].mean(), df2['trust_ai_3'].mean())
+print(stats.ttest_ind(df1['trust_ai_3'], df2['trust_ai_3']), end='\n\n')
+
+print(df1['trust_ai_6'].mean(), df2['trust_ai_6'].mean())
+print(stats.ttest_ind(df1['trust_ai_6'], df2['trust_ai_6']), end='\n\n')
