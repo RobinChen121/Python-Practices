@@ -59,11 +59,11 @@ unit_hold_cost = 2
 unit_back_cost = 10
 # mean_demands = [20 for _ in range(10)]
 # mean_demands = [10, 20, 10, 20, 10, 20, 10, 20]
-mean_demands = [10, 10]
+mean_demands = [10 for _ in range(10)]
 T = len(mean_demands)
-sample_num = 2  #
-iter_num = 5
-N = 4  # sampled number of scenarios for forward computing
+sample_num = 10  #
+iter_num = 30
+N = 10  # sampled number of scenarios for forward computing
 sample_nums = [sample_num for t in range(T)]
 
 trunQuantile = 0.9999  # affective to the final ordering quantity
@@ -75,7 +75,7 @@ for i in sample_nums:
 sample_detail = [[0 for i in range(sample_nums[t])] for t in range(T)]
 for t in range(T):
     sample_detail[t] = generate_samples(sample_nums[t], trunQuantile, mean_demands[t])
-sample_detail = [[5, 15], [5, 15]]
+# sample_detail = [[5, 15], [5, 15]]
 # scenarios_full = list(itertools.product(*sample_detail))
 
 
@@ -93,19 +93,17 @@ intercept1_stage = []
 slopes = [[[] for n in range(N)] for t in range(T - 1)]
 intercepts = [[[] for n in range(N)] for t in range(T - 1)]
 q_values = [0 for _ in range(iter_num)]
-q_sub_values = [
-    [[0 for n in range(N)] for t in range(T - 1)] for iter in range(iter_num)
-]
+q_sub_values = [[[0 for n in range(N)] for t in range(T - 1)] for _ in range(iter_num)]
 
 start = time.process_time()
 while iter < iter_num:
 
     # sample a numer of scenarios from the full scenario tree
     # random.seed(10000)
-    # sample_scenarios = generate_scenarios2(N, sample_num, sample_detail)
+    sample_scenarios = generate_scenarios2(N, sample_num, sample_detail)
     # sample_scenarios= random.sample(scenarios_full, N) # sampling without replacement
-    # sample_scenarios.sort() # sort to mase same numbers together
-    sample_scenarios = [[5, 5], [5, 15], [15, 5], [15, 15]]
+    sample_scenarios.sort()  # sort to mase same numbers together
+    # sample_scenarios = [[5, 5], [5, 15], [15, 5], [15, 15]]
 
     # forward
     if iter > 0:
@@ -113,8 +111,8 @@ while iter < iter_num:
     m.update()
     m.Params.OutputFlag = 0
     m.optimize()
-    m.write("iter" + str(iter + 1) + "_main1.lp")
-    # m.write('iter' + str(iter) + '_main1.sol')
+    # m.write("iter" + str(iter + 1) + "_main.lp")
+    # m.write("iter" + str(iter + 1) + "_main.sol")
 
     q_values[iter] = q.x
     theta_value = theta.x
@@ -211,18 +209,18 @@ while iter < iter_num:
             # optimize
             m_forward[t][n].Params.OutputFlag = 0
             m_forward[t][n].optimize()
-            m_forward[t][n].write(
-                "iter" + str(iter + 1) + "_sub_" + str(t + 1) + "^" + str(n + 1) + ".lp"
-            )
-            m_forward[t][n].write(
-                "iter"
-                + str(iter + 1)
-                + "_sub_"
-                + str(t + 1)
-                + "^"
-                + str(n + 1)
-                + ".sol"
-            )
+            # m_forward[t][n].write(
+            #     "iter" + str(iter + 1) + "_sub_" + str(t + 1) + "^" + str(n + 1) + ".lp"
+            # )
+            # m_forward[t][n].write(
+            #     "iter"
+            #     + str(iter + 1)
+            #     + "_sub_"
+            #     + str(t + 1)
+            #     + "^"
+            #     + str(n + 1)
+            #     + ".sol"
+            # )
 
             I_forward_values[t][n] = I_forward[t][n].x
             B_forward_values[t][n] = B_forward[t][n].x
