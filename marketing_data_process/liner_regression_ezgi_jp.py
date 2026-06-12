@@ -29,12 +29,12 @@ df_raw = pd.read_csv(data_address)
 # trust_ai_6 as DV
 # 2 model: trust_ai_3 as DV
 # mean_ai as DV
-# DV = "trust_ai_3"
-# IV = " + mean_ai + trust_ai_6"
+DV = "trust_ai_3"
+IV = " + mean_ai + trust_ai_6"
 # DV = "trust_ai_6"
 # IV = " + mean_ai + trust_ai_3"
-DV = "mean_ai"
-IV = " + trust_ai_3 + trust_ai_6"
+# DV = "mean_ai"
+# IV = " + trust_ai_3 + trust_ai_6"
 model0 = smf.ols(formula=DV + " ~ age" + IV, data=df_raw).fit()
 print(model0.summary())
 
@@ -136,15 +136,15 @@ model3 = smf.ols(
 print(model3.summary())
 
 df4 = df_raw.dropna(subset="marital_status").copy()
-df4["marital_status"] = df4["marital_status"].map(
+df4["marital_status"] = df4["marital_status"].map( # revised
     {
-        1.0: "Married",
-        2.0: "Married",
-        3.0: "Married",
-        4.0: "Married",
+        1.0: "Married or ever married",
+        2.0: "Married or ever married",
+        3.0: "Married or ever married",
+        4.0: "Married or ever married",
         5.0: "Never married",
-        6.0: "Married",
-        7.0: "Married",
+        6.0: "Married or ever married",
+        7.0: "Married or ever married",
     }
 )
 df4["marital_status"] = df4["marital_status"].astype("category")

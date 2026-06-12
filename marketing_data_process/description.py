@@ -30,35 +30,36 @@ df2 = pd.read_csv(data_address2)
 # 使用 map 时，不在里面的会输出 NaN
 df1["education_level"] = df1["education_level"].map(
     {
-        1.0: "No university degree",
-        2.0: "No university degree",
-        3.0: "No university degree",
-        4.0: "University degree and above",
-        5.0: "University degree and above",
-        6.0: "No university degree",
-        7.0: "No university degree",
+        1.0: "Elementary or junior high school",
+        2.0: "High school",
+        3.0: "Vocational college, junior college, training college",
+        4.0: "University (Four years)",
+        5.0: "University (Six years)",
+        6.0: "Graduate school",
+        7.0: "Other",
     }
 )
 df2.rename(columns={"profile_education_level": "education_level"}, inplace=True)
 df2["education_level"] = df2["education_level"].map(
     {
-        15.0: "University degree and above",
-        16.0: "University degree and above",
-        17.0: "University degree and above",
-        1.0: "No university degree",
-        2.0: "No university degree",
-        3.0: "No university degree",
-        4.0: "No university degree",
-        5.0: "No university degree",
-        6.0: "No university degree",
-        7.0: "No university degree",
-        8.0: "No university degree",
-        9.0: "No university degree",
-        10.0: "No university degree",
-        11.0: "No university degree",
-        12.0: "No university degree",
-        13.0: "No university degree",
-        14.0: "No university degree",
+        15.0: "University diploma",
+        16.0: "University or CNAA first degree (e.g. BA, B.Sc, B.Ed)",
+        17.0: "University or CNAA higher degree (e.g. M.Sc, Ph.D)",
+        18.0: "Other technical, professional or higher qualification",
+        1.0: "No formal qualifications",
+        2.0: "Youth training certificate/skill seekers",
+        3.0: "Recognised trade apprenticeship completed",
+        4.0: "Clerical and commercial",
+        5.0: "City & Guilds certificate",
+        6.0: "City & Guilds certificate - advanced",
+        7.0: "ONC",
+        8.0: "CSE grades 2-5",
+        9.0: "CSE grade 1, GCE O level, GCSE, School Certificate",
+        10.0: "Scottish Ordinary/ Lower Certificate",
+        11.0: "GCE A level or Higher Certificate",
+        12.0: "Scottish Higher Certificate",
+        13.0: "Nursing qualification (e.g. SEN, SRN, SCM, RGN)",
+        14.0: "Teaching qualification (not degree)",
     }
 )
 
@@ -66,88 +67,86 @@ df1.rename(columns={"children_in_HH": "household_children"}, inplace=True)
 df1["household_children"] = df1["household_children"].map(
     {
         0.0: "No children",
-        1.0: "Having children",
-        2.0: "Having children",
-        3.0: "Having children",
-        4.0: "Having children",
-        5.0: "Having children",
-        6.0: "Having children",
+        1.0: "1 children",
+        2.0: "2 children",
+        3.0: "3 children",
+        4.0: "4 children",
+        5.0: "5 children or more",
     }
 )
 df2.rename(columns={"profile_household_children": "household_children"}, inplace=True)
 df2["household_children"] = df2["household_children"].map(
     {
         1.0: "No children",
-        2.0: "Having children",
-        3.0: "Having children",
-        4.0: "Having children",
-        5.0: "Having children",
-        6.0: "Having children",
-        7.0: "Having children",
+        2.0: "1 child",
+        3.0: "2 children",
+        4.0: "3 children",
+        5.0: "4 children",
+        6.0: "5 children or more",
     }
 )
 
 df1.rename(columns={"gross_HH_income": "household_income"}, inplace=True)
 df1["household_income"] = df1["household_income"].map(
     {
-        1.0: "Under 5m Yen",
-        2.0: "Under 5m Yen",
-        3.0: "Under 5m Yen",
-        4.0: "Under 5m Yen",
-        5.0: "5m~7m",
-        6.0: "5m~7m",
-        7.0: "7m~9m",
-        8.0: "7m~9m",
-        9.0: "9m~12m",
-        10.0: "9m~12m",
-        11.0: "Over 12m",
-        12.0: "Over 12m",
-        13.0: "Over 12m",
+        1.0: "Under 2m Yen",
+        2.0: "2m~3m",
+        3.0: "3m~4m",
+        4.0: "4m~5m",
+        5.0: "5m~6m",
+        6.0: "6m~7m",
+        7.0: "7m~8m",
+        8.0: "8m~9m",
+        9.0: "9m~10m",
+        10.0: "10m~12m",
+        11.0: "11m~14m",
+        12.0: "14m~16m",
+        13.0: "Over 16m",
     }
 )
 df2.rename(columns={"profile_gross_household": "household_income"}, inplace=True)
 df2 = df2.dropna(subset="household_income").copy()
 df2["household_income"] = df2["household_income"].map(
     {
-        1.0: "Under 25k pounds",
-        2.0: "Under 25k pounds",
-        3.0: "Under 25k pounds",
-        4.0: "Under 25k pounds",
-        5.0: "Under 25k pounds",
-        6.0: "25k-35k",
-        7.0: "25k-35k",
-        8.0: "35k-45k",
-        9.0: "35k-45k",
-        10.0: "45k-60k",
-        11.0: "45k-60k",
-        12.0: "Over 60k",
-        13.0: "Over 60k",
-        14.0: "Over 60k",
-        15.0: "Over 60k",
+        1.0: "under 5k pounds",
+        2.0: "5k~10k",
+        3.0: "10k~15k",
+        4.0: "15k~20k",
+        5.0: "20k~25k",
+        6.0: "25k-30k",
+        7.0: "30k-35k",
+        8.0: "35k-40k",
+        9.0: "40k-45k",
+        10.0: "45k-50k",
+        11.0: "50k-60k",
+        12.0: "60k~70k",
+        13.0: "70k~100k",
+        14.0: "100k~150k",
+        15.0: "Over 150k",
     }
 )
 
 df1["marital_status"] = df1["marital_status"].map(
     {
-        1.0: "Married",
-        2.0: "Married",
-        3.0: "Married",
+        1.0: "Civil partnership",
+        2.0: "Divorced",
+        3.0: "Living as married",
         4.0: "Married",
         5.0: "Never married",
-        6.0: "Married",
-        7.0: "Married",
+        6.0: "Separated after being married",
+        7.0: "Widowed",
     }
 )
 df2.rename(columns={"profile_marital_stat": "marital_status"}, inplace=True)
 df2["marital_status"] = df2["marital_status"].map(
     {
         1.0: "Married",
-        2.0: "Married",
-        3.0: "Married",
-        4.0: "Married",
-        5.0: "Married",
+        2.0: "Living as married",
+        3.0: "Separated after being married",
+        4.0: "Divorced",
+        5.0: "Widowed",
         6.0: "Never married",
-        7.0: "Married",
+        7.0: "Civil partnership",
     }
 )
 
@@ -181,17 +180,17 @@ df2["social_media_active"] = df2["social_media_active"].map(
 df1.rename(columns={"urban/rural": "urban_rural"}, inplace=True)
 df1["urban_rural"] = df1["urban_rural"].map(
     {
-        1.0: "Cities",
-        2.0: "Cities",
-        6.0: "Others",
+        1.0: "Tokyo or designated cities",
+        2.0: "Other cities",
+        6.0: "Towns and villages",
     }
 )
 df2.rename(columns={"ONS_urban": "urban_rural"}, inplace=True)
 df2["urban_rural"] = df2["urban_rural"].map(
     {
-        1.0: "Cities",
-        2.0: "Others",
-        3.0: "Others",
+        1.0: "Urban",
+        2.0: "Town and Fringe",
+        3.0: "Rural",
     }
 )
 
@@ -220,6 +219,20 @@ df2["work_industry"] = df2["work_industry"].map(
     }
 )
 
+df1["used_ai"] = df1["used_ai"].map(
+    {
+        1.0: "No",
+        2.0: "Yes"
+    }
+)
+df2["used_ai"] = df2["used_ai"].map(
+    {
+        1.0: "No",
+        2.0: "Yes"
+    }
+)
+
+
 target_cols = [
     "education_level",
     "household_children",
@@ -229,25 +242,30 @@ target_cols = [
     "social_media_active",
     "urban_rural",
     "work_industry",
+    "used_ai"
 ]
 
-# frames = [df1.groupby(by=col).size() for col in target_cols]
-# result_df = pd.concat(frames, keys=target_cols).reset_index()
-# frames2 = [df2.groupby(by=col).size() for col in target_cols]
-# result_df2 = pd.concat(frames2, keys=target_cols).reset_index()
-# result_df.to_csv("jp.csv")
-# result_df2.to_csv("uk.csv")
+frames = [df1.groupby(by=col).size() for col in target_cols]
+result_df = pd.concat(frames, keys=target_cols).reset_index()
+frames2 = [df2.groupby(by=col).size() for col in target_cols]
+result_df2 = pd.concat(frames2, keys=target_cols).reset_index()
+result_df.to_csv("jp.csv")
+result_df2.to_csv("uk.csv")
 
 ## t test
 from scipy import stats
 print(df1['age'].mean(), df2['age'].mean())
+print(df1['age'].count(), df2['age'].count())
 print(stats.ttest_ind(df1['age'], df2['age']), end='\n\n')
 
 print(df1['mean_ai'].mean(), df2['mean_ai'].mean())
+print(df1['mean_ai'].count(), df2['mean_ai'].count())
 print(stats.ttest_ind(df1['mean_ai'], df2['mean_ai']), end='\n\n')
 
 print(df1['trust_ai_3'].mean(), df2['trust_ai_3'].mean())
+print(df1['mean_ai'].count(), df2['mean_ai'].count())
 print(stats.ttest_ind(df1['trust_ai_3'], df2['trust_ai_3']), end='\n\n')
 
 print(df1['trust_ai_6'].mean(), df2['trust_ai_6'].mean())
+print(df1['mean_ai'].count(), df2['mean_ai'].count())
 print(stats.ttest_ind(df1['trust_ai_6'], df2['trust_ai_6']), end='\n\n')

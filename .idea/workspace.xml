@@ -388,6 +388,7 @@
       <workItem from="1781023213838" duration="3217000" />
       <workItem from="1781086741805" duration="6661000" />
       <workItem from="1781103615566" duration="2018000" />
+      <workItem from="1781262923712" duration="11057000" />
     </task>
     <servers />
   </component>
@@ -741,7 +742,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/marketing_data_process/description.py</url>
-          <line>250</line>
+          <line>267</line>
           <option name="timeStamp" value="463" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
@@ -782,9 +783,9 @@
     <SUITE FILE_PATH="coverage/python_practices$embedding.coverage" NAME="embedding Coverage Results" MODIFIED="1772463433197" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/junior_practices" />
     <SUITE FILE_PATH="coverage/Python_Practices$rnn_forecast.coverage" NAME="rnn_forecast Coverage Results" MODIFIED="1773164754879" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/machine learning" />
     <SUITE FILE_PATH="coverage/python_practices$get_pc_info.coverage" NAME="get_pc_info Coverage Results" MODIFIED="1764970969472" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/utils" />
-    <SUITE FILE_PATH="coverage/python_practices$lstm_forecast.coverage" NAME="lstm_forecast Coverage Results" MODIFIED="1773262372775" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/machine learning" />
     <SUITE FILE_PATH="coverage/draw_heart2_py$main.coverage" NAME="main Coverage Results" MODIFIED="1780927717214" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/time_series_forecaster/deep_ar" />
-    <SUITE FILE_PATH="coverage/draw_heart2_py$liner_regression_ezgi_jp.coverage" NAME="liner_regression_ezgi_jp Coverage Results" MODIFIED="1777892568559" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/marketing_data_process" />
+    <SUITE FILE_PATH="coverage/python_practices$lstm_forecast.coverage" NAME="lstm_forecast Coverage Results" MODIFIED="1773262372775" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/machine learning" />
+    <SUITE FILE_PATH="coverage/draw_heart2_py$liner_regression_ezgi_jp.coverage" NAME="liner_regression_ezgi_jp Coverage Results" MODIFIED="1781271975196" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/marketing_data_process" />
     <SUITE FILE_PATH="coverage/Python_Practices$seq2seq.coverage" NAME="seq2seq Coverage Results" MODIFIED="1774637242801" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/machine learning" />
     <SUITE FILE_PATH="coverage/Python_Practices$main.coverage" NAME="main Coverage Results" MODIFIED="1774288091460" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/time_series_forecaster/deep_ar" />
     <SUITE FILE_PATH="coverage/python_practices$train.coverage" NAME="train Coverage Results" MODIFIED="1764530144573" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/../qr_forcaster" />
@@ -799,7 +800,7 @@
     <SUITE FILE_PATH="coverage/Python_Practices$convolution.coverage" NAME="convolution Coverage Results" MODIFIED="1753627292221" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/junior_practices" />
     <SUITE FILE_PATH="coverage/python_practices$seq2seq.coverage" NAME="seq2seq Coverage Results" MODIFIED="1768866844531" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/machine learning" />
     <SUITE FILE_PATH="coverage/draw_heart2_py$newsvendor_SDDP_lostsale.coverage" NAME="newsvendor-SDDP-lostsale Coverage Results" MODIFIED="1780594606280" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/linear programming/gurobi/newsvendor NLDS-SDDP" />
-    <SUITE FILE_PATH="coverage/draw_heart2_py$description.coverage" NAME="description Coverage Results" MODIFIED="1781104925214" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/marketing_data_process" />
+    <SUITE FILE_PATH="coverage/draw_heart2_py$description.coverage" NAME="description Coverage Results" MODIFIED="1781274558228" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/marketing_data_process" />
     <SUITE FILE_PATH="coverage/python_practices$read_data.coverage" NAME="read_data Coverage Results" MODIFIED="1772883318253" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/time_series_forecaster/carparts" />
     <SUITE FILE_PATH="coverage/draw_heart2_py$liner_regression_ezgi_uk.coverage" NAME="liner_regression_ezgi_uk Coverage Results" MODIFIED="1777892881426" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/marketing_data_process" />
     <SUITE FILE_PATH="coverage/python_practices$lstm.coverage" NAME="lstm Coverage Results" MODIFIED="1768920525579" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/time_series_forecaster/walmart" />
