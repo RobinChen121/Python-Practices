@@ -1,0 +1,54 @@
+,level_0,level_1,0
+0,education_level,Elementary or junior high school,30
+1,education_level,Graduate school,67
+2,education_level,High school,394
+3,education_level,Other,17
+4,education_level,University (Four years),596
+5,education_level,University (Six years),13
+6,education_level,"Vocational college, junior college, training college",323
+7,household_children,1 children,168
+8,household_children,2 children,131
+9,household_children,3 children,53
+10,household_children,4 children,7
+11,household_children,5 children or more,2
+12,household_children,No children,1081
+13,household_income,10m~12m,70
+14,household_income,11m~14m,35
+15,household_income,14m~16m,18
+16,household_income,2m~3m,124
+17,household_income,3m~4m,159
+18,household_income,4m~5m,147
+19,household_income,5m~6m,118
+20,household_income,6m~7m,90
+21,household_income,7m~8m,98
+22,household_income,8m~9m,60
+23,household_income,9m~10m,47
+24,household_income,Over 16m,26
+25,household_income,Under 2m Yen,148
+26,marital_status,Civil partnership,4
+27,marital_status,Divorced,100
+28,marital_status,Living as married,34
+29,marital_status,Married,831
+30,marital_status,Never married,398
+31,marital_status,Separated after being married,17
+32,marital_status,Widowed,41
+33,sex,Female,737
+34,sex,Male,738
+35,social_media_active,No,1265
+36,social_media_active,Yes,210
+37,urban_rural,Other cities,881
+38,urban_rural,Tokyo or designated cities,415
+39,urban_rural,Towns and villages,174
+40,work_industry,"Agriculture, forestry, fishery",11
+41,work_industry,Education,53
+42,work_industry,"Finance, insurance, real estate",77
+43,work_industry,Manufacturing,149
+44,work_industry,Medicare and nursing service,167
+45,work_industry,"Mining, energy, construction",51
+46,work_industry,Not working,366
+47,work_industry,Other,203
+48,work_industry,Other service industry,276
+49,work_industry,Public services,59
+50,work_industry,"Transportation, tourism",62
+51,used_ai,No,1054
+52,used_ai,Yes,419

@@ -1,0 +1,59 @@
+,level_0,level_1,0
+0,education_level,"CSE grade 1, GCE O level, GCSE, School Certificate",70
+1,education_level,CSE grades 2-5,8
+2,education_level,City & Guilds certificate,32
+3,education_level,City & Guilds certificate - advanced,16
+4,education_level,Clerical and commercial,12
+5,education_level,GCE A level or Higher Certificate,78
+6,education_level,No formal qualifications,24
+7,education_level,"Nursing qualification (e.g. SEN, SRN, SCM, RGN)",6
+8,education_level,ONC,5
+9,education_level,"Other technical, professional or higher qualification",78
+10,education_level,Recognised trade apprenticeship completed,4
+11,education_level,Scottish Higher Certificate,2
+12,education_level,Scottish Ordinary/ Lower Certificate,1
+13,education_level,Teaching qualification (not degree),12
+14,education_level,University diploma,23
+15,education_level,"University or CNAA first degree (e.g. BA, B.Sc, B.Ed)",132
+16,education_level,"University or CNAA higher degree (e.g. M.Sc, Ph.D)",60
+17,education_level,Youth training certificate/skill seekers,4
+18,household_children,1 child,97
+19,household_children,2 children,49
+20,household_children,3 children,7
+21,household_children,4 children,2
+22,household_children,5 children or more,2
+23,household_children,No children,393
+24,household_income,100k~150k,33
+25,household_income,10k~15k,34
+26,household_income,15k~20k,30
+27,household_income,20k~25k,26
+28,household_income,25k-30k,31
+29,household_income,30k-35k,38
+30,household_income,35k-40k,33
+31,household_income,40k-45k,28
+32,household_income,45k-50k,20
+33,household_income,50k-60k,47
+34,household_income,5k~10k,19
+35,household_income,60k~70k,33
+36,household_income,70k~100k,52
+37,household_income,Over 150k,12
+38,household_income,under 5k pounds,3
+39,marital_status,Civil partnership,6
+40,marital_status,Divorced,39
+41,marital_status,Living as married,75
+42,marital_status,Married,263
+43,marital_status,Never married,141
+44,marital_status,Separated after being married,8
+45,marital_status,Widowed,23
+46,sex,Female,329
+47,sex,Male,255
+48,social_media_active,No,569
+49,social_media_active,Yes,15
+50,urban_rural,Rural,70
+51,urban_rural,Town and Fringe,64
+52,urban_rural,Urban,449
+53,work_industry,Private sector,195
+54,work_industry,Public sector,121
+55,work_industry,Third/voluntary sector,35
+56,used_ai,No,392
+57,used_ai,Yes,192

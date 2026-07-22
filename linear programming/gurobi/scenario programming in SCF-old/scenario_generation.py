@@ -41,7 +41,7 @@ def objective(x):
     return obj
 
 
-# three demands, all follow Weibull distibution
+# three demands, all follow Weibull distribution
 global mean 
 global variance
 global skew

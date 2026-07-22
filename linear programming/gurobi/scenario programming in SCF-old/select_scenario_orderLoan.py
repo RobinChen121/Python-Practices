@@ -22,7 +22,7 @@ import time
 import math
 
 
-# selected scenario indexs for T=5 : [121, 0, 5, 239, 235, 231, 227, 223, 219, 215]
+# selected scenario index for T=5 : [121, 0, 5, 239, 235, 231, 227, 223, 219, 215]
 
 
 # Python function to f.write permutations of a given list 

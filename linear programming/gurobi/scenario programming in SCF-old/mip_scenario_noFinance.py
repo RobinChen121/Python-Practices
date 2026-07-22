@@ -170,7 +170,7 @@ def lp():
                 for t in range(T):
                     m.addConstr(I[t][n][s] >= 0)
         
-        # non-anticipativity 
+        # non-anticipative
         # s1 与 s 的顺序没啥影响       
         # no need for I, R, C      
         for t in range(T):

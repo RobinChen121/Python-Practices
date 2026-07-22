@@ -8,7 +8,7 @@ MIT Licence.
 
 Python version: 3.7
 -
-Description: build a general scenario model under no finance situation
+Description: build a general scenario model under order based loan
     
 """
 
@@ -73,7 +73,7 @@ S =  K ** T # total scenario number
 scenarioLink = [[[0 for s in range(S)] for s in range(S)] for t in range(T)]
 for t in range(T):
     slices = round(S * (1 / K)**(t+1)) # number of scenario in a slice
-    slice_num = round(K**(t+1))       # totoal number of slices
+    slice_num = round(K**(t+1))       # total number of slices
     for i in range(slice_num):
         for j in range(slices * i, slices * (i + 1)):
             for k in range(slices * i, slices * (i + 1)):
@@ -181,7 +181,7 @@ try:
                 index2 = booming_demand[t]
                 m.addConstr(w[t][n][s] <= demand_scenarios[index2][index][n])
             
-    # non-negavtivety of I_t
+    # non-negativity of I_t
     for s in range(S):
         for n in range(N):
             for t in range(T):
@@ -204,8 +204,8 @@ try:
         m.addConstr(total_loan[s] <= B)
          
     
-    # non-anticipativity 
-    # s1 与 s 的顺序没啥影响       
+    # non-anticipative constraints
+    # the order of s1 and s has no influence
     # no need for I, R, C      
     for t in range(T):
         for n in range(N):
