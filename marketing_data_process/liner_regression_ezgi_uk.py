@@ -29,12 +29,12 @@ df_raw = pd.read_csv(data_address)
 # trust_ai_6 as DV
 # 2 model: trust_ai_3 as DV
 # mean_ai as DV
-DV = "trust_ai_3"
-IV = " + mean_ai + trust_ai_6"
+# DV = "trust_ai_3"
+# IV = " + mean_ai + trust_ai_6"
 # DV = "trust_ai_6"
 # IV = " + mean_ai + trust_ai_3"
-# DV = "mean_ai"
-# IV = " + trust_ai_3 + trust_ai_6"
+DV = "mean_ai"
+IV = " + trust_ai_3 + trust_ai_6"
 model0 = smf.ols(formula=DV + " ~ age" + IV, data=df_raw).fit()
 print(model0.summary())
 
