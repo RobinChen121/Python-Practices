@@ -31,10 +31,10 @@ df_raw = pd.read_csv(data_address)
 # mean_ai as DV
 # DV = "trust_ai_3": trust AI companies
 # IV = " + mean_ai + trust_ai_6"
-# DV = "trust_ai_6"
-# IV = " + mean_ai + trust_ai_3"
-DV = "mean_ai"
-IV = " + trust_ai_3 + trust_ai_6"
+DV = "trust_ai_6"
+IV = " + mean_ai + trust_ai_3"
+# DV = "mean_ai"
+# IV = " + trust_ai_3 + trust_ai_6"
 model0 = smf.ols(formula=DV + " ~ age" + IV, data=df_raw).fit()
 print(model0.summary())
 
@@ -63,7 +63,9 @@ print(model1.summary())
 
 df_raw.rename(columns={"children_in_HH": "household_children"}, inplace=True)
 df2 = df_raw.dropna(subset="household_children").copy()
-df2 = df2[~df2["household_children"].isin([7.0, 8.0])] # do not know or prefer not to say
+df2 = df2[
+    ~df2["household_children"].isin([7.0, 8.0])
+]  # do not know or prefer not to say
 df2["household_children"] = df2["household_children"].map(
     {
         0.0: "No children",
@@ -136,7 +138,7 @@ model3 = smf.ols(
 print(model3.summary())
 
 df4 = df_raw.dropna(subset="marital_status").copy()
-df4["marital_status"] = df4["marital_status"].map( # revised
+df4["marital_status"] = df4["marital_status"].map(  # revised
     {
         1.0: "Married or ever married",
         2.0: "Married or ever married",
