@@ -25,14 +25,19 @@ class DeepARLSTM(nn.Module):
         bidirectional=False,
         distribution="negative-binomial",
     ):
-        super(DeepARLSTM, self).__init__()
+        # super(DeepARLSTM, self).__init__()  # super 里面可以不带参数
+        super().__init__()  # super 里面可以不带参数
         self.output_size = output_size
         self.dist = distribution
         self.layer_num = layer_num
         self.hidden_size = hidden_size
 
-        self.embedding_layers = nn.Embedding(item_num, embedding_dim)
+        # embedding 层
+        self.embedding = nn.Embedding(item_num, embedding_dim)
 
+        # LSTM 层
+        # 神经网络类中需要有一个表示网络结构的属性，当前的网络结构是 LSTM
+        # 在 forward 中定义具体的前向传播过程
         self.lstm = nn.LSTM(
             input_size,
             hidden_size,
@@ -57,12 +62,12 @@ class DeepARLSTM(nn.Module):
     def forward(self, x, v, emb, h=None, c=None):
         # embedding（输入必须是 long）
         # emb = emb.long()  # 建议加上，防御性写法
-        item_emb = self.embedding_layers(emb)  # shape = [batch, embed_dim]
+        item_emb = self.embedding(emb)  # shape = [batch, embed_dim]
         # 扩展到时间维度
         item_emb = item_emb.unsqueeze(1)  # shape: [batch, 1, embedding_dim]
         # expand的本质不会真的复制数据
         # 它创建一个“视图”（view），让同一块内存看起来被重复了
-        # 第一维不变，最后一维不变，第二维扩展
+        # 第一维不变，最后一维扩展
         item_emb = item_emb.expand(-1, x.size(1), -1)
 
         # x 的 shape 是 [batch, seq_size, input_size]
@@ -102,4 +107,4 @@ class DeepARLSTM(nn.Module):
                 total_count=r, probs=p
             )
 
-        return dist, (h, c) # 预测的是经验分布
+        return dist, (h, c)  # 预测的是经验分布

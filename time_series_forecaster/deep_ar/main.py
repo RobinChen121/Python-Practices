@@ -9,7 +9,7 @@
 
 from data_cleaning import get_raw_data, create_sequence
 import torch.nn as nn
-from torch.utils.data import TensorDataset, DataLoader
+from torch.utils.data import TensorDataset, DataLoader, WeightedRandomSampler
 from deep_ar_class import DeepARLSTM
 import torch
 
@@ -20,32 +20,41 @@ node_num = 40  # hidden size
 encoder_length = 8
 decoder_length = 8
 train_length = 43
-embedding_dim = 32
+embedding_dim = 1
 num_scenarios = 100  # the number of predicted scenarios
 
 # create data sequence
 raw_data = get_raw_data()
+# y_train, y_test 是真实需求数据，不需要 scaling，scaling 只对输入数据进行
+# embedding 的数据在 forward 函数中进行 embedding，此时的emb 是 item_id
 x_train, x_test, y_train, y_test, v_train, v_test, emb_train, emb_test = (
     create_sequence(raw_data, train_length, encoder_length, decoder_length)
 )
 
-# DataLoader
+# DataLoader，可以加权抽样
 # 使用 batch size, 若不使用，相当于 full batch
 train_dataset = TensorDataset(x_train, y_train, v_train, emb_train)
 test_dataset = TensorDataset(x_test, y_test, v_test, emb_test)
+sampler_train = WeightedRandomSampler(
+    weights=v_train[:, 0, 0].float(),  # 每个样本的权重，必须是浮点数
+    num_samples=len(train_dataset),  # 抽样的样本数量
+    replacement=True,  # 是否有放回抽样
+)
 train_loader = DataLoader(
     train_dataset,
     batch_size=batch_size,
     shuffle=False,  # 训练集通常 shuffle，但时间序列数据除外
     drop_last=False,
+    sampler=sampler_train,  # 使用加权抽样器
 )
+# test_loader 不需要加权抽样，因为测试集不参与训练
 test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
 
 
 # LSTM model
 input_size = x_train.shape[-1] + embedding_dim
 output_size = y_train.shape[-1]
-item_num = len(raw_data[0])
+item_num = raw_data.shape[1]  # 产品数量
 model = DeepARLSTM(
     input_size=input_size,
     output_size=output_size,
