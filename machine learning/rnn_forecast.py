@@ -47,6 +47,7 @@ scaler = MinMaxScaler(feature_range=(0, 1))
 data = scaler.fit_transform(raw_data.reshape(-1, 1))
 data = torch.tensor(data, dtype=torch.float32)
 
+
 # --------------------------
 # 2. 构建序列
 # --------------------------
@@ -61,7 +62,7 @@ def create_sequences(data, seq_len):
 
 
 seq_len = 12
-batch_size = 24 # 可以改成 2 / 4 / 16 对比效果
+batch_size = 24  # 可以改成 2 / 4 / 16 对比效果
 # 输入维度 [batch, seq_len, input_size]
 X_all, y_all = create_sequences(data, seq_len)
 
@@ -100,9 +101,7 @@ class SimpleRNN(nn.Module):
         # num_layers: number of recurrent layers
         # 若 batch_first=True, RNN 输入数据的形状为 (N, L, H_in)，即 (batch_size, seq_length, input_size)
         # 否则，输入形状为 (seq_length, batch_size, input_size)
-        self.rnn = nn.RNN(
-            input_size, hidden_size, batch_first=True
-        )
+        self.rnn = nn.RNN(input_size, hidden_size, batch_first=True)
         # D=2 if bidirectional otherwise =1
         # 若 batch_first=true, 每个时间步 h_t 形状 [num_layers * D, batch_size, hidden_size]
         # 若 batch_first=false, h_t 形状为 [num_layers * D, hidden_size]，即去掉 batch_size
@@ -115,10 +114,22 @@ class SimpleRNN(nn.Module):
         # 若 batch_first=true,
         # out 的形状是 (batch_size, seq_size, hidden_size*D)
         # D=2 if bidirectional otherwise =1
-        # 另一个输出 h_n 的形状是 (num_layers*D, batch_size, hidden_size)
-        out, _ = self.rnn(x)  # 返回所有时间步的隐藏状态及最后一个时间步的隐藏状态
-        out = out[:, -1, :]  # out.shape = (batch_size, seq_len, hidden_size)
-        out = self.linear(out)
+        # 若 batch_first=false,
+        # out 的形状是 (seq_size, batch_size, hidden_size*D)
+
+        # self.rnn(x) 返回两个值：out 和 h_n
+        # out：最后一层 RNN 在所有时间步的隐藏状态
+        # h_n：所有层在最后时间步的隐藏状态（Hidden State）
+        # h_n 的形状是 (num_layers * D, batch_size, hidden_size)
+
+        # out, _ = self.rnn(x)
+        # out = out[:, -1, :]
+        # out = self.linear(out) # 要通过linear函数把hidden state映射到output_size维度
+        # return out
+
+        # 也可以用下面代码
+        _, out = self.rnn(x)
+        out = self.linear(out[-1])  # 取最后一个时间步的 hidden state
         return out
 
 
@@ -140,7 +151,7 @@ for epoch in range(epochs):
     epoch_loss = 0.0
     for X_batch, y_batch in train_loader:
         optimizer.zero_grad()
-        output = model(X_batch) # 相当于调用了里面的forward函数
+        output = model(X_batch)  # 相当于调用了里面的forward函数
         loss = criterion(output, y_batch)  # 这个loss 是 batch 的平均 loss
         loss.backward()  # 计算梯度
         optimizer.step()  # 根据梯度更新权重

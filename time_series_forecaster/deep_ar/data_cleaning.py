@@ -105,10 +105,10 @@ def create_sequence(
             # torch.full 与 repeat 功能类似，只不过作用于单个值
             v_window = torch.full((encoder_length, 1), v)
             v_train.append(v_window)
-            x = torch.tensor(data_np[i : i + encoder_length, j] / v).unsqueeze(1)
+            x = torch.from_numpy(data_np[i : i + encoder_length, j] / v).unsqueeze(1)
             # 预测的 y 数据不需要 scaling，因为 y 是整数，且要拟合负二项分布
             # 神经网络最终输出二项分布的两个参数，其中 y 会参与计算似然函数，目标是最小化负对数似然函数
-            y = torch.tensor(
+            y = torch.from_numpy(
                 data_np[i + encoder_length : i + encoder_length + decoder_length, j]
             ).unsqueeze(1)
 
@@ -126,7 +126,7 @@ def create_sequence(
         v = 1 + np.mean(data_np[train_length - encoder_length : train_length, j])
         v_window = torch.full((encoder_length, 1), v)
         v_test.append(v_window)
-        x = torch.tensor(
+        x = torch.from_numpy(
             data_np[train_length - encoder_length : train_length, j] / v
         ).unsqueeze(1)
         age_window = scaled_ages[train_length - encoder_length : train_length]
@@ -163,4 +163,3 @@ if __name__ == "__main__":
     )
     print(df_.head())
     print(df_.shape)
-

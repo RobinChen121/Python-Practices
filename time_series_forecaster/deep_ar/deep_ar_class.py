@@ -51,23 +51,25 @@ class DeepARLSTM(nn.Module):
         # 用每个时间步最后那个 layer 的h_t 参与下面的映射
         self.linear = nn.Linear(hidden_size, 2 * output_size)
 
-    def init_hidden(self, batch_size):
-        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        return (
-            torch.zeros(self.layer_num, batch_size, self.hidden_size).to(device),
-            torch.zeros(self.layer_num, batch_size, self.hidden_size).to(device),
-        )
+    # 可以不定义初始状态 h, c，因为 pytorch 会自动初始化为 0
+    # def init_hidden(self, batch_size):
+    #     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    #     return (
+    #         torch.zeros(self.layer_num, batch_size, self.hidden_size).to(device),
+    #         torch.zeros(self.layer_num, batch_size, self.hidden_size).to(device),
+    #     )
 
     # h, c are for prediction since the predicted data is put inside to predict new data
     def forward(self, x, v, emb, h=None, c=None):
         # embedding（输入必须是 long）
         # emb = emb.long()  # 建议加上，防御性写法
-        item_emb = self.embedding(emb)  # shape = [batch, embed_dim]
+        # self.embedding 的作用是将 item_id 转换为 embedding 向量
+        item_emb = self.embedding(emb)  # shape = [batch, emb]
         # 扩展到时间维度
         item_emb = item_emb.unsqueeze(1)  # shape: [batch, 1, embedding_dim]
         # expand的本质不会真的复制数据
         # 它创建一个“视图”（view），让同一块内存看起来被重复了
-        # 第一维不变，最后一维扩展
+        # x.size(1) 是 seq_len，表示时间步的长度
         item_emb = item_emb.expand(-1, x.size(1), -1)
 
         # x 的 shape 是 [batch, seq_size, input_size]
@@ -107,4 +109,5 @@ class DeepARLSTM(nn.Module):
                 total_count=r, probs=p
             )
 
+        # 返回 dist 是因为要计算对应分布的似然函数值
         return dist, (h, c)  # 预测的是经验分布
