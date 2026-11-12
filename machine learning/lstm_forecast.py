@@ -108,27 +108,36 @@ class LSTMModel(nn.Module):
             hidden_size, output_size
         )  # 线性输出,输出维度 [batch, output_size]
 
-    def forward(self, x):
+    def forward(self, x, h=None, c=None):
         # 若 batch_first=true, 每个时间步的输出形状是 (batch_size, seq_size, hidden_size*D)
         # D=2 if bidirectional otherwise =1
         # 若 batch_first=false, 输出形状是 (seq_size, batch_size, hidden_size*D)
 
         # self.lstm(x) 返回两个值：out 和 (h_n, c_n)
-        # out 为最后一层的输出，
+        # out 为所有时间步最后一层的隐藏状态 h，不包括 c
         # h_n 为所有层最后一个时间步的隐藏状态，c_n 为所有层最后一个时间步的细胞状态
         # out 的形状是 (batch_size, seq_len, hidden_size*D) 若 batch_first=true
         # h_n 的形状是 (num_layers*D, batch_size, hidden_size)
         # c_n 的形状是 (num_layers*D, batch_size, hidden_size)
 
+        # 若样本假设相互独立，每次预测时都从初始状态开始
+        # 否则，h, c 可以传入上一次的状态，用于预测下一个时间步
+        if h is None or c is None:  # 第一次 forward 时，h, c 是 None，后续预测时会传入上一次的 h, c
+            out, (h, c) = self.lstm(x)
+        else:
+            out, (h, c) = self.lstm(x, (h, c))
+
         # out, _ = self.lstm(
         #     x
         # )
-        # out = out[:, -1, :]
+        out = out[:, -1, :]
+
+
         # 等价于
-        _, out = self.lstm(
-            x
-        )
-        out = out[0][-1]  # 取最后一个时间步的 h_n, out[0] 是 h_n, out[1] 是 c_n
+        # _, out = self.lstm(
+        #     x
+        # )
+        # out = out[0][-1]  # 取最后一个时间步的 h_n, out[0] 是 h_n, out[1] 是 c_n
 
         out = self.linear(out) # 要通过linear函数把hidden state映射到output_size维度
         return out

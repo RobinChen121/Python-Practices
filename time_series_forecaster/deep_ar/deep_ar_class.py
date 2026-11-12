@@ -67,9 +67,9 @@ class DeepARLSTM(nn.Module):
         item_emb = self.embedding(emb)  # shape = [batch, emb]
         # 扩展到时间维度
         item_emb = item_emb.unsqueeze(1)  # shape: [batch, 1, embedding_dim]
-        # expand的本质不会真的复制数据
-        # 它创建一个“视图”（view），让同一块内存看起来被重复了
+        # expand的本质不会真的复制数据，用于扩展维度
         # x.size(1) 是 seq_len，表示时间步的长度
+        # tensor.view() 返回一个新的 tensor，具有相同的数据但不同的形状
         item_emb = item_emb.expand(-1, x.size(1), -1)
 
         # x 的 shape 是 [batch, seq_size, input_size]
@@ -77,12 +77,17 @@ class DeepARLSTM(nn.Module):
         x = torch.cat([x, item_emb], dim=-1)  # dim=0 按batch拼接，dim=1 按seq_size拼接
         # 返回所有时间步的隐藏状态及最后一个时间步的（h_n, c_m）
         # out 的形状是 (batch_size, seq_size, hidden_size)
-        if h is None or c is None:
-            out, (h, c) = self.lstm(x)  # out.shape = [batch, seq_len, 2*output_size]
+        if (
+            h is None or c is None
+        ):  # 第一次 forward 时，h, c 是 None，后续预测时会传入上一次的 h, c
+            out, (h, c) = self.lstm(x)
         else:
             out, (h, c) = self.lstm(x, (h, c))
-        parameters = self.linear(out)
-        mu = parameters[..., : self.output_size]  # tensor 的切片, 不论前面的维度是什么
+        parameters = self.linear(out)  # 所有时间步最后一层的隐藏状态 h
+        # 等价于 mu = parameters[:, :, :self.output_size]
+        # tensor 中 ... 表示前面任意数量的维度，适用于多维张量的切片操作
+        # mu 的维度是 [batch, seq_size, output_size]
+        mu = parameters[..., : self.output_size]
         sigma_or_alpha = parameters[..., self.output_size :]
         if self.dist == "negative-binomial":
             mu = (
@@ -102,9 +107,11 @@ class DeepARLSTM(nn.Module):
         else:
             # 负二项分布用 shape parameter 和均值拟合
             var = mu + sigma_or_alpha * (mu**2)
-            p = mu / var
+            p = 1 - mu / var  # tensor 支持向量逐元素相除
             p = torch.clamp(p, min=1e-6, max=1.0 - 1e-6)  # 让数值稳定，防止极端值
-            r = mu * p / (1 - p)
+            r = mu * mu / (var - mu)
+            # pytorch 的 NegativeBinomial 分布参数是 total_count 和 probs
+            # 这个 probs 跟维基百科中的 p 定义不一样，维基百科中是 p = 1 - probs
             dist = distribution.negative_binomial.NegativeBinomial(
                 total_count=r, probs=p
             )

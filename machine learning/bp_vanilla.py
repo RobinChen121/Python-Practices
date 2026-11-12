@@ -95,7 +95,7 @@ optimizer = torch.optim.SGD(model.parameters(), lr=0.1)
 # 8. 训练
 epochs = 500
 for epoch in range(epochs):
-    model.train()
+    model.train()  # 告诉模型处于训练模式， 如果没有 validation，model.train() 可以放在 for epoch 外面
     total_loss = 0
 
     # batch training
@@ -114,7 +114,7 @@ for epoch in range(epochs):
 
 
 # 9. 测试集准确率
-model.eval()
+model.eval()  # 切换到评估模式
 correct = 0
 total = 0
 

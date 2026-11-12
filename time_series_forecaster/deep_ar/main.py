@@ -13,6 +13,9 @@ from torch.utils.data import TensorDataset, DataLoader, WeightedRandomSampler
 from deep_ar_class import DeepARLSTM
 import torch
 
+sample_num = 200
+
+# car parts parameter values
 batch_size = 64
 learning_rate = 0.001
 layer_num = 3
@@ -52,8 +55,8 @@ test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
 
 
 # LSTM model
-input_size = x_train.shape[-1] + embedding_dim
-output_size = y_train.shape[-1]
+input_size = x_train.shape[-1] + embedding_dim  # feature size + embedding size
+output_size = 1  # 每个时间步预测一个参数和另一个参数
 item_num = raw_data.shape[1]  # 产品数量
 model = DeepARLSTM(
     input_size=input_size,
@@ -65,6 +68,9 @@ model = DeepARLSTM(
 )
 # set forget bias 初始值 = 1
 # 保持记忆
+# named_parameters() 返回模型参数名称与参数值的迭代器，可以查看 embedding.weight 的梯度 param.grad
+# state_dict() 返回用于保存和加载的模型状态，包含 embedding.weight 和需要保存的缓冲区，不包括 grad
+# 遗忘门的偏置 \(b_f\) 初始化为 1，让 LSTM 在训练初期倾向于多保留一些历史信息
 for name, param in model.named_parameters():
     if "bias" in name:
         n = param.size(0)
@@ -74,10 +80,11 @@ for name, param in model.named_parameters():
 optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
 
 # 训练
+# deep ar 里面的 epoch number 没有说，early stopping criteria 也没有说
 max_epochs = 1000
 model.train()  # 告诉模型处于训练模式
 # early stopping criteria
-patience = 10
+patience = 10  # 连续 10 个 epoch 的训练损失都没有刷新历史最低值，就停止训练
 best_loss = float("inf")
 counter = 0
 for epoch in range(max_epochs):
@@ -85,9 +92,10 @@ for epoch in range(max_epochs):
     for x_batch, y_batch, v_batch, emb_batch in train_loader:
         optimizer.zero_grad()  # 每次传播时清空梯度，不然会累加
         dist, _ = model(x_batch, v_batch, emb_batch)
-        loss = -dist.log_prob(y_batch)  # 极大似然
-        loss = loss.squeeze(-1)
-        loss = loss.mean()  # loss 对所有值取平均
+        # loss 的维度是 [batch_size, decoder_length, 1]，需要 squeeze(-1) 去掉最后一维
+        loss = -dist.log_prob(y_batch.unsqueeze(-1))  # 极大似然，维度要对齐
+        # loss = loss.squeeze(-1)
+        loss = loss.mean()  # loss 对所有值取平均，没有指定 dim，默认对所有维度取平均
         loss.backward()
         optimizer.step()
         epoch_loss += loss.item()
