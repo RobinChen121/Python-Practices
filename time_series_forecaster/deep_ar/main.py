@@ -116,6 +116,6 @@ for epoch in range(max_epochs):
 model.eval()  # 切换到评估模式
 scenarios = []
 with torch.no_grad():  # 告诉 PyTorch，“接下来的计算不需要记录梯度（Gradients）”
-    prediction = model(x_test, v_test)  # 自动调用里面的 forward 函数
+    prediction_dist, _ = model(x_test, v_test, emb_test)  # 自动调用里面的 forward 函数
     for _ in range(num_scenarios):
         pass

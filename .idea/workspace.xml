@@ -100,129 +100,129 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "Python tests.Doctest via pytest in solver_detail.py.executor": "Debug",
-    "Python tests.Doctest via pytest in sp.py.executor": "Run",
-    "Python tests.Python tests for test_sampling.executor": "Run",
-    "Python tests.Python tests for test_sampling.test_generate_sample.executor": "Run",
-    "Python tests.Python tests in test_get_distribution.py.executor": "Run",
-    "Python tests.Python tests in test_module1.py.executor": "Run",
-    "Python tests.Python tests in test_sampling.py.executor": "Run",
-    "Python tests.Python tests in test_utils.py.executor": "Run",
-    "Python tests.pdb pytest.executor": "Run",
-    "Python tests.pytest in /.executor": "Run",
-    "Python.MemorizeTimeTesting.executor": "Run",
-    "Python.a_simpleMip.executor": "Run",
-    "Python.a_simple_MIP.executor": "Debug",
-    "Python.air_conditioner.executor": "Run",
-    "Python.array-2process.executor": "Run",
-    "Python.binomial_test.executor": "Run",
-    "Python.bp.executor": "Run",
-    "Python.bp2.executor": "Run",
-    "Python.bp3.executor": "Run",
-    "Python.bp4.executor": "Run",
-    "Python.bp_validation.executor": "Debug",
-    "Python.bp_vanilla.executor": "Run",
-    "Python.contxtual_optimization.executor": "Run",
-    "Python.convolution.executor": "Run",
-    "Python.data_cleaning.executor": "Debug",
-    "Python.data_validation.executor": "Run",
-    "Python.deaw_contour.executor": "Run",
-    "Python.debug_test.executor": "Debug",
-    "Python.deep_ar_class.executor": "Debug",
-    "Python.description.executor": "Debug",
-    "Python.determin_orderLoan.executor": "Run",
-    "Python.draw_affine.executor": "Run",
-    "Python.draw_animation.executor": "Run",
-    "Python.draw_binormial.executor": "Run",
-    "Python.draw_heart3.executor": "Run",
-    "Python.draw_lineprogramming.executor": "Run",
-    "Python.draw_lineprogramming2.executor": "Run",
-    "Python.draw_sigmoid.executor": "Run",
-    "Python.draw_widget.executor": "Run",
-    "Python.e20.1.executor": "Run",
-    "Python.e21.executor": "Run",
-    "Python.embedding.executor": "Run",
-    "Python.evaluation.executor": "Run",
-    "Python.fibnocci.executor": "Run",
-    "Python.generate_art_words.executor": "Run",
-    "Python.get_pc_info.executor": "Run",
-    "Python.import_test.executor": "Run",
-    "Python.liner_regression_ezgi_jp.executor": "Run",
-    "Python.liner_regression_ezgi_uk.executor": "Run",
-    "Python.logger.executor": "Run",
-    "Python.logging_test.executor": "Run",
-    "Python.lstm.executor": "Run",
-    "Python.lstm2.executor": "Run",
-    "Python.lstm_forecast.executor": "Run",
-    "Python.main.executor": "Debug",
-    "Python.mip_deterministic_noFinance.executor": "Run",
-    "Python.mip_scenario_orderLoan.executor": "Run",
-    "Python.module1.executor": "Run",
-    "Python.multi-process-array.executor": "Debug",
-    "Python.multiprocess-class.executor": "Run",
-    "Python.multiprocess-fork-spawn.executor": "Run",
-    "Python.multiprocess-lock.executor": "Run",
-    "Python.multiprocess-lock2.executor": "Run",
-    "Python.multiprocess-pickle.executor": "Run",
-    "Python.multiprocess-pickle2.executor": "Run",
-    "Python.multiprocess-pool.executor": "Run",
-    "Python.multiprocess2.executor": "Run",
-    "Python.multiprocess3.executor": "Run",
-    "Python.multiprocess4.executor": "Run",
-    "Python.multiprocess5.executor": "Run",
-    "Python.multiprocess6.executor": "Run",
-    "Python.multiprocess7.executor": "Run",
-    "Python.multiprocess8.executor": "Run",
-    "Python.multiprocess_class.executor": "Run",
-    "Python.multiprocess_class2.executor": "Run",
-    "Python.news_vendor.executor": "Debug",
-    "Python.newsvendor-SDDP-backorder.executor": "Run",
-    "Python.newsvendor-SDDP-lostsale.executor": "Debug",
-    "Python.newsvendor.executor": "Run",
-    "Python.newsvendor_vanilla.executor": "Run",
-    "Python.normal run.executor": "Run",
-    "Python.plot_forecasts.executor": "Run",
-    "Python.pool2.executor": "Run",
-    "Python.portfolio_optimization.executor": "Run",
-    "Python.read_attendence.executor": "Run",
-    "Python.read_data.executor": "Debug",
-    "Python.read_data_ezgi_jp.executor": "Run",
-    "Python.read_data_ezgi_uk.executor": "Run",
-    "Python.read_workforce.executor": "Run",
-    "Python.rnn_forecast.executor": "Run",
-    "Python.run_weights.executor": "Run",
-    "Python.saa_orderLoan_LowerBounds.executor": "Run",
-    "Python.sampling.executor": "Run",
-    "Python.scenario_generation.executor": "Run",
-    "Python.scenario_reduction.executor": "Run",
-    "Python.seq2seq.executor": "Run",
-    "Python.seq2seq_cv.executor": "Run",
-    "Python.test.executor": "Debug",
-    "Python.test_get_distribution.executor": "Run",
-    "Python.train.executor": "Debug",
-    "Python.walmart_seq2seq.executor": "Debug",
-    "Python.widge_matplotlib.executor": "Run",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
-    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
-    "codeWithMe.voiceChat.enabledByDefault": "false",
-    "copilot.chat.legacySessionMetadata.migrated": "true",
-    "git-widget-placeholder": "master",
-    "last_opened_file_path": "/Users/zhenchen/Documents/Python-Practices/machine learning",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "python.packages.toolwindow.project.migrated.to.right.top.v2": "true",
-    "settings.editor.selected.configurable": "com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Python tests.Doctest via pytest in solver_detail.py.executor&quot;: &quot;Debug&quot;,
+    &quot;Python tests.Doctest via pytest in sp.py.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.Python tests for test_sampling.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.Python tests for test_sampling.test_generate_sample.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.Python tests in test_get_distribution.py.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.Python tests in test_module1.py.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.Python tests in test_sampling.py.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.Python tests in test_utils.py.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pdb pytest.executor&quot;: &quot;Run&quot;,
+    &quot;Python tests.pytest in /.executor&quot;: &quot;Run&quot;,
+    &quot;Python.MemorizeTimeTesting.executor&quot;: &quot;Run&quot;,
+    &quot;Python.a_simpleMip.executor&quot;: &quot;Run&quot;,
+    &quot;Python.a_simple_MIP.executor&quot;: &quot;Debug&quot;,
+    &quot;Python.air_conditioner.executor&quot;: &quot;Run&quot;,
+    &quot;Python.array-2process.executor&quot;: &quot;Run&quot;,
+    &quot;Python.binomial_test.executor&quot;: &quot;Run&quot;,
+    &quot;Python.bp.executor&quot;: &quot;Run&quot;,
+    &quot;Python.bp2.executor&quot;: &quot;Run&quot;,
+    &quot;Python.bp3.executor&quot;: &quot;Run&quot;,
+    &quot;Python.bp4.executor&quot;: &quot;Run&quot;,
+    &quot;Python.bp_validation.executor&quot;: &quot;Debug&quot;,
+    &quot;Python.bp_vanilla.executor&quot;: &quot;Run&quot;,
+    &quot;Python.contxtual_optimization.executor&quot;: &quot;Run&quot;,
+    &quot;Python.convolution.executor&quot;: &quot;Run&quot;,
+    &quot;Python.data_cleaning.executor&quot;: &quot;Debug&quot;,
+    &quot;Python.data_validation.executor&quot;: &quot;Run&quot;,
+    &quot;Python.deaw_contour.executor&quot;: &quot;Run&quot;,
+    &quot;Python.debug_test.executor&quot;: &quot;Debug&quot;,
+    &quot;Python.deep_ar_class.executor&quot;: &quot;Debug&quot;,
+    &quot;Python.description.executor&quot;: &quot;Debug&quot;,
+    &quot;Python.determin_orderLoan.executor&quot;: &quot;Run&quot;,
+    &quot;Python.draw_affine.executor&quot;: &quot;Run&quot;,
+    &quot;Python.draw_animation.executor&quot;: &quot;Run&quot;,
+    &quot;Python.draw_binormial.executor&quot;: &quot;Run&quot;,
+    &quot;Python.draw_heart3.executor&quot;: &quot;Run&quot;,
+    &quot;Python.draw_lineprogramming.executor&quot;: &quot;Run&quot;,
+    &quot;Python.draw_lineprogramming2.executor&quot;: &quot;Run&quot;,
+    &quot;Python.draw_sigmoid.executor&quot;: &quot;Run&quot;,
+    &quot;Python.draw_widget.executor&quot;: &quot;Run&quot;,
+    &quot;Python.e20.1.executor&quot;: &quot;Run&quot;,
+    &quot;Python.e21.executor&quot;: &quot;Run&quot;,
+    &quot;Python.embedding.executor&quot;: &quot;Run&quot;,
+    &quot;Python.evaluation.executor&quot;: &quot;Run&quot;,
+    &quot;Python.fibnocci.executor&quot;: &quot;Run&quot;,
+    &quot;Python.generate_art_words.executor&quot;: &quot;Run&quot;,
+    &quot;Python.get_pc_info.executor&quot;: &quot;Run&quot;,
+    &quot;Python.import_test.executor&quot;: &quot;Run&quot;,
+    &quot;Python.liner_regression_ezgi_jp.executor&quot;: &quot;Run&quot;,
+    &quot;Python.liner_regression_ezgi_uk.executor&quot;: &quot;Run&quot;,
+    &quot;Python.logger.executor&quot;: &quot;Run&quot;,
+    &quot;Python.logging_test.executor&quot;: &quot;Run&quot;,
+    &quot;Python.lstm.executor&quot;: &quot;Run&quot;,
+    &quot;Python.lstm2.executor&quot;: &quot;Run&quot;,
+    &quot;Python.lstm_forecast.executor&quot;: &quot;Run&quot;,
+    &quot;Python.main.executor&quot;: &quot;Debug&quot;,
+    &quot;Python.mip_deterministic_noFinance.executor&quot;: &quot;Run&quot;,
+    &quot;Python.mip_scenario_orderLoan.executor&quot;: &quot;Run&quot;,
+    &quot;Python.module1.executor&quot;: &quot;Run&quot;,
+    &quot;Python.multi-process-array.executor&quot;: &quot;Debug&quot;,
+    &quot;Python.multiprocess-class.executor&quot;: &quot;Run&quot;,
+    &quot;Python.multiprocess-fork-spawn.executor&quot;: &quot;Run&quot;,
+    &quot;Python.multiprocess-lock.executor&quot;: &quot;Run&quot;,
+    &quot;Python.multiprocess-lock2.executor&quot;: &quot;Run&quot;,
+    &quot;Python.multiprocess-pickle.executor&quot;: &quot;Run&quot;,
+    &quot;Python.multiprocess-pickle2.executor&quot;: &quot;Run&quot;,
+    &quot;Python.multiprocess-pool.executor&quot;: &quot;Run&quot;,
+    &quot;Python.multiprocess2.executor&quot;: &quot;Run&quot;,
+    &quot;Python.multiprocess3.executor&quot;: &quot;Run&quot;,
+    &quot;Python.multiprocess4.executor&quot;: &quot;Run&quot;,
+    &quot;Python.multiprocess5.executor&quot;: &quot;Run&quot;,
+    &quot;Python.multiprocess6.executor&quot;: &quot;Run&quot;,
+    &quot;Python.multiprocess7.executor&quot;: &quot;Run&quot;,
+    &quot;Python.multiprocess8.executor&quot;: &quot;Run&quot;,
+    &quot;Python.multiprocess_class.executor&quot;: &quot;Run&quot;,
+    &quot;Python.multiprocess_class2.executor&quot;: &quot;Run&quot;,
+    &quot;Python.news_vendor.executor&quot;: &quot;Debug&quot;,
+    &quot;Python.newsvendor-SDDP-backorder.executor&quot;: &quot;Run&quot;,
+    &quot;Python.newsvendor-SDDP-lostsale.executor&quot;: &quot;Debug&quot;,
+    &quot;Python.newsvendor.executor&quot;: &quot;Run&quot;,
+    &quot;Python.newsvendor_vanilla.executor&quot;: &quot;Run&quot;,
+    &quot;Python.normal run.executor&quot;: &quot;Run&quot;,
+    &quot;Python.plot_forecasts.executor&quot;: &quot;Run&quot;,
+    &quot;Python.pool2.executor&quot;: &quot;Run&quot;,
+    &quot;Python.portfolio_optimization.executor&quot;: &quot;Run&quot;,
+    &quot;Python.read_attendence.executor&quot;: &quot;Run&quot;,
+    &quot;Python.read_data.executor&quot;: &quot;Debug&quot;,
+    &quot;Python.read_data_ezgi_jp.executor&quot;: &quot;Run&quot;,
+    &quot;Python.read_data_ezgi_uk.executor&quot;: &quot;Run&quot;,
+    &quot;Python.read_workforce.executor&quot;: &quot;Run&quot;,
+    &quot;Python.rnn_forecast.executor&quot;: &quot;Run&quot;,
+    &quot;Python.run_weights.executor&quot;: &quot;Run&quot;,
+    &quot;Python.saa_orderLoan_LowerBounds.executor&quot;: &quot;Run&quot;,
+    &quot;Python.sampling.executor&quot;: &quot;Run&quot;,
+    &quot;Python.scenario_generation.executor&quot;: &quot;Run&quot;,
+    &quot;Python.scenario_reduction.executor&quot;: &quot;Run&quot;,
+    &quot;Python.seq2seq.executor&quot;: &quot;Run&quot;,
+    &quot;Python.seq2seq_cv.executor&quot;: &quot;Run&quot;,
+    &quot;Python.test.executor&quot;: &quot;Debug&quot;,
+    &quot;Python.test_get_distribution.executor&quot;: &quot;Run&quot;,
+    &quot;Python.train.executor&quot;: &quot;Debug&quot;,
+    &quot;Python.walmart_seq2seq.executor&quot;: &quot;Debug&quot;,
+    &quot;Python.widge_matplotlib.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
+    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
+    &quot;codeWithMe.voiceChat.enabledByDefault&quot;: &quot;false&quot;,
+    &quot;copilot.chat.legacySessionMetadata.migrated&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/Users/zhenchen/Documents/Python-Practices/machine learning&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;python.packages.toolwindow.project.migrated.to.right.top.v2&quot;: &quot;true&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="PyConsoleOptionsProvider">
     <option name="myPythonConsoleState">
       <console-settings module-name="Python-Practices" is-module-sdk="true">
@@ -248,6 +248,52 @@
     </key>
   </component>
   <component name="RunManager">
+    <configuration default="true" type="PythonConfigurationType" factoryName="Python">
+      <module name="Python-Practices" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+        <env name="KMP_DUPLICATE_LIB_OK" value="TRUE" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="DEBUG_JUST_MY_CODE" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="RUN_TOOL" value="" />
+      <option name="SCRIPT_NAME" value="" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration default="true" type="tests" factoryName="py.test">
+      <module name="sddp_overdraft" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="DEBUG_JUST_MY_CODE" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="RUN_TOOL" value="" />
+      <option name="_new_keywords" value="&quot;&quot;" />
+      <option name="_new_parameters" value="&quot;&quot;" />
+      <option name="_new_additionalArguments" value="&quot;--pdb&quot;" />
+      <option name="_new_target" value="&quot;&quot;" />
+      <option name="_new_targetType" value="&quot;PATH&quot;" />
+      <method v="2" />
+    </configuration>
     <configuration default="true" type="PythonConfigurationType" factoryName="Python">
       <module name="Python-Practices" />
       <option name="ENV_FILES" value="" />
@@ -432,6 +478,7 @@
       <workItem from="1794303385838" duration="3014000" />
       <workItem from="1794306742301" duration="30532000" />
       <workItem from="1794399479724" duration="16321000" />
+      <workItem from="1794830386101" duration="3283000" />
     </task>
     <servers />
   </component>
@@ -844,14 +891,14 @@
           <option name="timeStamp" value="525" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/time_series_forecaster/deep_ar/main.py</url>
-          <line>98</line>
-          <option name="timeStamp" value="529" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/machine learning/bp_validation.py</url>
           <line>80</line>
           <option name="timeStamp" value="530" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/time_series_forecaster/deep_ar/main.py</url>
+          <line>119</line>
+          <option name="timeStamp" value="532" />
         </line-breakpoint>
       </breakpoints>
       <default-breakpoints>
