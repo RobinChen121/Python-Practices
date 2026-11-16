@@ -14,16 +14,16 @@ import torch.distributions as distribution
 
 class DeepARLSTM(nn.Module):
     def __init__(
-        self,
-        input_size,
-        output_size,
-        hidden_size: int,
-        layer_num: int,
-        item_num,
-        embedding_dim,
-        batch_first=True,
-        bidirectional=False,
-        distribution="negative-binomial",
+            self,
+            input_size,
+            output_size,
+            hidden_size: int,
+            layer_num: int,
+            item_num,
+            embedding_dim,
+            batch_first=True,
+            bidirectional=False,
+            distribution="negative-binomial",
     ):
         # super(DeepARLSTM, self).__init__()  # super 里面可以不带参数
         super().__init__()  # super 里面可以不带参数
@@ -78,20 +78,21 @@ class DeepARLSTM(nn.Module):
         # 返回所有时间步的隐藏状态及最后一个时间步的（h_n, c_m）
         # out 的形状是 (batch_size, seq_size, hidden_size)
         if (
-            h is None or c is None
+                h is None or c is None
         ):  # 第一次 forward 时，h, c 是 None，后续预测时会传入上一次的 h, c
             out, (h, c) = self.lstm(x)
         else:
+            # 这种情况适用于时间序列自回归的情况
             out, (h, c) = self.lstm(x, (h, c))
         parameters = self.linear(out)  # 所有时间步最后一层的隐藏状态 h
         # 等价于 mu = parameters[:, :, :self.output_size]
         # tensor 中 ... 表示前面任意数量的维度，适用于多维张量的切片操作
         # mu 的维度是 [batch, seq_size, output_size]
         mu = parameters[..., : self.output_size]
-        sigma_or_alpha = parameters[..., self.output_size :]
+        sigma_or_alpha = parameters[..., self.output_size:]
         if self.dist == "negative-binomial":
             mu = (
-                torch.nn.functional.softplus(mu) + 1e-6
+                    torch.nn.functional.softplus(mu) + 1e-6
             )  # 加上 1e-6 是防止出现 0 的情况
         sigma_or_alpha = torch.nn.functional.softplus(sigma_or_alpha) + 1e-6
 
@@ -106,7 +107,7 @@ class DeepARLSTM(nn.Module):
             dist = distribution.normal.Normal(mu, sigma_or_alpha)
         else:
             # 负二项分布用 shape parameter 和均值拟合
-            var = mu + sigma_or_alpha * (mu**2)
+            var = mu + sigma_or_alpha * (mu ** 2)
             p = 1 - mu / var  # tensor 支持向量逐元素相除
             p = torch.clamp(p, min=1e-6, max=1.0 - 1e-6)  # 让数值稳定，防止极端值
             r = mu * mu / (var - mu)
