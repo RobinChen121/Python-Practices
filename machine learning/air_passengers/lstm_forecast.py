@@ -60,16 +60,17 @@ dataset = get_rdataset("AirPassengers").data
 raw_data = dataset["value"].to_numpy()
 train_data = raw_data[: int(len(raw_data) * train_ratio)]
 
-
 # 归一化 min, max scaling into [-1, 1]
 # Fit on training observations
-data_min = train_data .min()
-data_max = train_data .max()
+data_min = train_data.min()
+data_max = train_data.max()
 # Transform all data using training parameters
 scaled_data = 2 * (raw_data - data_min) / (data_max - data_min) - 1
 
+
 def inverse_transform(scaled_data):
     return (scaled_data + 1) * (data_max - data_min) / 2 + data_min
+
 
 # -------------------------------
 # 创建序列
@@ -80,14 +81,13 @@ def create_sequences(data, seq_length, pred_length):
         # Lstm 输入数据的 shape 是 [batch_size, seq_length, input_size]，input_size 是特征维度
         # 目前特征维度是一维的，shape [seq_length]，需要 unsqueeze(-1) 变为 shape [seq_length, 1]
         # unsqueeze(-1) 的作用是将 shape 从 [seq_length] 变为 [seq_length, 1]，即在最后一个维度增加一个维度
-        x = torch.tensor(data[i : i + seq_length], dtype=torch.float32).unsqueeze(-1)  # shape [seq_length, 1]
+        x = torch.tensor(data[i: i + seq_length], dtype=torch.float32).unsqueeze(-1)  # shape [seq_length, 1]
         # lstm 的输出是 shape [batch, output_size]，output_size 是预测维度
         # 因为当前预测维度不是标量，所以不需要 unsqueeze(-1)来增加维度
-        y = torch.tensor(data[i + seq_length : i + seq_length + pred_length], dtype=torch.float32)
+        y = torch.tensor(data[i + seq_length: i + seq_length + pred_length], dtype=torch.float32)
         xs.append(x)
         ys.append(y)
     return torch.stack(xs), torch.stack(ys)  # shape [N, seq_length, output_size], [N, output_size]
-
 
 
 train_len = int(len(raw_data) * train_ratio)
@@ -111,7 +111,7 @@ test_dataset = TensorDataset(X_test, y_test)
 train_loader = DataLoader(
     train_dataset,
     batch_size=batch_size,
-    shuffle=True, # shuffle 表示打乱
+    shuffle=True,  # shuffle 表示打乱
     drop_last=False,  # 如果最后一个 batch 的样本数量不足 batch_size，就直接丢掉
 )
 test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
@@ -159,7 +159,6 @@ class LSTMModel(nn.Module):
         # )
         out = out[:, -1, :]
 
-
         # 等价于
         # _, out = self.lstm(
         #     x
@@ -172,7 +171,7 @@ class LSTMModel(nn.Module):
         # return out
 
         # Predict changes relative to the last observation
-        change = self.linear(out) # shape [batch_size, pred_length]
+        change = self.linear(out)  # shape [batch_size, pred_length]
 
         # baseline values
         # 0:1 会返回 shape [batch_size, seq_length, 1]，而 x[:, :, 0] 返回 shape [batch_size, seq_length]
@@ -184,7 +183,7 @@ class LSTMModel(nn.Module):
         return baseline + change
 
 
-model = LSTMModel(input_size = input_size, hidden_size=hidden_size, num_layers=num_layers, output_size=pred_length)
+model = LSTMModel(input_size=input_size, hidden_size=hidden_size, num_layers=num_layers, output_size=pred_length)
 criterion = nn.L1Loss()  # nn.MSELoss(),  L1Loss() 是 mae，MSELoss() 是 mse，mae 对异常值不敏感，mse 对异常值敏感
 # model.parameters() 包含模型训练的各项权重与偏置
 optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
@@ -199,13 +198,13 @@ for epoch in range(epochs):
     epoch_loss = 0.0
     for X_batch, y_batch in train_loader:
         optimizer.zero_grad()
-        output = model(X_batch) # 相当于调用了里面的forward函数
+        output = model(X_batch)  # 相当于调用了里面的forward函数
         # PyTorch 中的 loss 函数可以自动计算一个 batch 内所有样本、所有预测时间步的平均绝对误差
         loss = criterion(output, y_batch)  # 这个 loss 是 batch 的平均 loss，
         loss.backward()  # 计算梯度
         optimizer.step()  # 根据梯度更新权重
         epoch_loss += (
-            loss.item() * len(X_batch)
+                loss.item() * len(X_batch)
         )  # .item() 的核心作用：把单元素张量转换成普通 Python 数字
     epoch_loss /= len(train_dataset)  # train_loader 是batch的数量，不是样本总数
     if (epoch + 1) % 100 == 0:
@@ -215,14 +214,13 @@ for epoch in range(epochs):
 # 预测
 # -------------------------------
 model.eval()  # 切换到评估模式
-with torch.no_grad(): # 告诉 PyTorch，“接下来的计算不需要记录梯度（Gradients）”
+with torch.no_grad():  # 告诉 PyTorch，“接下来的计算不需要记录梯度（Gradients）”
     pred_train_norm = model(X_train)
-    pred_test_norm = model(X_test) # shape [N, pred_length, 1]
+    pred_test_norm = model(X_test)  # shape [N, pred_length, 1]
     pred_train = inverse_transform(pred_train_norm.numpy())
     pred_test = inverse_transform(pred_test_norm.numpy())
     y_train_real = inverse_transform(y_train.numpy())
     y_test_real = inverse_transform(y_test.numpy())
-
 
 # -------------------------------
 # 计算预测误差
