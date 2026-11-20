@@ -23,13 +23,14 @@ from sklearn.metrics import (
 # -------------------------------
 # 1. Configuration
 # -------------------------------
-torch.manual_seed(42)
-np.random.seed(42)
+seed = 42
+torch.manual_seed(seed)
+# np.random.seed(42)
 
 epoch_num = 150
 
 seq_length = 52
-pred_length = 12  # 1: one-step; 12: multi-step
+pred_length = 1  # 1: one-step; 12: multi-step
 
 learning_rate = 0.001
 batch_size = 64
@@ -40,7 +41,14 @@ num_layers = 2
 train_ratio = 0.8
 seasonal_period = 52
 
-device = torch.device("cpu")
+if torch.cuda.is_available():
+    device = torch.device("cuda")
+elif torch.backends.mps.is_available():  # for Apple Silicon (M1/M2...) devices
+    device = torch.device("mps")
+else:
+    device = torch.device("cpu")
+
+# device = torch.device("cpu")
 
 # -------------------------------
 # 2. Load Weekly CO2
@@ -94,7 +102,6 @@ def create_sequences(data, seq_length, pred_length):
 
     for i in range(len(data) - seq_length - pred_length + 1):
         X.append(data[i : i + seq_length])
-
         y.append(data[i + seq_length : i + seq_length + pred_length])
 
     X = np.array(X, dtype=np.float32)
@@ -120,8 +127,11 @@ print("X_test:", X_test.shape)
 print("y_test:", y_test.shape)
 
 train_dataset = TensorDataset(X_train, y_train)
-
-train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
+generator = torch.Generator()
+generator.manual_seed(seed)  # 设置随机种子，保证每次运行结果一致
+train_loader = DataLoader(
+    train_dataset, batch_size=batch_size, shuffle=True, generator=generator
+)
 
 
 # -------------------------------
@@ -132,12 +142,15 @@ class LSTMModel(nn.Module):
     def __init__(self, input_size, hidden_size, num_layers, pred_length):
         super().__init__()
 
+        # 这里 dropout=0.1 表示训练期间，层间输出 h 中的元素以 10% 的概率被随机置为零，以减轻过拟合
+        # 维度并不变，h中的元素只是随机置为零，其他元素保持不变
+        # h 作为下一层的输入
         self.lstm = nn.LSTM(
             input_size=input_size,
             hidden_size=hidden_size,
             num_layers=num_layers,
             batch_first=True,
-            dropout=0.1 if num_layers > 1 else 0.0,
+            dropout=0.1 if num_layers > 1 else 0.0,  #
         )
 
         self.linear = nn.Linear(hidden_size, pred_length)
@@ -197,7 +210,7 @@ for epoch in range(epoch_num):
     avg_loss = total_loss / len(train_dataset)
     loss_history.append(avg_loss)
 
-    if (epoch + 1) % 10 == 0:
+    if (epoch + 1) % 50 == 0:
         print(f"Epoch {epoch + 1}/{epoch_num}, " f"Loss: {avg_loss:.6f}")
 
 # -------------------------------
@@ -206,9 +219,7 @@ for epoch in range(epoch_num):
 model.eval()
 
 with torch.inference_mode():
-
     pred_train = model(X_train.to(device)).cpu().numpy()
-
     pred_test = model(X_test.to(device)).cpu().numpy()
 
 # Inverse transform predictions
@@ -217,7 +228,6 @@ pred_test = inverse_transform(pred_test)
 
 # Actual values
 y_train_real = inverse_transform(y_train.numpy())
-
 y_test_real = inverse_transform(y_test.numpy())
 
 # -------------------------------
@@ -231,9 +241,7 @@ y_true = y_test_real.flatten()
 y_pred = pred_test.flatten()
 
 mae = mean_absolute_error(y_true, y_pred)
-
 mape = mean_absolute_percentage_error(y_true, y_pred) * 100
-
 rmse = root_mean_squared_error(y_true, y_pred)
 
 # Seasonal naive MAE on training data
@@ -250,24 +258,7 @@ mase = mae / mae_naive
 # from 52 weeks earlier.
 #
 # The first target window starts at train_len.
-
-naive_pred = []
-
-for i in range(len(X_test)):
-
-    target_start = train_len + i
-
-    naive_pred.append(
-        raw_data[
-            target_start
-            - seasonal_period : target_start
-            - seasonal_period
-            + pred_length
-        ]
-    )
-
-naive_pred = np.array(naive_pred)
-
+naive_pred = np.resize(train_data[-seasonal_period:], len(test_data))
 mae_baseline = mean_absolute_error(y_true, naive_pred.flatten())
 
 mase_naive = mae_baseline / mae_naive

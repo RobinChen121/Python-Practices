@@ -41,8 +41,9 @@ from sklearn.metrics import (
 # #fmt on
 
 # configuration
-torch.manual_seed(42)
-# np.random.seed(42) # 并没有用 numpy生成随机数，这个设置可以省略
+seed = 42
+# 这个种子并没有保证下面 DataLoder 的shuffle每次都一样，除非在 DataLoader 中设置 generator
+torch.manual_seed(seed)
 
 epoch_num = 300
 seq_length = 12  # 用过去几个月的数据预测未来
@@ -59,7 +60,7 @@ train_ratio = 0.8
 dataset = get_rdataset("AirPassengers").data
 raw_data = dataset["value"].to_numpy()
 train_data = raw_data[: int(len(raw_data) * train_ratio)]
-
+test_data = raw_data[int(len(raw_data) * train_ratio):]
 # 归一化 min, max scaling into [-1, 1]
 # Fit on training observations
 data_min = train_data.min()
@@ -108,10 +109,13 @@ input_size = X_train.shape[-1]  # 输入特征维度
 # 若不使用，相当于 full batch
 train_dataset = TensorDataset(X_train, y_train)
 test_dataset = TensorDataset(X_test, y_test)
+generator = torch.Generator()
+generator.manual_seed(seed)  # 设置随机种子，保证每次运行结果一致
 train_loader = DataLoader(
     train_dataset,
     batch_size=batch_size,
     shuffle=True,  # shuffle 表示打乱
+    generator = generator,
     drop_last=False,  # 如果最后一个 batch 的样本数量不足 batch_size，就直接丢掉
 )
 test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
@@ -242,13 +246,8 @@ print(f"测试集 MAPE: {mape_test:.2f}%")
 print(f"测试集 RMSE: {rmse_test:.4f}")
 print(f"测试集 MASE: {mase_test:.4f}")
 # compute naive MASE using seasonal naive forecast
-naive_pred = inverse_transform(
-    X_test[:, :pred_length, 0].numpy()
-)
-mae_baseline = mean_absolute_error(
-    y_test_real,
-    naive_pred
-)
+naive_pred = np.resize(train_data[-season_length:], len(test_data))
+mae_baseline = mean_absolute_error(test_data, naive_pred)
 mase_naive = mae_baseline / mae_naive
 print(f"Seasonal Naive MASE: {mase_naive:.4f}")
 

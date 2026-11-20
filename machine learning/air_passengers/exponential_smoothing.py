@@ -96,9 +96,8 @@ mae_naive = mean_absolute_error(
 mase = mae / mae_naive
 
 # Fixed-origin seasonal naive baseline
-naive_pred = raw_data[train_len - seasonal_period : len(raw_data) - seasonal_period]
+naive_pred = np.resize(train_data[-seasonal_period:], len(test_data))
 mae_baseline = mean_absolute_error(test_data, naive_pred)
-
 mase_naive = mae_baseline / mae_naive
 
 print("\nTesting Metrics:")

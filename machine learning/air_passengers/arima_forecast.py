@@ -137,11 +137,11 @@ mase = mae / naive_mae
 print("\nTesting Metrics:")
 print(f"MAE  : {mae:.4f}")
 print(f"MAPE : {mape:.4f}%")
-print(f"MASE : {mase:.4f}")
 print(f"RMSE : {rmse:.4f}")
+print(f"MASE : {mase:.4f}")
 # compute naive MASE using seasonal naive forecast
 # Use observations from 12 months earlier
-naive_pred = raw_data[train_len - seasonal_period : len(raw_data) - seasonal_period]
+naive_pred = np.resize(train_data[-seasonal_period:], len(test_data))
 mae_baseline = mean_absolute_error(test_data, naive_pred)
 mase_naive = mae_baseline / naive_mae
 print(f"Seasonal Naive MASE: {mase_naive:.4f}")

@@ -134,13 +134,11 @@ mase = mae / mae_naive
 # -------------------------------
 # Fixed-origin seasonal naive forecast
 # Repeat the last 52 training observations
-
+# 用最后一个季节的观测值作为预测值，下面这行代码循环生成与测试集长度相同的预测值
+# resize() 会将数组调整为指定长度，如果新长度大于原长度，np.resize() 会循环重复原数组的元素np.
 naive_pred = np.resize(train_data[-seasonal_period:], len(test_data))
-
 mae_baseline = mean_absolute_error(test_data, naive_pred)
-
 mase_naive = mae_baseline / mae_naive
-
 print("\nTesting Metrics:")
 print(f"MAE  : {mae:.4f}")
 print(f"MAPE : {mape:.4f}%")
